@@ -1,4 +1,4 @@
-![lumen·local splash](header.png)
+![lumen·local splash](header.png?v=2)
 
 # lumen·local — generative shader studio
 
