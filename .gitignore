@@ -1,0 +1,10 @@
+# Local Claude Code settings / memory
+.claude/
+
+# OS noise
+.DS_Store
+
+# Studio exports (generated locally)
+lumen-*.png
+lumen-*.webm
+lumen-*.gif

@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lumen·local — generative shader studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body {
+            width: 100%; height: 100%;
+            overflow: hidden;
+            background: #06040a;
+        }
+
+        canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%; height: 100%;
+            display: block;
+        }
+
+        /* ---- UI Layer ---- */
+        .ui {
+            position: fixed;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .title-group { text-align: center; }
+
+        h1 {
+            font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-weight: 100;
+            font-size: clamp(2.4rem, 7vw, 8rem);
+            letter-spacing: 0.5em;
+            text-indent: 0.5em;
+            text-transform: uppercase;
+            color: #ffffff;
+            text-shadow: 0 2px 40px rgba(0, 0, 0, 0.55), 0 1px 3px rgba(0, 0, 0, 0.35);
+            line-height: 1;
+            user-select: none;
+            animation: reveal 2.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+        h1 span { color: #ff8a8a; }
+
+        @keyframes reveal {
+            from { opacity: 0; letter-spacing: 0.85em; text-indent: 0.85em; filter: blur(10px); }
+            to   { opacity: 1; letter-spacing: 0.5em;  text-indent: 0.5em;  filter: blur(0); }
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .sub {
+            margin-top: 1.4rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 300;
+            font-size: clamp(0.5rem, 1vw, 0.74rem);
+            letter-spacing: 0.7em;
+            text-indent: 0.7em;
+            text-transform: lowercase;
+            color: rgba(255, 255, 255, 0.85);
+            text-shadow: 0 1px 12px rgba(0, 0, 0, 0.5);
+            user-select: none;
+            animation: fadeUp 1.6s 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        /* ---- Hero descriptor & CTA ---- */
+        .desc {
+            margin: 2.6rem auto 0;
+            max-width: 30rem;
+            font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-weight: 200;
+            font-size: clamp(0.78rem, 1.4vw, 0.96rem);
+            line-height: 1.75;
+            letter-spacing: 0.02em;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 1px 16px rgba(0, 0, 0, 0.6);
+            user-select: none;
+            animation: fadeUp 1.6s 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .actions {
+            margin-top: 2.8rem;
+            display: flex;
+            gap: 1.1rem;
+            justify-content: center;
+            pointer-events: auto;
+            animation: fadeUp 1.6s 1.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .btn {
+            font-family: 'Inter', sans-serif;
+            font-weight: 400;
+            font-size: 0.6rem;
+            letter-spacing: 0.34em;
+            text-indent: 0.34em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            padding: 0.95rem 1.9rem;
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.015);
+            backdrop-filter: blur(4px);
+            transition: border-color 0.4s, background 0.4s, color 0.4s, letter-spacing 0.4s;
+        }
+        .btn:hover {
+            border-color: rgba(224, 58, 58, 0.85);
+            background: rgba(224, 58, 58, 0.78);
+            color: #fff;
+            letter-spacing: 0.4em;
+        }
+        .btn.ghost {
+            border-color: transparent;
+            color: rgba(255, 255, 255, 0.42);
+        }
+        .btn.ghost:hover {
+            background: rgba(255, 255, 255, 0.04);
+            color: rgba(255, 255, 255, 0.85);
+            border-color: rgba(255, 255, 255, 0.18);
+        }
+
+        .hint {
+            display: block;
+            margin-top: 1.2rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.54rem;
+            letter-spacing: 0.3em;
+            text-indent: 0.3em;
+            text-transform: lowercase;
+            color: rgba(255, 255, 255, 0.6);
+            text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
+            user-select: none;
+            animation: fadeUp 1.6s 1.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        /* ---- Top nav / wordmark ---- */
+        .nav {
+            position: fixed;
+            top: 1.5rem; left: 0; right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.8rem;
+            z-index: 20;
+            pointer-events: none;
+        }
+        .mark {
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            font-size: 0.72rem;
+            letter-spacing: 0.42em;
+            text-indent: 0.42em;
+            text-transform: uppercase;
+            color: #ffffff;
+            text-shadow: 0 1px 12px rgba(0, 0, 0, 0.55);
+            user-select: none;
+        }
+        .mark span { color: #ff8a8a; }
+        .nav-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 300;
+            font-size: 0.58rem;
+            letter-spacing: 0.2em;
+            text-transform: lowercase;
+            color: rgba(255, 255, 255, 0.75);
+            text-shadow: 0 1px 12px rgba(0, 0, 0, 0.55);
+            user-select: none;
+        }
+
+        /* ---- Preset roster (bottom) ---- */
+        .roster {
+            position: fixed;
+            bottom: 3.8rem;
+            left: 0; right: 0;
+            display: flex;
+            justify-content: center;
+            gap: clamp(1rem, 3.4vw, 3rem);
+            z-index: 10;
+            pointer-events: none;
+            animation: fadeUp 1.8s 1.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+        .roster span {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 300;
+            font-size: 0.56rem;
+            letter-spacing: 0.26em;
+            text-transform: lowercase;
+            color: rgba(255, 255, 255, 0.55);
+            text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
+            user-select: none;
+            transition: color 0.6s;
+        }
+        .roster span.live { color: #ff8a8a; }
+
+        /* ---- Corner Labels ---- */
+        .corner {
+            position: fixed;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 300;
+            font-size: 0.56rem;
+            letter-spacing: 0.18em;
+            text-transform: lowercase;
+            color: rgba(255, 255, 255, 0.6);
+            text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+            pointer-events: none;
+        }
+        .bl { bottom: 1.6rem; left: 1.8rem; }
+        .br { bottom: 1.6rem; right: 1.8rem; }
+
+        @media (max-width: 640px) {
+            .roster, .desc { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="c"></canvas>
+
+    <div class="nav">
+        <span class="mark">Lumen<span>·</span>Local</span>
+        <span class="nav-meta">webgl · 60fps · seamless loops</span>
+    </div>
+
+    <div class="ui">
+        <div class="title-group">
+            <h1>Lumen<span>·</span>Local</h1>
+            <p class="sub">generative shader studio</p>
+            <p class="desc">Design looping motion graphics in your browser —
+                six procedural shaders, seeded and reproducible,
+                exported as image, video, or gif. No cloud, no account, no install.</p>
+            <div class="actions">
+                <a class="btn" href="studio.html">Enter Studio</a>
+                <a class="btn ghost" href="README.md">Read Docs</a>
+            </div>
+            <span class="hint">press enter to open the studio</span>
+        </div>
+    </div>
+
+    <div class="roster" id="roster">
+        <span>reeded</span>
+        <span>flow</span>
+        <span>orbs</span>
+        <span class="live">waves</span>
+        <span>halftone</span>
+        <span>grain</span>
+    </div>
+
+    <span class="corner bl" id="timer">0:00</span>
+    <span class="corner br">v1 · 2026</span>
+
+    <script>
+    /* =========================================================
+       Wave field — WebGL splash for lumen·local
+       ========================================================= */
+    (() => {
+        const canvas = document.getElementById('c');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        if (!gl) {
+            document.body.style.cssText = 'display:grid;place-items:center;color:#fff;background:#111';
+            document.body.innerHTML = '<p>WebGL is required. <a href="studio.html" style="color:#e03a3a">enter studio</a></p>';
+            return;
+        }
+
+        /* --------------------------------------------------
+           Vertex Shader — full-screen triangle strip
+        -------------------------------------------------- */
+        const VS = `
+attribute vec2 a_pos;
+void main() {
+    gl_Position = vec4(a_pos, 0.0, 1.0);
+}`;
+
+        /* --------------------------------------------------
+           Fragment Shader — flowing wave field
+        -------------------------------------------------- */
+        const FS = `
+precision highp float;
+
+uniform float u_time;
+uniform vec2  u_res;
+
+/* ---- Smooth value noise ---- */
+float hash21(vec2 p) {
+    p = fract(p * vec2(234.34, 435.345));
+    p += dot(p, p + 34.23);
+    return fract(p.x * p.y);
+}
+
+float vnoise(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    float a = hash21(i);
+    float b = hash21(i + vec2(1.0, 0.0));
+    float c = hash21(i + vec2(0.0, 1.0));
+    float d = hash21(i + vec2(1.0, 1.0));
+    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+}
+
+/* 5-octave FBM */
+float fbm(vec2 p) {
+    float v = 0.0;
+    float a = 0.5;
+    mat2  r = mat2(0.80, 0.60, -0.60, 0.80);
+    for (int i = 0; i < 5; i++) {
+        v += a * vnoise(p);
+        p  = r * p * 2.1 + vec2(1.7, 9.2);
+        a *= 0.5;
+    }
+    return v;
+}
+
+/* ---- Crimson palette
+   0.00 → near-black   #100C16
+   0.30 → deep crimson #7F0616
+   0.62 → vivid red    #E03A3A
+   1.00 → near-white   #FFF5F5
+---- */
+vec3 pal(float t) {
+    t = clamp(t, 0.0, 1.0);
+    if (t < 0.30) return mix(vec3(0.063, 0.047, 0.086), vec3(0.498, 0.024, 0.086), t / 0.30);
+    if (t < 0.62) return mix(vec3(0.498, 0.024, 0.086), vec3(0.875, 0.230, 0.230), (t - 0.30) / 0.32);
+                  return mix(vec3(0.875, 0.230, 0.230), vec3(1.000, 0.957, 0.957), (t - 0.62) / 0.38);
+}
+
+void main() {
+    vec2 uv = gl_FragCoord.xy / u_res;
+    uv.y = 1.0 - uv.y;
+    float ar = u_res.x / u_res.y;
+    float t  = u_time * 0.22;
+
+    vec2 p = vec2(uv.x * ar, uv.y);
+
+    /* ---- DOMAIN-WARPED FLOW ----
+       Warp the space with two noise fields, then advect them
+       horizontally so the waves visibly drift left→right. */
+    vec2 q = vec2(
+        fbm(p * 1.5 + vec2(t * 0.30, t * 0.05)),
+        fbm(p * 1.5 + vec2(5.2, 1.3) - vec2(t * 0.18, 0.0))
+    );
+    float f = fbm(p * 1.4 + q * 2.6 + vec2(t * 0.22, 0.0));
+
+    /* ---- TRAVELLING WAVE CRESTS ----
+       Layered sine waves bent by the warp give long rolling swells. */
+    float swell = uv.y * 1.4
+        + sin(uv.x * ar * 1.4 + t * 1.1 + q.x * 3.0) * 0.30
+        + sin(uv.x * ar * 3.1 - t * 1.6 + q.y * 2.0) * 0.14
+        + f * 1.5;
+
+    /* Map the field through the palette as flowing bands */
+    float band = 0.5 + 0.5 * sin(swell * 6.2831 * 0.85 - t * 0.6);
+    vec3 col = pal(band * 0.96);
+
+    /* ---- CREST HIGHLIGHTS ----
+       Bright foam where the wave gradient peaks. */
+    float crest = pow(band, 6.0) * 0.55;
+    col += vec3(1.0, 0.96, 0.96) * crest;
+
+    /* Gentle depth shading toward the lower third */
+    col *= 0.82 + 0.30 * smoothstep(0.0, 0.7, uv.y);
+
+    /* ---- FILM GRAIN ---- */
+    col += (hash21(gl_FragCoord.xy + vec2(u_time * 60.0)) - 0.5) * 0.04;
+
+    /* ---- VIGNETTE ---- */
+    vec2 vig = uv * 2.0 - 1.0;
+    col *= 1.0 - dot(vig, vig) * 0.22;
+
+    gl_FragColor = vec4(col, 1.0);
+}`;
+
+        /* ------ Compile & link ------ */
+        function mkShader(type, src) {
+            const s = gl.createShader(type);
+            gl.shaderSource(s, src);
+            gl.compileShader(s);
+            if (!gl.getShaderParameter(s, gl.COMPILE_STATUS))
+                throw new Error('Shader error: ' + gl.getShaderInfoLog(s));
+            return s;
+        }
+
+        const prog = gl.createProgram();
+        gl.attachShader(prog, mkShader(gl.VERTEX_SHADER,   VS));
+        gl.attachShader(prog, mkShader(gl.FRAGMENT_SHADER, FS));
+        gl.linkProgram(prog);
+        if (!gl.getProgramParameter(prog, gl.LINK_STATUS))
+            throw new Error('Link error: ' + gl.getProgramInfoLog(prog));
+
+        /* ------ Geometry: full-screen triangle strip ------ */
+        const vbo = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+        gl.bufferData(gl.ARRAY_BUFFER,
+            new Float32Array([-1,-1, 1,-1, -1,1, 1,1]),
+            gl.STATIC_DRAW);
+
+        const aPos  = gl.getAttribLocation(prog,  'a_pos');
+        const uTime = gl.getUniformLocation(prog, 'u_time');
+        const uRes  = gl.getUniformLocation(prog, 'u_res');
+
+        gl.enableVertexAttribArray(aPos);
+        gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+        /* ------ Resize ------ */
+        function resize() {
+            const dpr = Math.min(devicePixelRatio, 2);
+            canvas.width  = Math.round(window.innerWidth  * dpr);
+            canvas.height = Math.round(window.innerHeight * dpr);
+            gl.viewport(0, 0, canvas.width, canvas.height);
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        /* ------ Enter key → studio ------ */
+        window.addEventListener('keydown', e => {
+            if (e.key === 'Enter') window.location.href = 'studio.html';
+        });
+
+        /* ------ Roster: cycle the "live" preset label ------ */
+        const rosterEls = document.querySelectorAll('#roster span');
+        let liveIdx = 3; /* starts on "waves" */
+        setInterval(() => {
+            rosterEls[liveIdx].classList.remove('live');
+            liveIdx = (liveIdx + 1) % rosterEls.length;
+            rosterEls[liveIdx].classList.add('live');
+        }, 2400);
+
+        /* ------ Render loop ------ */
+        const t0      = performance.now();
+        const timerEl = document.getElementById('timer');
+        let   lastSec = -1;
+
+        function frame(now) {
+            const elapsed = (now - t0) / 1000;
+
+            gl.useProgram(prog);
+            gl.uniform1f(uTime, elapsed);
+            gl.uniform2f(uRes,  canvas.width, canvas.height);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+            const s = Math.floor(elapsed);
+            if (s !== lastSec) {
+                lastSec = s;
+                timerEl.textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+            }
+
+            requestAnimationFrame(frame);
+        }
+
+        requestAnimationFrame(frame);
+    })();
+    </script>
+</body>
+</html>
