@@ -1,3 +1,5 @@
+![lumen·local splash](header.png)
+
 # lumen·local — generative shader studio
 
 A self-contained, browser-based **graphics generation studio** for creating looping
