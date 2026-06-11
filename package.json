@@ -1,0 +1,14 @@
+{
+  "name": "lumen-local-studio",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.mjs",
+    "studio": "node server.mjs"
+  },
+  "dependencies": {
+    "node-pty": "^1.1.0",
+    "ws": "^8.16.0"
+  }
+}

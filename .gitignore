@@ -1,5 +1,7 @@
 # Local Claude Code settings / memory
 .claude/
+.agents/
+.opencode/
 
 # OS noise
 .DS_Store
@@ -8,3 +10,6 @@
 lumen-*.png
 lumen-*.webm
 lumen-*.gif
+
+# Dependencies
+node_modules/

@@ -22,12 +22,15 @@ optional things: Google Fonts (UI typography) and the GIF encoder library
 
 ## What's in this folder
 
-| File | What it is |
+| File / Dir | What it is |
 |---|---|
 | `studio.html` | **The studio.** The tool you open to design graphics. |
 | `index.html` | The front door — a full-screen splash with a live wave-field shader background and a link into the studio. |
 | `lumen-reeded-9015.png` / `.gif` | Original inspiration images downloaded from Lumen. |
 | `lumen-*-*.png/webm/gif` | Anything you export from the studio lands here (via browser downloads) with this naming scheme. |
+| `.claude/skills/motion-studio/` | Agent skills for **Claude Code** — studio guide, parameter tables, architect notes, design principles. |
+| `.opencode/skills/motion-studio/` | Agent skills for **opencode** — same content in opencode frontmatter format. |
+| `.agents/skills/motion-studio/` | Agent skills for **Codex CLI** — same content with Codex metadata and references directory. |
 
 ---
 
@@ -50,7 +53,7 @@ The layout: canvas preview on the left, control panel on the right, status bar
    everything. The same seed + preset + settings always reproduces the same
    graphic. Hit the dice (⚄) for a random one.
 3. **Choose colors** — a 4-stop gradient (dark → mid → bright → highlight).
-   Edit each swatch directly or shuffle (⟳) through 10 curated palettes.
+   Edit each swatch directly or shuffle (⟳) through 11 curated palettes.
 4. **Tune the sliders** — `speed`, `scale`, `density`, `distortion`, `detail`,
    `grain` (all 0–1; each preset interprets them in its own way).
 5. **Pick a canvas size** — social-ready: `1:1` (1080²), `16:9` (1920×1080),
@@ -67,6 +70,57 @@ Exports are named `lumen-{preset}-{seed}.{ext}` (e.g. `lumen-reeded-9015.png`),
 so a filename is enough to recreate the graphic.
 
 **Keyboard shortcuts:** `space` pause/play · `r` randomize everything · `s` save PNG.
+
+---
+
+## Agent skills (AI-assisted development)
+
+This repo ships with skill files for three AI coding tools. Each skill set teaches
+the agent how the studio works so it can answer questions, make modifications, and
+give design advice without context-switching.
+
+| Platform | Location | Format |
+|----------|----------|--------|
+| **Claude Code** | `.claude/skills/motion-studio/` | YAML frontmatter + Markdown |
+| **opencode** | `.opencode/skills/motion-studio/` | YAML frontmatter + Markdown |
+| **Codex CLI** | `.agents/skills/motion-studio/` | Codex frontmatter + Markdown + `agents/openai.yaml` metadata |
+
+**What's in each skill set:**
+
+| File | What it teaches |
+|------|----------------|
+| `SKILL.md` | Full studio overview — 9 presets, 6 sliders, seed/palette/export/loop mechanics, keyboard shortcuts. |
+| `SKILL_parameters.md` / `references/parameters.md` | Per-preset slider outcome tables — exactly what each value produces visually. |
+| `SKILL_architect.md` / `references/architect.md` | Extending the studio — adding presets/sliders/sizes, shader editing, GLSL constraints, loop invariant rules. |
+| `SKILL_design.md` / `references/design.md` | Generative design principles from ShaderToy, Processing, Tyler Hobbs, Dave Whyte, Ryoji Ikeda, and others. |
+
+---
+
+## Design philosophy
+
+This studio is built on principles drawn from the shader art, creative coding,
+and generative design communities:
+
+- **Paint with math.** Shaders describe every pixel simultaneously — compose from
+  small functions (`hash21` → `vnoise` → `fbm` → `grad4`).
+- **Design the output space.** Presets, seeds, and slider ranges define what *can*
+  happen. The GPU explores the possibility space.
+- **Seamless loops are a contract.** `u_phase` drives all animation. Integer
+  multiples only. When the first frame equals the last, the frame disappears.
+- **Noise is the engine.** FBM, domain warping, ridged noise — these are the
+  primary generative primitives.
+- **Constraints breed creativity.** 4-digit seed, 6 sliders, 4 palette stops.
+  Limitations force strong choices.
+- **Immediate feedback.** Every slider change re-renders at 60fps. No save/preview
+  mode. The `r` key randomizes everything instantly.
+- **Add analog imperfections.** Grain, vignette, rim lights — digital perfection
+  is lifeless.
+- **Export is a feature.** Zero-friction PNG/WebM/GIF at social-ready sizes.
+  `lumen-{preset}-{seed}.{ext}` means the filename alone recreates the graphic.
+
+*Inspired by Inigo Quilez, Book of Shaders, Casey Reas / Processing Foundation,
+Tyler Hobbs, Matt DesLauriers, Dave Whyte (beesandbombs), Ryoji Ikeda / teamLab,
+FIELD.IO, and Universal Everything.*
 
 ---
 
