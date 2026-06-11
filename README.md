@@ -81,7 +81,7 @@ framework, no modules, no build — edit the file directly.
   sizeIdx). All rendering reads from `P`.
 - **WEBGL SETUP** — WebGL1 context (`preserveDrawingBuffer: true`, required for
   PNG/GIF capture), a fullscreen triangle strip, and **one fragment shader**
-  containing all six presets, branched on the `u_mode` int uniform.
+  containing all nine presets, branched on the `u_mode` int uniform.
   `draw(phase)` pushes all uniforms from `P` and renders one frame.
 - **UI WIRING** — buttons/sliders are generated from the config arrays and
   write straight into `P`.
