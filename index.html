@@ -5,87 +5,150 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>lumen·local — generative shader studio</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
     <style>
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
-        html, body {
-            width: 100%; height: 100%;
-            overflow: hidden;
+        html {
+            scroll-behavior: smooth;
             background: #06040a;
         }
-
-        canvas {
-            position: fixed;
-            inset: 0;
-            width: 100%; height: 100%;
-            display: block;
+        body {
+            width:100%;
+            background: #06040a;
+            font-family: 'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;
+            color: #fff;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* ---- UI Layer ---- */
-        .ui {
+        /* ============================================================
+           VIDEO BACKGROUND — fixed, full-viewport, alpha-friendly
+           ============================================================ */
+        #bg-video, #bg-canvas {
             position: fixed;
             inset: 0;
-            display: grid;
-            place-items: center;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+            will-change: transform;
+            transition: transform 0.2s ease-out;
+            display: none;            /* hidden until JS activates the chosen background */
+        }
+        #bg-video.bg-active, #bg-canvas.bg-active { display: block; }
+
+        /* Dark vignette overlay on top of video */
+        #vignette {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
             pointer-events: none;
-            z-index: 10;
+            background:
+                radial-gradient(ellipse at center, transparent 30%, rgba(6,4,10,0.85) 100%),
+                linear-gradient(to bottom, rgba(6,4,10,0.4) 0%, transparent 30%, transparent 70%, rgba(6,4,10,0.7) 100%);
         }
 
-        .title-group { text-align: center; }
-
-        h1 {
-            font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            font-weight: 100;
-            font-size: clamp(2.4rem, 7vw, 8rem);
-            letter-spacing: 0.5em;
-            text-indent: 0.5em;
+        /* ============================================================
+           NAV — fixed wordmark + meta
+           ============================================================ */
+        .nav {
+            position: fixed;
+            top: 1.5rem; left: 0; right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.8rem;
+            z-index: 20;
+            pointer-events: none;
+            mix-blend-mode: difference;
+        }
+        .mark {
+            font-weight: 500;
+            font-size: 0.72rem;
+            letter-spacing: 0.42em;
+            text-indent: 0.42em;
             text-transform: uppercase;
-            color: #ffffff;
-            text-shadow: 0 2px 40px rgba(0, 0, 0, 0.55), 0 1px 3px rgba(0, 0, 0, 0.35);
-            line-height: 1;
+            color: #fff;
             user-select: none;
-            animation: reveal 2.2s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
-        h1 span { color: #ff8a8a; }
-
-        @keyframes reveal {
-            from { opacity: 0; letter-spacing: 0.85em; text-indent: 0.85em; filter: blur(10px); }
-            to   { opacity: 1; letter-spacing: 0.5em;  text-indent: 0.5em;  filter: blur(0); }
-        }
-
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(14px); }
-            to   { opacity: 1; transform: translateY(0); }
+        .mark span { color: #ff8a8a; }
+        .nav-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 300;
+            font-size: 0.58rem;
+            letter-spacing: 0.2em;
+            text-transform: lowercase;
+            color: rgba(255,255,255,0.75);
+            user-select: none;
         }
 
-        .sub {
+        /* ============================================================
+           CONTENT — scrollable sections over the video
+           ============================================================ */
+        section {
+            position: relative;
+            z-index: 5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5rem 2rem;
+        }
+
+        .section-inner {
+            max-width: 48rem;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* ---- HERO (first viewport) ---- */
+        #hero { padding: 0 2rem; }
+        #hero .section-inner {
+            /* wider than the story container so the spaced wordmark fits and stays centered */
+            max-width: 64rem;
+            animation: heroIn 2.8s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        @keyframes heroIn {
+            0%   { opacity:0; transform:translateY(20px); filter:blur(6px); }
+            100% { opacity:1; transform:translateY(0);    filter:blur(0); }
+        }
+
+        #hero h1 {
+            font-weight: 100;
+            /* sized so the spaced wordmark always fits the viewport without clipping */
+            font-size: clamp(2rem,6vw,5.5rem);
+            letter-spacing: 0.32em;
+            text-transform: uppercase;
+            line-height: 1.05;
+            max-width: 100%;
+            user-select: none;
+        }
+        #hero h1 span { color: #ff8a8a; }
+
+        #hero .sub {
             margin-top: 1.4rem;
             font-family: 'JetBrains Mono', monospace;
             font-weight: 300;
-            font-size: clamp(0.5rem, 1vw, 0.74rem);
+            font-size: clamp(0.5rem,1vw,0.74rem);
             letter-spacing: 0.7em;
+            /* match indent to letter-spacing to keep the line centered */
             text-indent: 0.7em;
             text-transform: lowercase;
-            color: rgba(255, 255, 255, 0.85);
-            text-shadow: 0 1px 12px rgba(0, 0, 0, 0.5);
+            color: rgba(255,255,255,0.85);
             user-select: none;
-            animation: fadeUp 1.6s 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+            text-align: center;
         }
 
-        /* ---- Hero descriptor & CTA ---- */
-        .desc {
-            margin: 2.6rem auto 0;
-            max-width: 30rem;
-            font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        #hero .desc {
+            margin: 2.2rem auto 0;
+            max-width: 28rem;
             font-weight: 200;
-            font-size: clamp(0.78rem, 1.4vw, 0.96rem);
-            line-height: 1.75;
+            font-size: clamp(0.75rem,1.3vw,0.92rem);
+            line-height: 1.8;
             letter-spacing: 0.02em;
-            color: rgba(255, 255, 255, 0.9);
-            text-shadow: 0 1px 16px rgba(0, 0, 0, 0.6);
+            color: rgba(255,255,255,0.8);
             user-select: none;
-            animation: fadeUp 1.6s 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
 
         .actions {
@@ -94,39 +157,38 @@
             gap: 1.1rem;
             justify-content: center;
             pointer-events: auto;
-            animation: fadeUp 1.6s 1.1s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
 
         .btn {
-            font-family: 'Inter', sans-serif;
             font-weight: 400;
             font-size: 0.6rem;
             letter-spacing: 0.34em;
-            text-indent: 0.34em;
             text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.85);
+            color: rgba(255,255,255,0.85);
             text-decoration: none;
             padding: 0.95rem 1.9rem;
-            border: 1px solid rgba(255, 255, 255, 0.22);
+            border: 1px solid rgba(255,255,255,0.22);
             border-radius: 2px;
-            background: rgba(255, 255, 255, 0.015);
+            background: rgba(255,255,255,0.015);
             backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
             transition: border-color 0.4s, background 0.4s, color 0.4s, letter-spacing 0.4s;
+            cursor: pointer;
         }
         .btn:hover {
-            border-color: rgba(224, 58, 58, 0.85);
-            background: rgba(224, 58, 58, 0.78);
+            border-color: rgba(224,58,58,0.85);
+            background: rgba(224,58,58,0.78);
             color: #fff;
             letter-spacing: 0.4em;
         }
         .btn.ghost {
             border-color: transparent;
-            color: rgba(255, 255, 255, 0.42);
+            color: rgba(255,255,255,0.42);
         }
         .btn.ghost:hover {
-            background: rgba(255, 255, 255, 0.04);
-            color: rgba(255, 255, 255, 0.85);
-            border-color: rgba(255, 255, 255, 0.18);
+            background: rgba(255,255,255,0.04);
+            color: rgba(255,255,255,0.85);
+            border-color: rgba(255,255,255,0.18);
         }
 
         .hint {
@@ -137,72 +199,159 @@
             letter-spacing: 0.3em;
             text-indent: 0.3em;
             text-transform: lowercase;
-            color: rgba(255, 255, 255, 0.6);
-            text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
+            color: rgba(255,255,255,0.5);
             user-select: none;
-            animation: fadeUp 1.6s 1.4s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
 
-        /* ---- Top nav / wordmark ---- */
-        .nav {
-            position: fixed;
-            top: 1.5rem; left: 0; right: 0;
+        /* ---- Scrolldown indicator ---- */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 6;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: space-between;
-            padding: 0 1.8rem;
-            z-index: 20;
+            gap: 0.4rem;
+            animation: bob 2.4s ease-in-out infinite;
             pointer-events: none;
         }
-        .mark {
-            font-family: 'Inter', sans-serif;
-            font-weight: 500;
-            font-size: 0.72rem;
-            letter-spacing: 0.42em;
-            text-indent: 0.42em;
-            text-transform: uppercase;
-            color: #ffffff;
-            text-shadow: 0 1px 12px rgba(0, 0, 0, 0.55);
-            user-select: none;
-        }
-        .mark span { color: #ff8a8a; }
-        .nav-meta {
+        .scroll-indicator span {
             font-family: 'JetBrains Mono', monospace;
-            font-weight: 300;
-            font-size: 0.58rem;
+            font-size: 0.48rem;
             letter-spacing: 0.2em;
-            text-transform: lowercase;
-            color: rgba(255, 255, 255, 0.75);
-            text-shadow: 0 1px 12px rgba(0, 0, 0, 0.55);
-            user-select: none;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.45);
+        }
+        .scroll-indicator .chevron {
+            width: 1.2rem;
+            height: 1.2rem;
+            border-right: 1px solid rgba(255,255,255,0.4);
+            border-bottom: 1px solid rgba(255,255,255,0.4);
+            transform: rotate(45deg);
+        }
+        @keyframes bob {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50%      { transform: translateX(-50%) translateY(8px); }
         }
 
-        /* ---- Preset roster (bottom) ---- */
-        .roster {
-            position: fixed;
-            bottom: 3.8rem;
-            left: 0; right: 0;
-            display: flex;
-            justify-content: center;
-            gap: clamp(1rem, 3.4vw, 3rem);
-            z-index: 10;
-            pointer-events: none;
-            animation: fadeUp 1.8s 1.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+        /* ---- STORY SECTIONS ---- */
+        .story {
+            min-height: 80vh;
+            padding: 6rem 2rem;
         }
-        .roster span {
+        .story .section-inner {
+            padding: 3rem 2rem;
+            background: rgba(6,4,10,0.55);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 4px;
+        }
+
+        .story h2 {
+            font-weight: 200;
+            font-size: clamp(1.4rem,3.6vw,3rem);
+            letter-spacing: 0.04em;
+            line-height: 1.4;
+            user-select: none;
+        }
+        .story h2 .accent { color: #ff8a8a; }
+
+        .story p {
+            margin-top: 1.6rem;
+            font-weight: 200;
+            font-size: clamp(0.85rem,1.3vw,1.05rem);
+            line-height: 1.9;
+            letter-spacing: 0.01em;
+            color: rgba(255,255,255,0.75);
+            max-width: 34rem;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .story .meta-pull {
+            margin-top: 1.2rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.35);
+        }
+
+        /* ---- ANIMATED ROSTER (inside story) ---- */
+        .roster-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.6rem 1.6rem;
+            margin-top: 2rem;
+        }
+        .roster-grid span {
             font-family: 'JetBrains Mono', monospace;
             font-weight: 300;
-            font-size: 0.56rem;
+            font-size: 0.6rem;
             letter-spacing: 0.26em;
             text-transform: lowercase;
-            color: rgba(255, 255, 255, 0.55);
-            text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
-            user-select: none;
-            transition: color 0.6s;
+            color: rgba(255,255,255,0.4);
+            transition: color 0.5s;
         }
-        .roster span.live { color: #ff8a8a; }
+        .roster-grid span.live {
+            color: #ff8a8a;
+        }
 
-        /* ---- Corner Labels ---- */
+        /* ---- CTA section ---- */
+        #cta .btn-enter {
+            display: inline-block;
+            margin-top: 2rem;
+            font-weight: 300;
+            font-size: clamp(0.7rem,1.2vw,0.85rem);
+            letter-spacing: 0.5em;
+            text-transform: uppercase;
+            color: #fff;
+            text-decoration: none;
+            padding: 1.2rem 3rem;
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 3px;
+            background: rgba(224,58,58,0.12);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            transition: background 0.5s, border-color 0.5s, letter-spacing 0.5s;
+            cursor: pointer;
+        }
+        #cta .btn-enter:hover {
+            background: rgba(224,58,58,0.7);
+            border-color: rgba(224,58,58,0.9);
+            letter-spacing: 0.6em;
+        }
+
+        /* ============================================================
+           SCROLL-IN ANIMATION (Intersection Observer)
+           ============================================================ */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            filter: blur(4px);
+            transition: opacity 1s cubic-bezier(0.16,1,0.3,1),
+                        transform 1s cubic-bezier(0.16,1,0.3,1),
+                        filter 1s cubic-bezier(0.16,1,0.3,1);
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+            filter: blur(0);
+        }
+
+        /* Delays for staggered children */
+        .reveal.d1 { transition-delay: 0.1s; }
+        .reveal.d2 { transition-delay: 0.3s; }
+        .reveal.d3 { transition-delay: 0.5s; }
+        .reveal.d4 { transition-delay: 0.7s; }
+
+        /* ============================================================
+           CORNER LABELS
+           ============================================================ */
         .corner {
             position: fixed;
             font-family: 'JetBrains Mono', monospace;
@@ -210,96 +359,290 @@
             font-size: 0.56rem;
             letter-spacing: 0.18em;
             text-transform: lowercase;
-            color: rgba(255, 255, 255, 0.6);
-            text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
-            z-index: 10;
+            color: rgba(255,255,255,0.5);
+            z-index: 20;
             pointer-events: none;
+            mix-blend-mode: difference;
         }
         .bl { bottom: 1.6rem; left: 1.8rem; }
         .br { bottom: 1.6rem; right: 1.8rem; }
 
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
         @media (max-width: 640px) {
-            .roster, .desc { display: none; }
+            .story p { font-size: 0.85rem; }
+            .nav-meta, .corner { display: none; }
+            .story .section-inner {
+                padding: 2rem 1.2rem;
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .reveal { opacity: 1; transform: none; filter: none; transition: none; }
+            #bg-video, #bg-canvas { transition: none; }
+            html { scroll-behavior: auto; }
         }
     </style>
 </head>
 <body>
 
-    <canvas id="c"></canvas>
+    <!-- ============ BACKGROUND (video OR webgl shader, chosen at random) ============ -->
+    <video id="bg-video" loop muted playsinline poster="poster.jpg" preload="none"></video>
+    <canvas id="bg-canvas"></canvas>
+    <div id="vignette"></div>
 
-    <div class="nav">
+    <!-- ============ NAV ============ -->
+    <nav class="nav">
         <span class="mark">Lumen<span>·</span>Local</span>
         <span class="nav-meta">webgl · 60fps · seamless loops</span>
-    </div>
+    </nav>
 
-    <div class="ui">
-        <div class="title-group">
+    <span class="corner bl" id="timer">0:00</span>
+    <span class="corner br">v1 · 2026</span>
+
+    <!-- ============ HERO ============ -->
+    <section id="hero">
+        <div class="section-inner">
             <h1>Lumen<span>·</span>Local</h1>
             <p class="sub">generative shader studio</p>
-            <p class="desc">Design looping motion graphics in your browser —
-                six procedural shaders, seeded and reproducible,
-                exported as image, video, or gif. No cloud, no account, no install.</p>
+            <p class="desc">Procedural motion graphics in your browser —<br>
+                14 shaders, seeded and reproducible, exported as image, video, or gif.<br>
+                No cloud. No account. No install.</p>
             <div class="actions">
                 <a class="btn" href="studio.html">Enter Studio</a>
                 <a class="btn ghost" href="README.md">Read Docs</a>
             </div>
             <span class="hint">press enter to open the studio</span>
         </div>
-    </div>
+        <div class="scroll-indicator">
+            <span>scroll</span>
+            <div class="chevron"></div>
+        </div>
+    </section>
 
-    <div class="roster" id="roster">
-        <span>reeded</span>
-        <span>flow</span>
-        <span>orbs</span>
-        <span class="live">waves</span>
-        <span>halftone</span>
-        <span>grain</span>
-        <span>glass</span>
-        <span>aurora</span>
-        <span>electric</span>
-    </div>
+    <!-- ============ STORY: Seed ============ -->
+    <section class="story" id="seed">
+        <div class="section-inner reveal">
+            <p class="meta-pull reveal d1">— 001 —</p>
+            <h2 class="reveal d2">Every frame<br>begins with&nbsp;a&nbsp;<span class="accent">seed</span>.</h2>
+            <p class="reveal d3">
+                A single number determines everything — the curl of a wave,
+                the scatter of grain, the drift of light across a field of noise.
+                Type in a seed and the same frame appears every time.
+                Deterministic. Reproducible. Yours to archive and revisit.
+            </p>
+        </div>
+    </section>
 
-    <span class="corner bl" id="timer">0:00</span>
-    <span class="corner br">v1 · 2026</span>
+    <!-- ============ STORY: Presets ============ -->
+    <section class="story" id="presets">
+        <div class="section-inner reveal">
+            <p class="meta-pull reveal d1">— 002 —</p>
+            <h2 class="reveal d2"><span class="accent">14</span> ways to&nbsp;shape&nbsp;time.</h2>
+            <p class="reveal d3">
+                From the crystalline harmonics of <em>reeded glass</em> to the
+                organic drift of <em>aurora</em>&thinsp;—&thinsp;each preset is a distinct
+                visual language. Mix them with image overlays, pixelate,
+                distort. The palette is yours.
+            </p>
+            <div class="roster-grid reveal d4" id="roster">
+                <span>reeded</span>
+                <span>flow</span>
+                <span>orbs</span>
+                <span class="live">waves</span>
+                <span>halftone</span>
+                <span>grain</span>
+                <span>glass</span>
+                <span>aurora</span>
+                <span>electric</span>
+                <span>kaleidoscope</span>
+                <span>rings</span>
+                <span>plasma</span>
+                <span>displace</span>
+                <span>melt</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ STORY: Local ============ -->
+    <section class="story" id="local">
+        <div class="section-inner reveal">
+            <p class="meta-pull reveal d1">— 003 —</p>
+            <h2 class="reveal d2">Everything runs <span class="accent">here</span>.<br>Nothing leaves.</h2>
+            <p class="reveal d3">
+                Every shader compiles on your GPU. Every frame renders in your
+                browser. No data touches a server, no account tracks your work,
+                and the studio works offline. This is creative software that
+                respects where it runs.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============ STORY: Export ============ -->
+    <section class="story" id="export">
+        <div class="section-inner reveal">
+            <p class="meta-pull reveal d1">— 004 —</p>
+            <h2 class="reveal d2">Capture the <span class="accent">loop</span>.</h2>
+            <p class="reveal d3">
+                Export a single frame as PNG, a sequence as GIF, or a seamless
+                loop as WebM. The output matches what you see — no encoding
+                surprises, no quality loss. Designed for the pipeline from
+                sketch to production.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============ CTA ============ -->
+    <section id="cta">
+        <div class="section-inner">
+            <h2 class="reveal" style="font-weight:200;font-size:clamp(1.6rem,4vw,3.4rem);letter-spacing:0.06em;line-height:1.3;">
+                Enter&nbsp;<span style="color:#ff8a8a;">Lumen·Local</span>
+            </h2>
+            <p class="reveal d1" style="margin-top:1.2rem;font-weight:200;font-size:clamp(0.75rem,1.1vw,0.9rem);color:rgba(255,255,255,0.6);">
+                The studio is a single page. Open it and start designing.
+            </p>
+            <div style="margin-top:2.5rem;">
+                <a class="btn-enter reveal d2" href="studio.html">Open Studio</a>
+            </div>
+            <p class="reveal d3" style="margin-top:2.5rem;font-family:'JetBrains Mono',monospace;font-size:0.5rem;letter-spacing:0.25em;color:rgba(255,255,255,0.3);">
+                lumen·local · v1 · 2026
+            </p>
+        </div>
+    </section>
 
     <script>
-    /* =========================================================
-       Wave field — WebGL splash for lumen·local
-       ========================================================= */
     (() => {
-        const canvas = document.getElementById('c');
-        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-        if (!gl) {
-            document.body.style.cssText = 'display:grid;place-items:center;color:#fff;background:#111';
-            document.body.innerHTML = '<p>WebGL is required. <a href="studio.html" style="color:#e03a3a">enter studio</a></p>';
-            return;
+        'use strict';
+
+        /* --------------------------------------------------
+           KEYBOARD: Enter → studio
+        -------------------------------------------------- */
+        window.addEventListener('keydown', e => {
+            if (e.key === 'Enter') window.location.href = 'studio.html';
+        });
+
+        /* --------------------------------------------------
+           ROSTER: cycle the "live" highlight
+        -------------------------------------------------- */
+        const rosterEls = document.querySelectorAll('#roster span');
+        if (rosterEls.length) {
+            let liveIdx = 3;
+            setInterval(() => {
+                rosterEls[liveIdx].classList.remove('live');
+                liveIdx = (liveIdx + 1) % rosterEls.length;
+                rosterEls[liveIdx].classList.add('live');
+            }, 2400);
         }
 
         /* --------------------------------------------------
-           Vertex Shader — full-screen triangle strip
+           TIMER
         -------------------------------------------------- */
-        const VS = `
-attribute vec2 a_pos;
-void main() {
-    gl_Position = vec4(a_pos, 0.0, 1.0);
-}`;
+        const timerEl = document.getElementById('timer');
+        if (timerEl) {
+            const t0 = performance.now();
+            let lastSec = -1;
+            function tick() {
+                const s = Math.floor((performance.now() - t0) / 1000);
+                if (s !== lastSec) {
+                    lastSec = s;
+                    timerEl.textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+                }
+                requestAnimationFrame(tick);
+            }
+            requestAnimationFrame(tick);
+        }
 
         /* --------------------------------------------------
-           Fragment Shader — flowing wave field
+           BACKGROUND — randomly pick the video loop OR the
+           WebGL wave-field shader on each page load
         -------------------------------------------------- */
-        const FS = `
-precision highp float;
+        const video  = document.getElementById('bg-video');
+        const canvas = document.getElementById('bg-canvas');
+        let   activeBg = null;
 
+        function startVideo() {
+            activeBg = video;
+            canvas.classList.remove('bg-active');
+            video.classList.add('bg-active');
+            if (!video.querySelector('source')) {
+                const s = document.createElement('source');
+                s.src = 'lumen-halftone-1992.webm';
+                s.type = 'video/webm';
+                video.appendChild(s);
+                video.load();
+            }
+            video.play().catch(() => {
+                /* Autoplay blocked — add click-to-play overlay */
+                const playOverlay = document.createElement('div');
+                playOverlay.style.cssText =
+                    'position:fixed;inset:0;z-index:999;display:grid;place-items:center;' +
+                    'background:rgba(6,4,10,0.85);cursor:pointer;';
+                playOverlay.innerHTML =
+                    '<span style="font-family:Inter,sans-serif;font-weight:200;' +
+                    'font-size:1.2rem;letter-spacing:0.3em;color:rgba(255,255,255,0.7);' +
+                    'border:1px solid rgba(255,255,255,0.2);padding:1.2rem 2.4rem;">' +
+                    'click to enter</span>';
+                playOverlay.addEventListener('click', () => { video.play(); playOverlay.remove(); });
+                document.body.appendChild(playOverlay);
+            });
+        }
+
+        /* 50/50 coin flip; fall back to the video if WebGL is unavailable */
+        const useShader = Math.random() < 0.5;
+        if (useShader && initShader(canvas)) {
+            activeBg = canvas;
+            canvas.classList.add('bg-active');
+        } else {
+            startVideo();
+        }
+
+        /* Parallax on whichever background ended up active */
+        document.addEventListener('mousemove', e => {
+            if (!activeBg) return;
+            const x = (e.clientX / window.innerWidth  - 0.5) * 6;
+            const y = (e.clientY / window.innerHeight - 0.5) * 6;
+            activeBg.style.transform = `translate(${x}px, ${y}px) scale(1.03)`;
+        });
+        document.addEventListener('mouseleave', () => {
+            if (activeBg) activeBg.style.transform = 'translate(0,0) scale(1)';
+        });
+
+        /* --------------------------------------------------
+           INTERSECTION OBSERVER — reveal on scroll
+        -------------------------------------------------- */
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.15 });
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        /* --------------------------------------------------
+           WEBGL WAVE FIELD — fullscreen flowing shader,
+           ported from the repo's canvas splash. Returns
+           false if WebGL can't initialize (→ video fallback).
+        -------------------------------------------------- */
+        function initShader(cv) {
+            const gl = cv.getContext('webgl') || cv.getContext('experimental-webgl');
+            if (!gl) return false;
+
+            const VS = `
+attribute vec2 a_pos;
+void main() { gl_Position = vec4(a_pos, 0.0, 1.0); }`;
+
+            const FS = `
+precision highp float;
 uniform float u_time;
 uniform vec2  u_res;
 
-/* ---- Smooth value noise ---- */
 float hash21(vec2 p) {
     p = fract(p * vec2(234.34, 435.345));
     p += dot(p, p + 34.23);
     return fract(p.x * p.y);
 }
-
 float vnoise(vec2 p) {
     vec2 i = floor(p);
     vec2 f = fract(p);
@@ -310,8 +653,6 @@ float vnoise(vec2 p) {
     float d = hash21(i + vec2(1.0, 1.0));
     return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
-
-/* 5-octave FBM */
 float fbm(vec2 p) {
     float v = 0.0;
     float a = 0.5;
@@ -323,144 +664,89 @@ float fbm(vec2 p) {
     }
     return v;
 }
-
-/* ---- Crimson palette
-   0.00 → near-black   #100C16
-   0.30 → deep crimson #7F0616
-   0.62 → vivid red    #E03A3A
-   1.00 → near-white   #FFF5F5
----- */
 vec3 pal(float t) {
     t = clamp(t, 0.0, 1.0);
     if (t < 0.30) return mix(vec3(0.063, 0.047, 0.086), vec3(0.498, 0.024, 0.086), t / 0.30);
     if (t < 0.62) return mix(vec3(0.498, 0.024, 0.086), vec3(0.875, 0.230, 0.230), (t - 0.30) / 0.32);
                   return mix(vec3(0.875, 0.230, 0.230), vec3(1.000, 0.957, 0.957), (t - 0.62) / 0.38);
 }
-
 void main() {
     vec2 uv = gl_FragCoord.xy / u_res;
     uv.y = 1.0 - uv.y;
     float ar = u_res.x / u_res.y;
     float t  = u_time * 0.22;
-
     vec2 p = vec2(uv.x * ar, uv.y);
-
-    /* ---- DOMAIN-WARPED FLOW ----
-       Warp the space with two noise fields, then advect them
-       horizontally so the waves visibly drift left→right. */
     vec2 q = vec2(
         fbm(p * 1.5 + vec2(t * 0.30, t * 0.05)),
         fbm(p * 1.5 + vec2(5.2, 1.3) - vec2(t * 0.18, 0.0))
     );
     float f = fbm(p * 1.4 + q * 2.6 + vec2(t * 0.22, 0.0));
-
-    /* ---- TRAVELLING WAVE CRESTS ----
-       Layered sine waves bent by the warp give long rolling swells. */
     float swell = uv.y * 1.4
         + sin(uv.x * ar * 1.4 + t * 1.1 + q.x * 3.0) * 0.30
         + sin(uv.x * ar * 3.1 - t * 1.6 + q.y * 2.0) * 0.14
         + f * 1.5;
-
-    /* Map the field through the palette as flowing bands */
     float band = 0.5 + 0.5 * sin(swell * 6.2831 * 0.85 - t * 0.6);
     vec3 col = pal(band * 0.96);
-
-    /* ---- CREST HIGHLIGHTS ----
-       Bright foam where the wave gradient peaks. */
     float crest = pow(band, 6.0) * 0.55;
     col += vec3(1.0, 0.96, 0.96) * crest;
-
-    /* Gentle depth shading toward the lower third */
     col *= 0.82 + 0.30 * smoothstep(0.0, 0.7, uv.y);
-
-    /* ---- FILM GRAIN ---- */
     col += (hash21(gl_FragCoord.xy + vec2(u_time * 60.0)) - 0.5) * 0.04;
-
-    /* ---- VIGNETTE ---- */
     vec2 vig = uv * 2.0 - 1.0;
     col *= 1.0 - dot(vig, vig) * 0.22;
-
     gl_FragColor = vec4(col, 1.0);
 }`;
 
-        /* ------ Compile & link ------ */
-        function mkShader(type, src) {
-            const s = gl.createShader(type);
-            gl.shaderSource(s, src);
-            gl.compileShader(s);
-            if (!gl.getShaderParameter(s, gl.COMPILE_STATUS))
-                throw new Error('Shader error: ' + gl.getShaderInfoLog(s));
-            return s;
-        }
-
-        const prog = gl.createProgram();
-        gl.attachShader(prog, mkShader(gl.VERTEX_SHADER,   VS));
-        gl.attachShader(prog, mkShader(gl.FRAGMENT_SHADER, FS));
-        gl.linkProgram(prog);
-        if (!gl.getProgramParameter(prog, gl.LINK_STATUS))
-            throw new Error('Link error: ' + gl.getProgramInfoLog(prog));
-
-        /* ------ Geometry: full-screen triangle strip ------ */
-        const vbo = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-        gl.bufferData(gl.ARRAY_BUFFER,
-            new Float32Array([-1,-1, 1,-1, -1,1, 1,1]),
-            gl.STATIC_DRAW);
-
-        const aPos  = gl.getAttribLocation(prog,  'a_pos');
-        const uTime = gl.getUniformLocation(prog, 'u_time');
-        const uRes  = gl.getUniformLocation(prog, 'u_res');
-
-        gl.enableVertexAttribArray(aPos);
-        gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
-
-        /* ------ Resize ------ */
-        function resize() {
-            const dpr = Math.min(devicePixelRatio, 2);
-            canvas.width  = Math.round(window.innerWidth  * dpr);
-            canvas.height = Math.round(window.innerHeight * dpr);
-            gl.viewport(0, 0, canvas.width, canvas.height);
-        }
-        window.addEventListener('resize', resize);
-        resize();
-
-        /* ------ Enter key → studio ------ */
-        window.addEventListener('keydown', e => {
-            if (e.key === 'Enter') window.location.href = 'studio.html';
-        });
-
-        /* ------ Roster: cycle the "live" preset label ------ */
-        const rosterEls = document.querySelectorAll('#roster span');
-        let liveIdx = 3; /* starts on "waves" */
-        setInterval(() => {
-            rosterEls[liveIdx].classList.remove('live');
-            liveIdx = (liveIdx + 1) % rosterEls.length;
-            rosterEls[liveIdx].classList.add('live');
-        }, 2400);
-
-        /* ------ Render loop ------ */
-        const t0      = performance.now();
-        const timerEl = document.getElementById('timer');
-        let   lastSec = -1;
-
-        function frame(now) {
-            const elapsed = (now - t0) / 1000;
-
-            gl.useProgram(prog);
-            gl.uniform1f(uTime, elapsed);
-            gl.uniform2f(uRes,  canvas.width, canvas.height);
-            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-
-            const s = Math.floor(elapsed);
-            if (s !== lastSec) {
-                lastSec = s;
-                timerEl.textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+            function mkShader(type, src) {
+                const s = gl.createShader(type);
+                gl.shaderSource(s, src);
+                gl.compileShader(s);
+                if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+                    gl.deleteShader(s);
+                    return null;
+                }
+                return s;
             }
 
-            requestAnimationFrame(frame);
-        }
+            const vs = mkShader(gl.VERTEX_SHADER, VS);
+            const fs = mkShader(gl.FRAGMENT_SHADER, FS);
+            if (!vs || !fs) return false;
 
-        requestAnimationFrame(frame);
+            const prog = gl.createProgram();
+            gl.attachShader(prog, vs);
+            gl.attachShader(prog, fs);
+            gl.linkProgram(prog);
+            if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return false;
+
+            const vbo = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+
+            const aPos  = gl.getAttribLocation(prog,  'a_pos');
+            const uTime = gl.getUniformLocation(prog, 'u_time');
+            const uRes  = gl.getUniformLocation(prog, 'u_res');
+            gl.enableVertexAttribArray(aPos);
+            gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+            function resize() {
+                const dpr = Math.min(devicePixelRatio, 2);
+                cv.width  = Math.round(window.innerWidth  * dpr);
+                cv.height = Math.round(window.innerHeight * dpr);
+                gl.viewport(0, 0, cv.width, cv.height);
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            const t0 = performance.now();
+            function frame(now) {
+                gl.useProgram(prog);
+                gl.uniform1f(uTime, (now - t0) / 1000);
+                gl.uniform2f(uRes, cv.width, cv.height);
+                gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+                requestAnimationFrame(frame);
+            }
+            requestAnimationFrame(frame);
+            return true;
+        }
     })();
     </script>
 </body>
