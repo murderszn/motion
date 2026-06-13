@@ -13,3 +13,11 @@ lumen-*.gif
 
 # Dependencies
 node_modules/
+
+# Vite build output
+dist/
+
+# Local editor / notes
+.obsidian/
+brain/
+brain-graph.html
