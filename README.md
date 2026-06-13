@@ -39,7 +39,7 @@ optional things: Google Fonts (UI typography) and the GIF encoder library
 The layout: canvas preview on the left, control panel on the right, status bar
 (resolution / fps / seed / mode) at the bottom.
 
-1. **Pick a preset** — nine generative shader modes:
+1. **Pick a preset** — 14 generative shader modes:
    - `reeded` — vertical reeded-glass rods refracting drifting color blobs (the original inspiration)
    - `flow` — domain-warped liquid noise gradients
    - `orbs` — soft metaballs drifting on orbits
@@ -49,6 +49,11 @@ The layout: canvas preview on the left, control panel on the right, status bar
    - `glass` — glassmorphism: drifting frosted panes refracting a colour backdrop
    - `aurora` — wavy glowing curtains of light undulating across a dark night sky
    - `electric` — branching, flickering lightning filaments
+   - `kaleidoscope` — mirrored radial symmetry slices
+   - `rings` — concentric glowing rings modulated by noise
+   - `plasma` — classic multi-frequency sine wave plasma
+   - `displace` — image texture warped by noise
+   - `melt` — vertical dripping liquid distortion
 2. **Set a seed** — a 4-digit number that deterministically positions/offsets
    everything. The same seed + preset + settings always reproduces the same
    graphic. Hit the dice (⚄) for a random one.

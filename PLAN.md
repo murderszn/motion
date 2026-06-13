@@ -60,7 +60,7 @@ typography to full compositing.
 ### Phase 0: Foundation (current state)
 
 ```
-✓ 9 procedural shader presets
+✓ 14 procedural shader presets
 ✓ Seed-based determinism
 ✓ 4-stop palette system
 ✓ 6 parametric sliders
