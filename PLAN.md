@@ -3,7 +3,8 @@
 **From shader playground → full moving-image studio.**
 
 ```
-Current state:   browser-based shader toy with 9 presets, text overlay, video/GIF export
+Current state:   browser-based shader studio with 16 presets, text tool (placement mode),
+                 video/GIF/PNG export, hotkeys legend, live shader editor
 Target state:    open-source, extensible motion design application — layers, timeline,
                  node graph, expressions, compositing, multi-format export
 ```
@@ -60,16 +61,24 @@ typography to full compositing.
 ### Phase 0: Foundation (current state)
 
 ```
-✓ 14 procedural shader presets
+✓ 16 procedural shader presets
 ✓ Seed-based determinism
-✓ 4-stop palette system
+✓ 4-stop palette system + 11 curated palettes
 ✓ 6 parametric sliders
 ✓ PNG / WebM / GIF export
+✓ Self-contained HTML splash page exporter (embedded shader + params + textures)
 ✓ Seamless loop (circular phase)
-✓ Text overlay with drag positioning
+✓ Text tool with click-to-place (Word/Canva-style placement)
+✓ Live GLSL shader editor with compile + problems panel
+✓ Hotkeys legend panel
 ✓ xterm.js terminal
 ✓ VSCode-style layout (activity bar, panel, status bar)
-✓ Theme system (4 built-in themes, localStorage persistence)
+✓ Theme system (11 built-in themes, localStorage persistence)
+✓ Fullscreen toggle (F key)
+✓ Command palette (Cmd+Shift+P / F1)
+✓ JSON clipboard copy/paste for state sharing
+✓ Shareable URL links with query parameter API
+✓ Developer & AI agent integration guide
 ```
 
 ### Phase 1: The Studio Shell (next 3–6 months)
@@ -162,10 +171,10 @@ collaboration, and distribution in one open-source package.
 ### Current tech stack
 
 ```
-HTML     → single-page app
+HTML     → multi-page app (splash + studio)
 CSS      → custom properties, CSS Grid layout
-GLSL     → WebGL1 fragment shaders
-JS       → vanilla IIFE, no framework
+GLSL     → WebGL1 fragment shaders (16 presets)
+TypeScript → strict types, Vite HMR, multi-module architecture
 xterm.js → terminal emulator
 WebSocket→ shell communication via node-pty
 ```

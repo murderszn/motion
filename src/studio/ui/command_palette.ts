@@ -6,11 +6,13 @@ import type { Command } from '../types';
 import { P, PRESETS, SIZES } from '../state';
 import { applyTheme, togglePanel, toggleTerm, toggleMaximize, selectLeftTab } from './sidebar';
 import { exportPNG } from './export';
-import { addText } from './text';
+import { toggleTextTool } from './text';
 import { applyPresetUI } from './presets';
 import { applySizeUI } from './sizes';
 import { togglePause } from '../render';
 import { logToTerminal } from './terminal';
+import { copyStateToClipboard, pasteStateFromClipboard, copyShareLink } from './url_api';
+import { exportHtmlEmbed } from './export_embed';
 
 const $ = (id: string) => document.getElementById(id)!;
 
@@ -23,7 +25,8 @@ function buildCommands(randomize: () => void): Command[] {
     { name: 'Save PNG Image', action: exportPNG, key: 'S' },
     { name: 'Export WebM Video', action: () => ($('expVid') as HTMLButtonElement).click() },
     { name: 'Export GIF',        action: () => ($('expGif') as HTMLButtonElement).click() },
-    { name: 'Add Text Element', action: addText, key: 'T' },
+    { name: 'Export HTML Splash Page', action: exportHtmlEmbed },
+    { name: 'Toggle Text Tool', action: toggleTextTool, key: 'T' },
     { name: 'Toggle Right Panel', action: togglePanel, key: 'Cmd+B' },
     { name: 'Toggle Bottom Terminal', action: toggleTerm, key: 'Ctrl+`' },
     { name: 'Toggle Maximized Terminal', action: toggleMaximize, key: 'Ctrl+Shift+`' },
@@ -32,6 +35,15 @@ function buildCommands(randomize: () => void): Command[] {
     { name: 'Theme: Lumen Dim',      action: () => applyTheme('lumen-dim') },
     { name: 'Theme: Lumen Contrast', action: () => applyTheme('lumen-contrast') },
     { name: 'Theme: Lumen Light',    action: () => applyTheme('lumen-light') },
+    { name: 'Theme: Neon Midnight (Cyberpunk)', action: () => applyTheme('lumen-cyberpunk') },
+    { name: 'Theme: Moss Forest',    action: () => applyTheme('lumen-forest') },
+    { name: 'Theme: Arctic Frost (Nord)', action: () => applyTheme('lumen-nord') },
+    { name: 'Theme: Synthwave Dream', action: () => applyTheme('lumen-synthwave') },
+    { name: 'Theme: Dracula Noir',   action: () => applyTheme('lumen-dracula') },
+    { name: 'Theme: Cherry Blossom', action: () => applyTheme('lumen-sakura') },
+    { name: 'Theme: Warm Espresso',  action: () => applyTheme('lumen-coffee') },
+    { name: 'Theme: Claude Cream',   action: () => applyTheme('lumen-cream') },
+    { name: 'Theme: Colorblind Friendly', action: () => applyTheme('lumen-accessibility') },
     ...PRESETS.map((p, i) => ({
       name: `Preset: ${p.full.charAt(0).toUpperCase() + p.full.slice(1)}`,
       action: () => { P.mode = i; applyPresetUI(); logToTerminal('preset: ' + p.full, 'info'); },
@@ -42,6 +54,9 @@ function buildCommands(randomize: () => void): Command[] {
     })),
     { name: 'Save Project (.lumen)', action: () => window.dispatchEvent(new CustomEvent('lumen:saveProject')) },
     { name: 'Load Project (.lumen)', action: () => ($('projFile') as HTMLInputElement).click() },
+    { name: 'Copy JSON to Clipboard', action: copyStateToClipboard },
+    { name: 'Paste JSON from Clipboard', action: pasteStateFromClipboard },
+    { name: 'Copy Shareable Link', action: copyShareLink },
   ];
 }
 

@@ -12,4 +12,16 @@ export function initStatusBar(): void {
 
 export function setStatusMode(name: string): void  { $('stMode').textContent = name; }
 export function setStatusSeed(val: string): void   { $('stSeed').textContent = val; }
-export function setStatusMsg(val: string): void    { $('stMsg').textContent = val; }
+let msgTimer: ReturnType<typeof setTimeout> | null = null;
+
+export function setStatusMsg(val: string): void {
+  const el = $('stLog');
+  if (el) {
+    el.textContent = val;
+    if (msgTimer) clearTimeout(msgTimer);
+    msgTimer = setTimeout(() => {
+      if (el.textContent === val) el.textContent = '';
+      msgTimer = null;
+    }, 3000);
+  }
+}

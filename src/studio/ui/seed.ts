@@ -18,11 +18,11 @@ export function setSeed(n: number, onUpdate?: (val: string) => void): void {
 
 export function initSeed(onUpdate?: (val: string) => void): void {
   seedEl = $('seed') as HTMLInputElement;
+  setSeed(P.seed, onUpdate);
 
   seedEl.addEventListener('change', () => {
     setSeed(parseInt(seedEl.value, 10) || 0, onUpdate);
-    seedEl.addEventListener('change', () =>
-      window.dispatchEvent(new CustomEvent('lumen:log', { detail: { msg: 'seed: ' + seedEl.value, cls: 'info' } })));
+    window.dispatchEvent(new CustomEvent('lumen:log', { detail: { msg: 'seed: ' + seedEl.value, cls: 'info' } }));
   });
 
   ($('seedDice') as HTMLButtonElement).onclick = () => {

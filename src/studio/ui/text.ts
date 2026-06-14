@@ -1,6 +1,8 @@
 // ─────────────────────────────────────────────────────────
-//  Text overlay — drag, style controls, canvas bake
+//  Text render helpers: selectors, canvas composition, export
 // ─────────────────────────────────────────────────────────
+
+import { P } from '../state';
 
 import type { TextElem, TextAlign, TextEffect } from '../types';
 import { canvas } from '../webgl';
@@ -10,6 +12,7 @@ const $ = (id: string) => document.getElementById(id)!;
 export let texts: TextElem[] = [];
 let nextTextId = 0;
 export let selectedText: number | null = null;
+export let textToolActive = false;
 
 // ── Overlay DOM render ───────────────────────────────────
 
@@ -114,10 +117,31 @@ export function renderTextOnCanvas(ctx: CanvasRenderingContext2D, w: number, h: 
 export function composeExportCanvas(srcCanvas: HTMLCanvasElement, w: number, h: number): HTMLCanvasElement {
   const c = document.createElement('canvas');
   c.width = w; c.height = h;
-  const ctx = c.getContext('2d')!;
-  ctx.drawImage(srcCanvas, 0, 0, w, h);
-  renderTextOnCanvas(ctx, w, h);
-  return c;
+  const ctx = c.getContext('2d', { willReadFrequently: true })!;
+  if ((P.pixel ?? 0) < 0.001) {
+    ctx.drawImage(srcCanvas, 0, 0, w, h);
+    renderTextOnCanvas(ctx, w, h);
+    return c;
+  }
+
+  try {
+    const scale = Math.max(0.02, 1 - (P.pixel ?? 0));
+    const sw = Math.max(1, Math.floor(w * scale));
+    const sh = Math.max(1, Math.floor(h * scale));
+    const tmp = document.createElement('canvas');
+    tmp.width = sw; tmp.height = sh;
+    const tctx = tmp.getContext('2d', { willReadFrequently: true })!;
+    tctx.imageSmoothingEnabled = true;
+    tctx.drawImage(srcCanvas, 0, 0, sw, sh);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(tmp, 0, 0, w, h);
+    renderTextOnCanvas(ctx, w, h);
+    return c;
+  } catch {
+    ctx.drawImage(srcCanvas, 0, 0, w, h);
+    renderTextOnCanvas(ctx, w, h);
+    return c;
+  }
 }
 
 // ── Select / create / delete ─────────────────────────────
@@ -163,10 +187,18 @@ export function deleteText(id: number): void {
   window.dispatchEvent(new CustomEvent('lumen:log', { detail: { msg: 'text deleted', cls: 'info' } }));
 }
 
-export function addText(): void {
+export function toggleTextTool(): void {
+  textToolActive = !textToolActive;
+  const btn = $('btnTextTab') as HTMLElement | null;
+  if (btn) btn.classList.toggle('active', textToolActive);
+  ($('canvas-wrap') as HTMLElement).style.cursor = textToolActive ? 'crosshair' : '';
+  window.dispatchEvent(new CustomEvent('lumen:log', { detail: { msg: textToolActive ? 'text tool armed — click canvas to place' : 'text tool off', cls: 'info' } }));
+}
+
+export function addText(x?: number, y?: number): void {
   const t: TextElem = {
     id: nextTextId++,
-    x: 0.5, y: 0.5,
+    x: x ?? 0.5, y: y ?? 0.5,
     content: 'text',
     fontSize: 0.05,
     fontFamily: 'Inter, sans-serif',
@@ -273,10 +305,18 @@ export function initTextControls(): void {
   });
   $('tbDel').onclick = () => { if (selectedText !== null) deleteText(selectedText); };
 
-  // Deselect on canvas click
+  // Canvas click — place text or deselect
   ($('canvas-wrap') as HTMLElement).addEventListener('mousedown', e => {
     const target = e.target as Element;
-    if (target === $('canvas-wrap') || target === $('text-overlay') || target === document.getElementById('c')) {
+    const isCanvasBg = target === $('canvas-wrap') || target === $('text-overlay') || target === document.getElementById('c');
+    if (!isCanvasBg) return;
+
+    if (textToolActive) {
+      const wr = ($('canvas-wrap') as HTMLElement).getBoundingClientRect();
+      const nx = (e.clientX - wr.left) / wr.width;
+      const ny = (e.clientY - wr.top) / wr.height;
+      addText(Math.max(0, Math.min(1, nx)), Math.max(0, Math.min(1, ny)));
+    } else {
       selectText(null); renderTextOverlay();
     }
   });

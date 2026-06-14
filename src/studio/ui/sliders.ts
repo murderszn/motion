@@ -18,9 +18,10 @@ export function initSliders(): void {
   SLIDERS.forEach(s => {
     const wrap = document.createElement('div');
     wrap.className = 'ctl';
+    const val = P[s.id] !== undefined ? P[s.id] : s.def;
     wrap.innerHTML =
-      `<div class="ctl-head"><span>${s.label}</span><span class="val" id="${s.id}Val">${s.def.toFixed(2)}</span></div>` +
-      `<input type="range" id="${s.id}Rng" min="0" max="1" step="0.01" value="${s.def}">`;
+      `<div class="ctl-head"><span>${s.label}</span><span class="val" id="${s.id}Val">${val.toFixed(2)}</span></div>` +
+      `<input type="range" id="${s.id}Rng" min="0" max="1" step="0.01" value="${val}">`;
     slidersEl.appendChild(wrap);
     const rng = wrap.querySelector('input') as HTMLInputElement;
     rng.addEventListener('input', () => {

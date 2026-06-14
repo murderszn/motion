@@ -50,30 +50,42 @@ export function logToTerminal(msg: string, cls?: string): void {
   term.write('\r\n\x1b[' + c + 'm▸ ' + msg + '\x1b[0m');
 }
 
-export function initTerminal(themeKey: string): void {
+export function initTerminal(themeKey: string, termRef: XTerm | null = null): void {
   try {
     if (typeof window.Terminal === 'undefined') {
-      if (termRetries++ < 20) { setTimeout(() => initTerminal(themeKey), 250); return; }
-      console.error('[term] Terminal not available after 20 retries'); return;
+      if (termRetries++ < 20) {
+        setTimeout(() => initTerminal(themeKey), 250);
+        return;
+      }
+      console.error('[term] Terminal not available after 20 retries');
+      return;
     }
     if (typeof window.FitAddon === 'undefined' || !window.FitAddon.FitAddon) {
-      if (termRetries++ < 20) { setTimeout(() => initTerminal(themeKey), 250); return; }
-      console.error('[term] FitAddon not available after 20 retries'); return;
+      if (termRetries++ < 20) {
+        setTimeout(() => initTerminal(themeKey), 250);
+        return;
+      }
+      console.error('[term] FitAddon not available after 20 retries');
+      return;
     }
-    term = new window.Terminal({
-      cursorBlink: true, cursorStyle: 'bar', fontSize: 12,
-      fontFamily: "'JetBrains Mono', monospace",
-      theme: {
-        background: '#060608', foreground: '#b8b8c0', cursor: '#e03a3a',
-        selectionBackground: '#e03a3a44', black: '#1c1c22', red: '#e03a3a',
-        green: '#a3be8c', yellow: '#d08770', blue: '#5e81ac', magenta: '#b48ead',
-        cyan: '#88c0d0', white: '#f4f4f6',
-      },
-    });
-    const fitAddon = new window.FitAddon.FitAddon();
-    termFitAddon = fitAddon;
-    term.loadAddon(fitAddon);
-    term.open($('term-xterm'));
+    if (termRef !== null) {
+      term = termRef;
+    } else {
+      term = new window.Terminal({
+        cursorBlink: true, cursorStyle: 'bar', fontSize: 12,
+        fontFamily: "'JetBrains Mono', monospace",
+        theme: {
+          background: '#060608', foreground: '#b8b8c0', cursor: '#e03a3a',
+          selectionBackground: '#e03a3a44', black: '#1c1c22', red: '#e03a3a',
+          green: '#a3be8c', yellow: '#d08770', blue: '#5e81ac', magenta: '#b48ead',
+          cyan: '#88c0d0', white: '#f4f4f6',
+        },
+      });
+      const fitAddon = new window.FitAddon.FitAddon();
+      termFitAddon = fitAddon;
+      term.loadAddon(fitAddon);
+      term.open($('term-xterm'));
+    }
 
     if (window.currentThemeKey) {
       const vars = THEMES[window.currentThemeKey]?.variables;
@@ -130,15 +142,17 @@ export function initTerminal(themeKey: string): void {
 
 function applyTermTheme(themeVars: Record<string,string>): void {
   if (!term) return;
+  const isLightTerm = themeVars['--term-bg'] === '#f4f4f6';
   term.options.theme = {
     background: themeVars['--term-bg'],
-    foreground: themeVars['--text'],
+    foreground: themeVars['--term-text'] || themeVars['--text'],
     cursor: themeVars['--accent'],
     selectionBackground: (themeVars['--accent'] ?? '') + '44',
-    black: themeVars['--line'],
-    red: themeVars['--accent'],
+    black: isLightTerm ? '#f4f4f6' : '#1c1c22',
+    red: themeVars['--term-accent'] || themeVars['--accent'],
     green: '#a3be8c', yellow: '#d08770', blue: '#5e81ac', magenta: '#b48ead',
-    cyan: themeVars['--term-text'], white: themeVars['--white'],
+    cyan: themeVars['--term-text'] || themeVars['--text'],
+    white: isLightTerm ? '#1c1c1e' : '#ffffff',
   };
 }
 

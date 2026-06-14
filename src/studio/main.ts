@@ -11,7 +11,7 @@ import { initSeed, setSeed } from './ui/seed';
 import { initPalette, setPalette } from './ui/palette';
 import { initSliders, setSlider } from './ui/sliders';
 import { initSizes, applySizeUI } from './ui/sizes';
-import { initTextControls, renderTextOverlay, texts, addText } from './ui/text';
+import { initTextControls, renderTextOverlay, texts } from './ui/text';
 import { initExport, exportPNG } from './ui/export';
 import { initTerminal, initResizeDragHandle, logToTerminal } from './ui/terminal';
 import { initSidebar } from './ui/sidebar';
@@ -19,6 +19,8 @@ import { initStatusBar, setStatusMode, setStatusSeed } from './ui/statusbar';
 import { initShaderEditor } from './ui/shader_editor';
 import { initKeyboard } from './ui/keyboard';
 import { initCommandPalette } from './ui/command_palette';
+import { parseUrlParams, copyStateToClipboard, pasteStateFromClipboard, copyShareLink } from './ui/url_api';
+import { exportHtmlEmbed } from './ui/export_embed';
 
 const $ = (id: string): HTMLElement => document.getElementById(id)!;
 
@@ -97,8 +99,14 @@ function loadProject(file: File): void {
 // ── Bootstrap ────────────────────────────────────────────
 
 (function init(): void {
+  let lastImgUrl: string | null = null;
+  let lastViewerUrl: string | null = null;
+
   // WebGL
   initWebGL($('c') as HTMLCanvasElement);
+
+  // Parse URL parameters to set up initial state
+  parseUrlParams();
 
   // UI modules
   initPresets(name => setStatusMode(name));
@@ -108,6 +116,10 @@ function loadProject(file: File): void {
   initSizes(() => renderTextOverlay());
   initTextControls();
   initStatusBar();
+
+  // Sync initial status labels
+  setStatusMode(PRESETS[P.mode].full);
+  setStatusSeed(String(P.seed).padStart(4, '0'));
   initSidebar();
   initShaderEditor();
   initResizeDragHandle();
@@ -138,7 +150,9 @@ function loadProject(file: File): void {
       $('imgStatus').textContent = img.naturalWidth + '×' + img.naturalHeight;
       logToTerminal('image loaded: ' + img.naturalWidth + '×' + img.naturalHeight, 'ok');
     };
-    img.src = URL.createObjectURL(file);
+    if (lastImgUrl) URL.revokeObjectURL(lastImgUrl);
+    lastImgUrl = URL.createObjectURL(file);
+    img.src = lastImgUrl;
   };
   ($('imgRemove') as HTMLButtonElement).onclick = () => {
     clearTexture();
@@ -147,6 +161,10 @@ function loadProject(file: File): void {
     $('imgStatus').textContent = '';
     ($('mixRng') as HTMLInputElement).value = '0'; P.mix = 0; $('mixVal').textContent = '0%';
     ($('pixelRng') as HTMLInputElement).value = '0'; P.pixel = 0; $('pixelVal').textContent = '0%';
+    if (lastImgUrl) {
+      URL.revokeObjectURL(lastImgUrl);
+      lastImgUrl = null;
+    }
     logToTerminal('image removed', 'info');
   };
   ($('mixRng') as HTMLInputElement).addEventListener('input', function() {
@@ -173,7 +191,9 @@ function loadProject(file: File): void {
       $('imgStatus').textContent = img.naturalWidth + '×' + img.naturalHeight;
       logToTerminal('image dropped: ' + img.naturalWidth + '×' + img.naturalHeight, 'ok');
     };
-    img.src = URL.createObjectURL(file);
+    if (lastImgUrl) URL.revokeObjectURL(lastImgUrl);
+    lastImgUrl = URL.createObjectURL(file);
+    img.src = lastImgUrl;
   });
 
   // Loop duration
@@ -191,9 +211,89 @@ function loadProject(file: File): void {
   };
   window.addEventListener('lumen:saveProject', saveProject);
 
+  // JSON State and Shareable Link actions
+  ($('btnCopyState') as HTMLButtonElement).onclick = copyStateToClipboard;
+  ($('btnPasteState') as HTMLButtonElement).onclick = pasteStateFromClipboard;
+  ($('btnCopyLink') as HTMLButtonElement).onclick = copyShareLink;
+
+  // HTML Splash Page Embed Export
+  ($('expEmbed') as HTMLButtonElement).onclick = exportHtmlEmbed;
+
   // Keyboard + Command Palette
   initKeyboard(randomize);
   initCommandPalette(randomize);
+
+  // Viewer
+  try {
+    const viewerFile = $('viewerFile') as HTMLInputElement | null;
+    const viewerStage = $('viewerStage') as HTMLElement | null;
+    const viewerVid = $('viewerVid') as HTMLVideoElement | null;
+    const viewerImg = $('viewerImg') as HTMLImageElement | null;
+    const viewerSection = $('viewerSection') as HTMLElement | null;
+    const viewerOpen = $('viewerOpen') as HTMLButtonElement | null;
+    const viewerPlay = $('viewerPlay') as HTMLButtonElement | null;
+    const viewerPause = $('viewerPause') as HTMLButtonElement | null;
+    const viewerLoop = $('viewerLoop') as HTMLButtonElement | null;
+    const viewerInvert = $('viewerInvert') as HTMLButtonElement | null;
+    const viewerSpeed = $('viewerSpeed') as HTMLInputElement | null;
+    const viewerSpeedVal = $('viewerSpeedVal') as HTMLElement | null;
+
+    viewerOpen?.addEventListener('click', () => viewerFile?.click());
+    viewerFile?.addEventListener('change', () => {
+      const file = viewerFile.files?.[0];
+      if (!file || !viewerStage || !viewerSection) return;
+      viewerSection.style.display = '';
+      if (lastViewerUrl) {
+        URL.revokeObjectURL(lastViewerUrl);
+      }
+      lastViewerUrl = URL.createObjectURL(file);
+      if (file.type.startsWith('video/')) {
+        if (viewerImg) viewerImg.style.display = 'none';
+        if (viewerVid) {
+          viewerVid.src = lastViewerUrl;
+          viewerVid.style.display = 'block';
+          viewerVid.play().catch(() => {});
+        }
+      } else {
+        if (viewerVid) {
+          viewerVid.pause();
+          viewerVid.style.display = 'none';
+        }
+        if (viewerImg) {
+          viewerImg.src = lastViewerUrl;
+          viewerImg.style.display = 'block';
+        }
+      }
+    });
+    viewerPlay?.addEventListener('click', () => {
+      if (viewerVid && viewerVid.style.display !== 'none') {
+        viewerVid.play().catch(() => {});
+      }
+    });
+    viewerPause?.addEventListener('click', () => {
+      if (viewerVid && viewerVid.style.display !== 'none') {
+        viewerVid.pause();
+      }
+    });
+    viewerLoop?.addEventListener('click', () => {
+      if (!viewerVid) return;
+      viewerVid.loop = !viewerVid.loop;
+      viewerLoop.textContent = viewerVid.loop ? 'loop on' : 'loop off';
+    });
+    let viewerInverted = false;
+    viewerInvert?.addEventListener('click', () => {
+      viewerInverted = !viewerInverted;
+      if (viewerVid) viewerVid.style.filter = viewerInverted ? 'invert(1)' : '';
+      if (viewerImg) viewerImg.style.filter = viewerInverted ? 'invert(1)' : '';
+      viewerInvert.textContent = viewerInverted ? 'invert on' : 'invert off';
+    });
+    viewerSpeed?.addEventListener('input', () => {
+      const v = parseFloat(viewerSpeed?.value ?? '1');
+      if (viewerVid) viewerVid.playbackRate = v;
+      if (viewerSpeedVal) viewerSpeedVal.textContent = v.toFixed(2) + 'x';
+    });
+  } catch {}
+
 
   // Start RAF
   startRenderLoop();

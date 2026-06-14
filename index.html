@@ -3,23 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>lumen·local — generative shader studio</title>
+    <title>/motion local — generative shader studio</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
+        :root {
+            --bg: #06040a;
+            --text-color: #ffffff;
+            --accent: #d43636;
+            --text-dim: rgba(255,255,255,0.5);
+            --text-muted: rgba(255,255,255,0.95);
+            --text-sub: rgba(255,255,255,0.9);
+            --border: rgba(255,255,255,0.22);
+            --border-hover: rgba(255,255,255,0.18);
+            --btn-bg: rgba(255,255,255,0.015);
+            --btn-ghost-hover: rgba(255,255,255,0.04);
+            --panel-bg: rgba(6,4,10,0.55);
+            --vignette-radial: radial-gradient(ellipse at center, transparent 30%, rgba(6,4,10,0.85) 100%);
+            --vignette-linear: linear-gradient(to bottom, rgba(6,4,10,0.4) 0%, transparent 30%, transparent 70%, rgba(6,4,10,0.7) 100%);
+            --indicator-chevron: rgba(255,255,255,0.4);
+            --indicator-text: rgba(255,255,255,0.45);
+            --story-border: rgba(255,255,255,0.06);
+            --story-meta: rgba(255,255,255,0.35);
+            --roster-color: rgba(255,255,255,0.4);
+            --cta-bg: rgba(224,58,58,0.12);
+            --mix-blend: difference;
+        }
+
+        :root[data-theme="motion-dim"] {
+            --bg: #0f0f14;
+            --text-color: #c0c0cb;
+            --accent: #e54b4b;
+            --text-dim: rgba(192,192,203,0.5);
+            --text-muted: rgba(192,192,203,0.95);
+            --text-sub: rgba(192,192,203,0.9);
+            --border: rgba(192,192,203,0.22);
+            --border-hover: rgba(192,192,203,0.18);
+            --btn-bg: rgba(192,192,203,0.015);
+            --btn-ghost-hover: rgba(192,192,203,0.04);
+            --panel-bg: rgba(15,15,20,0.55);
+            --vignette-radial: radial-gradient(ellipse at center, transparent 30%, rgba(15,15,20,0.85) 100%);
+            --vignette-linear: linear-gradient(to bottom, rgba(15,15,20,0.4) 0%, transparent 30%, transparent 70%, rgba(15,15,20,0.7) 100%);
+            --indicator-chevron: rgba(192,192,203,0.4);
+            --indicator-text: rgba(192,192,203,0.45);
+            --story-border: rgba(192,192,203,0.06);
+            --story-meta: rgba(192,192,203,0.35);
+            --roster-color: rgba(192,192,203,0.4);
+            --cta-bg: rgba(229,75,75,0.12);
+            --mix-blend: difference;
+        }
+
+        :root[data-theme="motion-contrast"] {
+            --bg: #000000;
+            --text-color: #ffffff;
+            --accent: #ff3b30;
+            --text-dim: rgba(255,255,255,0.65);
+            --text-muted: rgba(255,255,255,0.95);
+            --text-sub: rgba(255,255,255,0.9);
+            --border: rgba(255,255,255,0.35);
+            --border-hover: rgba(255,255,255,0.5);
+            --btn-bg: rgba(255,255,255,0.02);
+            --btn-ghost-hover: rgba(255,255,255,0.1);
+            --panel-bg: rgba(8,8,8,0.75);
+            --vignette-radial: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.85) 100%);
+            --vignette-linear: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.7) 100%);
+            --indicator-chevron: rgba(255,255,255,0.6);
+            --indicator-text: rgba(255,255,255,0.65);
+            --story-border: rgba(255,255,255,0.2);
+            --story-meta: rgba(255,255,255,0.5);
+            --roster-color: rgba(255,255,255,0.6);
+            --cta-bg: rgba(255,59,48,0.15);
+            --mix-blend: difference;
+        }
+
+        :root[data-theme="motion-light"] {
+            --bg: #f4f4f6;
+            --text-color: #1c1c1e;
+            --accent: #d32f2f;
+            --text-dim: rgba(28,28,30,0.5);
+            --text-muted: rgba(28,28,30,0.95);
+            --text-sub: rgba(28,28,30,0.9);
+            --border: rgba(28,28,30,0.22);
+            --border-hover: rgba(28,28,30,0.18);
+            --btn-bg: rgba(28,28,30,0.015);
+            --btn-ghost-hover: rgba(28,28,30,0.04);
+            --panel-bg: rgba(244,244,246,0.55);
+            --vignette-radial: radial-gradient(ellipse at center, transparent 30%, rgba(244,244,246,0.85) 100%);
+            --vignette-linear: linear-gradient(to bottom, rgba(244,244,246,0.4) 0%, transparent 30%, transparent 70%, rgba(244,244,246,0.7) 100%);
+            --indicator-chevron: rgba(28,28,30,0.4);
+            --indicator-text: rgba(28,28,30,0.45);
+            --story-border: rgba(28,28,30,0.06);
+            --story-meta: rgba(28,28,30,0.35);
+            --roster-color: rgba(28,28,30,0.4);
+            --cta-bg: rgba(211,47,47,0.12);
+            --mix-blend: normal;
+        }
+
         html {
             scroll-behavior: smooth;
-            background: #06040a;
+            background: var(--bg);
+            transition: background 0.4s, color 0.4s;
         }
         body {
             width:100%;
-            background: #06040a;
+            background: var(--bg);
             font-family: 'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;
-            color: #fff;
+            color: var(--text-color);
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
+            transition: background 0.4s, color 0.4s;
         }
 
         /* ============================================================
@@ -45,9 +139,27 @@
             z-index: 1;
             pointer-events: none;
             background:
-                radial-gradient(ellipse at center, transparent 30%, rgba(6,4,10,0.85) 100%),
-                linear-gradient(to bottom, rgba(6,4,10,0.4) 0%, transparent 30%, transparent 70%, rgba(6,4,10,0.7) 100%);
+                var(--vignette-radial),
+                var(--vignette-linear);
+            transition: background 0.4s;
         }
+
+        /* Adaptive scrim — keeps the page text readable over any of the 3 bgs.
+           Tinted with the active theme's base colour; opacity adapts to which
+           background loaded (heavier over the light aurora, lighter over the
+           already-dark wave/video). */
+        #scrim {
+            position: fixed;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+            background: var(--bg);
+            opacity: 0.4;
+            transition: opacity 0.6s ease, background 0.4s;
+        }
+        body[data-bg="aurora"] #scrim { opacity: 0.72; }
+        body[data-bg="wave"]   #scrim { opacity: 0.32; }
+        body[data-bg="video"]  #scrim { opacity: 0.40; }
 
         /* ============================================================
            NAV — fixed wordmark + meta
@@ -61,26 +173,36 @@
             padding: 0 1.8rem;
             z-index: 20;
             pointer-events: none;
-            mix-blend-mode: difference;
+            mix-blend-mode: var(--mix-blend);
         }
         .mark {
-            font-weight: 500;
-            font-size: 0.72rem;
-            letter-spacing: 0.42em;
-            text-indent: 0.42em;
-            text-transform: uppercase;
-            color: #fff;
+            font-weight: 800;
+            font-size: 1.05rem;
+            letter-spacing: -0.02em;
+            text-transform: lowercase;
+            color: var(--text-color);
             user-select: none;
+            transition: color 0.4s;
         }
-        .mark span { color: #d43636; }
-        .nav-meta {
+        .mark span { color: var(--accent); transition: color 0.4s; }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 1.8rem;
+            pointer-events: auto;
+        }
+        .nav-link {
             font-family: 'JetBrains Mono', monospace;
             font-weight: 300;
-            font-size: 0.58rem;
-            letter-spacing: 0.2em;
+            font-size: 0.55rem;
+            letter-spacing: 0.18em;
             text-transform: lowercase;
-            color: rgba(255,255,255,0.9);
-            user-select: none;
+            color: var(--text-dim);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover {
+            color: var(--accent);
         }
 
         /* ============================================================
@@ -91,6 +213,7 @@
             z-index: 5;
             min-height: 100vh;
             display: flex;
+            flex-direction: column;   /* keep the divider ::before stacked above content, not beside it */
             align-items: center;
             justify-content: center;
             padding: 5rem 2rem;
@@ -115,16 +238,16 @@
         }
 
         #hero h1 {
-            font-weight: 100;
-            /* sized so the spaced wordmark always fits the viewport without clipping */
-            font-size: clamp(2rem,6vw,5.5rem);
-            letter-spacing: 0.32em;
-            text-transform: uppercase;
-            line-height: 1.05;
+            /* matches the splash /motion wordmark: bold Inter, tight tracking */
+            font-weight: 700;
+            font-size: clamp(3.5rem,10vw,5.8rem);
+            letter-spacing: -0.04em;
+            text-transform: lowercase;
+            line-height: 1.1;
             max-width: 100%;
             user-select: none;
         }
-        #hero h1 span { color: #d43636; }
+        #hero h1 span { color: var(--accent); transition: color 0.4s; }
 
         #hero .sub {
             margin-top: 1.4rem;
@@ -135,9 +258,10 @@
             /* match indent to letter-spacing to keep the line centered */
             text-indent: 0.7em;
             text-transform: lowercase;
-            color: rgba(255,255,255,0.95);
+            color: var(--text-muted);
             user-select: none;
             text-align: center;
+            transition: color 0.4s;
         }
 
         #hero .desc {
@@ -147,8 +271,8 @@
             font-size: clamp(0.75rem,1.3vw,0.92rem);
             line-height: 1.8;
             letter-spacing: 0.02em;
-            color: rgba(255,255,255,0.95);
-            user-select: none;
+            color: var(--text-muted);
+            transition: color 0.4s;
         }
 
         .actions {
@@ -164,31 +288,31 @@
             font-size: 0.6rem;
             letter-spacing: 0.34em;
             text-transform: uppercase;
-            color: rgba(255,255,255,0.85);
+            color: var(--text-muted);
             text-decoration: none;
             padding: 0.95rem 1.9rem;
-            border: 1px solid rgba(255,255,255,0.22);
+            border: 1px solid var(--border);
             border-radius: 2px;
-            background: rgba(255,255,255,0.015);
+            background: var(--btn-bg);
             backdrop-filter: blur(4px);
             -webkit-backdrop-filter: blur(4px);
             transition: border-color 0.4s, background 0.4s, color 0.4s, letter-spacing 0.4s;
             cursor: pointer;
         }
         .btn:hover {
-            border-color: rgba(224,58,58,0.85);
-            background: rgba(224,58,58,0.78);
+            border-color: var(--accent);
+            background: var(--accent);
             color: #fff;
             letter-spacing: 0.4em;
         }
         .btn.ghost {
             border-color: transparent;
-            color: rgba(255,255,255,0.42);
+            color: var(--text-dim);
         }
         .btn.ghost:hover {
-            background: rgba(255,255,255,0.04);
-            color: rgba(255,255,255,0.85);
-            border-color: rgba(255,255,255,0.18);
+            background: var(--btn-ghost-hover);
+            color: var(--text-muted);
+            border-color: var(--border-hover);
         }
 
         .hint {
@@ -199,8 +323,9 @@
             letter-spacing: 0.3em;
             text-indent: 0.3em;
             text-transform: lowercase;
-            color: rgba(255,255,255,0.5);
+            color: var(--text-dim);
             user-select: none;
+            transition: color 0.4s;
         }
 
         /* ---- Scrolldown indicator ---- */
@@ -222,14 +347,16 @@
             font-size: 0.48rem;
             letter-spacing: 0.2em;
             text-transform: uppercase;
-            color: rgba(255,255,255,0.45);
+            color: var(--indicator-text);
+            transition: color 0.4s;
         }
         .scroll-indicator .chevron {
             width: 1.2rem;
             height: 1.2rem;
-            border-right: 1px solid rgba(255,255,255,0.4);
-            border-bottom: 1px solid rgba(255,255,255,0.4);
+            border-right: 1px solid var(--indicator-chevron);
+            border-bottom: 1px solid var(--indicator-chevron);
             transform: rotate(45deg);
+            transition: border-color 0.4s;
         }
         @keyframes bob {
             0%, 100% { transform: translateX(-50%) translateY(0); }
@@ -238,16 +365,26 @@
 
         /* ---- STORY SECTIONS ---- */
         .story {
-            min-height: 80vh;
+            min-height: 60vh;
             padding: 6rem 2rem;
+            text-align: center;
         }
         .story .section-inner {
-            padding: 3rem 2rem;
-            background: rgba(6,4,10,0.55);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 4px;
+            padding: 2rem;
+            max-width: 56rem;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        /* ---- Section transitions ---- */
+        .story + .story::before {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 1px;
+            background: var(--accent);
+            margin: 0 auto 4rem;
+            opacity: 0.5;
         }
 
         .story h2 {
@@ -256,8 +393,9 @@
             letter-spacing: 0.04em;
             line-height: 1.4;
             user-select: none;
+            text-align: center;
         }
-        .story h2 .accent { color: #d43636; }
+        .story h2 .accent { color: var(--accent); transition: color 0.4s; }
 
         .story p {
             margin-top: 1.6rem;
@@ -265,10 +403,12 @@
             font-size: clamp(0.85rem,1.3vw,1.05rem);
             line-height: 1.9;
             letter-spacing: 0.01em;
-            color: rgba(255,255,255,0.9);
+            color: var(--text-sub);
             max-width: 34rem;
             margin-left: auto;
             margin-right: auto;
+            transition: color 0.4s;
+            text-align: center;
         }
 
         .story .meta-pull {
@@ -277,7 +417,9 @@
             font-size: 0.6rem;
             letter-spacing: 0.18em;
             text-transform: uppercase;
-            color: rgba(255,255,255,0.35);
+            color: var(--story-meta);
+            transition: color 0.4s;
+            text-align: center;
         }
 
         /* ---- ANIMATED ROSTER (inside story) ---- */
@@ -294,11 +436,11 @@
             font-size: 0.6rem;
             letter-spacing: 0.26em;
             text-transform: lowercase;
-            color: rgba(255,255,255,0.4);
+            color: var(--roster-color);
             transition: color 0.5s;
         }
         .roster-grid span.live {
-            color: #d43636;
+            color: var(--accent);
         }
 
         /* ---- CTA section ---- */
@@ -309,20 +451,21 @@
             font-size: clamp(0.7rem,1.2vw,0.85rem);
             letter-spacing: 0.5em;
             text-transform: uppercase;
-            color: #fff;
+            color: var(--text-color);
             text-decoration: none;
             padding: 1.2rem 3rem;
-            border: 1px solid rgba(255,255,255,0.25);
+            border: 1px solid var(--border);
             border-radius: 3px;
-            background: rgba(224,58,58,0.12);
+            background: var(--cta-bg);
             backdrop-filter: blur(6px);
             -webkit-backdrop-filter: blur(6px);
-            transition: background 0.5s, border-color 0.5s, letter-spacing 0.5s;
+            transition: background 0.5s, border-color 0.5s, letter-spacing 0.5s, color 0.5s;
             cursor: pointer;
         }
         #cta .btn-enter:hover {
-            background: rgba(224,58,58,0.7);
-            border-color: rgba(224,58,58,0.9);
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
             letter-spacing: 0.6em;
         }
 
@@ -348,6 +491,8 @@
         .reveal.d2 { transition-delay: 0.3s; }
         .reveal.d3 { transition-delay: 0.5s; }
         .reveal.d4 { transition-delay: 0.7s; }
+        .reveal.d5 { transition-delay: 0.9s; }
+        .reveal.d6 { transition-delay: 1.1s; }
 
         /* ============================================================
            CORNER LABELS
@@ -359,10 +504,11 @@
             font-size: 0.56rem;
             letter-spacing: 0.18em;
             text-transform: lowercase;
-            color: rgba(255,255,255,0.5);
+            color: var(--text-dim);
             z-index: 20;
             pointer-events: none;
-            mix-blend-mode: difference;
+            mix-blend-mode: var(--mix-blend);
+            transition: color 0.4s;
         }
         .bl { bottom: 1.6rem; left: 1.8rem; }
         .br { bottom: 1.6rem; right: 1.8rem; }
@@ -377,6 +523,175 @@
                 padding: 2rem 1.2rem;
             }
         }
+        /* ============================================================
+           PLAYGROUND
+           ============================================================ */
+        .playground-wrap {
+            position: relative;
+            max-width: 56rem;
+            margin: 0 auto;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 0 0 1px var(--border), 0 20px 60px rgba(0,0,0,0.4);
+        }
+        #playground-canvas {
+            display: block;
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+        }
+        .playground-overlay {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            padding: 1rem 1.2rem;
+            background: linear-gradient(transparent, rgba(0,0,0,0.6));
+            pointer-events: none;
+        }
+        .playground-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.48rem;
+            letter-spacing: 0.2em;
+            text-transform: lowercase;
+            color: rgba(255,255,255,0.5);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .playground-dot {
+            width: 5px; height: 5px;
+            border-radius: 50%;
+            background: var(--accent);
+            animation: blink 2s ease-in-out infinite;
+        }
+
+        /* ============================================================
+           TERMINAL BLOCK (install command)
+           ============================================================ */
+        .terminal-block {
+            margin-top: 2.8rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-align: left;
+            pointer-events: auto;
+            width: 100%;
+            max-width: 580px;
+            margin-left: auto;
+            margin-right: auto;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 14px 22px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .terminal-block:hover {
+            background: rgba(255,255,255,0.04);
+            border-color: var(--border-hover);
+        }
+        .terminal-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            white-space: nowrap;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .terminal-content::-webkit-scrollbar {
+            display: none;
+        }
+        .terminal-block .prompt {
+            color: var(--accent);
+            user-select: none;
+            flex-shrink: 0;
+        }
+        .terminal-block .cmd {
+            color: var(--text-muted);
+        }
+        .copy-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-dim);
+            transition: color 0.2s ease;
+            flex-shrink: 0;
+        }
+        .terminal-block:hover .copy-btn {
+            color: var(--text-muted);
+        }
+        .copy-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* ============================================================
+           FEATURE GRID
+           ============================================================ */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 2rem;
+            max-width: 56rem;
+            margin: 2rem auto 0;
+            text-align: center;
+        }
+        .feature-card {
+            text-align: center;
+        }
+        .feature-card h3 {
+            font-weight: 400;
+            font-size: 0.8rem;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            transition: color 0.4s;
+        }
+        .feature-card p {
+            font-weight: 200;
+            font-size: 0.72rem;
+            line-height: 1.7;
+            color: var(--text-dim);
+            transition: color 0.4s;
+        }
+
+        /* ============================================================
+           STACK GRID
+           ============================================================ */
+        .stack-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem 1.2rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+        .stack-item {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            display: flex;
+            gap: 0.5rem;
+            align-items: baseline;
+            transition: color 0.4s;
+        }
+        .stack-label {
+            font-size: 0.48rem;
+            letter-spacing: 0.15em;
+            text-transform: lowercase;
+            color: var(--text-dim);
+            transition: color 0.4s;
+        }
+
         @media (prefers-reduced-motion: reduce) {
             .reveal { opacity: 1; transform: none; filter: none; transition: none; }
             #bg-video, #bg-canvas { transition: none; }
@@ -390,11 +705,17 @@
     <video id="bg-video" loop muted playsinline poster="poster.jpg" preload="none"></video>
     <canvas id="bg-canvas"></canvas>
     <div id="vignette"></div>
+    <div id="scrim"></div>
 
     <!-- ============ NAV ============ -->
     <nav class="nav">
-        <span class="mark">Lumen<span>·</span>Local</span>
-        <span class="nav-meta">webgl · 60fps · seamless loops</span>
+        <span class="mark"><span>/</span>motion local</span>
+        <div class="nav-links">
+            <a href="#playground" class="nav-link">playground</a>
+            <a href="#how" class="nav-link">how it works</a>
+            <a href="#quickstart" class="nav-link">install</a>
+            <a href="studio.html" class="nav-link">docs</a>
+        </div>
     </nav>
 
     <span class="corner bl" id="timer">0:00</span>
@@ -403,14 +724,14 @@
     <!-- ============ HERO ============ -->
     <section id="hero">
         <div class="section-inner">
-            <h1>Lumen<span>·</span>Local</h1>
+            <h1><span>/</span>motion</h1>
             <p class="sub">generative shader studio</p>
             <p class="desc">Procedural motion graphics in your browser —<br>
-                14 shaders, seeded and reproducible, exported as image, video, or gif.<br>
+                15 shaders, seeded and reproducible, exported as image, video, gif, or a standalone HTML page.<br>
                 No cloud. No account. No install.</p>
             <div class="actions">
                 <a class="btn" href="studio.html">Enter Studio</a>
-                <a class="btn ghost" href="README.md">Read Docs</a>
+                <a class="btn ghost" href="https://github.com/murderszn/motion" target="_blank">View Source</a>
             </div>
             <span class="hint">press enter to open the studio</span>
         </div>
@@ -420,32 +741,110 @@
         </div>
     </section>
 
-    <!-- ============ STORY: Seed ============ -->
-    <section class="story" id="seed">
-        <div class="section-inner reveal">
-            <p class="meta-pull reveal d1">— 001 —</p>
-            <h2 class="reveal d2">Every frame<br>begins with&nbsp;a&nbsp;<span class="accent">seed</span>.</h2>
-            <p class="reveal d3">
-                A single number determines everything — the curl of a wave,
-                the scatter of grain, the drift of light across a field of noise.
-                Type in a seed and the same frame appears every time.
-                Deterministic. Reproducible. Yours to archive and revisit.
+    <!-- ============ PLAYGROUND ============ -->
+    <section class="story" id="playground" style="min-height:100vh;padding:4rem 2rem;">
+        <div class="section-inner" style="max-width:64rem;">
+            <p class="meta-pull reveal">playground</p>
+            <h2 class="reveal d1" style="font-weight:100;font-size:clamp(1.8rem,4vw,3.5rem);letter-spacing:0.02em;line-height:1.2;text-align:center;margin-bottom:0.5rem;">
+                See it <span class="accent">move</span>.
+            </h2>
+            <p class="reveal d2" style="font-weight:200;font-size:0.8rem;color:var(--text-dim);text-align:center;margin-bottom:2rem;">
+                This is a live WebGL shader — the same engine running the studio.
             </p>
+            <div class="playground-wrap reveal d3">
+                <canvas id="playground-canvas"></canvas>
+                <div class="playground-overlay">
+                    <div class="playground-label">
+                        <span class="playground-dot"></span>
+                        live · 60fps · webgl
+                    </div>
+                </div>
+            </div>
+            <div class="reveal d4" style="text-align:center;margin-top:2rem;">
+                <a class="btn" href="studio.html" style="display:inline-block;">open full studio →</a>
+            </div>
         </div>
     </section>
 
-    <!-- ============ STORY: Presets ============ -->
+    <!-- ============ DRAMATIC STATEMENT ============ -->
+    <section class="story" id="statement">
+        <div class="section-inner reveal">
+            <h2 class="reveal" style="font-weight:100;font-size:clamp(2rem,5vw,4.5rem);letter-spacing:0.02em;line-height:1.2;text-align:center;max-width:40rem;margin:0 auto;">
+                Every pixel is <span class="accent">yours</span>.<br>
+                Every loop is <span class="accent">seamless</span>.
+            </h2>
+        </div>
+    </section>
+
+    <!-- ============ QUICK START ============ -->
+    <section class="story" id="quickstart">
+        <div class="section-inner reveal">
+            <p class="meta-pull reveal d1">get started</p>
+            <h2 class="reveal d2">Clone. Install. <span class="accent">Create.</span></h2>
+            <div class="terminal-block reveal d3" onclick="copyText('curl -fsSL https://raw.githubusercontent.com/murderszn/motion/main/install.sh | bash', this.querySelector('.copy-btn'))" title="Click to copy install command">
+                <div class="terminal-content">
+                    <span class="prompt">&gt;_</span>
+                    <span class="cmd">curl -fsSL https://raw.githubusercontent.com/murderszn/motion/main/install.sh | bash</span>
+                </div>
+                <div class="copy-btn">
+                    <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ WHAT YOU GET ============ -->
+    <section class="story" id="how">
+        <div class="section-inner">
+            <p class="meta-pull reveal">what you get</p>
+            <div style="max-width:48rem;margin:0 auto;">
+                <h2 class="reveal d1" style="font-weight:100;font-size:clamp(1.8rem,4vw,3.8rem);letter-spacing:0.02em;line-height:1.25;text-align:center;margin-bottom:0.8rem;">
+                    <span class="accent">15</span> shaders.
+                </h2>
+                <h2 class="reveal d2" style="font-weight:100;font-size:clamp(1.8rem,4vw,3.8rem);letter-spacing:0.02em;line-height:1.25;text-align:center;margin-bottom:0.8rem;">
+                    <span class="accent">60</span>fps real-time.
+                </h2>
+                <h2 class="reveal d3" style="font-weight:100;font-size:clamp(1.8rem,4vw,3.8rem);letter-spacing:0.02em;line-height:1.25;text-align:center;margin-bottom:2rem;">
+                    <span class="accent">0</span> dependencies in production.
+                </h2>
+            </div>
+            <div class="feature-grid">
+                <div class="feature-card reveal d4">
+                    <h3>Seeded & Deterministic</h3>
+                    <p>Same seed, same frame. Every time. Reproducible art you can archive and revisit.</p>
+                </div>
+                <div class="feature-card reveal d5">
+                    <h3>Multi-Format Export</h3>
+                    <p>PNG, WebM, GIF, or a self-contained HTML page with embedded shader. Deploy anywhere.</p>
+                </div>
+                <div class="feature-card reveal d6">
+                    <h3>Live Shader Editor</h3>
+                    <p>Edit GLSL in real-time. Compile, debug, iterate — no reload, no waiting.</p>
+                </div>
+                <div class="feature-card reveal d1">
+                    <h3>Text Overlays</h3>
+                    <p>Click-to-place text with 6 effects: shadow, neon, outline, badge, frosted glass. Drag to reposition.</p>
+                </div>
+                <div class="feature-card reveal d2">
+                    <h3>Shareable Links</h3>
+                    <p>Copy a URL with all settings encoded. Share your exact configuration with anyone.</p>
+                </div>
+                <div class="feature-card reveal d3">
+                    <h3>11 Curated Palettes</h3>
+                    <p>From crimson to cobalt. 4-stop gradients with a one-click randomizer for instant variety.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ PRESETS ============ -->
     <section class="story" id="presets">
         <div class="section-inner reveal">
-            <p class="meta-pull reveal d1">— 002 —</p>
-            <h2 class="reveal d2"><span class="accent">14</span> ways to&nbsp;shape&nbsp;time.</h2>
-            <p class="reveal d3">
-                From the crystalline harmonics of <em>reeded glass</em> to the
-                organic drift of <em>aurora</em>&thinsp;—&thinsp;each preset is a distinct
-                visual language. Mix them with image overlays, pixelate,
-                distort. The palette is yours.
-            </p>
-            <div class="roster-grid reveal d4" id="roster">
+            <p class="meta-pull reveal d1">visual languages</p>
+            <h2 class="reveal d2" style="font-weight:100;font-size:clamp(2rem,5vw,4.5rem);letter-spacing:0.02em;line-height:1.2;text-align:center;">
+                <span class="accent">15</span> ways to&nbsp;shape&nbsp;time.
+            </h2>
+            <div class="roster-grid reveal d3" id="roster">
                 <span>reeded</span>
                 <span>flow</span>
                 <span>orbs</span>
@@ -458,58 +857,184 @@
                 <span>kaleidoscope</span>
                 <span>rings</span>
                 <span>plasma</span>
-                <span>displace</span>
-                <span>melt</span>
+                <span>fractal sq</span>
+                <span>tri lattice</span>
+                <span>rosette</span>
             </div>
         </div>
     </section>
 
-    <!-- ============ STORY: Local ============ -->
-    <section class="story" id="local">
+    <!-- ============ STACK ============ -->
+    <section class="story" id="stack">
         <div class="section-inner reveal">
-            <p class="meta-pull reveal d1">— 003 —</p>
-            <h2 class="reveal d2">Everything runs <span class="accent">here</span>.<br>Nothing leaves.</h2>
-            <p class="reveal d3">
-                Every shader compiles on your GPU. Every frame renders in your
-                browser. No data touches a server, no account tracks your work,
-                and the studio works offline. This is creative software that
-                respects where it runs.
-            </p>
-        </div>
-    </section>
-
-    <!-- ============ STORY: Export ============ -->
-    <section class="story" id="export">
-        <div class="section-inner reveal">
-            <p class="meta-pull reveal d1">— 004 —</p>
-            <h2 class="reveal d2">Capture the <span class="accent">loop</span>.</h2>
-            <p class="reveal d3">
-                Export a single frame as PNG, a sequence as GIF, or a seamless
-                loop as WebM. The output matches what you see — no encoding
-                surprises, no quality loss. Designed for the pipeline from
-                sketch to production.
-            </p>
+            <h2 class="reveal" style="font-weight:100;font-size:clamp(1.6rem,3.5vw,3rem);letter-spacing:0.03em;line-height:1.3;text-align:center;margin-bottom:1.5rem;">
+                Built with <span class="accent">TypeScript</span>.<br>Runs on <span class="accent">WebGL</span>.
+            </h2>
+            <div class="stack-grid reveal d1">
+                <div class="stack-item"><span class="stack-label">lang</span> TypeScript</div>
+                <div class="stack-item"><span class="stack-label">build</span> Vite</div>
+                <div class="stack-item"><span class="stack-label">render</span> WebGL1</div>
+                <div class="stack-item"><span class="stack-label">shaders</span> GLSL ES 1.0</div>
+                <div class="stack-item"><span class="stack-label">modules</span> 21 typed files</div>
+                <div class="stack-item"><span class="stack-label">palettes</span> 11 curated</div>
+                <div class="stack-item"><span class="stack-label">themes</span> 13 UI themes</div>
+                <div class="stack-item"><span class="stack-label">license</span> Open Source</div>
+            </div>
         </div>
     </section>
 
     <!-- ============ CTA ============ -->
     <section id="cta">
         <div class="section-inner">
-            <h2 class="reveal" style="font-weight:200;font-size:clamp(1.6rem,4vw,3.4rem);letter-spacing:0.06em;line-height:1.3;">
-                Enter&nbsp;<span style="color:#d43636;">Lumen·Local</span>
+            <h2 class="reveal" style="font-weight:100;font-size:clamp(2.5rem,6vw,5rem);letter-spacing:0.04em;line-height:1.1;text-align:center;">
+                Start <span style="color:var(--accent);">creating</span>.
             </h2>
-            <p class="reveal d1" style="margin-top:1.2rem;font-weight:200;font-size:clamp(0.75rem,1.1vw,0.9rem);color:rgba(255,255,255,0.85);">
-                The studio is a single page. Open it and start designing.
-            </p>
-            <div style="margin-top:2.5rem;">
-                <a class="btn-enter reveal d2" href="studio.html">Open Studio</a>
+            <div style="margin-top:2.5rem;text-align:center;">
+                <a class="btn-enter reveal d1" href="studio.html">Open Studio</a>
             </div>
-            <p class="reveal d3" style="margin-top:2.5rem;font-family:'JetBrains Mono',monospace;font-size:0.5rem;letter-spacing:0.25em;color:rgba(255,255,255,0.3);">
-                lumen·local · v1 · 2026
-            </p>
+            <div class="reveal d2" style="margin-top:3rem;font-family:'JetBrains Mono',monospace;font-size:0.45rem;letter-spacing:0.25em;color:var(--text-dim);text-align:center;">
+                motion local — no cloud · no account · no install
+            </div>
         </div>
     </section>
 
     <script type="module" src="/src/index.ts"></script>
+
+    <script>
+    function copyText(text, btnEl) {
+        navigator.clipboard.writeText(text).then(() => {
+            if (btnEl) {
+                const oldHtml = btnEl.innerHTML;
+                btnEl.innerHTML = '<svg viewBox="0 0 24 24" style="stroke:#28c840;width:16px;height:16px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+                setTimeout(() => { btnEl.innerHTML = oldHtml; }, 2000);
+            }
+        });
+    }
+    </script>
+
+    <script>
+    // Playground shader — wave preset
+    (function() {
+        const canvas = document.getElementById('playground-canvas');
+        if (!canvas) return;
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        if (!gl) return;
+
+        const VS = `attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }`;
+        const FS = `
+precision highp float;
+uniform float u_time;
+uniform vec2 u_res;
+
+float hash21(vec2 p){
+    p = fract(p * vec2(234.34, 435.345));
+    p += dot(p, p + 34.23);
+    return fract(p.x * p.y);
+}
+float vnoise(vec2 p){
+    vec2 i = floor(p), f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    return mix(mix(hash21(i), hash21(i+vec2(1,0)), f.x),
+               mix(hash21(i+vec2(0,1)), hash21(i+vec2(1,1)), f.x), f.y);
+}
+float fbm(vec2 p){
+    float v=0.0, a=0.5;
+    mat2 r=mat2(0.8,0.6,-0.6,0.8);
+    for(int i=0;i<5;i++){v+=a*vnoise(p);p=r*p*2.1+vec2(1.7,9.2);a*=0.5;}
+    return v;
+}
+vec3 pal(float t){
+    t=clamp(t,0.0,1.0);
+    vec3 c0=vec3(0.063,0.047,0.086);
+    vec3 c1=vec3(0.498,0.024,0.086);
+    vec3 c2=vec3(0.875,0.230,0.230);
+    vec3 c3=vec3(1.0,0.957,0.957);
+    if(t<0.30) return mix(c0,c1,t/0.30);
+    if(t<0.62) return mix(c1,c2,(t-0.30)/0.32);
+    return mix(c2,c3,(t-0.62)/0.38);
+}
+void main(){
+    vec2 uv=gl_FragCoord.xy/u_res;
+    uv.y=1.0-uv.y;
+    float ar=u_res.x/u_res.y;
+    float t=u_time*0.22;
+    vec2 p=vec2(uv.x*ar,uv.y);
+    vec2 q=vec2(fbm(p*1.5+vec2(t*0.30,t*0.05)),
+                fbm(p*1.5+vec2(5.2,1.3)-vec2(t*0.18,0.0)));
+    float f=fbm(p*1.4+q*2.6+vec2(t*0.22,0.0));
+    float swell=uv.y*1.4
+        +sin(uv.x*ar*1.4+t*1.1+q.x*3.0)*0.30
+        +sin(uv.x*ar*3.1-t*1.6+q.y*2.0)*0.14
+        +f*1.5;
+    float band=0.5+0.5*sin(swell*6.2831*0.85-t*0.6);
+    vec3 col=pal(band*0.96);
+    float crest=pow(band,6.0)*0.55;
+    col+=vec3(1.0,0.96,0.96)*crest;
+    col*=0.82+0.30*smoothstep(0.0,0.7,uv.y);
+    col+=(hash21(gl_FragCoord.xy+vec2(t*60.0))-0.5)*0.04;
+    vec2 vig=uv*2.0-1.0;
+    col*=1.0-dot(vig,vig)*0.22;
+    gl_FragColor=vec4(col,1.0);
+}`;
+
+        function compile(type, src) {
+            const s = gl.createShader(type);
+            gl.shaderSource(s, src);
+            gl.compileShader(s);
+            if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) { gl.deleteShader(s); return null; }
+            return s;
+        }
+
+        const vs = compile(gl.VERTEX_SHADER, VS);
+        const fs = compile(gl.FRAGMENT_SHADER, FS);
+        if (!vs || !fs) return;
+
+        const prog = gl.createProgram();
+        gl.attachShader(prog, vs);
+        gl.attachShader(prog, fs);
+        gl.linkProgram(prog);
+        if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
+        gl.useProgram(prog);
+
+        const buf = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
+        const aLoc = gl.getAttribLocation(prog, 'a');
+        gl.enableVertexAttribArray(aLoc);
+        gl.vertexAttribPointer(aLoc, 2, gl.FLOAT, false, 0, 0);
+
+        const uTime = gl.getUniformLocation(prog, 'u_time');
+        const uRes = gl.getUniformLocation(prog, 'u_res');
+
+        function resize() {
+            const rect = canvas.getBoundingClientRect();
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            canvas.width = Math.round(rect.width * dpr);
+            canvas.height = Math.round(rect.height * dpr);
+            gl.viewport(0, 0, canvas.width, canvas.height);
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        const t0 = performance.now();
+        let running = true;
+
+        // Pause when not visible
+        const observer = new IntersectionObserver(entries => {
+            running = entries[0].isIntersecting;
+        }, { threshold: 0.1 });
+        observer.observe(canvas);
+
+        function render(now) {
+            if (running) {
+                gl.uniform1f(uTime, (now - t0) / 1000);
+                gl.uniform2f(uRes, canvas.width, canvas.height);
+                gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            }
+            requestAnimationFrame(render);
+        }
+        requestAnimationFrame(render);
+    })();
+    </script>
 </body>
 </html>

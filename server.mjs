@@ -73,6 +73,6 @@ wss.on('connection', (ws) => {
 });
 
 server.listen(PORT, () => {
-    console.log(`\n  lumen·local studio → http://localhost:${PORT}\n`);
+    console.log(`\n  /motion local studio → http://localhost:${PORT}\n`);
     console.log(`  terminal connected to ${process.env.SHELL || 'bash'} via node-pty\n`);
 });

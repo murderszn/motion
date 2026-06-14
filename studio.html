@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>lumen·local — generative shader studio</title>
+<title>/motion local — generative shader studio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=Inter:wght@300;400&family=Anton&family=Bebas+Neue&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Syne:wght@700;800&family=Pacifico&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/@xterm/xterm@5.5.0/css/xterm.css">
@@ -19,6 +19,7 @@
     --white:     #f4f4f6;
     --term-bg:   #060608;
     --term-text: #88c0d0;
+    --term-accent: var(--accent);
     --left-w:    48px;
     --right-w:   290px;
     --text-w:    0px;
@@ -87,37 +88,104 @@ header {
 
 button {
     font-family: inherit;
-    font-size: 10px;
+    font-size: 11px;
     letter-spacing: 0.08em;
-    background: transparent;
+    background: rgba(255, 255, 255, 0.02);
     color: var(--text);
     border: 1px solid var(--line);
-    padding: 4px 10px;
+    padding: 6px 14px;
     cursor: pointer;
-    transition: border-color .15s, color .15s, background .15s;
+    transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
     text-transform: lowercase;
     white-space: nowrap;
-    border-radius: 3px;
+    border-radius: 4px;
 }
-button:hover { border-color: var(--dim); color: var(--white); }
-button.primary { border-color: var(--accent); color: var(--accent); }
-button.primary:hover { background: var(--accent); color: #fff; }
+button:hover { 
+    border-color: var(--text); 
+    color: var(--white); 
+    background: rgba(255, 255, 255, 0.06); 
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transform: translateY(-1px);
+}
+button:active {
+    transform: translateY(0);
+}
+button.primary { 
+    border-color: var(--accent); 
+    color: var(--accent); 
+}
+button.primary:hover { 
+    background: var(--accent); 
+    color: #fff; 
+    box-shadow: 0 4px 14px rgba(224, 58, 58, 0.35);
+}
 button:disabled { opacity: .35; cursor: default; pointer-events: none; }
 
 .icon-btn {
     border: none;
     padding: 0;
-    width: 28px; height: 28px;
+    width: 36px; height: 36px;
     display: grid; place-items: center;
-    font-size: 13px;
-    border-radius: 4px;
+    font-size: 15px;
+    border-radius: 6px;
     color: var(--dim);
     background: transparent;
-    transition: color .15s, background .15s;
+    transition: all .2s ease;
 }
-.icon-btn:hover { color: var(--white); background: rgba(255,255,255,.06); }
-.icon-btn.active { color: var(--accent); }
+.icon-btn:hover { 
+    color: var(--white); 
+    background: rgba(255,255,255,.08); 
+    transform: scale(1.05);
+}
+.icon-btn:active {
+    transform: scale(0.95);
+}
+.icon-btn.active { color: var(--accent); background: rgba(224,58,58,.08); }
 .icon-btn.primary { color: var(--accent); }
+
+/* --- Tooltips --- */
+[data-tooltip] {
+    position: relative;
+}
+[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    z-index: 9999;
+    background: rgba(8, 8, 12, 0.96);
+    color: var(--white, #fff);
+    border: 1px solid var(--line, rgba(255,255,255,0.1));
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 10px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%) scale(0.9);
+    transform-origin: bottom center;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7);
+}
+[data-tooltip]:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+}
+
+#left [data-tooltip]::after {
+    bottom: auto;
+    left: calc(100% + 8px);
+    top: 50%;
+    transform: translateY(-50%) scale(0.9);
+    transform-origin: left center;
+}
+#left [data-tooltip]:hover::after {
+    transform: translateY(-50%) scale(1);
+}
 
 #recStatus { color: var(--accent); display: none; align-items: center; gap: 8px; font-size: 9px; }
 #recStatus.on { display: flex; }
@@ -136,8 +204,8 @@ button:disabled { opacity: .35; cursor: default; pointer-events: none; }
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
-    padding: 4px 0;
+    gap: 8px;
+    padding: 8px 0;
     z-index: 5;
     overflow: hidden;
 }
@@ -163,7 +231,7 @@ body.left-closed #left { pointer-events: none; border-right: 0; }
     max-width: 100%;
     max-height: 100%;
     line-height: 1.2;
-    box-shadow: 0 0 0 1px var(--line), 0 24px 80px rgba(0,0,0,.55);
+    box-shadow: 0 0 0 1px #000, 0 24px 80px rgba(0,0,0,.55);
     border-radius: 2px;
     overflow: hidden;
     flex-shrink: 0;
@@ -311,14 +379,14 @@ body.right-closed #panel {
 }
 
 /* preset grid */
-.presets { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; }
+.presets { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
 .presets button {
-    padding: 6px 4px;
+    padding: 8px 6px;
     text-align: center;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 500;
     letter-spacing: 0.08em;
-    border-radius: 3px;
+    border-radius: 4px;
 }
 .presets button.active { border-color: var(--accent); color: var(--white); background: rgba(224,58,58,.12); }
 .presets button:hover { border-color: var(--accent); color: var(--white); }
@@ -335,7 +403,7 @@ body.right-closed #panel {
     border-radius: 3px;
 }
 .seed-row input:focus { border-color: var(--dim); }
-.seed-row button { padding: 5px 10px; font-size: 11px; }
+.seed-row button { padding: 6px 12px; font-size: 11px; }
 
 /* palette */
 .swatches { display: flex; gap: 5px; }
@@ -349,7 +417,7 @@ body.right-closed #panel {
 }
 .swatches input[type=color]::-webkit-color-swatch-wrapper { padding: 0; }
 .swatches input[type=color]::-webkit-color-swatch { border: none; border-radius: 2px; }
-.swatches button { width: 30px; flex: none; padding: 0; font-size: 13px; }
+.swatches button { width: 34px; height: 26px; flex: none; padding: 0; font-size: 14px; }
 
 /* sliders */
 .ctl { margin-bottom: 10px; }
@@ -382,13 +450,13 @@ input[type=range]::-moz-range-thumb {
 }
 
 /* canvas size */
-.sizes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; }
-.sizes button { padding: 5px 6px; font-size: 10px; border-radius: 3px; }
+.sizes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.sizes button { padding: 8px 6px; font-size: 11px; border-radius: 4px; }
 .sizes button.active { border-color: var(--white); color: var(--white); }
 
 /* export */
-.exports { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; }
-.exports button { padding: 5px 6px; font-size: 10px; border-radius: 3px; }
+.exports { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.exports button { padding: 8px 6px; font-size: 11px; border-radius: 4px; }
 
 /* ============ BOTTOM TERMINAL (xterm.js) ============ */
 #bottom {
@@ -463,7 +531,9 @@ input[type=range]::-moz-range-thumb {
     cursor: default;
     user-select: none;
     text-transform: lowercase;
+    transition: color 0.15s ease;
 }
+.term-tab:hover { color: var(--text); cursor: pointer; }
 .term-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 .term-actions { margin-left: auto; display: flex; gap: 4px; }
 #termMaximize .icon-max { font-size: 11px; }
@@ -547,7 +617,7 @@ footer .right { margin-left: auto; display: flex; gap: 10px; min-width: 0; flex:
     width: 100%;
     height: 100%;
     background: var(--term-bg);
-    color: var(--text);
+    color: var(--term-text);
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
     line-height: 1.5;
@@ -688,7 +758,7 @@ footer .right { margin-left: auto; display: flex; gap: 10px; min-width: 0; flex:
 <body>
 
 <header>
-    <div class="logo">lumen<span>·</span>local</div>
+    <div class="logo"><span>/</span>motion local</div>
     <div id="recStatus"><span id="recText">recording</span><button id="recCancel">cancel</button></div>
     <div class="mini-actions">
         <button id="btnPause">pause</button>
@@ -697,13 +767,13 @@ footer .right { margin-left: auto; display: flex; gap: 10px; min-width: 0; flex:
 </header>
 
 <nav id="left">
-    <button class="icon-btn active" id="btnGenTab" title="generator settings (g)">⚙</button>
-    <button class="icon-btn" id="btnTextTab"  title="text overlays (t)">T</button>
-    <button class="icon-btn" id="togPanel" title="toggle right panel (⌘B)">☰</button>
-    <button class="icon-btn" id="togTerm"  title="toggle terminal (⌃\`)">▤</button>
+    <button class="icon-btn active" id="btnGenTab" data-tooltip="generator settings (g)">⚙</button>
+    <button class="icon-btn" id="btnTextTab"  data-tooltip="text overlays">T</button>
+    <button class="icon-btn" id="togPanel" data-tooltip="toggle right panel (⌘B)">☰</button>
+    <button class="icon-btn" id="togTerm"  data-tooltip="toggle terminal (⌃`)">▤</button>
     <div class="spacer"></div>
-    <button class="icon-btn primary" id="btnRandom2" title="randomize (r)">↻</button>
-    <button class="icon-btn" id="btnSave"     title="save png (s)">↓</button>
+    <button class="icon-btn primary" id="btnRandom2" data-tooltip="randomize (r)">↻</button>
+    <button class="icon-btn" id="btnSave"     data-tooltip="save png (s)">↓</button>
 </nav>
 
 <div id="text-bar">
@@ -730,13 +800,14 @@ footer .right { margin-left: auto; display: flex; gap: 10px; min-width: 0; flex:
 
         <div class="sect">
             <div class="sect-label">palette</div>
-            <div class="swatches">
+            <div class="swatches" style="margin-bottom:8px">
                 <input type="color" id="col0" value="#100c16">
                 <input type="color" id="col1" value="#7f0616">
                 <input type="color" id="col2" value="#e03a3a">
                 <input type="color" id="col3" value="#fff5f5">
                 <button id="palDice" title="random palette">⟳</button>
             </div>
+            <button id="btnInvert" style="width:100%;padding:6px">invert colors: off</button>
         </div>
 
         <div class="sect">
@@ -865,11 +936,38 @@ footer .right { margin-left: auto; display: flex; gap: 10px; min-width: 0; flex:
     </div>
 
     <div class="sect">
+        <div class="sect-label">viewer</div>
+        <div class="ctl">
+            <input type="file" id="viewerFile" accept="image/*,video/*,.gif" hidden>
+            <button id="viewerOpen" style="width:100%;padding:6px">+ open video / gif / image</button>
+        </div>
+        <div id="viewerSection" style="display:none;margin-top:6px">
+            <div id="viewerStage" style="position:relative;width:100%;aspect-ratio:16/9;background:#000;border:1px solid #000;border-radius:3px;overflow:hidden">
+                <video id="viewerVid" style="width:100%;height:100%;display:none;object-fit:contain;" playsinline loop></video>
+                <img id="viewerImg" style="width:100%;height:100%;display:none;object-fit:contain;" />
+            </div>
+            <div class="ctl" style="margin-top:8px;display:flex;gap:4px">
+                <button class="primary" id="viewerPlay" style="flex:1">play</button>
+                <button id="viewerPause" style="flex:1">pause</button>
+            </div>
+            <div class="ctl" style="margin-top:6px;display:flex;gap:4px">
+                <button id="viewerLoop" style="flex:1">loop on</button>
+                <button id="viewerInvert" style="flex:1">invert off</button>
+            </div>
+            <div class="ctl" style="margin-top:6px">
+                <div class="ctl-head"><span>speed</span><span class="val" id="viewerSpeedVal">1.0x</span></div>
+                <input type="range" id="viewerSpeed" min="0.25" max="2.0" step="0.25" value="1">
+            </div>
+        </div>
+    </div>
+
+    <div class="sect">
         <div class="sect-label">export</div>
         <div class="exports">
             <button id="expPng">image</button>
             <button id="expVid">video</button>
             <button id="expGif">gif</button>
+            <button id="expEmbed" style="grid-column: span 3; margin-top: 4px;">export html splash page</button>
         </div>
     </div>
 
@@ -878,6 +976,9 @@ footer .right { margin-left: auto; display: flex; gap: 10px; min-width: 0; flex:
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
             <button id="btnSaveProj">save project</button>
             <button id="btnLoadProj">load project</button>
+            <button id="btnCopyState">copy JSON</button>
+            <button id="btnPasteState">paste JSON</button>
+            <button id="btnCopyLink" style="grid-column: span 2; margin-top: 4px;">🔗 copy shareable link</button>
             <input type="file" id="projFile" accept=".lumen,application/json" hidden>
         </div>
     </div>
@@ -888,9 +989,10 @@ footer .right { margin-left: auto; display: flex; gap: 10px; min-width: 0; flex:
     <div id="term-resize-handle"></div>
     <div class="term-bar">
         <div class="term-tabs">
-            <div class="term-tab active" id="tabTerm">terminal</div>
+            <div class="term-tab active" id="tabTerm">terminal <span style="font-size:7px;padding:1px 5px;border-radius:8px;background:var(--accent);color:#fff;font-weight:700;vertical-align:middle;margin-left:4px;">beta</span></div>
             <div class="term-tab" id="tabShader">shader.glsl</div>
             <div class="term-tab" id="tabProblems">problems <span id="probCount" class="badge hidden">0</span></div>
+            <div class="term-tab" id="tabHotkeys">hotkeys</div>
         </div>
         <div class="term-actions">
             <button id="btnCompileShader" class="icon-btn" title="Compile Shader (⌘S)" style="display:none;width:auto;padding:0 8px;font-size:10px;gap:4px">✓ compile</button>
@@ -902,8 +1004,12 @@ footer .right { margin-left: auto; display: flex; gap: 10px; min-width: 0; flex:
     <div id="term-editor" style="display:none;flex:1;overflow:hidden;position:relative;">
         <textarea id="shaderCode" spellcheck="false"></textarea>
     </div>
-    <div id="term-problems" style="display:none;flex:1;overflow-y:auto;padding:12px;background:var(--term-bg);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.6;">
+    <div id="term-problems" style="display:none;flex:1;overflow-y:auto;padding:12px;background:var(--term-bg);color:var(--term-text);font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.6;">
         <div id="problemsList">No problems have been detected in the workspace.</div>
+    </div>
+    <div id="term-hotkeys" style="display:none;flex:1;overflow-y:auto;padding:14px 16px;background:var(--term-bg);color:var(--term-text);font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.7;">
+        <div style="opacity:0.6;font-size:9px;letter-spacing:0.15em;text-transform:lowercase;margin-bottom:10px">keyboard shortcuts</div>
+        <div id="hotkeysList"></div>
     </div>
 </div>
 
@@ -912,6 +1018,7 @@ footer .right { margin-left: auto; display: flex; gap: 10px; min-width: 0; flex:
     <span><b id="stFps">60</b> fps</span>
     <span>seed <b id="stSeed">9015</b></span>
     <span>mode <b id="stMode">reeded</b></span>
+    <span id="stLog" style="color:var(--dim);margin-left:12px"></span>
     <span class="right" id="stMsg">
         <button class="status-btn" id="sTheme">◆ theme</button>
         <button class="status-btn" id="sLeft">◀</button>

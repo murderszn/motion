@@ -189,15 +189,26 @@ Evolve toward:
 | Drag a slider | Thumb turns accent on hover |
 | Toggle a panel | CSS class on `<body>` toggles `--right-w` / `--left-w` / `--text-w` between their value and `0px` |
 | Maximize terminal | Class swaps grid rows, stage collapses |
+| Arm text tool | `T` key or text button — cursor changes to crosshair on canvas |
+| Place text | Click canvas while text tool armed — text box drops at click position |
+| Deactivate text tool | `Escape` key or click text tool button again |
 | Edit text on canvas | Selected element gets accent outline, text bar slides in |
+| Export HTML splash | Generates self-contained HTML with embedded shader, params, textures, text |
+| Copy JSON | Copies full studio state (params + texts) to clipboard |
+| Paste JSON | Restores state from JSON payload in clipboard |
+| Copy shareable link | Generates URL with all settings as query parameters |
+| URL query params | Launch studio in any state: `?preset=waves&seed=4012&speed=0.8` |
 | Status bar click | Opens/closes the associated panel |
+| Hotkeys legend | Bottom panel "hotkeys" tab shows all keyboard shortcuts |
 
 ---
 
 ## Theme Switcher UI (implemented)
 
 - A `◆ theme` button in the status bar cycles through built-in themes.
-- **Built-in themes**: `lumen dark`, `lumen dim`, `lumen contrast`, `lumen light`.
+- **Built-in themes**: `lumen dark`, `lumen dim`, `lumen contrast`, `lumen light`,
+  `lumen cyberpunk`, `lumen forest`, `lumen nord`, `lumen synthwave`,
+  `lumen dracula`, `lumen sakura`, `lumen coffee`.
 - **Persistence**: theme choice saved in `localStorage`.
 - Future: settings dropdown with theme picker, import custom JSON themes.
 

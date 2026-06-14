@@ -20,7 +20,7 @@ uniform int   u_mode;
 uniform float u_speed, u_scale, u_density, u_distort, u_detail, u_grain;
 uniform vec3  u_c0, u_c1, u_c2, u_c3;
 uniform sampler2D u_texture;
-uniform float u_mix, u_pixel;
+uniform float u_mix, u_pixel, u_invert;
 
 #define TAU 6.28318530718
 
@@ -85,34 +85,45 @@ void main(){
 
     vec3 col = vec3(0.0);
 
-    /* ─── 0 · reeded glass ─── */
+    /* ─── 0 · aurora ─── */
     if (u_mode == 0){
-        float N  = mix(24.0, 110.0, u_density);
-        float rx = uv.x * N;
-        float ri = floor(rx);
-        float rf = fract(rx);
-
-        float lens = (rf - 0.5) * ((0.3 + 2.2 * u_distort) / N);
-        vec2 sUV = vec2(clamp(uv.x + lens, 0.001, 0.999), uv.y);
-
-        vec2 p = vec2(sUV.x * ar, sUV.y);
-        float f = metaf(p, ar)
-                + fbm(sUV * (1.2 + 2.4 * u_scale) + loopOff() + sOff) * (0.12 + 0.28 * u_detail);
-        col = grad4(f * 0.42);
-
-        float shimmer = 0.028 * sin(ri * 2.399 + u_seed + 2.0 * u_phase);
-        float h1 = exp(-pow((rf - 0.27 - shimmer) * 13.5, 2.0)) * 0.62;
-        float h2 = exp(-pow((rf - 0.75) * 22.0, 2.0)) * 0.10;
-        float groove = smoothstep(0.0, 0.07, rf) * smoothstep(1.0, 0.93, rf);
-
-        col  = col * (0.70 + groove * 0.30);
-        col += u_c3 * h1;
-        col += u_c3 * 0.85 * h2;
-        col *= 0.87 + fbm(vec2(ri * 0.09, uv.y * 3.1) + loopOff() * 0.8 + sOff) * 0.15;
+        vec3 night  = u_c0 * 0.40;
+        float light = 0.0;
+        vec3  tint  = vec3(0.0);
+        for (int i = 0; i < 3; i++){
+            float fi = float(i) + 1.0;
+            float xx = uv.x * ar * (1.0 + 0.35 * fi) + u_seed * fi * 1.7;
+            float wave = fbm(vec2(xx * 0.6, fi * 4.0) + loopOff() * 1.2) - 0.5;
+            float cy   = 0.42 + 0.12 * fi + wave * 0.38;
+            float streak = fbm(vec2(xx * (3.0 + 4.0 * u_detail),
+                                    uv.y * (1.0 + 1.5 * u_scale)) + loopOff());
+            float dist  = uv.y - cy;
+            float band  = exp(-dist * dist * (8.0 + 34.0 * u_density));
+            float inten = max(band * (0.25 + 0.95 * streak), 0.0);
+            light += inten / fi;
+            tint  += grad4(clamp(0.15 + (1.0 - uv.y) * 0.95, 0.0, 1.0)) * inten / fi;
+        }
+        col  = night + tint * (1.3 + 1.0 * u_distort);
+        col += u_c3 * pow(clamp(light, 0.0, 1.0), 3.0) * 0.30;
     }
 
-    /* ─── 1 · flow ─── */
+    /* ─── 1 · electricity ─── */
     else if (u_mode == 1){
+        vec2 p = uv * vec2(ar, 1.0) * mix(1.5, 5.0, u_scale) + sOff;
+        vec2 q = vec2(fbm(p + loopOff()),
+                      fbm(p + vec2(5.2, 1.3) - loopOff()));
+        float n = fbm(p * 1.4 + q * (1.0 + 2.5 * u_distort) + loopOff());
+        float ridge = 1.0 - abs(2.0 * n - 1.0);
+        float veins = pow(ridge, mix(6.0, 24.0, u_detail));
+        veins *= 0.55 + 0.45 * cos(3.0 * u_phase + u_seed);
+        col  = u_c0 * 0.55;
+        col += grad4(clamp(veins * 1.3, 0.0, 1.0)) * veins;
+        col += u_c3 * pow(veins, 2.0) * 0.9;
+        col += grad4(n * 0.35) * (0.10 + 0.10 * u_density);
+    }
+
+    /* ─── 2 · flow ─── */
+    else if (u_mode == 2){
         vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.2, 5.0, u_scale) + sOff;
         float w = 1.0 + 3.0 * u_distort;
         vec2 q = vec2(fbm(p + loopOff()),
@@ -124,53 +135,26 @@ void main(){
         col = mix(col, u_c2, q.y * q.x * 0.25);
     }
 
-    /* ─── 2 · orbs ─── */
-    else if (u_mode == 2){
-        vec2 p = vec2(uv.x * ar, uv.y);
-        float f = metaf(p, ar) * (0.30 + 0.30 * u_density)
-                + fbm(uv * (1.0 + 2.0 * u_scale) + loopOff() + sOff) * 0.20 * u_detail;
-        col = grad4(f);
-    }
-
-    /* ─── 3 · waves ─── */
+    /* ─── 3 · fractal square ─── */
     else if (u_mode == 3){
-        float f = uv.y * mix(1.5, 5.0, u_scale);
-        f += sin(uv.x * (3.0 + 9.0 * u_density) + u_phase + u_seed) * 0.45;
-        f += sin(uv.x * (7.0 + 5.0 * u_density) - 2.0 * u_phase + u_seed * 1.7) * 0.20;
-        f += fbm(uv * vec2(ar, 1.0) * (1.5 + 2.0 * u_scale) + loopOff() + sOff)
-             * (0.30 + 0.90 * u_distort);
-        float t = 0.5 + 0.5 * sin(f * TAU * (0.4 + 0.9 * u_detail));
-        col = grad4(t);
+        vec2 p = uv - 0.5;
+        p.x *= ar;
+        float s = 1.0;
+        float orbit = 0.0;
+        for (int i = 0; i < 6; i++){
+            p = abs(p) - 0.12 * (0.6 + 0.4 * u_scale);
+            float r2 = dot(p,p);
+            orbit += exp(-4.0 * r2);
+            p = p / r2 + sOff * 0.15;
+            p *= 1.15 + 0.15 * u_detail;
+        }
+        float f = clamp(orbit * 0.35, 0.0, 1.0);
+        col = grad4(f + 0.15 * u_distort);
+        col += u_c3 * pow(orbit, 3.0) * 0.08;
     }
 
-    /* ─── 4 · halftone ─── */
+    /* ─── 4 · glass ─── */
     else if (u_mode == 4){
-        vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.2, 4.0, u_scale) + sOff;
-        vec2 q = vec2(fbm(p + loopOff()), fbm(p + vec2(5.2, 1.3) - loopOff()));
-        float f = fbm(p + q * (1.0 + 2.5 * u_distort));
-        float cells = mix(18.0, 80.0, u_density);
-        vec2 g = fract(vec2(uv.x * ar, uv.y) * cells) - 0.5;
-        float rdot = clamp(f * (0.5 + 0.6 * u_detail), 0.05, 0.62);
-        float mask = smoothstep(rdot, rdot - 0.12, length(g) * 1.45);
-        col = mix(u_c0 * 0.7, grad4(clamp(f * 1.5, 0.0, 1.0)), mask);
-    }
-
-    /* ─── 5 · grain ─── */
-    else if (u_mode == 5){
-        vec2 p = vec2(uv.x * ar, uv.y);
-        float s = u_seed;
-        float rA = 0.10 + 0.22 * u_speed;
-        vec2 b1 = vec2(0.32 * ar, 0.60) + rA * vec2(cos(u_phase + s), sin(u_phase + s));
-        vec2 b2 = vec2(0.70 * ar, 0.35) + rA * 0.8 * vec2(cos(-u_phase + s * 1.9), sin(-u_phase + s * 1.9));
-        float f = 0.55 / (length(p - b1) + 0.30)
-                + 0.45 / (length(p - b2) + 0.30)
-                + fbm(uv * (1.0 + 1.5 * u_scale) + loopOff() + sOff) * 0.25 * u_detail;
-        col = grad4(f * (0.45 + 0.25 * u_density));
-        col += (hash21(gl_FragCoord.xy + vec2(u_phase * 43.7)) - 0.5) * (0.10 + 0.30 * u_distort);
-    }
-
-    /* ─── 6 · glass ─── */
-    else if (u_mode == 6){
         vec2 p = vec2(uv.x * ar, uv.y);
         float frost = 0.0, rim = 0.0;
         vec2  refr = vec2(0.0);
@@ -198,45 +182,34 @@ void main(){
         col += u_c3 * rim * (0.4 + 0.6 * u_detail);
     }
 
-    /* ─── 7 · aurora ─── */
+    /* ─── 5 · grain ─── */
+    else if (u_mode == 5){
+        vec2 p = vec2(uv.x * ar, uv.y);
+        float s = u_seed;
+        float rA = 0.10 + 0.22 * u_speed;
+        vec2 b1 = vec2(0.32 * ar, 0.60) + rA * vec2(cos(u_phase + s), sin(u_phase + s));
+        vec2 b2 = vec2(0.70 * ar, 0.35) + rA * 0.8 * vec2(cos(-u_phase + s * 1.9), sin(-u_phase + s * 1.9));
+        float f = 0.55 / (length(p - b1) + 0.30)
+                + 0.45 / (length(p - b2) + 0.30)
+                + fbm(uv * (1.0 + 1.5 * u_scale) + loopOff() + sOff) * 0.25 * u_detail;
+        col = grad4(f * (0.45 + 0.25 * u_density));
+        col += (hash21(gl_FragCoord.xy + vec2(u_phase * 43.7)) - 0.5) * (0.10 + 0.30 * u_distort);
+    }
+
+    /* ─── 6 · halftone ─── */
+    else if (u_mode == 6){
+        vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.2, 4.0, u_scale) + sOff;
+        vec2 q = vec2(fbm(p + loopOff()), fbm(p + vec2(5.2, 1.3) - loopOff()));
+        float f = fbm(p + q * (1.0 + 2.5 * u_distort));
+        float cells = mix(18.0, 80.0, u_density);
+        vec2 g = fract(vec2(uv.x * ar, uv.y) * cells) - 0.5;
+        float rdot = clamp(f * (0.5 + 0.6 * u_detail), 0.05, 0.62);
+        float mask = smoothstep(rdot, rdot - 0.12, length(g) * 1.45);
+        col = mix(u_c0 * 0.7, grad4(clamp(f * 1.5, 0.0, 1.0)), mask);
+    }
+
+    /* ─── 7 · kaleidoscope ─── */
     else if (u_mode == 7){
-        vec3 night  = u_c0 * 0.40;
-        float light = 0.0;
-        vec3  tint  = vec3(0.0);
-        for (int i = 0; i < 3; i++){
-            float fi = float(i) + 1.0;
-            float xx = uv.x * ar * (1.0 + 0.35 * fi) + u_seed * fi * 1.7;
-            float wave = fbm(vec2(xx * 0.6, fi * 4.0) + loopOff() * 1.2) - 0.5;
-            float cy   = 0.42 + 0.12 * fi + wave * 0.38;
-            float streak = fbm(vec2(xx * (3.0 + 4.0 * u_detail),
-                                    uv.y * (1.0 + 1.5 * u_scale)) + loopOff());
-            float dist  = uv.y - cy;
-            float band  = exp(-dist * dist * (8.0 + 34.0 * u_density));
-            float inten = max(band * (0.25 + 0.95 * streak), 0.0);
-            light += inten / fi;
-            tint  += grad4(clamp(0.15 + (1.0 - uv.y) * 0.95, 0.0, 1.0)) * inten / fi;
-        }
-        col  = night + tint * (1.3 + 1.0 * u_distort);
-        col += u_c3 * pow(clamp(light, 0.0, 1.0), 3.0) * 0.30;
-    }
-
-    /* ─── 8 · electricity ─── */
-    else if (u_mode == 8){
-        vec2 p = uv * vec2(ar, 1.0) * mix(1.5, 5.0, u_scale) + sOff;
-        vec2 q = vec2(fbm(p + loopOff()),
-                      fbm(p + vec2(5.2, 1.3) - loopOff()));
-        float n = fbm(p * 1.4 + q * (1.0 + 2.5 * u_distort) + loopOff());
-        float ridge = 1.0 - abs(2.0 * n - 1.0);
-        float veins = pow(ridge, mix(6.0, 24.0, u_detail));
-        veins *= 0.55 + 0.45 * cos(3.0 * u_phase + u_seed);
-        col  = u_c0 * 0.55;
-        col += grad4(clamp(veins * 1.3, 0.0, 1.0)) * veins;
-        col += u_c3 * pow(veins, 2.0) * 0.9;
-        col += grad4(n * 0.35) * (0.10 + 0.10 * u_density);
-    }
-
-    /* ─── 9 · kaleidoscope ─── */
-    else if (u_mode == 9){
         vec2 p = uv - 0.5;
         p.x *= ar;
         float angle = atan(p.y, p.x);
@@ -253,20 +226,16 @@ void main(){
         col += u_c3 * pow(rad * 1.8, 3.0) * 0.12;
     }
 
-    /* ─── 10 · rings ─── */
-    else if (u_mode == 10){
-        vec2 p = (uv - 0.5) * vec2(ar, 1.0);
-        float rad = length(p);
-        float n = fbm(p * mix(1.0, 4.0, u_scale) + loopOff() + sOff);
-        float rings = sin((rad * mix(8.0, 30.0, u_density) + n * 2.0 * u_distort - u_phase * 1.5) * 3.14159);
-        float f = 0.5 + 0.5 * rings;
-        col = grad4(clamp(f * (0.7 + 0.5 * u_detail), 0.0, 1.0));
-        float glow = exp(-rad * 3.0) * 0.3;
-        col += u_c3 * glow;
+    /* ─── 8 · orbs ─── */
+    else if (u_mode == 8){
+        vec2 p = vec2(uv.x * ar, uv.y);
+        float f = metaf(p, ar) * (0.30 + 0.30 * u_density)
+                + fbm(uv * (1.0 + 2.0 * u_scale) + loopOff() + sOff) * 0.20 * u_detail;
+        col = grad4(f);
     }
 
-    /* ─── 11 · plasma ─── */
-    else if (u_mode == 11){
+    /* ─── 9 · plasma ─── */
+    else if (u_mode == 9){
         vec2 p = uv * mix(1.0, 3.5, u_scale);
         float t = u_phase * mix(0.3, 1.2, u_speed);
         float v = 0.0;
@@ -280,33 +249,89 @@ void main(){
         col = mix(col, grad4(clamp(v * 0.8 + 0.3, 0.0, 1.0)), 0.3 * u_distort);
     }
 
-    /* ─── 12 · displace ─── */
-    else if (u_mode == 12){
-        vec2 p = uv * vec2(ar, 1.0) * mix(0.8, 3.0, u_scale);
-        float strength = 0.02 + 0.10 * u_distort;
-        vec2 off = vec2(
-            fbm(p + loopOff() + sOff) - 0.5,
-            fbm(p + vec2(5.2, 1.3) + loopOff() + sOff) - 0.5
-        ) * strength;
-        vec2 suv = clamp(uv + off, 0.0, 1.0);
-        vec4 tex = texture2D(u_texture, suv);
-        float n = fbm(p * 1.5 + loopOff() * 0.5 + sOff) * 0.3 * u_detail;
-        col = tex.rgb * (0.7 + 0.3 * n);
-        col += grad4(n * 0.5) * 0.15;
+    /* ─── 10 · reeded ─── */
+    else if (u_mode == 10){
+        float N  = mix(24.0, 110.0, u_density);
+        float rx = uv.x * N;
+        float ri = floor(rx);
+        float rf = fract(rx);
+
+        float lens = (rf - 0.5) * ((0.3 + 2.2 * u_distort) / N);
+        vec2 sUV = vec2(clamp(uv.x + lens, 0.001, 0.999), uv.y);
+
+        vec2 p = vec2(sUV.x * ar, sUV.y);
+        float f = metaf(p, ar)
+                + fbm(sUV * (1.2 + 2.4 * u_scale) + loopOff() + sOff) * (0.12 + 0.28 * u_detail);
+        col = grad4(f * 0.42);
+
+        float shimmer = 0.028 * sin(ri * 2.399 + u_seed + 2.0 * u_phase);
+        float h1 = exp(-pow((rf - 0.27 - shimmer) * 13.5, 2.0)) * 0.62;
+        float h2 = exp(-pow((rf - 0.75) * 22.0, 2.0)) * 0.10;
+        float groove = smoothstep(0.0, 0.07, rf) * smoothstep(1.0, 0.93, rf);
+
+        col  = col * (0.70 + groove * 0.30);
+        col += u_c3 * h1;
+        col += u_c3 * 0.85 * h2;
+        col *= 0.87 + fbm(vec2(ri * 0.09, uv.y * 3.1) + loopOff() * 0.8 + sOff) * 0.15;
     }
 
-    /* ─── 13 · melt ─── */
+    /* ─── 11 · rings ─── */
+    else if (u_mode == 11){
+        vec2 p = (uv - 0.5) * vec2(ar, 1.0);
+        float rad = length(p);
+        float n = fbm(p * mix(1.0, 4.0, u_scale) + loopOff() + sOff);
+        float rings = sin((rad * mix(8.0, 30.0, u_density) + n * 2.0 * u_distort - u_phase * 1.5) * 3.14159);
+        float f = 0.5 + 0.5 * rings;
+        col = grad4(clamp(f * (0.7 + 0.5 * u_detail), 0.0, 1.0));
+        float glow = exp(-rad * 3.0) * 0.3;
+        col += u_c3 * glow;
+    }
+
+    /* ─── 12 · sd rosette ─── */
+    else if (u_mode == 12){
+        vec2 p = uv - 0.5;
+        p.x *= ar;
+        float n = 5.0 + floor(mix(3.0, 9.0, u_density));
+        float a = atan(p.y, p.x);
+        float r = length(p);
+        float sector = 3.14159 / max(n, 2.0);
+        a = mod(a + u_phase * 0.25, sector * 2.0);
+        a = abs(a - sector);
+        vec2 q = vec2(cos(a), sin(a)) * r;
+        float f = abs(q.y) - 0.04 * (0.4 + 0.8 * u_scale);
+        float pulse = sin(r * mix(6.0, 24.0, u_detail) - u_phase * 1.6) * 0.5 + 0.5;
+        float edge = exp(-abs(f) * (18.0 + 40.0 * u_distort));
+        edge = smoothstep(0.0, 0.9, edge);
+        col = mix(u_c0 * 0.5, grad4(pulse), edge);
+        col += u_c3 * edge * 0.22;
+    }
+
+    /* ─── 13 · triangle lattice ─── */
     else if (u_mode == 13){
-        vec2 p = uv * vec2(ar, 1.0) * mix(0.5, 2.5, u_scale);
-        float warp = fbm(p + loopOff() * 0.5 + sOff) - 0.5;
-        float meltY = uv.y + warp * 0.18 * u_distort;
-        vec2 suv = vec2(uv.x, clamp(meltY, 0.0, 1.0));
-        suv.x += sin(uv.y * mix(4.0, 16.0, u_density) + u_phase * 0.8) * 0.025 * u_detail;
-        suv = clamp(suv, 0.0, 1.0);
-        vec4 tex = texture2D(u_texture, suv);
-        float vig = 1.0 - abs(uv.y - 0.5) * 0.6;
-        col = tex.rgb * vig;
-        col += u_c0 * 0.08;
+        vec2 p = uv - 0.5;
+        p.x *= ar;
+        float a = u_phase * (0.2 + 0.4 * u_speed);
+        float ca = cos(a), sa = sin(a);
+        p = mat2(ca, -sa, sa, ca) * p;
+        vec2 g = p * (8.0 + 18.0 * u_density);
+        vec2 f = fract(g) - 0.5;
+        float tri = abs(f.x) * 0.866 + f.y * 0.5;
+        float d = abs(tri);
+        float rings = sin(length(floor(g)) * 0.9 + u_phase) * 0.5 + 0.5;
+        float edge = smoothstep(0.08, 0.0, d);
+        col = grad4(clamp(rings * (0.6 + 0.6 * u_detail), 0.0, 1.0));
+        col = mix(col, u_c3, edge * (0.4 + 0.6 * u_scale));
+    }
+
+    /* ─── 14 · waves ─── */
+    else if (u_mode == 14){
+        float f = uv.y * mix(1.5, 5.0, u_scale);
+        f += sin(uv.x * (3.0 + 9.0 * u_density) + u_phase + u_seed) * 0.45;
+        f += sin(uv.x * (7.0 + 5.0 * u_density) - 2.0 * u_phase + u_seed * 1.7) * 0.20;
+        f += fbm(uv * vec2(ar, 1.0) * (1.5 + 2.0 * u_scale) + loopOff() + sOff)
+             * (0.30 + 0.90 * u_distort);
+        float t = 0.5 + 0.5 * sin(f * TAU * (0.4 + 0.9 * u_detail));
+        col = grad4(t);
     }
 
     /* texture overlay */
@@ -324,6 +349,10 @@ void main(){
     vec2 v = uv * 2.0 - 1.0;
     col *= 1.0 - dot(v, v) * 0.16;
 
+    if (u_invert > 0.5) {
+        col = 1.0 - col;
+    }
+
     gl_FragColor = vec4(col, 1.0);
 }`;
 
@@ -334,7 +363,7 @@ type UniformMap = Record<string, WebGLUniformLocation | null>;
 const UNIFORM_NAMES = [
   'u_res', 'u_phase', 'u_seed', 'u_mode',
   'u_speed', 'u_scale', 'u_density', 'u_distort', 'u_detail', 'u_grain',
-  'u_c0', 'u_c1', 'u_c2', 'u_c3', 'u_texture', 'u_mix', 'u_pixel',
+  'u_c0', 'u_c1', 'u_c2', 'u_c3', 'u_texture', 'u_mix', 'u_pixel', 'u_invert',
 ] as const;
 
 export let canvas: HTMLCanvasElement;
@@ -441,6 +470,7 @@ export function draw(phase: number): void {
   gl.uniform1f(U.u_grain,   P.grain);
   gl.uniform1f(U.u_mix,     P.mix);
   gl.uniform1f(U.u_pixel,   P.pixel);
+  gl.uniform1f(U.u_invert,  P.invert);
   gl.uniform3fv(U.u_c0, hex2rgb(P.colors[0]));
   gl.uniform3fv(U.u_c1, hex2rgb(P.colors[1]));
   gl.uniform3fv(U.u_c2, hex2rgb(P.colors[2]));
@@ -463,9 +493,22 @@ export function compileNewFS(newSrc: string): string | null {
     gl.useProgram(newProg);
     gl.enableVertexAttribArray(aLoc);
     gl.vertexAttribPointer(aLoc, 2, gl.FLOAT, false, 0, 0);
+    const oldProg = prog;
     prog = newProg;
     U = cacheUniforms(prog);
     FS = newSrc;
+
+    if (oldProg) {
+      const shaders = gl.getAttachedShaders(oldProg);
+      if (shaders) {
+        shaders.forEach(s => {
+          gl.detachShader(oldProg, s);
+          gl.deleteShader(s);
+        });
+      }
+      gl.deleteProgram(oldProg);
+    }
+
     return null; // success
   } catch (e) {
     return e instanceof Error ? e.message : String(e);

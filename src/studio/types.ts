@@ -39,6 +39,7 @@ export interface Params {
   grain: number;
   mix: number;
   pixel: number;
+  invert: number;
 }
 
 export type TextAlign = 'left' | 'center' | 'right';

@@ -6,6 +6,7 @@ import { P, PRESETS } from '../state';
 import { draw, canvas } from '../webgl';
 import { getPhase, setPhase, isPaused, setExporting } from '../render';
 import { composeExportCanvas, renderTextOnCanvas } from './text';
+import { setStatusMsg } from './statusbar';
 
 const $ = (id: string) => document.getElementById(id)!;
 
@@ -18,7 +19,7 @@ function download(blob: Blob, name: string): void {
   a.download = name; a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 }
-function msg(t: string): void { $('stMsg').textContent = t; }
+function msg(t: string): void { setStatusMsg(t); }
 
 // ── PNG ──────────────────────────────────────────────────
 
@@ -41,6 +42,10 @@ export function startWebmExport(pauseBtn: HTMLButtonElement): void {
   exportCv = document.createElement('canvas');
   exportCv.width = canvas.width; exportCv.height = canvas.height;
   ectx = exportCv.getContext('2d')!;
+  
+  const pixelCv = document.createElement('canvas');
+  const pctx = pixelCv.getContext('2d')!;
+
   const stream = exportCv.captureStream(60);
   const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
     ? 'video/webm;codecs=vp9' : 'video/webm';
@@ -66,7 +71,22 @@ export function startWebmExport(pauseBtn: HTMLButtonElement): void {
     lastTime = now;
     phase = (phase + dt / P.loop * Math.PI * 2) % (Math.PI * 2);
     draw(phase);
-    ectx.drawImage(canvas, 0, 0);
+
+    if (P.pixel && P.pixel > 0.001) {
+      const scale = Math.max(0.02, 1 - P.pixel);
+      const sw = Math.max(1, Math.floor(exportCv.width * scale));
+      const sh = Math.max(1, Math.floor(exportCv.height * scale));
+      if (pixelCv.width !== sw || pixelCv.height !== sh) {
+        pixelCv.width = sw; pixelCv.height = sh;
+      }
+      pctx.imageSmoothingEnabled = true;
+      pctx.drawImage(canvas, 0, 0, sw, sh);
+      ectx.imageSmoothingEnabled = false;
+      ectx.drawImage(pixelCv, 0, 0, exportCv.width, exportCv.height);
+    } else {
+      ectx.drawImage(canvas, 0, 0);
+    }
+
     renderTextOnCanvas(ectx, exportCv.width, exportCv.height);
     requestAnimationFrame(vidComposite);
   }
@@ -123,6 +143,10 @@ export async function exportGIF(): Promise<void> {
     const tmp = document.createElement('canvas');
     tmp.width = tw; tmp.height = th;
     const tctx = tmp.getContext('2d')!;
+
+    const pixelCv = document.createElement('canvas');
+    const pctx = pixelCv.getContext('2d')!;
+
     const fps = 30;
     const frames = Math.round(P.loop * fps);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -130,7 +154,22 @@ export async function exportGIF(): Promise<void> {
     for (let i = 0; i < frames; i++) {
       if (gifCancel) throw new Error('cancelled');
       draw(i / frames * Math.PI * 2);
-      tctx.drawImage(canvas, 0, 0, tw, th);
+
+      if (P.pixel && P.pixel > 0.001) {
+        const scale = Math.max(0.02, 1 - P.pixel);
+        const sw = Math.max(1, Math.floor(tw * scale));
+        const sh = Math.max(1, Math.floor(th * scale));
+        if (pixelCv.width !== sw || pixelCv.height !== sh) {
+          pixelCv.width = sw; pixelCv.height = sh;
+        }
+        pctx.imageSmoothingEnabled = true;
+        pctx.drawImage(canvas, 0, 0, sw, sh);
+        tctx.imageSmoothingEnabled = false;
+        tctx.drawImage(pixelCv, 0, 0, tw, th);
+      } else {
+        tctx.drawImage(canvas, 0, 0, tw, th);
+      }
+
       renderTextOnCanvas(tctx, tw, th);
       gif.addFrame(tmp, { copy: true, delay: 1000 / fps });
       $('recText').textContent = 'rendering gif ' + (i + 1) + '/' + frames;

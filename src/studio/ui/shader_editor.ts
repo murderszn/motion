@@ -12,7 +12,7 @@ function showProblems(errorStr: string | null): void {
   const list = $('problemsList'), badge = $('probCount');
   const tabProblems = $('tabProblems');
   if (!errorStr) {
-    list.innerHTML = '<div style="color:var(--dim)">No problems have been detected in the workspace.</div>';
+    list.innerHTML = '<div style="opacity:0.65">No problems have been detected in the workspace.</div>';
     badge.classList.add('hidden'); badge.textContent = '0';
     (tabProblems as HTMLElement).style.color = '';
   } else {
@@ -22,26 +22,26 @@ function showProblems(errorStr: string | null): void {
       const match = line.match(/ERROR:\s+\d+:(\d+):(.*)/);
       if (match) {
         const lineNum = match[1], msg = match[2].trim();
-        html += `<div class="prob-item" style="color:var(--accent);cursor:pointer;margin-bottom:6px" onclick="window.goToShaderLine(${lineNum})">
+        html += `<div class="prob-item" style="color:var(--term-accent, var(--accent));cursor:pointer;margin-bottom:6px" onclick="window.goToShaderLine(${lineNum})">
           <span style="font-weight:bold">✗ Line ${lineNum}:</span> ${msg}
         </div>`;
       } else {
-        html += `<div style="color:var(--accent);margin-bottom:6px">${line}</div>`;
+        html += `<div style="color:var(--term-accent, var(--accent));margin-bottom:6px">${line}</div>`;
       }
     });
     list.innerHTML = html;
     badge.classList.remove('hidden'); badge.textContent = String(lines.length);
-    (tabProblems as HTMLElement).style.color = 'var(--accent)';
+    (tabProblems as HTMLElement).style.color = 'var(--term-accent, var(--accent))';
   }
 }
 
-function selectTab(tab: 'term' | 'shader' | 'problems'): void {
-  const tabTerm     = $('tabTerm'),   tabShader   = $('tabShader'),  tabProblems = $('tabProblems');
-  const termXterm   = $('term-xterm'), termEditor = $('term-editor'), termProblems = $('term-problems');
+function selectTab(tab: 'term' | 'shader' | 'problems' | 'hotkeys'): void {
+  const tabTerm     = $('tabTerm'),   tabShader   = $('tabShader'),  tabProblems = $('tabProblems'), tabHotkeys = $('tabHotkeys');
+  const termXterm   = $('term-xterm'), termEditor = $('term-editor'), termProblems = $('term-problems'), termHotkeys = $('term-hotkeys');
   const btnCompile  = $('btnCompileShader');
 
-  [tabTerm, tabShader, tabProblems].forEach(t => t.classList.remove('active'));
-  [$('term-xterm'), $('term-editor'), $('term-problems')].forEach(c => (c as HTMLElement).style.display = 'none');
+  [tabTerm, tabShader, tabProblems, tabHotkeys].forEach(t => t.classList.remove('active'));
+  [$('term-xterm'), $('term-editor'), $('term-problems'), $('term-hotkeys')].forEach(c => (c as HTMLElement).style.display = 'none');
   (btnCompile as HTMLElement).style.display = 'none';
 
   if (tab === 'term') {
@@ -53,6 +53,9 @@ function selectTab(tab: 'term' | 'shader' | 'problems'): void {
     (termEditor as HTMLElement).style.display = 'flex';
     (btnCompile as HTMLElement).style.display = 'grid';
     ($('shaderCode') as HTMLTextAreaElement).focus();
+  } else if (tab === 'hotkeys') {
+    tabHotkeys.classList.add('active');
+    (termHotkeys as HTMLElement).style.display = 'block';
   } else {
     tabProblems.classList.add('active');
     (termProblems as HTMLElement).style.display = 'block';
@@ -66,11 +69,37 @@ function compileCurrentShader(): void {
   if (!err) window.dispatchEvent(new CustomEvent('lumen:log', { detail: { msg: 'shader compiled successfully', cls: 'ok' } }));
 }
 
+function populateHotkeys(): void {
+  const rows: [string, string][] = [
+    ['Space',        'Pause / play animation'],
+    ['R',            'Randomize all parameters'],
+    ['S',            'Save PNG image'],
+    ['T',            'Toggle text tool (click canvas to place)'],
+    ['Escape',       'Deactivate text tool'],
+    ['G',            'Open generator tab'],
+    ['F',            'Toggle fullscreen'],
+    ['Ctrl + B',     'Toggle right panel'],
+    ['Ctrl + `',     'Toggle terminal'],
+    ['Ctrl + Shift + `', 'Maximize terminal'],
+    ['Ctrl + Shift + P', 'Command palette'],
+    ['F1',           'Command palette'],
+    ['Ctrl + S',     'Compile shader (in editor)'],
+  ];
+  const el = $('hotkeysList');
+  el.innerHTML = rows.map(([key, desc]) =>
+    `<div style="display:flex;gap:12px;align-items:baseline;margin-bottom:4px">` +
+    `<span style="color:var(--term-text);min-width:170px;flex:none;font-weight:500">${key}</span>` +
+    `<span style="opacity:0.65">${desc}</span></div>`
+  ).join('');
+}
+
 export function initShaderEditor(): void {
   $('tabTerm').onclick     = () => selectTab('term');
   $('tabShader').onclick   = () => selectTab('shader');
   $('tabProblems').onclick = () => selectTab('problems');
+  $('tabHotkeys').onclick  = () => selectTab('hotkeys');
   $('btnCompileShader').onclick = compileCurrentShader;
+  populateHotkeys();
 
   // Pre-populate with current source
   ($('shaderCode') as HTMLTextAreaElement).value = FS.trim();
@@ -104,7 +133,4 @@ export function initShaderEditor(): void {
     shaderCode.setSelectionRange(charIdx, charIdx + lines[lineNum - 1].length);
     shaderCode.scrollTop = (lineNum - 5) * 16.5;
   };
-
-  // Maximize shortcut
-  $('termMaximize').onclick = toggleMaximize;
 }

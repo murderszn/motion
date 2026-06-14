@@ -5,7 +5,7 @@
 
 import { THEMES } from '../state';
 import { fitTerminal, updateTermTheme, logToTerminal } from './terminal';
-import { renderTextOverlay, texts, addText } from './text';
+import { renderTextOverlay, toggleTextTool, textToolActive } from './text';
 
 const $ = (id: string) => document.getElementById(id)!;
 
@@ -130,11 +130,8 @@ export function initSidebar(): void {
     } else selectLeftTab('generator');
   };
   $('btnTextTab').onclick = () => {
-    const open = document.body.classList.contains('text-open');
-    if (open && $('btnTextTab').classList.contains('active')) {
-      document.body.classList.remove('text-open');
-      $('btnTextTab').classList.remove('active');
-    } else { selectLeftTab('text'); if (!texts.length) addText(); }
+    toggleTextTool();
+    if (textToolActive) selectLeftTab('text');
   };
 
   // Listen for cross-module selectTab events (from text.ts)
