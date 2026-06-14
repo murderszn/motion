@@ -204,6 +204,10 @@ violates it will produce a visible seam.
 
 ---
 
+---
+
+**Community:** [Join the Discord](https://discord.gg/F9Vy9ByYbB)
+
 *Inspired by Inigo Quilez, Book of Shaders, Casey Reas / Processing Foundation,
 Tyler Hobbs, Matt DesLauriers, Dave Whyte (beesandbombs), Ryoji Ikeda / teamLab,
 FIELD.IO, and Universal Everything.*
