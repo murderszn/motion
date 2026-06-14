@@ -11,6 +11,9 @@ lumen-*.png
 lumen-*.webm
 lumen-*.gif
 
+# Firebase
+.firebase/
+
 # Dependencies
 node_modules/
 

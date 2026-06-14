@@ -1,0 +1,2357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>/motion local — generative shader studio</title>
+  <meta name="description" content="/motion local is a browser-based generative graphics studio for creating looping motion graphics with WebGL shaders. 15 shader presets, seamless loops, export as PNG, WebM, GIF, or standalone HTML.">
+  <meta name="keywords" content="webgl, shader, generative art, motion graphics, glsl, animation, loop, export, creative coding, procedural graphics">
+  <meta name="author" content="murderszn">
+  <meta name="robots" content="index, follow">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="/motion local — generative shader studio">
+  <meta property="og:description" content="Browser-based generative graphics studio. 15 WebGL shaders, seamless loops, multi-format export. No cloud. No account. No install.">
+  <meta property="og:image" content="/favicon.png">
+  <meta property="og:site_name" content="/motion local">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="/motion local — generative shader studio">
+  <meta name="twitter:description" content="Browser-based generative graphics studio. 15 WebGL shaders, seamless loops, multi-format export.">
+  <meta name="twitter:image" content="/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%; min-height: 100%; overflow-y: auto; overflow-x: hidden;
+      background: #f8f8fa;
+      font-family: 'Inter', -apple-system, sans-serif;
+      color: #4a4a63;
+      -webkit-font-smoothing: antialiased;
+    }
+    html { font-size: 112.5%; }
+
+    /* ── background: red wave shader ── */
+    #bg-canvas {
+      position: fixed; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      z-index: 0;
+      will-change: transform;
+      transition: transform 0.2s ease-out;
+    }
+
+    /* ── scrim — light wash so the dark page text stays readable over the shader ── */
+    #scrim {
+      position: fixed; inset: 0; z-index: 3;
+      pointer-events: none;
+      background: #f8f8fa;
+      opacity: 0.45;
+    }
+
+    /* ── vignette ── */
+    #vignette {
+      position: fixed; inset: 0; z-index: 1;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse at 50% 55%, transparent 20%, rgba(248,248,250,0.25) 60%, rgba(248,248,250,0.6) 100%),
+        linear-gradient(to bottom, rgba(248,248,250,0.1) 0%, transparent 25%, transparent 75%, rgba(248,248,250,0.25) 100%);
+    }
+
+    /* ── grain ── */
+    #grain {
+      position: fixed; inset: 0; z-index: 2;
+      pointer-events: none;       opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* ── content ── */
+    #content {
+      position: relative; z-index: 10;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-start;
+      min-height: 100vh;
+      padding: 4.5rem 1.5rem;
+      pointer-events: none;
+    }
+
+    /* ── hero container ── */
+    .hero-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 9rem);
+      width: 100%;
+      max-width: 800px;
+      text-align: center;
+    }
+
+    /* ── footer container ── */
+    .footer-container {
+      width: 100%;
+      max-width: 800px;
+      margin-top: 8rem;
+      margin-bottom: 2rem;
+      padding-top: 3rem;
+      border-top: 1px solid rgba(26, 26, 46, 0.06);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      pointer-events: auto;
+      opacity: 0;
+      animation: fadeUp 1.4s 2.3s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    /* ── corners ── */
+    .corner {
+      position: fixed; z-index: 20;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.52rem; font-weight: 300;
+      letter-spacing: 0.18em; color: rgba(26,26,46,0.4);
+      pointer-events: none;
+    }
+    .corner-tl { top: 1.6rem; left: 1.8rem; text-transform: lowercase; }
+    .corner-br { bottom: 1.6rem; right: 1.8rem; }
+
+    /* ── status bar (top right) ── */
+    .status {
+      position: fixed; top: 1.6rem; right: 1.8rem; z-index: 20;
+      display: flex; align-items: center; gap: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.48rem; letter-spacing: 0.12em;
+      color: rgba(26,26,46,0.5);
+    }
+    .status .dot {
+      width: 4px; height: 4px; border-radius: 50%;
+      background: #c0392b;
+      animation: blink 2.5s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100% { opacity: 0.25; } 50% { opacity: 1; } }
+
+    /* ── title ── */
+    .title {
+      font-family: 'Inter', -apple-system, sans-serif;
+      font-weight: 600;
+      font-size: clamp(3.5rem, 10vw, 5.8rem);
+      letter-spacing: -0.04em;
+      line-height: 1.2;
+      text-align: center;
+      color: #ffffff;
+      text-shadow: 0 2px 20px rgba(0,0,0,0.35);
+      animation: titleIn 2.4s cubic-bezier(0.16,1,0.3,1) both;
+      pointer-events: auto;
+      user-select: none;
+      text-transform: lowercase;
+    }
+    .title .slash {
+      color: #c0392b;
+    }
+    @keyframes titleIn {
+      0% { opacity: 0; transform: translateY(20px); filter: blur(5px); }
+      100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+    }
+
+    /* ── subtitle ── */
+    .subtitle {
+      margin-top: 1.4rem;
+      font-family: 'Inter', -apple-system, sans-serif;
+      font-weight: 400;
+      font-size: clamp(0.95rem, 2.2vw, 1.15rem);
+      color: rgba(26,26,46,0.6);
+      max-width: 680px;
+      text-align: center;
+      line-height: 1.5;
+      opacity: 0;
+      animation: fadeUp 1.4s 0.7s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    @keyframes fadeUp {
+      0% { opacity: 0; transform: translateY(14px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── terminal block ── */
+    .terminal-block {
+      margin-top: 2.8rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: rgba(26,26,46,0.85);
+      text-align: left;
+      opacity: 0;
+      animation: fadeUp 1.4s 1s cubic-bezier(0.16,1,0.3,1) both;
+      pointer-events: auto;
+      width: 100%;
+      max-width: 580px;
+      background: rgba(26,26,46,0.03);
+      border: 1px solid rgba(26, 26, 46, 0.1);
+      border-radius: 4px;
+      padding: 14px 22px;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.01);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+    .terminal-block:hover {
+      background: rgba(26,26,46,0.05);
+      border-color: rgba(26,26,46,0.08);
+    }
+    .terminal-content {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      white-space: nowrap;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .terminal-content::-webkit-scrollbar {
+      display: none;
+    }
+    .terminal-block .prompt {
+      color: rgba(26,26,46,0.4);
+      user-select: none;
+      flex-shrink: 0;
+    }
+    .terminal-block .cmd {
+      color: #4a4a63;
+    }
+    .copy-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(26,26,46,0.35);
+      transition: color 0.2s ease;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .terminal-block:hover .copy-btn {
+      color: rgba(26,26,46,0.7);
+    }
+    .copy-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* ── divider ── */
+    .divider {
+      width: 32px; height: 1px;
+      background: rgba(26,26,46,0.15);
+      margin-top: 2rem;
+      opacity: 0;
+      animation: fadeUp 1.4s 1.4s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    /* ── actions row ── */
+    .actions {
+      margin-top: 2.6rem;
+      display: flex; gap: 0.8rem;
+      pointer-events: auto;
+      opacity: 0;
+      animation: fadeUp 1.4s 1.6s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .btn {
+      font-family: 'Inter', -apple-system, sans-serif;
+      font-weight: 500;
+      font-size: 0.88rem;
+      letter-spacing: -0.01em;
+      text-decoration: none;
+      padding: 0.75rem 1.8rem;
+      border: 1px solid rgba(26,26,46,0.15);
+      border-radius: 4px;
+      background: #f8f8fa;
+      color: #4a4a63;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn:hover {
+      border-color: rgba(26,26,46,0.4);
+      background: rgba(26,26,46,0.02);
+    }
+    .btn.primary {
+      background: #1a1a2e;
+      color: #ffffff;
+      border-color: #4a4a63;
+    }
+    .btn.primary:hover {
+      background: #2b2b40;
+      border-color: #2b2b40;
+      color: #ffffff;
+    }
+
+    /* ── github bar ── */
+    .github-bar {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.52rem;
+      letter-spacing: 0.08em;
+      color: rgba(26,26,46,0.5);
+      background: rgba(26,26,46,0.03);
+      border: 1px solid rgba(26,26,46,0.06);
+      border-radius: 4px;
+      padding: 6px 16px;
+      transition: all 0.3s ease;
+      pointer-events: auto;
+      text-decoration: none;
+    }
+    .github-bar:hover {
+      background: rgba(26,26,46,0.06);
+      border-color: rgba(26,26,46,0.15);
+      transform: translateY(-1px);
+    }
+    .github-bar a {
+      color: rgba(26,26,46,0.8);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+    .github-bar a:hover { color: #4a4a63; }
+    .github-bar svg { width: 12px; height: 12px; fill: currentColor; }
+    .github-bar .sep { color: rgba(26,26,46,0.2); }
+
+    /* ── socials (minimal) ── */
+    .socials {
+      display: flex;
+      gap: 1rem;
+      pointer-events: auto;
+    }
+    .socials a {
+      width: 24px; height: 24px;
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(26,26,46,0.3);
+      transition: color 0.3s ease, transform 0.3s ease;
+    }
+    .socials a:hover {
+      color: rgba(26,26,46,0.7);
+      transform: translateY(-1px);
+    }
+    .socials a svg {
+      width: 14px; height: 14px;
+      fill: currentColor;
+    }
+
+    /* ── bottom sig ── */
+    .bottom-sig {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.42rem;
+      letter-spacing: 0.3em;
+      text-transform: lowercase;
+      color: rgba(26,26,46,0.3);
+      pointer-events: none;
+      text-align: center;
+    }
+
+    /* ── steps section ── */
+    .steps-section {
+      width: 100%;
+      max-width: 1000px;
+      margin-top: 7rem;
+      opacity: 0;
+      animation: fadeUp 1.4s 2.3s cubic-bezier(0.16,1,0.3,1) both;
+      pointer-events: auto;
+      text-align: center;
+    }
+    .steps-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: #c0392b;
+      margin-bottom: 3.5rem;
+    }
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+    }
+    .step-card {
+      background: rgba(255, 255, 255, 0.4);
+      border: 1px solid rgba(26, 26, 46, 0.1);
+      border-radius: 4px;
+      padding: 24px;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+    .step-card:hover {
+      background: rgba(255, 255, 255, 0.55);
+      border-color: rgba(26, 26, 46, 0.2);
+    }
+    .step-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.8rem;
+      font-weight: 200;
+      color: rgba(192, 57, 43, 0.25);
+    }
+    .step-heading {
+      font-weight: 500;
+      font-size: 0.9rem;
+      letter-spacing: 0.05em;
+      color: #4a4a63;
+    }
+    .step-desc {
+      font-size: 0.65rem;
+      line-height: 1.6;
+      color: rgba(26, 26, 46, 0.55);
+      margin-bottom: 8px;
+    }
+    .step-img-wrapper {
+      width: 100%;
+      aspect-ratio: 1.6;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid rgba(26, 26, 46, 0.06);
+      background: #fff;
+    }
+    .step-img-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    .step-card:hover .step-img-wrapper img {
+      transform: scale(1.05);
+    }
+
+    @media (max-width: 768px) {
+      .steps-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .title { letter-spacing: -0.04em; }
+      .actions { flex-direction: column; align-items: center; }
+      .corner, .status { display: none; }
+      .terminal-block { font-size: 0.55rem; }
+    }
+
+    /* ── navbar ── */
+    .navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 4rem;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(26px) saturate(180%);
+      -webkit-backdrop-filter: blur(26px) saturate(180%);
+      border-bottom: 1px solid rgba(26, 26, 46, 0.06);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2.5rem;
+      pointer-events: auto;
+    }
+
+    .navbar-logo {
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+      text-shadow: 0 1px 10px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+
+    .navbar-logo .slash {
+      color: #c0392b;
+    }
+
+    .navbar-links {
+      display: flex;
+      gap: 2.2rem;
+    }
+
+    .navbar-links a {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: rgba(26, 26, 46, 0.55);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .navbar-links a:hover {
+      color: #4a4a63;
+    }
+
+    .navbar-actions {
+      display: flex;
+      align-items: center;
+    }
+
+    .btn-nav-install {
+      padding: 0.45rem 1.1rem !important;
+      font-size: 0.78rem !important;
+    }
+
+    @media (max-width: 768px) {
+      .navbar-links {
+        display: none;
+      }
+      .navbar {
+        padding: 0 1.5rem;
+      }
+    }
+
+    /* ── brand logos grid ── */
+    .brand-logos {
+      margin-top: 4.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 2.5rem 3.5rem;
+      width: 100%;
+      max-width: 800px;
+      opacity: 0;
+      animation: fadeUp 1.4s 1.9s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    .brand-logo-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 0.78rem;
+      letter-spacing: -0.01em;
+      color: rgba(26, 26, 46, 0.35);
+      transition: color 0.3s ease;
+      user-select: none;
+    }
+
+    .brand-logo-item:hover {
+      color: rgba(26, 26, 46, 0.7);
+    }
+
+    .brand-logo-item svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    /* ── agent console playground ── */
+    .playground-section {
+      width: 100%;
+      max-width: 1000px;
+      margin-top: 7rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 1.4s 2.0s cubic-bezier(0.16,1,0.3,1) both;
+      pointer-events: auto;
+      text-align: center;
+    }
+
+    .playground-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: #c0392b;
+      margin-bottom: 0.5rem;
+    }
+
+    .playground-container {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      background: rgba(255, 255, 255, 0.45);
+      border: 1px solid rgba(26, 26, 46, 0.12);
+      border-radius: 6px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      overflow: hidden;
+      text-align: left;
+      margin-top: 1.5rem;
+    }
+
+    @media (max-width: 900px) {
+      .playground-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ── live preview strip (decoupled from the page background) ── */
+    .preview-strip {
+      grid-column: 1 / -1;
+      aspect-ratio: 16 / 9;   /* screen-accurate viewport, like the app */
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+      background: #1a1a2e;
+      border-bottom: 1px solid rgba(26, 26, 46, 0.1);
+    }
+    #preview-canvas { display: block; width: 100%; height: 100%; }
+    .preview-tag {
+      position: absolute; top: 12px; left: 16px; z-index: 2;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.55rem; letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.6);
+      pointer-events: none;
+    }
+
+    .agent-pane {
+      border-right: 1px solid rgba(26, 26, 46, 0.08);
+      display: flex;
+      flex-direction: column;
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    @media (max-width: 900px) {
+      .agent-pane {
+        border-right: none;
+        border-bottom: 1px solid rgba(26, 26, 46, 0.08);
+      }
+    }
+
+    .pane-header {
+      padding: 12px 18px;
+      border-bottom: 1px solid rgba(26, 26, 46, 0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.45);
+    }
+
+    .pane-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      font-weight: 500;
+      color: rgba(26, 26, 46, 0.7);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pane-title .dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #27ae60;
+      box-shadow: 0 0 6px rgba(39, 174, 96, 0.6);
+      animation: pulseGreen 2s infinite;
+    }
+
+    @keyframes pulseGreen {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.6); }
+      70% { transform: scale(1); box-shadow: 0 0 0 5px rgba(39, 174, 96, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(39, 174, 96, 0); }
+    }
+
+    .pane-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .window-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(26, 26, 46, 0.1);
+    }
+
+    .agent-chat {
+      flex-grow: 1;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      height: 330px;
+      overflow-y: auto;
+      font-size: 0.75rem;
+      line-height: 1.45;
+    }
+
+    .chat-bubble {
+      max-width: 85%;
+      padding: 10px 14px;
+      border-radius: 4px;
+      position: relative;
+    }
+
+    .chat-bubble.user {
+      align-self: flex-end;
+      background: #1a1a2e;
+      color: #ffffff;
+      border-bottom-right-radius: 2px;
+    }
+
+    .chat-bubble.agent {
+      align-self: flex-start;
+      background: rgba(26, 26, 46, 0.04);
+      border: 1px solid rgba(26, 26, 46, 0.05);
+      color: #4a4a63;
+      border-bottom-left-radius: 2px;
+    }
+
+    .chat-bubble .sender {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.58rem;
+      opacity: 0.45;
+      margin-bottom: 3px;
+      display: block;
+    }
+
+    .chat-bubble.user .sender {
+      color: rgba(255, 255, 255, 0.55);
+    }
+
+    .agent-terminal {
+      background: rgba(26, 26, 46, 0.94);
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      color: #a9b2c3;
+      margin-top: 6px;
+      border-left: 2px solid #c0392b;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.15);
+    }
+
+    .terminal-line {
+      margin-bottom: 3px;
+      white-space: pre-wrap;
+    }
+
+    .terminal-line.success {
+      color: #27ae60;
+    }
+
+    .terminal-line.info {
+      color: #3b82f6;
+    }
+
+    /* Right Pane */
+    .controls-pane {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .control-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: rgba(26, 26, 46, 0.45);
+      letter-spacing: 0.06em;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .control-label span.val {
+      color: #c0392b;
+    }
+
+    .preset-pills {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+    }
+
+    .preset-pill {
+      padding: 8px 10px;
+      border-radius: 4px;
+      border: 1px solid rgba(26, 26, 46, 0.07);
+      background: rgba(255, 255, 255, 0.65);
+      font-size: 0.68rem;
+      font-weight: 500;
+      color: rgba(26, 26, 46, 0.7);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    .preset-pill:hover {
+      background: rgba(26, 26, 46, 0.03);
+      border-color: rgba(26, 26, 46, 0.12);
+    }
+
+    .preset-pill.active {
+      background: #1a1a2e;
+      border-color: #4a4a63;
+      color: #ffffff;
+      box-shadow: 0 4px 10px rgba(26, 26, 46, 0.12);
+    }
+
+    .slider-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .slider-container input[type="range"] {
+      flex-grow: 1;
+      appearance: none;
+      -webkit-appearance: none;
+      height: 3px;
+      border-radius: 2px;
+      background: rgba(26, 26, 46, 0.08);
+      outline: none;
+    }
+
+    .slider-container input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #c0392b;
+      cursor: pointer;
+      transition: transform 0.1s ease;
+    }
+
+    .slider-container input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    /* ── platforms grid ── */
+    .platforms-section {
+      width: 100%;
+      max-width: 1000px;
+      margin-top: 7rem;
+      text-align: center;
+      opacity: 0;
+      animation: fadeUp 1.4s 2.1s cubic-bezier(0.16,1,0.3,1) both;
+      pointer-events: auto;
+    }
+
+    .platforms-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: #c0392b;
+      margin-bottom: 1rem;
+    }
+
+    .platforms-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-top: 2.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .platforms-grid {
+        grid-template-columns: 1fr;
+        gap: 1.2rem;
+      }
+    }
+
+    .platform-card {
+      background: rgba(255, 255, 255, 0.4);
+      border: 1px solid rgba(26, 26, 46, 0.1);
+      border-radius: 4px;
+      padding: 24px;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .platform-card:hover {
+      border-color: rgba(26, 26, 46, 0.2);
+      background: rgba(255, 255, 255, 0.55);
+    }
+
+    .platform-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      background: rgba(26, 26, 46, 0.03);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #c0392b;
+      margin-bottom: 4px;
+    }
+
+    .platform-icon svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .platform-heading {
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #4a4a63;
+    }
+
+    .platform-desc {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      line-height: 1.55;
+      color: rgba(26, 26, 46, 0.55);
+    }
+
+    /* ── faq section ── */
+    .faq-section {
+      width: 100%;
+      max-width: 800px;
+      margin-top: 7rem;
+      text-align: center;
+      opacity: 0;
+      animation: fadeUp 1.4s 2.2s cubic-bezier(0.16,1,0.3,1) both;
+      pointer-events: auto;
+    }
+
+    .faq-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: #c0392b;
+      margin-bottom: 1rem;
+    }
+
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      text-align: left;
+      margin-top: 2.5rem;
+    }
+
+    .faq-item {
+      background: rgba(255, 255, 255, 0.4);
+      border: 1px solid rgba(26, 26, 46, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .faq-item:hover {
+      border-color: rgba(26, 26, 46, 0.14);
+      background: rgba(255, 255, 255, 0.55);
+    }
+
+    .faq-question {
+      padding: 18px 22px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 0.85rem;
+      color: #4a4a63;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+
+    .faq-question .icon {
+      font-size: 0.9rem;
+      color: rgba(26, 26, 46, 0.4);
+      transition: transform 0.3s ease;
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s cubic-bezier(0.16, 1, 0.3, 1), padding 0.3s ease;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      line-height: 1.6;
+      color: rgba(26, 26, 46, 0.55);
+      padding: 0 22px;
+    }
+
+    .faq-item.active {
+      background: rgba(255, 255, 255, 0.75);
+      border-color: rgba(26, 26, 46, 0.18);
+    }
+
+    .faq-item.active .faq-question .icon {
+      transform: rotate(45deg);
+    }
+
+    .faq-item.active .faq-answer {
+      max-height: 220px;
+      padding-bottom: 18px;
+    }
+
+    /* ── technical rundown & footer grid ── */
+    .rundown-section {
+      width: 100%;
+      max-width: 1000px;
+      margin-top: 7rem;
+      text-align: center;
+      opacity: 0;
+      animation: fadeUp 1.4s 2.3s cubic-bezier(0.16,1,0.3,1) both;
+      pointer-events: auto;
+    }
+
+    .rundown-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: #c0392b;
+      margin-bottom: 1rem;
+    }
+
+    .rundown-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.2rem;
+      margin-top: 2.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .rundown-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 480px) {
+      .rundown-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .rundown-card {
+      background: rgba(255, 255, 255, 0.4);
+      border: 1px solid rgba(26, 26, 46, 0.1);
+      border-radius: 4px;
+      padding: 18px;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: border-color 0.2s ease, background 0.2s ease;
+      text-decoration: none;
+    }
+
+    .rundown-card:hover {
+      border-color: rgba(26, 26, 46, 0.2);
+      background: rgba(255, 255, 255, 0.55);
+    }
+
+    .rundown-card .category {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.55rem;
+      color: rgba(26, 26, 46, 0.4);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .rundown-card .name {
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 0.78rem;
+      color: #4a4a63;
+    }
+
+    .rundown-card .desc {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.65rem;
+      line-height: 1.45;
+      color: rgba(26, 26, 46, 0.5);
+    }
+
+    /* ── bottom cta banner ── */
+    .cta-banner {
+      width: 100%;
+      max-width: 1000px;
+      margin-top: 7rem;
+      background: rgba(255, 255, 255, 0.5);
+      border: 1px solid rgba(26, 26, 46, 0.12);
+      border-radius: 6px;
+      padding: 3.5rem 2rem;
+      color: #4a4a63;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.8rem;
+      opacity: 0;
+      animation: fadeUp 1.4s 2.4s cubic-bezier(0.16,1,0.3,1) both;
+      pointer-events: auto;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    .cta-banner h2 {
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: clamp(1.6rem, 3.5vw, 2.3rem);
+      letter-spacing: -0.03em;
+      max-width: 600px;
+      line-height: 1.25;
+    }
+
+    .cta-banner p {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      color: rgba(26, 26, 46, 0.55);
+      max-width: 500px;
+      margin-top: -0.5rem;
+    }
+
+    /* inner terminal inherits the default light styling so it matches the site */
+    .cta-banner .terminal-block {
+      margin-top: 0;
+      max-width: 480px;
+    }
+
+    .newsletter-form {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+      max-width: 380px;
+      margin-top: 0.5rem;
+    }
+
+    .newsletter-input {
+      flex-grow: 1;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+      padding: 0.55rem 1.1rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      color: #ffffff;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .newsletter-input:focus {
+      border-color: rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .newsletter-btn {
+      background: #ffffff;
+      color: #4a4a63;
+      border: none;
+      border-radius: 4px;
+      padding: 0.55rem 1.3rem;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .newsletter-btn:hover {
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    /* Footer Directory */
+    .footer-directory {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+      width: 100%;
+      text-align: left;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 600px) {
+      .footer-directory {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+      }
+    }
+
+    .footer-col {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .footer-col h4 {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: rgba(26, 26, 46, 0.7);
+    }
+
+    .footer-col a {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      color: rgba(26, 26, 46, 0.45);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .footer-col a:hover {
+      color: #4a4a63;
+    }
+
+    .terminal-mock {
+      background: rgba(26, 26, 46, 0.95);
+      border: 1px solid rgba(26, 26, 46, 0.1);
+      border-radius: 4px;
+      padding: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      color: #a9b2c3;
+      text-align: left;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+      margin-top: 15px;
+      min-height: 110px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 6px;
+    }
+    .terminal-mock .term-line {
+      white-space: pre-wrap;
+    }
+    .terminal-mock .prompt {
+      color: rgba(255,255,255,0.35);
+      user-select: none;
+    }
+    .terminal-mock .success {
+      color: #27ae60;
+    }
+    .terminal-mock .info {
+      color: #3b82f6;
+    }
+
+    /* ── iOS-26 "liquid glass" material — applied to every container ──
+       Frosted, translucent, saturated backdrop with a bright top highlight.
+       Pure CSS so all content stays fully interactive over the live shader. */
+    .terminal-block,
+    .playground-container,
+    .step-card,
+    .platform-card,
+    .faq-item,
+    .rundown-card,
+    .cta-banner,
+    .github-bar {
+      background: rgba(255, 255, 255, 0.13) !important;
+      -webkit-backdrop-filter: blur(26px) saturate(180%);
+      backdrop-filter: blur(26px) saturate(180%);
+      border: none !important;
+      box-shadow: 0 8px 32px rgba(20, 20, 40, 0.12) !important;
+    }
+    .terminal-block:hover,
+    .step-card:hover,
+    .platform-card:hover,
+    .faq-item:hover,
+    .rundown-card:hover {
+      background: rgba(255, 255, 255, 0.2) !important;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bg-canvas"></canvas>
+  <div id="vignette"></div>
+  <div id="grain"></div>
+  <div id="scrim"></div>
+
+  <header class="navbar">
+    <a href="#" class="navbar-logo">
+      <span class="slash">/</span>motion
+    </a>
+    <nav class="navbar-links">
+      <a href="#playground">Playground</a>
+      <a href="#how-it-works">How It Works</a>
+      <a href="#platforms">Platforms</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://github.com/murderszn/motion#readme" target="_blank">Docs</a>
+    </nav>
+  </header>
+
+  <div id="content" style="margin-top: 4rem; padding: 4.5rem 1.5rem 2.5rem 1.5rem;">
+    <div class="hero-container" style="min-height: calc(100vh - 13rem);">
+      <div class="title"><span class="slash">/</span>motion</div>
+      <div class="subtitle">A generative graphics studio for shader design. Run the app locally, configure WebGL shaders, customize colors, and loop visuals. Open it to any coding assistant of your choice (like Cursor or Copilot) to write configuration files and output standalone HTML splash pages.</div>
+
+      <div class="terminal-block" onclick="copyText('git clone https://github.com/murderszn/motion.git && cd motion && npm install && npm run dev', this.querySelector('.copy-btn'))" style="cursor: pointer;" title="Click to copy install command">
+        <div class="terminal-content">
+          <span class="prompt">&gt;_</span>
+          <span class="cmd">git clone https://github.com/murderszn/motion.git && cd motion && npm install && npm run dev</span>
+        </div>
+        <div class="copy-btn">
+          <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+        </div>
+      </div>
+
+      <div class="actions">
+        <a href="https://github.com/murderszn/motion" target="_blank" rel="noopener" class="btn">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222 0 1.606-.014 2.898-.014 3.293 0 .322.216.694.825.576C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+          GitHub
+        </a>
+        <a href="https://github.com/murderszn/motion#readme" target="_blank" rel="noopener" class="btn">
+          Docs
+        </a>
+        <a href="https://discord.gg/F9Vy9ByYbB" target="_blank" rel="noopener" class="btn primary">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg>
+          Join Discord <span style="font-family: system-ui; margin-left: 2px;">↗</span>
+        </a>
+      </div>
+
+    </div>
+
+    <!-- ── Interactive Config Builder ── -->
+    <div class="playground-section" id="playground">
+      <div class="playground-title">interactive config builder</div>
+      <h3 style="font-family:'Inter',sans-serif;font-weight:600;font-size: clamp(1.4rem, 4vw, 2rem);color:#4a4a63;margin-top:-0.3rem;margin-bottom:0.8rem;letter-spacing:-0.03em;">Tweak shader parameters dynamically</h3>
+      <p style="font-family:'Inter',sans-serif;font-size:0.82rem;color:rgba(26,26,46,0.55);max-width:650px;margin:0 auto 1.5rem auto;line-height:1.5;">Tweak the shader parameters on the right. `/motion` dynamically updates the schema config on the left. Feed this JSON structure to your favorite AI assistant to automate shader styling.</p>
+      
+      <div class="playground-container">
+        <!-- Live preview (decoupled from the page background) -->
+        <div class="preview-strip">
+          <span class="preview-tag">live preview</span>
+          <canvas id="preview-canvas"></canvas>
+        </div>
+        <!-- Left Pane: JSON Config View -->
+        <div class="agent-pane">
+          <div class="pane-header">
+            <div class="pane-title">
+              <span class="dot"></span>
+              motion.config.json
+            </div>
+            <div class="pane-actions">
+              <span class="window-dot"></span>
+              <span class="window-dot"></span>
+              <span class="window-dot"></span>
+            </div>
+          </div>
+          <div class="code-editor-body" style="padding: 20px; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; line-height: 1.5; color: #a9b2c3; background: #1a1a2e; height: 330px; overflow-y: auto; display: flex; flex-direction: column; justify-content: flex-start; border-bottom-left-radius: 0; box-shadow: inset 0 4px 15px rgba(0,0,0,0.2);">
+            <pre style="margin: 0;"><code id="json-code"></code></pre>
+          </div>
+        </div>
+        
+        <!-- Right Pane: Controls and Presets -->
+        <div class="controls-pane">
+          <div class="control-group">
+            <div class="control-label">Shader Presets</div>
+            <div class="preset-pills">
+              <div class="preset-pill active" onclick="loadPreset('aurora')">Aurora Waves</div>
+              <div class="preset-pill" onclick="loadPreset('grid')">Cyber Grid</div>
+              <div class="preset-pill" onclick="loadPreset('lava')">Lava Flow</div>
+              <div class="preset-pill" onclick="loadPreset('nebula')">Cosmic Nebula</div>
+              <div class="preset-pill" onclick="loadPreset('fractal')">Fractal Orbit</div>
+              <div class="preset-pill" onclick="loadPreset('plasma')">Digital Plasma</div>
+            </div>
+          </div>
+          
+          <div class="control-group">
+            <div class="control-label">Scale <span class="val" id="val-scale">0.18</span></div>
+            <div class="slider-container">
+              <input type="range" id="slide-scale" min="0.05" max="5.0" step="0.05" value="0.18" oninput="updateShaderParam('scale', parseFloat(this.value))">
+            </div>
+          </div>
+          
+          <div class="control-group">
+            <div class="control-label">Density <span class="val" id="val-density">0.08</span></div>
+            <div class="slider-container">
+              <input type="range" id="slide-density" min="0.01" max="1.0" step="0.01" value="0.08" oninput="updateShaderParam('density', parseFloat(this.value))">
+            </div>
+          </div>
+          
+          <div class="control-group">
+            <div class="control-label">Distortion <span class="val" id="val-distort">0.86</span></div>
+            <div class="slider-container">
+              <input type="range" id="slide-distort" min="0.0" max="3.0" step="0.05" value="0.86" oninput="updateShaderParam('distort', parseFloat(this.value))">
+            </div>
+          </div>
+          
+          <div class="control-group">
+            <div class="control-label">Detail <span class="val" id="val-detail">0.32</span></div>
+            <div class="slider-container">
+              <input type="range" id="slide-detail" min="0.0" max="1.0" step="0.02" value="0.32" oninput="updateShaderParam('detail', parseFloat(this.value))">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── How It Works Steps ── -->
+    <div class="steps-section" id="how-it-works">
+      <div class="steps-title">how it works</div>
+      <h3 style="font-family:'Inter',sans-serif;font-weight:600;font-size: clamp(1.4rem, 4vw, 2rem);color:#4a4a63;margin-top:-0.3rem;margin-bottom:0.8rem;letter-spacing:-0.03em;">Three steps to generate your graphics</h3>
+      <p style="font-family:'Inter',sans-serif;font-size:0.82rem;color:rgba(26,26,46,0.55);max-width:650px;margin:0 auto 2.5rem auto;line-height:1.5;">Create config files, ask any AI assistant to modify parameters, and export self-contained responsive code blocks in seconds.</p>
+      
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-num">01</div>
+          <div class="step-heading">install & run locally</div>
+          <div class="step-desc">Clone the repo and start the Vite dev server on your machine. This mounts a WebGL preview canvas directly on your local network.</div>
+          <div class="terminal-mock">
+            <div class="term-line"><span class="prompt">$</span> git clone https://github.com/murderszn/motion.git</div>
+            <div class="term-line"><span class="prompt">$</span> cd motion &amp;&amp; npm install &amp;&amp; npm run dev</div>
+            <div class="term-line success">  [vite] ready → http://localhost:5173</div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">02</div>
+          <div class="step-heading">instruct any ai assistant</div>
+          <div class="step-desc">Ask your favorite AI (like Cursor, Copilot, or ChatGPT) to configure a specific layout or palette using `/motion`'s JSON parameter format.</div>
+          <div class="terminal-mock">
+            <div class="term-line"><span class="prompt">&gt;</span> "Create a slow lavender wave preset config:"</div>
+            <div class="term-line info">  [agent] updating motion.config.json...</div>
+            <div class="term-line success">  [agent] configuration completed.</div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">03</div>
+          <div class="step-heading">bake & export index.html</div>
+          <div class="step-desc">Compile your configured studio workspace into a single self-contained, offline-ready HTML splash page with embedded WebGL shaders.</div>
+          <div class="terminal-mock">
+            <div class="term-line"><span class="prompt">$</span> motion bake --config my-theme.json --output build/</div>
+            <div class="term-line info">  [baker] baking index.html with WebGL contexts...</div>
+            <div class="term-line success">  [baker] successfully baked page build/index.html (48kb)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Platforms Grid Section ── -->
+    <div class="platforms-section" id="platforms">
+      <div class="platforms-title">meets you where you code</div>
+      <h3 style="font-family:'Inter',sans-serif;font-weight:600;font-size: clamp(1.4rem, 4vw, 2rem);color:#4a4a63;margin-top:-0.3rem;margin-bottom:0.8rem;letter-spacing:-0.03em;">Integrate seamlessly with your workflow</h3>
+      <p style="font-family:'Inter',sans-serif;font-size:0.82rem;color:rgba(26,26,46,0.55);max-width:650px;margin:0 auto 1.5rem auto;line-height:1.5;">`/motion` runs anywhere you need visual assets: local CLI workspaces, integrated dev environments, or direct exports.</p>
+      
+      <div class="platforms-grid">
+        <div class="platform-card">
+          <div class="platform-icon">
+            <svg viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+          </div>
+          <div class="platform-heading">Terminal PTY Server</div>
+          <div class="platform-desc">Boot up the local Node pipeline. It spins up a high-performance WebGL state container and connects via WebSockets to feed your AI coding workspace.</div>
+        </div>
+        <div class="platform-card">
+          <div class="platform-icon">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+          </div>
+          <div class="platform-heading">IDE Configuration</div>
+          <div class="platform-desc">Edit configurations directly inside Cursor or any other editor. Hot-reload shaders instantly as your JSON configs or custom noise values update in the background.</div>
+        </div>
+        <div class="platform-card">
+          <div class="platform-icon">
+            <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+          </div>
+          <div class="platform-heading">Static HTML Baker</div>
+          <div class="platform-desc">Compile WebGL canvas instances into self-contained HTML pages. Overlays text, styles, and scripts automatically—ideal for single-file deployment.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── FAQ Section ── -->
+    <div class="faq-section" id="faq">
+      <div class="faq-title">frequently asked questions</div>
+      <h3 style="font-family:'Inter',sans-serif;font-weight:600;font-size: clamp(1.4rem, 4vw, 2rem);color:#4a4a63;margin-top:-0.3rem;margin-bottom:0.8rem;letter-spacing:-0.03em;">Got questions? We've got answers.</h3>
+      
+      <div class="faq-list">
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this.parentElement)">
+            What is /motion?
+            <span class="icon">+</span>
+          </div>
+          <div class="faq-answer">
+            `/motion` is an open-source local generative graphics shader studio. It acts as a workspace where you can write, preview, and test WebGL shaders and looping visual templates, exporting them directly into offline-ready standalone HTML splash pages.
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this.parentElement)">
+            Does /motion include a built-in AI coding assistant?
+            <span class="icon">+</span>
+          </div>
+          <div class="faq-answer">
+            No. `/motion` is a local software utility and visual shader studio. However, it uses a clean, standardized JSON schema configuration structure. This makes it extremely easy for you to ask your own favorite coding agent (like Cursor, Copilot, ChatGPT, or Gemini) to write or modify visual configs that you can paste directly into `/motion`.
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this.parentElement)">
+            Is /motion free?
+            <span class="icon">+</span>
+          </div>
+          <div class="faq-answer">
+            Yes! `/motion` is completely free, open-source, and hosted on GitHub. There are no paid plans, no subscription pricing, and no server-side licensing fees. It is built to run entirely on your local machine.
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this.parentElement)">
+            Can I export custom GLSL code?
+            <span class="icon">+</span>
+          </div>
+          <div class="faq-answer">
+            Absolutely. You can download the generated fragment shader code directly from the workspace UI, or use the CLI exporter to save the fragment shader code as a standard `.frag` file, ready to be used in shadertoy or other WebGL environments.
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this.parentElement)">
+            Are the exported HTML files self-contained?
+            <span class="icon">+</span>
+          </div>
+          <div class="faq-answer">
+            Yes. The exporter compiles the GLSL shader code, text layers, CSS stylesheet rules, grain, vignette, and WebGL rendering scripts directly into a single self-contained HTML page. You can host it on GitHub Pages, Netlify, or open it entirely offline.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Technical Rundown ── -->
+    <div class="rundown-section">
+      <div class="rundown-title">get the technical rundown</div>
+      <h3 style="font-family:'Inter',sans-serif;font-weight:600;font-size: clamp(1.4rem, 4vw, 2rem);color:#4a4a63;margin-top:-0.3rem;margin-bottom:0.8rem;letter-spacing:-0.03em;">Deep dive into shader studio resources</h3>
+      
+      <div class="rundown-grid">
+        <a href="https://github.com/murderszn/motion#readme" target="_blank" class="rundown-card">
+          <span class="category">developer docs</span>
+          <span class="name">Core API Reference</span>
+          <span class="desc">Explore websocket control messages, JSON state schemas, and command payloads.</span>
+        </a>
+        <a href="https://github.com/murderszn/motion" target="_blank" class="rundown-card">
+          <span class="category">developer docs</span>
+          <span class="name">Shader Math Guides</span>
+          <span class="desc">Learn how to configure FBM noise loops, time-invariant coordinate scales, and metaballs.</span>
+        </a>
+        <a href="https://github.com/murderszn/motion" target="_blank" class="rundown-card">
+          <span class="category">presets schema</span>
+          <span class="name">JSON Presets Spec</span>
+          <span class="desc">Understand the JSON preset formatting for colors, seed configurations, and distortion multipliers.</span>
+        </a>
+        <a href="https://github.com/murderszn/motion" target="_blank" class="rundown-card">
+          <span class="category">community showcase</span>
+          <span class="name">Preset Showcases</span>
+          <span class="desc">Browse user-generated WebGL shaders, visualizer loops, and interactive web elements.</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- ── Bottom CTA ── -->
+    <div class="cta-banner" id="install">
+      <h2>Create what's exciting.<br>Maintain what's essential.</h2>
+      <p>Get started with `/motion` today for free. Clone the repository, spin up the server, and write configurations using your favorite AI agent.</p>
+      
+      <div class="terminal-block" onclick="copyText('git clone https://github.com/murderszn/motion.git && cd motion && npm install && npm run dev', this.querySelector('.copy-btn'))" style="cursor: pointer;" title="Click to copy install command">
+        <div class="terminal-content">
+          <span class="prompt">&gt;_</span>
+          <span class="cmd">git clone https://github.com/murderszn/motion.git && cd motion && npm install && npm run dev</span>
+        </div>
+        <div class="copy-btn">
+          <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Footer ── -->
+    <div class="footer-container" style="border-top: none; margin-top: 6rem; padding-top: 0;">
+      <div class="footer-directory">
+        <div class="footer-col">
+          <h4>Products</h4>
+          <a href="#playground">Presets Studio</a>
+          <a href="#playground">Visualizer Screen</a>
+          <a href="#platforms">CLI Server</a>
+          <a href="#platforms">HTML Baker</a>
+        </div>
+        <div class="footer-col">
+          <h4>Solutions</h4>
+          <a href="#playground">WebGL Backgrounds</a>
+          <a href="#playground">Looping Visuals</a>
+          <a href="#playground">Shader Templates</a>
+          <a href="https://github.com/murderszn/motion" target="_blank">Creative Coding</a>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <a href="https://github.com/murderszn/motion#readme" target="_blank">Shader API Docs</a>
+          <a href="https://github.com/murderszn/motion" target="_blank">Shader Presets Spec</a>
+          <a href="https://github.com/murderszn/motion" target="_blank">GitHub Issues</a>
+          <a href="https://discord.gg/F9Vy9ByYbB" target="_blank">Discord Guild</a>
+        </div>
+        <div class="footer-col">
+          <h4>Collective</h4>
+          <a href="https://github.com/murderszn" target="_blank">/motion Collective</a>
+          <a href="https://github.com/murderszn/motion" target="_blank">GitHub Repository</a>
+          <a href="https://discord.gg/F9Vy9ByYbB" target="_blank">Join Chat</a>
+          <a href="https://x.com/jahflyx" target="_blank">Follow on X</a>
+        </div>
+      </div>
+
+      <div class="socials" style="margin-top: 1.75rem;">
+        <a href="https://github.com/murderszn/motion" target="_blank" rel="noopener" aria-label="GitHub">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222 0 1.606-.014 2.898-.014 3.293 0 .322.216.694.825.576C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+        </a>
+        <a href="https://discord.gg/F9Vy9ByYbB" target="_blank" rel="noopener" aria-label="Discord">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg>
+        </a>
+      </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       WEBGL — original aurora splash shader (untouched)
+       ═══════════════════════════════════════════════════════ -->
+  <script>
+    // Drives the interactive config-builder PREVIEW (not the page background).
+    const canvas = document.getElementById('preview-canvas');
+    const gl = canvas && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl'));
+    if (!gl) { console.warn('Live preview unavailable: WebGL not supported.'); }
+
+    const VS = `attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }`;
+    const FS = `
+precision highp float;
+
+uniform vec2  u_res;
+uniform float u_phase;
+uniform float u_seed;
+uniform int   u_mode;
+uniform float u_speed, u_scale, u_density, u_distort, u_detail, u_grain;
+uniform vec3  u_c0, u_c1, u_c2, u_c3;
+uniform sampler2D u_texture;
+uniform float u_mix, u_pixel;
+
+#define TAU 6.28318530718
+
+float hash21(vec2 p){
+    p = fract(p * vec2(234.34, 435.345));
+    p += dot(p, p + 34.23);
+    return fract(p.x * p.y);
+}
+
+float vnoise(vec2 p){
+    vec2 i = floor(p), f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    float a = hash21(i);
+    float b = hash21(i + vec2(1.0, 0.0));
+    float c = hash21(i + vec2(0.0, 1.0));
+    float d = hash21(i + vec2(1.0, 1.0));
+    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+}
+
+float fbm(vec2 p){
+    float v = 0.0, a = 0.5;
+    mat2 r = mat2(0.80, 0.60, -0.60, 0.80);
+    for (int i = 0; i < 5; i++){
+        v += a * vnoise(p);
+        p  = r * p * 2.1 + vec2(1.7, 9.2);
+        a *= 0.5;
+    }
+    return v;
+}
+
+vec2 loopOff(){
+    return vec2(cos(u_phase), sin(u_phase)) * (0.10 + 0.55 * u_speed);
+}
+
+vec3 grad4(float t){
+    t = clamp(t, 0.0, 1.0);
+    vec3 c = mix(u_c0, u_c1, smoothstep(0.00, 0.35, t));
+    c = mix(c, u_c2, smoothstep(0.35, 0.70, t));
+    c = mix(c, u_c3, smoothstep(0.70, 1.00, t));
+    return c;
+}
+
+float metaf(vec2 p, float ar){
+    float s  = u_seed;
+    float rA = 0.08 + 0.20 * u_speed;
+    vec2 b1 = vec2((0.28 + 0.06 * sin(s))       * ar, 0.62 + 0.05 * cos(s * 1.3))
+            + rA        * vec2(cos(u_phase + s),             sin(u_phase + s));
+    vec2 b2 = vec2((0.72 + 0.05 * cos(s * 2.1)) * ar, 0.40 + 0.06 * sin(s * 0.7))
+            + rA * 0.85 * vec2(cos(-2.0 * u_phase + s * 1.7), sin(-2.0 * u_phase + s * 1.7));
+    vec2 b3 = vec2((0.50 + 0.07 * sin(s * 1.6)) * ar, 0.24 + 0.05 * cos(s * 2.4))
+            + rA * 0.70 * vec2(cos(u_phase + s * 2.3 + 2.0),  sin(u_phase + s * 2.3 + 2.0));
+    return 0.30 / (length(p - b1) + 0.07)
+         + 0.22 / (length(p - b2) + 0.07)
+         + 0.16 / (length(p - b3) + 0.07);
+}
+
+void main(){
+    vec2 uv = gl_FragCoord.xy / u_res;
+    uv.y = 1.0 - uv.y;
+    float ar = u_res.x / u_res.y;
+    vec2 sOff = vec2(fract(u_seed * 0.193), fract(u_seed * 0.317)) * 47.0;
+
+    vec3 col = vec3(0.0);
+
+    if (u_mode == 0){
+        vec3 base   = vec3(0.96, 0.97, 0.99);
+        float light = 0.0;
+        vec3  tint  = vec3(0.0);
+        for (int i = 0; i < 3; i++){
+            float fi = float(i) + 1.0;
+            float xx = uv.x * ar * (1.0 + 0.35 * fi) + u_seed * fi * 1.7;
+            float wave = fbm(vec2(xx * 0.6, fi * 4.0) + loopOff() * 1.2) - 0.5;
+            float cy   = 0.42 + 0.12 * fi + wave * 0.38;
+            float streak = fbm(vec2(xx * (3.0 + 4.0 * u_detail),
+                                    uv.y * (1.0 + 1.5 * u_scale)) + loopOff());
+            float dist  = uv.y - cy;
+            float band  = exp(-dist * dist * (8.0 + 34.0 * u_density));
+            float inten = max(band * (0.25 + 0.95 * streak), 0.0);
+            light += inten / fi;
+            tint  += grad4(clamp(0.15 + (1.0 - uv.y) * 0.95, 0.0, 1.0)) * inten / fi;
+        }
+        col = mix(base, tint * (1.3 + 1.0 * u_distort), light * 0.7);
+        col += u_c3 * pow(clamp(light, 0.0, 1.0), 3.0) * 0.15;
+        col = clamp(col, 0.0, 1.0);
+    }
+
+    else if (u_mode == 1){
+        vec2 p = uv * vec2(ar, 1.0) * mix(1.5, 5.0, u_scale) + sOff;
+        vec2 q = vec2(fbm(p + loopOff()),
+                      fbm(p + vec2(5.2, 1.3) - loopOff()));
+        float n = fbm(p * 1.4 + q * (1.0 + 2.5 * u_distort) + loopOff());
+        float ridge = 1.0 - abs(2.0 * n - 1.0);
+        float veins = pow(ridge, mix(6.0, 24.0, u_detail));
+        veins *= 0.55 + 0.45 * cos(3.0 * u_phase + u_seed);
+        col  = u_c0 * 0.55;
+        col += grad4(clamp(veins * 1.3, 0.0, 1.0)) * veins;
+        col += u_c3 * pow(veins, 2.0) * 0.9;
+        col += grad4(n * 0.35) * (0.10 + 0.10 * u_density);
+    }
+
+    else if (u_mode == 2){
+        vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.2, 5.0, u_scale) + sOff;
+        float w = 1.0 + 3.0 * u_distort;
+        vec2 q = vec2(fbm(p + loopOff()),
+                      fbm(p + vec2(5.2, 1.3) - loopOff()));
+        vec2 r = vec2(fbm(p + q * w + vec2(1.7, 9.2) + loopOff() * 0.7),
+                      fbm(p + q * w + vec2(8.3, 2.8) - loopOff() * 0.4));
+        float f = fbm(p + r * (1.0 + 2.5 * u_detail));
+        col = grad4(clamp(f * 1.45 + 0.10 * r.x - 0.05, 0.0, 1.0));
+        col = mix(col, u_c2, q.y * q.x * 0.25);
+    }
+
+    else if (u_mode == 3){
+        vec2 p = uv - 0.5;
+        p.x *= ar;
+        float s = 1.0;
+        float orbit = 0.0;
+        for (int i = 0; i < 6; i++){
+            p = abs(p) - 0.12 * (0.6 + 0.4 * u_scale);
+            float r2 = dot(p,p);
+            orbit += exp(-4.0 * r2);
+            p = p / r2 + sOff * 0.15;
+            p *= 1.15 + 0.15 * u_detail;
+        }
+        float f = clamp(orbit * 0.35, 0.0, 1.0);
+        col = grad4(f + 0.15 * u_distort);
+        col += u_c3 * pow(orbit, 3.0) * 0.08;
+    }
+
+    else if (u_mode == 4){
+        vec2 p = vec2(uv.x * ar, uv.y);
+        float frost = 0.0, rim = 0.0;
+        vec2  refr = vec2(0.0);
+        for (int i = 0; i < 4; i++){
+            float fi = float(i) + 1.0;
+            float ph = u_phase + u_seed * fi + fi * 1.9;
+            vec2  c  = vec2(0.5 * ar, 0.5) + vec2(cos(ph), sin(ph)) * (0.36 / fi);
+            float r  = 0.14 + 0.06 * fi * u_scale + 0.12 * u_density;
+            float dd = length(p - c);
+            float body = smoothstep(r, r * 0.6, dd);
+            float ring = smoothstep(r * 0.70, r * 0.88, dd) * (1.0 - smoothstep(r * 0.88, r, dd));
+            frost += body;
+            rim   += ring;
+            refr  += normalize(p - c + 0.0001) * body;
+        }
+        frost = clamp(frost, 0.0, 1.0);
+        float bg  = metaf(p, ar) + fbm(uv * (1.2 + 2.0 * u_scale) + loopOff() + sOff) * 0.30;
+        vec3 plain = grad4(bg * 0.45);
+        vec2 sUV = uv + refr * (0.03 + 0.10 * u_distort);
+        vec2 sp  = vec2(sUV.x * ar, sUV.y);
+        float bg2 = metaf(sp, ar) + fbm(sUV * (1.2 + 2.0 * u_scale) + loopOff() + sOff) * 0.30;
+        vec3 behind = grad4(bg2 * 0.45);
+        vec3 frosted = mix(behind, vec3(dot(behind, vec3(0.333))), 0.30) + u_c3 * 0.10;
+        col = mix(plain, frosted, frost * 0.92);
+        col += u_c3 * rim * (0.4 + 0.6 * u_detail);
+    }
+
+    else if (u_mode == 5){
+        vec2 p = vec2(uv.x * ar, uv.y);
+        float s = u_seed;
+        float rA = 0.10 + 0.22 * u_speed;
+        vec2 b1 = vec2(0.32 * ar, 0.60) + rA * vec2(cos(u_phase + s), sin(u_phase + s));
+        vec2 b2 = vec2(0.70 * ar, 0.35) + rA * 0.8 * vec2(cos(-u_phase + s * 1.9), sin(-u_phase + s * 1.9));
+        float f = 0.55 / (length(p - b1) + 0.30)
+                + 0.45 / (length(p - b2) + 0.30)
+                + fbm(uv * (1.0 + 1.5 * u_scale) + loopOff() + sOff) * 0.25 * u_detail;
+        col = grad4(f * (0.45 + 0.25 * u_density));
+        col += (hash21(gl_FragCoord.xy + vec2(u_phase * 43.7)) - 0.5) * (0.10 + 0.30 * u_distort);
+    }
+
+    else if (u_mode == 6){
+        vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.2, 4.0, u_scale) + sOff;
+        vec2 q = vec2(fbm(p + loopOff()), fbm(p + vec2(5.2, 1.3) - loopOff()));
+        float f = fbm(p + q * (1.0 + 2.5 * u_distort));
+        float cells = mix(18.0, 80.0, u_density);
+        vec2 g = fract(vec2(uv.x * ar, uv.y) * cells) - 0.5;
+        float rdot = clamp(f * (0.5 + 0.6 * u_detail), 0.05, 0.62);
+        float mask = smoothstep(rdot, rdot - 0.12, length(g) * 1.45);
+        col = mix(u_c0 * 0.7, grad4(clamp(f * 1.5, 0.0, 1.0)), mask);
+    }
+
+    else if (u_mode == 7){
+        vec2 p = uv - 0.5;
+        p.x *= ar;
+        float angle = atan(p.y, p.x);
+        float rad   = length(p);
+        float slices = mix(4.0, 12.0, u_density);
+        angle = mod(angle, 3.14159 / slices * 2.0);
+        angle = abs(angle - 3.14159 / slices);
+        p = vec2(cos(angle), sin(angle)) * rad;
+        vec2 np = p * mix(1.5, 4.0, u_scale) + sOff;
+        vec2 q = vec2(fbm(np + loopOff()),
+                      fbm(np + vec2(5.2, 1.3) - loopOff()));
+        float f = fbm(np + q * (1.0 + 2.0 * u_distort) + loopOff() * 0.6);
+        col = grad4(clamp(f * 1.3, 0.0, 1.0));
+        col += u_c3 * pow(rad * 1.8, 3.0) * 0.12;
+    }
+
+    else if (u_mode == 8){
+        vec2 p = vec2(uv.x * ar, uv.y);
+        float f = metaf(p, ar) * (0.30 + 0.30 * u_density)
+                + fbm(uv * (1.0 + 2.0 * u_scale) + loopOff() + sOff) * 0.20 * u_detail;
+        col = grad4(f);
+    }
+
+    else if (u_mode == 9){
+        vec2 p = uv * mix(1.0, 3.5, u_scale);
+        float t = u_phase * mix(0.3, 1.2, u_speed);
+        float v = 0.0;
+        v += sin(p.x * 4.0 + t) * 0.5 + 0.5;
+        v += sin(p.y * 5.0 - t * 1.3) * 0.4;
+        v += sin((p.x + p.y) * 6.0 + t * 0.7) * 0.3;
+        v += sin(length(p - 0.5) * 8.0 - t * 1.1) * 0.3;
+        v += fbm(p * 1.5 + loopOff() + sOff) * 0.35 * u_detail;
+        v *= 0.5 + 0.5 * u_density;
+        col = grad4(clamp(v * 1.2, 0.0, 1.0));
+        col = mix(col, grad4(clamp(v * 0.8 + 0.3, 0.0, 1.0)), 0.3 * u_distort);
+    }
+
+    else if (u_mode == 10){
+        float N  = mix(24.0, 110.0, u_density);
+        float rx = uv.x * N;
+        float ri = floor(rx);
+        float rf = fract(rx);
+        float lens = (rf - 0.5) * ((0.3 + 2.2 * u_distort) / N);
+        vec2 sUV = vec2(clamp(uv.x + lens, 0.001, 0.999), uv.y);
+        vec2 p = vec2(sUV.x * ar, sUV.y);
+        float f = metaf(p, ar)
+                + fbm(sUV * (1.2 + 2.4 * u_scale) + loopOff() + sOff) * (0.12 + 0.28 * u_detail);
+        col = grad4(f * 0.42);
+        float shimmer = 0.028 * sin(ri * 2.399 + u_seed + 2.0 * u_phase);
+        float h1 = exp(-pow((rf - 0.27 - shimmer) * 13.5, 2.0)) * 0.62;
+        float h2 = exp(-pow((rf - 0.75) * 22.0, 2.0)) * 0.10;
+        float groove = smoothstep(0.0, 0.07, rf) * smoothstep(1.0, 0.93, rf);
+        col  = col * (0.70 + groove * 0.30);
+        col += u_c3 * h1;
+        col += u_c3 * 0.85 * h2;
+        col *= 0.87 + fbm(vec2(ri * 0.09, uv.y * 3.1) + loopOff() * 0.8 + sOff) * 0.15;
+    }
+
+    else if (u_mode == 11){
+        vec2 p = (uv - 0.5) * vec2(ar, 1.0);
+        float rad = length(p);
+        float n = fbm(p * mix(1.0, 4.0, u_scale) + loopOff() + sOff);
+        float rings = sin((rad * mix(8.0, 30.0, u_density) + n * 2.0 * u_distort - u_phase * 1.5) * 3.14159);
+        float f = 0.5 + 0.5 * rings;
+        col = grad4(clamp(f * (0.7 + 0.5 * u_detail), 0.0, 1.0));
+        float glow = exp(-rad * 3.0) * 0.3;
+        col += u_c3 * glow;
+    }
+
+    else if (u_mode == 12){
+        vec2 p = uv - 0.5;
+        p.x *= ar;
+        float n = 5.0 + floor(mix(3.0, 9.0, u_density));
+        float a = atan(p.y, p.x);
+        float r = length(p);
+        float sector = 3.14159 / max(n, 2.0);
+        a = mod(a + u_phase * 0.25, sector * 2.0);
+        a = abs(a - sector);
+        vec2 q = vec2(cos(a), sin(a)) * r;
+        float f = abs(q.y) - 0.04 * (0.4 + 0.8 * u_scale);
+        float pulse = sin(r * mix(6.0, 24.0, u_detail) - u_phase * 1.6) * 0.5 + 0.5;
+        float edge = exp(-abs(f) * (18.0 + 40.0 * u_distort));
+        edge = smoothstep(0.0, 0.9, edge);
+        col = mix(u_c0 * 0.5, grad4(pulse), edge);
+        col += u_c3 * edge * 0.22;
+    }
+
+    else if (u_mode == 13){
+        vec2 p = uv - 0.5;
+        p.x *= ar;
+        float a = u_phase * (0.2 + 0.4 * u_speed);
+        float ca = cos(a), sa = sin(a);
+        p = mat2(ca, -sa, sa, ca) * p;
+        vec2 g = p * (8.0 + 18.0 * u_density);
+        vec2 f = fract(g) - 0.5;
+        float tri = abs(f.x) * 0.866 + f.y * 0.5;
+        float d = abs(tri);
+        float rings = sin(length(floor(g)) * 0.9 + u_phase) * 0.5 + 0.5;
+        float edge = smoothstep(0.08, 0.0, d);
+        col = grad4(clamp(rings * (0.6 + 0.6 * u_detail), 0.0, 1.0));
+        col = mix(col, u_c3, edge * (0.4 + 0.6 * u_scale));
+    }
+
+    else if (u_mode == 14){
+        float f = uv.y * mix(1.5, 5.0, u_scale);
+        f += sin(uv.x * (3.0 + 9.0 * u_density) + u_phase + u_seed) * 0.45;
+        f += sin(uv.x * (7.0 + 5.0 * u_density) - 2.0 * u_phase + u_seed * 1.7) * 0.20;
+        f += fbm(uv * vec2(ar, 1.0) * (1.5 + 2.0 * u_scale) + loopOff() + sOff)
+             * (0.30 + 0.90 * u_distort);
+        float t = 0.5 + 0.5 * sin(f * TAU * (0.4 + 0.9 * u_detail));
+        col = grad4(t);
+    }
+
+    if (u_mix > 0.001){
+        vec2 tuv = uv;
+        float pix = 1.0 - u_pixel;
+        float blocks = mix(8.0, 200.0, pix * pix);
+        tuv = floor(tuv * blocks) / blocks;
+        vec4 tex = texture2D(u_texture, tuv);
+        col = mix(col, tex.rgb, clamp(u_mix, 0.0, 1.0));
+    }
+
+    col += (hash21(gl_FragCoord.xy + vec2(u_phase * 91.3)) - 0.5) * u_grain * 0.04;
+    vec2 v = uv * 2.0 - 1.0;
+    col *= 1.0 - dot(v, v) * 0.08;
+
+    gl_FragColor = vec4(col, 1.0);
+}`;
+
+    function compileShader(type, src) {
+      const s = gl.createShader(type);
+      gl.shaderSource(s, src);
+      gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+        console.error(gl.getShaderInfoLog(s));
+        gl.deleteShader(s);
+        return null;
+      }
+      return s;
+    }
+
+    const vs = compileShader(gl.VERTEX_SHADER, VS);
+    const fs = compileShader(gl.FRAGMENT_SHADER, FS);
+    if (!vs || !fs) { console.error('Shader compilation failed.'); }
+
+    const prog = gl.createProgram();
+    gl.attachShader(prog, vs);
+    gl.attachShader(prog, fs);
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+      console.error('Program linking failed: ' + gl.getProgramInfoLog(prog));
+    }
+    gl.useProgram(prog);
+
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+    const aLoc = gl.getAttribLocation(prog, 'a');
+    gl.enableVertexAttribArray(aLoc);
+    gl.vertexAttribPointer(aLoc, 2, gl.FLOAT, false, 0, 0);
+
+    const U = {};
+    const uniforms = [
+      'u_res', 'u_phase', 'u_seed', 'u_mode',
+      'u_speed', 'u_scale', 'u_density', 'u_distort', 'u_detail', 'u_grain',
+      'u_c0', 'u_c1', 'u_c2', 'u_c3', 'u_texture', 'u_mix', 'u_pixel'
+    ];
+    uniforms.forEach(n => { U[n] = gl.getUniformLocation(prog, n); });
+
+    const P = {
+      "mode": 0,
+      "seed": 5790,
+      "sizeIdx": 1,
+      "loop": 4,
+      "colors": ["#020617", "#1e3a8a", "#60a5fa", "#eff6ff"],
+      "speed": 0.2,
+      "scale": 0.18,
+      "density": 0.08,
+      "distort": 0.86,
+      "detail": 0.32,
+      "grain": 0.16,
+      "mix": 0,
+      "pixel": 0
+    };
+
+    function hex2rgb(h) {
+      return [
+        parseInt(h.slice(1, 3), 16) / 255,
+        parseInt(h.slice(3, 5), 16) / 255,
+        parseInt(h.slice(5, 7), 16) / 255,
+      ];
+    }
+
+    let texLoaded = false, texObj = null;
+    const base64Tex = "";
+    if (base64Tex) {
+      const img = new Image();
+      img.onload = () => {
+        texObj = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, texObj);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+        texLoaded = true;
+      };
+      img.src = base64Tex;
+    }
+
+    function resize() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const w = canvas.clientWidth || 960;
+      const h = canvas.clientHeight || 540;
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      gl.viewport(0, 0, canvas.width, canvas.height);
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    const t0 = performance.now();
+    function render(now) {
+      const time = (now - t0) / 1000;
+      const phase = (time / P.loop * Math.PI * 2) % (Math.PI * 2);
+
+      gl.uniform2f(U.u_res, canvas.width, canvas.height);
+      gl.uniform1f(U.u_phase, phase);
+      gl.uniform1f(U.u_seed, (P.seed % 10000) * 0.6180339887 % 12.566);
+      gl.uniform1i(U.u_mode, P.mode);
+      gl.uniform1f(U.u_speed, P.speed);
+      gl.uniform1f(U.u_scale, P.scale);
+      gl.uniform1f(U.u_density, P.density);
+      gl.uniform1f(U.u_distort, P.distort);
+      gl.uniform1f(U.u_detail, P.detail);
+      gl.uniform1f(U.u_grain, P.grain);
+      gl.uniform1f(U.u_mix, P.mix);
+      gl.uniform1f(U.u_pixel, P.pixel);
+      gl.uniform3fv(U.u_c0, hex2rgb(P.colors[0]));
+      gl.uniform3fv(U.u_c1, hex2rgb(P.colors[1]));
+      gl.uniform3fv(U.u_c2, hex2rgb(P.colors[2]));
+      gl.uniform3fv(U.u_c3, hex2rgb(P.colors[3]));
+
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, texLoaded ? texObj : null);
+      gl.uniform1i(U.u_texture, 0);
+
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      requestAnimationFrame(render);
+    }
+    requestAnimationFrame(render);
+  </script>
+
+  <script>
+    // Copy helper
+    function copyText(text, btnEl) {
+      navigator.clipboard.writeText(text).then(() => {
+        if (btnEl) {
+          const oldHtml = btnEl.innerHTML;
+          btnEl.innerHTML = `<svg viewBox="0 0 24 24" style="stroke: #27ae60; width:16px; height:16px; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+          setTimeout(() => {
+            btnEl.innerHTML = oldHtml;
+          }, 2000);
+        }
+      });
+    }
+
+    // FAQ Accordion toggling
+    function toggleFaq(item) {
+      // Toggle active class on clicked item
+      item.classList.toggle('active');
+      
+      // Close other accordion items
+      const items = document.querySelectorAll('.faq-item');
+      items.forEach(otherItem => {
+        if (otherItem !== item) {
+          otherItem.classList.remove('active');
+        }
+      });
+    }
+
+    // Presets config
+    const PRESETS = {
+      aurora: {
+        mode: 0,
+        scale: 0.18,
+        density: 0.08,
+        distort: 0.86,
+        detail: 0.32,
+        colors: ["#020617", "#1e3a8a", "#60a5fa", "#eff6ff"]
+      },
+      grid: {
+        mode: 6,
+        scale: 2.50,
+        density: 0.24,
+        distort: 0.45,
+        detail: 0.60,
+        colors: ["#0f172a", "#3b82f6", "#10b981", "#ffffff"]
+      },
+      lava: {
+        mode: 2,
+        scale: 1.80,
+        density: 0.12,
+        distort: 1.80,
+        detail: 0.40,
+        colors: ["#180000", "#e11d48", "#f59e0b", "#fffbeb"]
+      },
+      nebula: {
+        mode: 5,
+        scale: 1.20,
+        density: 0.30,
+        distort: 1.20,
+        detail: 0.80,
+        colors: ["#0b031a", "#7c3aed", "#ec4899", "#fdf2f8"]
+      },
+      fractal: {
+        mode: 3,
+        scale: 0.80,
+        density: 0.15,
+        distort: 0.65,
+        detail: 0.50,
+        colors: ["#020617", "#0d9488", "#2dd4bf", "#f0fdfa"]
+      },
+      plasma: {
+        mode: 9,
+        scale: 1.50,
+        density: 0.40,
+        distort: 0.20,
+        detail: 0.70,
+        colors: ["#020617", "#e11d48", "#2563eb", "#ffffff"]
+      }
+    };
+
+    function updateJsonConfigView() {
+      const codeEl = document.getElementById('json-code');
+      if (!codeEl) return;
+      
+      const jsonStr = `{
+  <span style="color:#f43f5e;">"project"</span>: <span style="color:#10b981;">"/motion"</span>,
+  <span style="color:#f43f5e;">"version"</span>: <span style="color:#10b981;">"1.0.0"</span>,
+  <span style="color:#f43f5e;">"shader"</span>: {
+    <span style="color:#f43f5e;">"mode"</span>: <span style="color:#3b82f6;">${P.mode}</span>,
+    <span style="color:#f43f5e;">"scale"</span>: <span style="color:#3b82f6;">${P.scale.toFixed(2)}</span>,
+    <span style="color:#f43f5e;">"density"</span>: <span style="color:#3b82f6;">${P.density.toFixed(2)}</span>,
+    <span style="color:#f43f5e;">"distort"</span>: <span style="color:#3b82f6;">${P.distort.toFixed(2)}</span>,
+    <span style="color:#f43f5e;">"detail"</span>: <span style="color:#3b82f6;">${P.detail.toFixed(2)}</span>
+  },
+  <span style="color:#f43f5e;">"colors"</span>: [
+    <span style="color:#10b981;">"${P.colors[0]}"</span>,
+    <span style="color:#10b981;">"${P.colors[1]}"</span>,
+    <span style="color:#10b981;">"${P.colors[2]}"</span>,
+    <span style="color:#10b981;">"${P.colors[3]}"</span>
+  ]
+}`;
+      codeEl.innerHTML = jsonStr;
+    }
+
+    function loadPreset(key) {
+      const preset = PRESETS[key];
+      if (!preset) return;
+      
+      // Set active class on pill
+      const pills = document.querySelectorAll('.preset-pill');
+      pills.forEach(p => p.classList.remove('active'));
+      
+      // Find the clicked pill
+      const targetPill = Array.from(pills).find(p => p.textContent.toLowerCase().replace(/\s/g, '').includes(key));
+      if (targetPill) targetPill.classList.add('active');
+
+      // Update slider inputs
+      document.getElementById('slide-scale').value = preset.scale;
+      document.getElementById('slide-density').value = preset.density;
+      document.getElementById('slide-distort').value = preset.distort;
+      document.getElementById('slide-detail').value = preset.detail;
+
+      // Update slider labels
+      document.getElementById('val-scale').textContent = preset.scale.toFixed(2);
+      document.getElementById('val-density').textContent = preset.density.toFixed(2);
+      document.getElementById('val-distort').textContent = preset.distort.toFixed(2);
+      document.getElementById('val-detail').textContent = preset.detail.toFixed(2);
+
+      // Update WebGL P params
+      P.mode = preset.mode;
+      P.scale = preset.scale;
+      P.density = preset.density;
+      P.distort = preset.distort;
+      P.detail = preset.detail;
+      P.colors = preset.colors;
+
+      // Update JSON code block
+      updateJsonConfigView();
+    }
+
+    function updateShaderParam(param, value) {
+      // Update value in global P
+      P[param] = value;
+
+      // Update label
+      const label = document.getElementById(`val-${param}`);
+      if (label) {
+        label.textContent = typeof value === 'number' && !Number.isInteger(value) ? value.toFixed(2) : value;
+      }
+
+      // Update slider input value too (in case called from presets)
+      const input = document.getElementById(`slide-${param}`);
+      if (input) {
+        input.value = value;
+      }
+
+      // Deselect active preset pill since it's customized
+      const pills = document.querySelectorAll('.preset-pill');
+      pills.forEach(p => p.classList.remove('active'));
+
+      // Update JSON code block
+      updateJsonConfigView();
+    }
+
+    // Initialize json code view on load
+    window.addEventListener('DOMContentLoaded', () => {
+      updateJsonConfigView();
+    });
+
+    // Fetch live GitHub stats
+    fetch('https://api.github.com/repos/vitejs/vite')
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(data => {
+        document.getElementById('star-count').textContent = data.stargazers_count.toLocaleString();
+        document.getElementById('fork-count').textContent = data.forks_count.toLocaleString();
+      })
+      .catch(() => {
+        // Fallback to simple organization link pill if repo stats fetch fails
+        const githubBar = document.querySelector('.github-bar');
+        if (githubBar) {
+          githubBar.innerHTML = `
+            <svg viewBox="0 0 16 16" style="width: 12px; height: 12px; fill: currentColor; margin-right: 4px;"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+            <a href="https://github.com/murderszn/motion" target="_blank" rel="noopener">github.com/murderszn/motion</a>
+          `;
+        }
+      });
+  </script>
+
+  <!-- ═══════════════════════════════════════════════════════
+       PAGE BACKGROUND — red FBM wave shader (matches the studio app)
+       (independent of the config-builder live preview above)
+       ═══════════════════════════════════════════════════════ -->
+  <script>
+  (function () {
+    const canvas = document.getElementById('bg-canvas');
+    if (!canvas) return;
+
+    const VS = 'attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }';
+
+    const WAVE_FS = `
+precision highp float;
+uniform float u_time;
+uniform vec2  u_res;
+float hash21(vec2 p){ p = fract(p * vec2(234.34, 435.345)); p += dot(p, p + 34.23); return fract(p.x * p.y); }
+float vnoise(vec2 p){ vec2 i = floor(p); vec2 f = fract(p); f = f*f*(3.0-2.0*f);
+  float a=hash21(i), b=hash21(i+vec2(1.0,0.0)), c=hash21(i+vec2(0.0,1.0)), d=hash21(i+vec2(1.0,1.0));
+  return mix(mix(a,b,f.x), mix(c,d,f.x), f.y); }
+float fbm(vec2 p){ float v=0.0; float a=0.5; mat2 r=mat2(0.80,0.60,-0.60,0.80);
+  for(int i=0;i<5;i++){ v+=a*vnoise(p); p=r*p*2.1+vec2(1.7,9.2); a*=0.5; } return v; }
+vec3 pal(float t){ t=clamp(t,0.0,1.0);
+  if(t<0.30) return mix(vec3(0.063,0.047,0.086), vec3(0.498,0.024,0.086), t/0.30);
+  if(t<0.62) return mix(vec3(0.498,0.024,0.086), vec3(0.875,0.230,0.230), (t-0.30)/0.32);
+             return mix(vec3(0.875,0.230,0.230), vec3(1.000,0.957,0.957), (t-0.62)/0.38); }
+void main(){
+  vec2 uv = gl_FragCoord.xy / u_res; uv.y = 1.0 - uv.y;
+  float ar = u_res.x / u_res.y;
+  float t  = u_time * 0.22;
+  vec2 p = vec2(uv.x * ar, uv.y);
+  vec2 q = vec2(fbm(p*1.5 + vec2(t*0.30, t*0.05)), fbm(p*1.5 + vec2(5.2,1.3) - vec2(t*0.18, 0.0)));
+  float f = fbm(p*1.4 + q*2.6 + vec2(t*0.22, 0.0));
+  float swell = uv.y*1.4 + sin(uv.x*ar*1.4 + t*1.1 + q.x*3.0)*0.30 + sin(uv.x*ar*3.1 - t*1.6 + q.y*2.0)*0.14 + f*1.5;
+  float band = 0.5 + 0.5*sin(swell*6.2831*0.85 - t*0.6);
+  vec3 col = pal(band*0.96);
+  float crest = pow(band,6.0)*0.55;
+  col += vec3(1.0,0.96,0.96)*crest;
+  col *= 0.82 + 0.30*smoothstep(0.0,0.7,uv.y);
+  col += (hash21(gl_FragCoord.xy) - 0.5)*0.02;
+  vec2 vig = uv*2.0 - 1.0; col *= 1.0 - dot(vig,vig)*0.22;
+  gl_FragColor = vec4(col, 1.0);
+}`;
+
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (!gl) return;
+
+    function mk(type, src) {
+      const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) { console.error(gl.getShaderInfoLog(s)); return null; }
+      return s;
+    }
+    const vs = mk(gl.VERTEX_SHADER, VS), fs = mk(gl.FRAGMENT_SHADER, WAVE_FS);
+    if (!vs || !fs) return;
+    const prog = gl.createProgram(); gl.attachShader(prog, vs); gl.attachShader(prog, fs); gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
+    gl.useProgram(prog);
+
+    const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+    const aLoc = gl.getAttribLocation(prog, 'a');
+    gl.enableVertexAttribArray(aLoc); gl.vertexAttribPointer(aLoc, 2, gl.FLOAT, false, 0, 0);
+    const uTime = gl.getUniformLocation(prog, 'u_time'), uRes = gl.getUniformLocation(prog, 'u_res');
+
+    function resize() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(window.innerWidth * dpr);
+      canvas.height = Math.round(window.innerHeight * dpr);
+      gl.viewport(0, 0, canvas.width, canvas.height);
+    }
+    window.addEventListener('resize', resize); resize();
+
+    const t0 = performance.now();
+    (function frame(now) {
+      gl.uniform1f(uTime, (now - t0) / 1000);
+      gl.uniform2f(uRes, canvas.width, canvas.height);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      requestAnimationFrame(frame);
+    })(t0);
+
+    // parallax
+    document.addEventListener('mousemove', (e) => {
+      const x = (e.clientX / window.innerWidth  - 0.5) * 6;
+      const y = (e.clientY / window.innerHeight - 0.5) * 6;
+      canvas.style.transform = `translate(${x}px, ${y}px) scale(1.03)`;
+    });
+    document.addEventListener('mouseleave', () => { canvas.style.transform = 'translate(0,0) scale(1)'; });
+  })();
+  </script>
+</body>
+</html>
