@@ -3,7 +3,7 @@
 // ─────────────────────────────────────────────────────────
 
 import { P, PRESETS } from '../state';
-import { draw, canvas } from '../webgl';
+import { draw, canvas, gl } from '../webgl';
 import { getPhase, setPhase, isPaused, setExporting } from '../render';
 import { composeExportCanvas, renderTextOnCanvas } from './text';
 import { setStatusMsg } from './statusbar';
@@ -16,7 +16,11 @@ function fname(ext: string): string {
 function download(blob: Blob, name: string): void {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = name; a.click();
+  a.download = name;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 }
 function msg(t: string): void { setStatusMsg(t); }
@@ -25,52 +29,95 @@ function msg(t: string): void { setStatusMsg(t); }
 
 export function exportPNG(): void {
   draw(getPhase());
+  gl.finish();
   const ec = composeExportCanvas(canvas, canvas.width, canvas.height);
   ec.toBlob(b => { if (b) { download(b, fname('png')); msg('image saved'); } }, 'image/png');
 }
 
-// ── WebM video ───────────────────────────────────────────
+// ── WebM / MP4 Video ─────────────────────────────────────
 
 let recorder: MediaRecorder | null = null;
-let recTimer: ReturnType<typeof setTimeout> | null = null;
 let exportCv: HTMLCanvasElement | null = null;
 let ectx: CanvasRenderingContext2D | null = null;
+let videoAnimId: number | null = null;
+let activeExportExt = 'webm';
 
 export function startWebmExport(pauseBtn: HTMLButtonElement): void {
   if (recorder) return;
   setExporting(true);
+
+  // Determine supported container and codec
+  let mime = 'video/webm';
+  activeExportExt = 'webm';
+  if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) {
+    mime = 'video/webm;codecs=vp9';
+  } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp8')) {
+    mime = 'video/webm;codecs=vp8';
+  } else if (MediaRecorder.isTypeSupported('video/webm')) {
+    mime = 'video/webm';
+  } else if (MediaRecorder.isTypeSupported('video/mp4;codecs=avc1')) {
+    mime = 'video/mp4;codecs=avc1';
+    activeExportExt = 'mp4';
+  } else if (MediaRecorder.isTypeSupported('video/mp4')) {
+    mime = 'video/mp4';
+    activeExportExt = 'mp4';
+  }
+
   exportCv = document.createElement('canvas');
   exportCv.width = canvas.width; exportCv.height = canvas.height;
+  // Style invisibly and append to DOM so captureStream works in all browsers
+  exportCv.style.position = 'fixed';
+  exportCv.style.top = '0';
+  exportCv.style.left = '0';
+  exportCv.style.width = '1px';
+  exportCv.style.height = '1px';
+  exportCv.style.opacity = '0';
+  exportCv.style.pointerEvents = 'none';
+  exportCv.style.zIndex = '-9999';
+  document.body.appendChild(exportCv);
+
   ectx = exportCv.getContext('2d')!;
   
   const pixelCv = document.createElement('canvas');
   const pctx = pixelCv.getContext('2d')!;
 
   const stream = exportCv.captureStream(60);
-  const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
-    ? 'video/webm;codecs=vp9' : 'video/webm';
   const chunks: BlobPart[] = [];
   recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 18_000_000 });
   recorder.ondataavailable = e => { if ((e as BlobEvent).data.size) chunks.push((e as BlobEvent).data); };
   recorder.onstop = () => {
     $('recStatus').classList.remove('on');
-    if (chunks.length) { download(new Blob(chunks, { type: 'video/webm' }), fname('webm')); msg('video saved'); }
+    if (exportCv && exportCv.parentNode) {
+      exportCv.parentNode.removeChild(exportCv);
+    }
+    if (chunks.length) {
+      const baseMime = mime.split(';')[0];
+      download(new Blob(chunks, { type: baseMime }), fname(activeExportExt));
+      msg('video saved');
+    }
     recorder = null; exportCv = null; ectx = null;
     setExporting(false);
   };
+
   setPhase(0);
   pauseBtn.textContent = 'pause';
-  $('recText').textContent = 'recording ' + P.loop.toFixed(1) + 's';
+  $('recText').textContent = 'recording';
   $('recStatus').classList.add('on');
 
-  let lastTime = performance.now();
-  let phase = 0;
-  function vidComposite(now: number): void {
+  const fps = 60;
+  const totalFrames = Math.round(P.loop * fps);
+  let currentFrame = 0;
+
+  function recordFrame(): void {
     if (!recorder || !exportCv || !ectx) return;
-    const dt = Math.min((now - lastTime) / 1000, 0.1);
-    lastTime = now;
-    phase = (phase + dt / P.loop * Math.PI * 2) % (Math.PI * 2);
+    if (currentFrame >= totalFrames) {
+      recorder.stop();
+      return;
+    }
+
+    const phase = (currentFrame / totalFrames) * Math.PI * 2;
     draw(phase);
+    gl.finish();
 
     if (P.pixel && P.pixel > 0.001) {
       const scale = Math.max(0.02, 1 - P.pixel);
@@ -88,20 +135,31 @@ export function startWebmExport(pauseBtn: HTMLButtonElement): void {
     }
 
     renderTextOnCanvas(ectx, exportCv.width, exportCv.height);
-    requestAnimationFrame(vidComposite);
+    $('recText').textContent = `recording frame ${currentFrame + 1}/${totalFrames}`;
+    
+    currentFrame++;
+    videoAnimId = requestAnimationFrame(recordFrame);
   }
-  vidComposite(performance.now());
+
   recorder.start();
-  recTimer = setTimeout(() => recorder?.stop(), P.loop * 1000);
+  recordFrame();
 }
 
 export function cancelExport(): void {
+  if (videoAnimId !== null) {
+    cancelAnimationFrame(videoAnimId);
+    videoAnimId = null;
+  }
   if (recorder) {
-    if (recTimer !== null) clearTimeout(recTimer);
     recorder.ondataavailable = null;
     recorder.onstop = () => {
       $('recStatus').classList.remove('on');
+      if (exportCv && exportCv.parentNode) {
+        exportCv.parentNode.removeChild(exportCv);
+      }
       recorder = null;
+      exportCv = null;
+      ectx = null;
       setExporting(false);
     };
     recorder.stop();
@@ -154,6 +212,7 @@ export async function exportGIF(): Promise<void> {
     for (let i = 0; i < frames; i++) {
       if (gifCancel) throw new Error('cancelled');
       draw(i / frames * Math.PI * 2);
+      gl.finish();
 
       if (P.pixel && P.pixel > 0.001) {
         const scale = Math.max(0.02, 1 - P.pixel);

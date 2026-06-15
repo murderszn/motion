@@ -28,7 +28,12 @@ const $ = (id: string): HTMLElement => document.getElementById(id)!;
 
 function downloadBlob(blob: Blob, name: string): void {
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob); a.download = name; a.click();
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 }
 
