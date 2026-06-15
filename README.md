@@ -1,4 +1,4 @@
-![motion splash](header.png?v=2)
+![motion splash](media/header.png?v=2)
 
 # /motion local — generative shader studio
 

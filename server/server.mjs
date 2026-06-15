@@ -5,7 +5,7 @@ import pty from 'node-pty';
 import { WebSocketServer } from 'ws';
 
 const PORT = parseInt(process.env.PORT || '3000', 10);
-const ROOT = path.dirname(new URL(import.meta.url).pathname);
+const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 
 const MIME = {
     '.html': 'text/html',
