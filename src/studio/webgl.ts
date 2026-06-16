@@ -135,22 +135,26 @@ void main(){
         col = mix(col, u_c2, q.y * q.x * 0.25);
     }
 
-    /* ─── 3 · fractal square ─── */
+    /* ─── 3 · golden swirl (multi-arm spiral) ─── */
     else if (u_mode == 3){
-        vec2 p = uv - 0.5;
-        p.x *= ar;
-        float s = 1.0;
-        float orbit = 0.0;
-        for (int i = 0; i < 6; i++){
-            p = abs(p) - 0.12 * (0.6 + 0.4 * u_scale);
-            float r2 = dot(p,p);
-            orbit += exp(-4.0 * r2);
-            p = p / r2 + sOff * 0.15;
-            p *= 1.15 + 0.15 * u_detail;
-        }
-        float f = clamp(orbit * 0.35, 0.0, 1.0);
-        col = grad4(f + 0.15 * u_distort);
-        col += u_c3 * pow(orbit, 3.0) * 0.08;
+        vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.5, 5.0, u_scale) + sOff;
+        float t = u_phase * mix(0.3, 1.2, u_speed);
+        float r = length(p);
+        float a = atan(p.y, p.x);
+        float golden = 2.39996323;
+        float arms = mix(3.0, 8.0, u_density);
+        float twist = mix(2.0, 12.0, u_distort);
+        float s1 = cos(a * arms - r * twist + t);
+        float s2 = cos(a * arms * 2.0 - r * twist * 1.5 - t * 0.7) * 0.4;
+        float spiral = s1 + s2;
+        float rings = cos(r * mix(6.0, 18.0, u_density) + t * 0.4);
+        rings += 0.3 * cos(r * 12.0 - t * 0.6) * u_detail;
+        float f = 0.5 + 0.35 * spiral + 0.15 * rings;
+        vec2 warp = vec2(fbm(p * 0.8 + loopOff()),
+                         fbm(p * 0.8 + vec2(5.2, 1.3) - loopOff()));
+        f += fbm(p + warp * u_distort * 1.5) * 0.2 * u_detail;
+        col = grad4(clamp(f, 0.0, 1.0));
+        col += u_c3 * pow(max(0.5 + 0.5 * spiral, 0.0), 4.0) * mix(0.08, 0.22, u_distort);
     }
 
     /* ─── 4 · glass ─── */
@@ -332,6 +336,58 @@ void main(){
              * (0.30 + 0.90 * u_distort);
         float t = 0.5 + 0.5 * sin(f * TAU * (0.4 + 0.9 * u_detail));
         col = grad4(t);
+    }
+
+    /* ─── 15 · truchet (tile arc maze) ─── */
+    else if (u_mode == 15){
+        float tileN = mix(2.0, 8.0, u_scale);
+        vec2 p = (uv - 0.5) * vec2(ar, 1.0) * tileN + sOff;
+        float t = u_phase * mix(0.5, 1.5, u_speed);
+        vec2 ip = floor(p);
+        vec2 fp = fract(p);
+        float h = hash21(ip + sOff);
+        if (h < 0.5) fp.x = 1.0 - fp.x;
+        float d = min(length(fp), length(fp - 1.0));
+        d = abs(d - 0.5);
+        float bands = mix(3.0, 7.0, u_density) + u_distort * 2.5;
+        float f = 0.5 + 0.5 * cos(d * bands * TAU - t * 1.5);
+        f += fbm(p * 0.4 + loopOff()) * 0.1 * u_detail;
+        col = grad4(clamp(f, 0.0, 1.0));
+        float edge = smoothstep(0.06, 0.0, abs(d - 0.5) - 0.02);
+        col += u_c3 * edge * mix(0.15, 0.40, u_distort);
+    }
+
+    /* ─── 16 · golden (phyllotaxis / sunflower) ─── */
+    else if (u_mode == 16){
+        vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.5, 5.0, u_scale) + sOff;
+        float t = u_phase * mix(0.3, 1.0, u_speed);
+        float r = length(p) * (1.3 + u_distort * 0.18);
+        float a = atan(p.y, p.x);
+        float n = r * r * mix(0.8, 1.5, u_density);
+        float golden = 2.39996323;
+        float spiral = cos(a - n * golden + t * 0.2);
+        float rings  = cos(n * 3.14159265 - t * 0.1);
+        float f = 0.5 + 0.5 * spiral * rings;
+        vec2 warp = vec2(fbm(p * 0.6 + loopOff()),
+                         fbm(p * 0.6 + vec2(5.2, 1.3) - loopOff()));
+        f += fbm(p + warp * u_distort) * 0.15 * u_detail;
+        col = grad4(clamp(f, 0.0, 1.0));
+        col += u_c3 * pow(max(0.5 + 0.5 * spiral, 0.0), mix(3.0, 8.0, u_detail)) * mix(0.08, 0.20, u_distort);
+    }
+
+    /* ─── 17 · lines (rotated parallel bands) ─── */
+    else if (u_mode == 17){
+        vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.5, 5.0, u_scale) + sOff;
+        float t = u_phase * mix(0.3, 1.0, u_speed);
+        float ang = u_distort * 0.35 + t * 0.05;
+        float ca = cos(ang), sa = sin(ang);
+        vec2 q = vec2(ca * p.x - sa * p.y, sa * p.x + ca * p.y);
+        float freq = mix(3.0, 8.0, u_density) + u_distort * 1.4;
+        float wave = 0.6 * sin(q.y * 0.7 + t * 0.3);
+        wave += 0.3 * sin(q.y * 1.4 - t * 0.5) * u_detail;
+        float f = 0.5 + 0.5 * sin(q.x * freq + wave);
+        f += fbm(p * 0.3 + loopOff()) * 0.08 * u_detail;
+        col = grad4(clamp(f, 0.0, 1.0));
     }
 
     /* texture overlay */

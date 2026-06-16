@@ -8,7 +8,7 @@ export const PRESETS: Preset[] = [
   { id: 'aurora',   icon: 'AU', full: 'aurora' },
   { id: 'electric', icon: 'EL', full: 'electric' },
   { id: 'flow',     icon: 'FL', full: 'flow' },
-  { id: 'fsq',      icon: 'FQ', full: 'fractal square' },
+  { id: 'fsq',      icon: 'IF', full: 'interference' },
   { id: 'glass',    icon: 'GL', full: 'glass' },
   { id: 'grain',    icon: 'GR', full: 'grain' },
   { id: 'halftone', icon: 'HT', full: 'halftone' },
@@ -20,6 +20,9 @@ export const PRESETS: Preset[] = [
   { id: 'rosette',  icon: 'RS', full: 'sd rosette' },
   { id: 'trilat',   icon: 'TL', full: 'triangle lattice' },
   { id: 'waves',    icon: 'WV', full: 'waves' },
+  { id: 'truchet',  icon: 'TR', full: 'truchet' },
+  { id: 'interfere',icon: 'PH', full: 'golden' },
+  { id: 'lines',    icon: 'LN', full: 'lines' },
 ];
 
 export const SIZES: SizeDef[] = [

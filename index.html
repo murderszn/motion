@@ -168,12 +168,12 @@
             z-index: 2;
             pointer-events: none;
             background: var(--bg);
-            opacity: 0.4;
+            opacity: 0.25;
             transition: opacity 0.6s ease, background 0.4s;
         }
-        body[data-bg="aurora"] #scrim { opacity: 0.72; }
-        body[data-bg="wave"]   #scrim { opacity: 0.32; }
-        body[data-bg="video"]  #scrim { opacity: 0.40; }
+        body[data-bg="aurora"] #scrim { opacity: 0.48; }
+        body[data-bg="wave"]   #scrim { opacity: 0.15; }
+        body[data-bg="video"]  #scrim { opacity: 0.20; }
 
         /* ============================================================
            NAV — fixed wordmark + meta
@@ -206,14 +206,13 @@
             pointer-events: auto;
         }
         .nav-link {
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 300;
-            font-size: 0.55rem;
-            letter-spacing: 0.18em;
-            text-transform: lowercase;
-            color: var(--text-dim);
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            font-size: 0.82rem;
+            color: var(--text-color);
             text-decoration: none;
-            transition: color 0.3s ease;
+            transition: color 0.2s ease;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
         }
         .nav-link:hover {
             color: var(--accent);
@@ -244,48 +243,50 @@
         #hero .section-inner {
             /* wider than the story container so the spaced wordmark fits and stays centered */
             max-width: 64rem;
-            animation: heroIn 2.8s cubic-bezier(0.16,1,0.3,1) both;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
-        @keyframes heroIn {
-            0%   { opacity:0; transform:translateY(20px); filter:blur(6px); }
-            100% { opacity:1; transform:translateY(0);    filter:blur(0); }
+        @keyframes titleIn {
+            0%   { opacity: 0; transform: translateY(20px); filter: blur(5px); }
+            100% { opacity: 1; transform: translateY(0);    filter: blur(0); }
+        }
+        @keyframes fadeUp {
+            0%   { opacity: 0; transform: translateY(14px); }
+            100% { opacity: 1; transform: translateY(0); }
         }
 
-        #hero h1 {
-            /* matches the splash /motion wordmark: bold Inter, tight tracking */
-            font-weight: 700;
-            font-size: clamp(3.5rem,10vw,5.8rem);
+        #hero .title {
+            font-family: 'Inter', -apple-system, sans-serif;
+            font-weight: 600;
+            font-size: clamp(3.5rem, 10vw, 5.8rem);
             letter-spacing: -0.04em;
             text-transform: lowercase;
-            line-height: 1.1;
+            line-height: 1.2;
+            text-align: center;
             max-width: 100%;
             user-select: none;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.35);
+            animation: titleIn 2.4s cubic-bezier(0.16,1,0.3,1) both;
+            color: var(--text-color);
         }
-        #hero h1 span { color: var(--accent); transition: color 0.4s; }
+        #hero .title .slash { color: #c0392b; }
+        #hero .title span { color: var(--accent); transition: color 0.4s; }
 
-        #hero .sub {
+        #hero .subtitle {
             margin-top: 1.4rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 300;
-            font-size: clamp(0.5rem,1vw,0.74rem);
-            letter-spacing: 0.7em;
-            /* match indent to letter-spacing to keep the line centered */
-            text-indent: 0.7em;
-            text-transform: lowercase;
-            color: var(--text-muted);
-            user-select: none;
+            font-family: 'Inter', -apple-system, sans-serif;
+            font-weight: 400;
+            font-size: clamp(0.95rem, 2.2vw, 1.15rem);
+            color: var(--text-sub);
+            text-shadow: 0 1px 10px rgba(0,0,0,0.45);
+            max-width: 680px;
             text-align: center;
-            transition: color 0.4s;
-        }
-
-        #hero .desc {
-            margin: 2.2rem auto 0;
-            max-width: 28rem;
-            font-weight: 200;
-            font-size: clamp(0.75rem,1.3vw,0.92rem);
-            line-height: 1.8;
-            letter-spacing: 0.02em;
-            color: var(--text-muted);
+            line-height: 1.5;
+            user-select: none;
+            opacity: 0;
+            animation: fadeUp 1.4s 0.7s cubic-bezier(0.16,1,0.3,1) both;
             transition: color 0.4s;
         }
 
@@ -298,40 +299,45 @@
         }
 
         .btn {
-            font-weight: 400;
-            font-size: 0.6rem;
-            letter-spacing: 0.34em;
-            text-transform: uppercase;
-            color: var(--text-muted);
+            font-family: 'Inter', -apple-system, sans-serif;
+            font-weight: 500;
+            font-size: 0.88rem;
+            letter-spacing: -0.01em;
             text-decoration: none;
-            padding: 0.95rem 1.9rem;
+            padding: 0.75rem 1.8rem;
             border: 1px solid var(--border);
-            border-radius: 2px;
+            border-radius: 4px;
             background: var(--btn-bg);
+            color: var(--text-color);
             backdrop-filter: blur(4px);
             -webkit-backdrop-filter: blur(4px);
-            transition: border-color 0.4s, background 0.4s, color 0.4s, letter-spacing 0.4s;
+            transition: all 0.25s ease;
             cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         .btn:hover {
             border-color: var(--accent);
-            background: var(--accent);
-            color: #fff;
-            letter-spacing: 0.4em;
-        }
-        .btn.ghost {
-            border-color: transparent;
-            color: var(--text-dim);
-        }
-        .btn.ghost:hover {
             background: var(--btn-ghost-hover);
-            color: var(--text-muted);
-            border-color: var(--border-hover);
+            color: var(--text-color);
+        }
+        .btn.primary {
+            background: var(--accent);
+            color: #ffffff;
+            border-color: var(--accent);
+        }
+        .btn.primary:hover {
+            background: var(--accent);
+            filter: brightness(1.15);
+            border-color: var(--accent);
+            color: #ffffff;
         }
 
         .hint {
             display: block;
-            margin-top: 1.2rem;
+            margin-top: 1.6rem;
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.54rem;
             letter-spacing: 0.3em;
@@ -361,16 +367,15 @@
             font-size: 0.48rem;
             letter-spacing: 0.2em;
             text-transform: uppercase;
-            color: var(--indicator-text);
-            transition: color 0.4s;
+            color: #ffffff;
+            text-shadow: 0 1px 6px rgba(0,0,0,0.5);
         }
         .scroll-indicator .chevron {
             width: 1.2rem;
             height: 1.2rem;
-            border-right: 1px solid var(--indicator-chevron);
-            border-bottom: 1px solid var(--indicator-chevron);
+            border-right: 2px solid #ffffff;
+            border-bottom: 2px solid #ffffff;
             transform: rotate(45deg);
-            transition: border-color 0.4s;
         }
         @keyframes bob {
             0%, 100% { transform: translateX(-50%) translateY(0); }
@@ -379,9 +384,14 @@
 
         /* ---- STORY SECTIONS ---- */
         .story {
-            min-height: 60vh;
-            padding: 6rem 2rem;
+            min-height: 100vh;
+            padding: 8rem 2rem;
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
         }
         .story .section-inner {
             padding: 2rem;
@@ -401,24 +411,27 @@
             opacity: 0.5;
         }
 
-        .story h2 {
-            font-weight: 200;
-            font-size: clamp(1.4rem,3.6vw,3rem);
-            letter-spacing: 0.04em;
-            line-height: 1.4;
+        section h2 {
+            font-family: 'Inter', -apple-system, sans-serif;
+            font-weight: 600;
+            font-size: clamp(2.4rem, 6vw, 3.6rem);
+            letter-spacing: -0.03em;
+            line-height: 1.2;
             user-select: none;
             text-align: center;
+            color: var(--text-color);
+            text-shadow: 0 2px 14px rgba(0,0,0,0.5);
         }
-        .story h2 .accent { color: var(--accent); transition: color 0.4s; }
+        section h2 .accent { color: var(--accent); transition: color 0.4s; }
 
         .story p {
-            margin-top: 1.6rem;
+            margin-top: 1.8rem;
             font-weight: 200;
-            font-size: clamp(0.85rem,1.3vw,1.05rem);
-            line-height: 1.9;
+            font-size: clamp(1.05rem, 1.8vw, 1.3rem);
+            line-height: 1.7;
             letter-spacing: 0.01em;
             color: var(--text-sub);
-            max-width: 34rem;
+            max-width: 42rem;
             margin-left: auto;
             margin-right: auto;
             transition: color 0.4s;
@@ -428,12 +441,11 @@
         .story .meta-pull {
             margin-top: 1.2rem;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.6rem;
-            letter-spacing: 0.18em;
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 0.25em;
             text-transform: uppercase;
-            color: var(--story-meta);
-            transition: color 0.4s;
-            text-align: center;
+            color: var(--accent);
         }
 
         /* ---- ANIMATED ROSTER (inside story) ---- */
@@ -441,17 +453,16 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 0.6rem 1.6rem;
-            margin-top: 2rem;
+            gap: 1rem 2.2rem;
+            margin-top: 3rem;
         }
         .roster-grid span {
             font-family: 'JetBrains Mono', monospace;
-            font-weight: 300;
-            font-size: 0.6rem;
+            font-weight: 500;
+            font-size: 0.85rem;
             letter-spacing: 0.26em;
             text-transform: lowercase;
-            color: var(--roster-color);
-            transition: color 0.5s;
+            color: #ffffff;
         }
         .roster-grid span.live {
             color: var(--accent);
@@ -531,7 +542,7 @@
            RESPONSIVE
            ============================================================ */
         @media (max-width: 640px) {
-            .story p { font-size: 0.85rem; }
+            .story p { font-size: 0.95rem; }
             .nav-meta, .corner { display: none; }
             .story .section-inner {
                 padding: 2rem 1.2rem;
@@ -566,7 +577,7 @@
             font-size: 0.48rem;
             letter-spacing: 0.2em;
             text-transform: lowercase;
-            color: rgba(255,255,255,0.5);
+            color: #ffffff;
             display: flex;
             align-items: center;
             gap: 6px;
@@ -584,18 +595,18 @@
         .terminal-block {
             margin-top: 2.8rem;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.72rem;
+            font-size: 0.85rem;
             color: var(--text-muted);
             text-align: left;
             pointer-events: auto;
             width: 100%;
-            max-width: 580px;
+            max-width: 650px;
             margin-left: auto;
             margin-right: auto;
             background: rgba(255,255,255,0.02);
             border: 1px solid var(--border);
             border-radius: 4px;
-            padding: 14px 22px;
+            padding: 16px 24px;
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             display: flex;
@@ -625,13 +636,13 @@
             flex-shrink: 0;
         }
         .terminal-block .cmd {
-            color: var(--text-muted);
+            color: #ffffff;
         }
         .copy-btn {
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--text-dim);
+            color: #ffffff;
             transition: color 0.2s ease;
             flex-shrink: 0;
         }
@@ -653,26 +664,26 @@
            ============================================================ */
         .feature-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 2rem;
-            max-width: 56rem;
-            margin: 2rem auto 0;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 2.5rem;
+            max-width: 64rem;
+            margin: 3rem auto 0;
             text-align: center;
         }
         .feature-card {
             text-align: center;
         }
         .feature-card h3 {
-            font-weight: 400;
-            font-size: 0.8rem;
+            font-weight: 700;
+            font-size: 1.10rem;
             letter-spacing: 0.06em;
-            color: var(--text-muted);
-            margin-bottom: 0.5rem;
-            transition: color 0.4s;
+            color: #ffffff;
+            margin-bottom: 0.8rem;
+            text-shadow: 0 1px 6px rgba(0,0,0,0.4);
         }
         .feature-card p {
             font-weight: 200;
-            font-size: 0.72rem;
+            font-size: 0.88rem;
             line-height: 1.7;
             color: var(--text-dim);
             transition: color 0.4s;
@@ -684,26 +695,25 @@
         .stack-grid {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.6rem 1.2rem;
+            gap: 1rem 2rem;
             justify-content: center;
-            margin-top: 1.5rem;
+            margin-top: 2.5rem;
         }
         .stack-item {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.6rem;
+            font-size: 0.85rem;
             letter-spacing: 0.1em;
-            color: var(--text-muted);
+            color: #ffffff;
             display: flex;
-            gap: 0.5rem;
+            gap: 0.6rem;
             align-items: baseline;
-            transition: color 0.4s;
         }
         .stack-label {
-            font-size: 0.48rem;
+            font-size: 0.68rem;
+            font-weight: 700;
             letter-spacing: 0.15em;
             text-transform: lowercase;
-            color: var(--text-dim);
-            transition: color 0.4s;
+            color: var(--accent);
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -728,6 +738,7 @@
             <a href="#playground" class="nav-link">playground</a>
             <a href="#how" class="nav-link">how it works</a>
             <a href="#quickstart" class="nav-link">install</a>
+            <a href="#" class="nav-link">workshops</a>
             <a href="studio.html" class="nav-link">docs</a>
         </div>
     </nav>
@@ -738,15 +749,32 @@
     <!-- ============ HERO ============ -->
     <section id="hero">
         <div class="section-inner">
-            <h1><span>/</span>motion</h1>
-            <p class="sub">generative shader studio</p>
-            <p class="desc">Procedural motion graphics in your browser —<br>
-                15 shaders, seeded and reproducible, exported as image, video, gif, or a standalone HTML page.<br>
-                No cloud. No account. No install.</p>
+            <h1 class="title"><span class="slash">/</span>motion</h1>
+            <div class="subtitle">A generative graphics studio for shader design. Run the app locally, configure WebGL shaders, customize colors, and loop visuals. Open it to any coding assistant of your choice (like Cursor or Claude) to write configuration files and output standalone HTML splash pages.</div>
+            
+            <div class="terminal-block" onclick="copyText('git clone https://github.com/murderszn/motion.git && cd motion && npm install && npm run dev', this.querySelector('.copy-btn'))" style="cursor: pointer;" title="Click to copy install command">
+                <div class="terminal-content">
+                    <span class="prompt">&gt;_</span>
+                    <span class="cmd">git clone https://github.com/murderszn/motion.git && cd motion && npm install && npm run dev</span>
+                </div>
+                <div class="copy-btn">
+                    <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </div>
+            </div>
+
             <div class="actions">
-                <a class="btn" href="studio.html">Enter Studio</a>
-                <a class="btn ghost" href="https://github.com/murderszn/motion" target="_blank">View Source</a>
-                <a class="btn ghost" href="https://discord.gg/F9Vy9ByYbB" target="_blank">Discord</a>
+                <a class="btn primary" href="studio.html">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="margin-right:2px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    Enter Studio
+                </a>
+                <a href="https://github.com/murderszn/motion" target="_blank" rel="noopener" class="btn">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222 0 1.606-.014 2.898-.014 3.293 0 .322.216.694.825.576C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                    GitHub
+                </a>
+                <a href="https://discord.gg/F9Vy9ByYbB" target="_blank" rel="noopener" class="btn">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg>
+                    Discord
+                </a>
             </div>
             <span class="hint">press enter to open the studio</span>
         </div>
@@ -760,10 +788,10 @@
     <section class="story" id="playground" style="min-height:100vh;padding:4rem 2rem;">
         <div class="section-inner" style="max-width:64rem;">
             <p class="meta-pull reveal">playground</p>
-            <h2 class="reveal d1" style="font-weight:100;font-size:clamp(1.8rem,4vw,3.5rem);letter-spacing:0.02em;line-height:1.2;text-align:center;margin-bottom:0.5rem;">
+            <h2 class="reveal d1" style="margin-bottom:0.5rem;">
                 See it <span class="accent">move</span>.
             </h2>
-            <p class="reveal d2" style="font-weight:200;font-size:0.8rem;color:var(--text-dim);text-align:center;margin-bottom:2rem;">
+            <p class="reveal d2" style="font-weight:200;font-size:1.15rem;color:var(--text-dim);text-align:center;margin-bottom:2rem;">
                 This is a live WebGL shader — the same engine running the studio.
             </p>
             <div class="playground-wrap reveal d3">
@@ -784,7 +812,7 @@
     <!-- ============ DRAMATIC STATEMENT ============ -->
     <section class="story" id="statement">
         <div class="section-inner reveal">
-            <h2 class="reveal" style="font-weight:100;font-size:clamp(2rem,5vw,4.5rem);letter-spacing:0.02em;line-height:1.2;text-align:center;max-width:40rem;margin:0 auto;">
+            <h2 class="reveal" style="max-width:40rem;margin:0 auto;">
                 Every pixel is <span class="accent">yours</span>.<br>
                 Every loop is <span class="accent">seamless</span>.
             </h2>
@@ -813,13 +841,13 @@
         <div class="section-inner">
             <p class="meta-pull reveal">what you get</p>
             <div style="max-width:48rem;margin:0 auto;">
-                <h2 class="reveal d1" style="font-weight:100;font-size:clamp(1.8rem,4vw,3.8rem);letter-spacing:0.02em;line-height:1.25;text-align:center;margin-bottom:0.8rem;">
+                <h2 class="reveal d1" style="margin-bottom:0.8rem;">
                     <span class="accent">15</span> shaders.
                 </h2>
-                <h2 class="reveal d2" style="font-weight:100;font-size:clamp(1.8rem,4vw,3.8rem);letter-spacing:0.02em;line-height:1.25;text-align:center;margin-bottom:0.8rem;">
+                <h2 class="reveal d2" style="margin-bottom:0.8rem;">
                     <span class="accent">60</span>fps real-time.
                 </h2>
-                <h2 class="reveal d3" style="font-weight:100;font-size:clamp(1.8rem,4vw,3.8rem);letter-spacing:0.02em;line-height:1.25;text-align:center;margin-bottom:2rem;">
+                <h2 class="reveal d3" style="margin-bottom:2rem;">
                     <span class="accent">0</span> dependencies in production.
                 </h2>
             </div>
@@ -856,7 +884,7 @@
     <section class="story" id="presets">
         <div class="section-inner reveal">
             <p class="meta-pull reveal d1">visual languages</p>
-            <h2 class="reveal d2" style="font-weight:100;font-size:clamp(2rem,5vw,4.5rem);letter-spacing:0.02em;line-height:1.2;text-align:center;">
+            <h2 class="reveal d2">
                 <span class="accent">15</span> ways to&nbsp;shape&nbsp;time.
             </h2>
             <div class="roster-grid reveal d3" id="roster">
@@ -882,7 +910,7 @@
     <!-- ============ STACK ============ -->
     <section class="story" id="stack">
         <div class="section-inner reveal">
-            <h2 class="reveal" style="font-weight:100;font-size:clamp(1.6rem,3.5vw,3rem);letter-spacing:0.03em;line-height:1.3;text-align:center;margin-bottom:1.5rem;">
+            <h2 class="reveal" style="margin-bottom:1.5rem;">
                 Built with <span class="accent">TypeScript</span>.<br>Runs on <span class="accent">WebGL</span>.
             </h2>
             <div class="stack-grid reveal d1">
@@ -901,7 +929,7 @@
     <!-- ============ CTA ============ -->
     <section id="cta">
         <div class="section-inner">
-            <h2 class="reveal" style="font-weight:100;font-size:clamp(2.5rem,6vw,5rem);letter-spacing:0.04em;line-height:1.1;text-align:center;">
+            <h2 class="reveal">
                 Start <span style="color:var(--accent);">creating</span>.
             </h2>
             <div style="margin-top:2.5rem;text-align:center;">

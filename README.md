@@ -22,11 +22,15 @@ npm run dev
 
 # PTY terminal backend (for the built-in shell panel)
 npm run server
+
+# Workshop Signup API backend (requires MONGO_URI in .env) — http://localhost:3001
+npm run api
 ```
 
-> Run both commands in separate terminals if you want the live terminal panel
-> inside the studio to work. The Vite config proxies `/terminal` WebSocket to
-> the node-pty server automatically.
+> **Note on Servers**: Run the dev server, terminal backend, and signup API in separate terminal sessions.
+>
+> 1. **Live Terminal Panel**: The PTY backend (`npm run server`) communicates with the studio interface via a WebSocket proxy `/terminal` configured in Vite.
+> 2. **Workshop Signup API**: The Express API backend (`npm run api`) handles database persistence for workshops. You must set up a `.env` file in the root containing your `MONGO_URI` connection string before running it. Vite proxies `/api` requests to this backend.
 
 **Browser:** Chrome/Edge recommended. Safari has spotty WebM (video export) support —
 PNG and GIF work everywhere.
@@ -41,9 +45,11 @@ PNG and GIF work everywhere.
 | `src/index.ts` | Splash page script |
 | `studio.html` | Studio HTML shell (script tag points to `src/studio/main.ts`) |
 | `index.html` | Splash page HTML shell |
-| `vite.config.ts` | Vite multi-page config + `/terminal` WebSocket proxy |
+| `vite.config.ts` | Vite multi-page config + `/terminal` WebSocket proxy + `/api` proxy |
 | `tsconfig.json` | TypeScript config (strict, ES2020, bundler resolution) |
-| `server.mjs` | Node.js PTY + WebSocket server (terminal panel backend) |
+| `server/server.mjs` | Node.js PTY + WebSocket server (terminal panel backend) |
+| `server/api.mjs` | Express + MongoDB signup API backend for workshops |
+| `brain/` | The studio's documentation vault (Obsidian notes on architecture, presets, and design principles) |
 | `DEVELOPER_AGENT_GUIDE.md` | Integration guide for developers and AI agents |
 | `.agents/skills/motion-studio/` | AI agent skill files for the studio |
 
@@ -151,6 +157,28 @@ status bar at the bottom.
 `Cmd+Shift+P` / `F1` command palette · `Ctrl+`` toggle terminal · `Cmd+B` toggle panel
 
 The bottom panel has a **hotkeys** tab with the full shortcut reference.
+
+---
+
+## Documentation Vault (`brain/`)
+
+The repository includes a comprehensive documentation vault located in the [`brain/`](file:///Users/jahflyx/motion/brain) directory. It is structured as an **Obsidian** knowledge base containing notes on the system design, concepts, presets, and development guidelines:
+- **Architecture**: In-depth explanations of the [UI System](file:///Users/jahflyx/motion/brain/Architecture/UI%20System.md), [Shader Architecture](file:///Users/jahflyx/motion/brain/Architecture/Shader%20Architecture.md), and [Plugin System](file:///Users/jahflyx/motion/brain/Architecture/Plugin%20System.md).
+- **Concepts**: Core mathematics and systems, including [Seed-Based Determinism](file:///Users/jahflyx/motion/brain/Concepts/Seed-Based%20Determinism.md) and the [Seamless Loop Invariant](file:///Users/jahflyx/motion/brain/Concepts/Seamless%20Loop%20Invariant.md).
+- **Design**: Guidelines for aesthetic rendering, [Color Theory for Shaders](file:///Users/jahflyx/motion/brain/Design/Color%20Theory%20for%20Shaders.md), and composition.
+- **Development**: Practical guides for adding features (e.g., [Adding a Preset](file:///Users/jahflyx/motion/brain/Development/Adding%20a%20Preset.md), [Adding a Slider](file:///Users/jahflyx/motion/brain/Development/Adding%20a%20Slider.md), [Adding a Palette](file:///Users/jahflyx/motion/brain/Development/Adding%20a%20Palette.md)).
+
+---
+
+## Workshop Signup API (`server/api.mjs`)
+
+The project features a lightweight Node.js Express signup API connected to MongoDB Atlas. It supports visitor/attendee registration for events or workshops:
+- **Endpoints**:
+  - `GET /api/health` — Checks API server status and connection.
+  - `POST /api/signup` — Registers a user for an event (requires `name`, `email`, and `event` in JSON body). Returns a generated unique cryptographically secure 24-byte hex key.
+- **Configuration**:
+  - Set up a `.env` file based on [.env.example](file:///Users/jahflyx/motion/.env.example) with `MONGO_URI`.
+  - The studio frontend accesses this API via Vite's configured `/api` proxy.
 
 ---
 
