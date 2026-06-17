@@ -1,2231 +1,1827 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>/motion Tour 2026 — Developer Workshops</title>
-  <meta name="description" content="/motion Tour 2026. Live developer workshops covering agentic coding, workspace automation, custom agent skills, and multi-agent systems orchestration.">
-  <meta name="keywords" content="motion design, agentic coding, workspace automation, custom agent skills, multi-agent orchestration, developer workshops, WebGL, creative coding">
-  <meta name="author" content="murderszn">
-  <meta name="robots" content="index, follow">
-  <link rel="icon" type="image/png" href="/assets/favicon.png">
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="/motion Tour 2026 — Developer Workshops">
-  <meta property="og:description" content="Live developer workshops covering agentic coding, workspace automation, custom agent skills, and multi-agent systems orchestration.">
-  <meta property="og:image" content="/assets/favicon.png">
-  <meta property="og:site_name" content="/motion Tour">
-  <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="/motion Tour 2026 — Developer Workshops">
-  <meta name="twitter:description" content="Live developer workshops covering agentic coding, workspace automation, custom agent skills, and multi-agent systems orchestration.">
-  <meta name="twitter:image" content="/assets/favicon.png">
-  <style>
-    :root {
-      --bg-primary: #070708;
-      --border-color: rgba(255, 255, 255, 0.08);
-      --border-hover: rgba(255, 255, 255, 0.25);
-      --text-primary: #f4f4f5;
-      --text-secondary: #d4d4d8;
-      --text-muted: #a1a1aa;
-      --accent: #1d4ed8;
-      --accent-gradient: linear-gradient(90deg, #1d4ed8, #6366f1);
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    
-    html, body {
-      width: 100%;
-      min-height: 100%;
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      overflow-x: hidden;
-      scroll-behavior: smooth;
-    }
-
-    #bg-canvas {
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-      pointer-events: none;
-      display: block;
-      will-change: transform;
-    }
-
-    /* Subtle grid overlay */
-
-    body::after {
-      content: "";
-      position: fixed;
-      inset: 0;
-      background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-      background-size: 24px 24px;
-      z-index: 1;
-      pointer-events: none;
-    }
-
-    .container {
-      position: relative;
-      z-index: 2;
-      width: 100%;
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 0 1.5rem;
-    }
-
-    /* Header */
-    .header {
-      height: 80px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .logo {
-      font-size: 1.15rem;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      color: var(--text-primary);
-      text-transform: uppercase;
-    }
-
-    .nav {
-      display: flex;
-      gap: 1.5rem;
-    }
-
-    .nav a {
-      color: var(--text-secondary);
-      text-decoration: none;
-      font-size: 0.85rem;
-      font-weight: 500;
-      transition: color 0.2s;
-    }
-
-    .nav a:hover {
-      color: var(--text-primary);
-    }
-
-    /* Hero */
-    .hero {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      padding: 7rem 0 6rem 0;
-      border-bottom: 1px solid var(--border-color);
-      font-family: 'Inter', sans-serif;
-    }
-
-    .hero-tag {
-      font-family: 'JetBrains Mono', monospace;
-      font-weight: 300;
-      font-size: clamp(0.5rem, 1vw, 0.74rem);
-      letter-spacing: 0.7em;
-      text-indent: 0.7em;
-      text-transform: lowercase;
-      color: #ffffff;
-      margin-bottom: 1.5rem;
-      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
-    }
-
-    .title {
-      font-size: clamp(3rem, 9vw, 5rem);
-      font-weight: 700;
-      line-height: 1.1;
-      letter-spacing: -0.04em;
-      margin-bottom: 1.5rem;
-      text-transform: lowercase;
-      text-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
-    }
-
-    .subtitle {
-      font-size: clamp(0.75rem, 1.3vw, 0.92rem);
-      line-height: 1.8;
-      font-weight: 400;
-      color: #ffffff;
-      max-width: 580px;
-      margin-bottom: 2.5rem;
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
-    }
-
-    /* Copyable Terminal Block - Whitish Glassmorphism */
-    .terminal {
-      width: 100%;
-      max-width: 480px;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 20px 40px rgba(0, 0, 0, 0.35);
-      border-radius: 8px;
-      overflow: hidden;
-      margin-bottom: 2.5rem;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-    }
-
-    .terminal-header {
-      height: 28px;
-      background: rgba(255, 255, 255, 0.03);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      display: flex;
-      align-items: center;
-      padding: 0 0.75rem;
-      gap: 0.35rem;
-    }
-
-    .terminal-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    .terminal-body {
-      padding: 0.75rem 1rem;
-      font-family: 'Fira Code', monospace;
-      font-size: 0.8rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .prompt {
-      color: var(--accent);
-      margin-right: 0.5rem;
-    }
-
-    .code-line {
-      color: var(--text-primary);
-      text-align: left;
-      flex: 1;
-      overflow-x: auto;
-      white-space: nowrap;
-    }
-
-    .copy-btn {
-      background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: var(--text-secondary);
-      font-family: 'Fira Code', monospace;
-      font-size: 0.7rem;
-      padding: 3px 8px;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .copy-btn:hover {
-      background: var(--text-primary);
-      color: var(--bg-primary);
-      border-color: var(--text-primary);
-    }
-
-    .hero-actions {
-      display: flex;
-      gap: 1rem;
-    }
-
-    .btn-primary {
-      display: inline-flex;
-      align-items: center;
-      padding: 0.65rem 1.75rem;
-      background: var(--text-primary);
-      color: var(--bg-primary);
-      border: 1px solid var(--text-primary);
-      font-family: 'Outfit', sans-serif;
-      font-size: 0.9rem;
-      font-weight: 600;
-      text-decoration: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-primary:hover {
-      background: transparent;
-      color: var(--text-primary);
-    }
-
-    .btn-secondary {
-      display: inline-flex;
-      align-items: center;
-      padding: 0.65rem 1.75rem;
-      background: transparent;
-      color: var(--text-primary);
-      border: 1px solid var(--border-color);
-      font-family: 'Outfit', sans-serif;
-      font-size: 0.9rem;
-      font-weight: 500;
-      text-decoration: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-secondary:hover {
-      border-color: var(--border-hover);
-      background: rgba(255,255,255,0.02);
-    }
-
-    /* Workshops section */
-    .workshops-section {
-      padding: 6rem 0;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .section-header {
-      margin-bottom: 3.5rem;
-      text-align: center;
-    }
-
-    .section-title {
-      font-size: 1.75rem;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      margin-bottom: 0.5rem;
-      text-transform: uppercase;
-    }
-
-    .section-subtitle {
-      font-size: 0.95rem;
-      color: var(--text-secondary);
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
-    }
-
-    /* Whitish Glassmorphism Node Cards */
-    .card {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.03) 100%);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 12px 30px rgba(0, 0, 0, 0.25);
-      border-radius: 8px;
-      padding: 1.75rem;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .card:hover {
-      transform: translateY(-2px);
-      border-color: rgba(255, 255, 255, 0.35);
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.05) 100%);
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.25), 0 20px 40px rgba(0, 0, 0, 0.35);
-    }
-
-    .card-meta {
-      display: flex;
-      justify-content: space-between;
-      font-family: 'Fira Code', monospace;
-      font-size: 0.75rem;
-      color: var(--accent);
-      margin-bottom: 0.5rem;
-    }
-
-    .card-location {
-      font-size: 1.35rem;
-      font-weight: 800;
-      color: var(--text-primary);
-      margin-bottom: 0.75rem;
-    }
-
-    .card-date {
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-      margin-bottom: 1.25rem;
-    }
-
-    .card-capacity {
-      margin-bottom: 1.25rem;
-    }
-
-    .capacity-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.75rem;
-      color: var(--text-secondary);
-      margin-bottom: 0.3rem;
-    }
-
-    .bar {
-      height: 3px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 1.5px;
-      overflow: hidden;
-    }
-
-    .bar-fill {
-      height: 100%;
-      background: var(--accent-gradient);
-      border-radius: 1.5px;
-      transition: width 0.5s ease-out;
-    }
-
-    .tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.35rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .tag {
-      font-size: 0.7rem;
-      padding: 3px 6px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: #e4e4e7;
-      border-radius: 4px;
-    }
-
-    .card-btn {
-      width: 100%;
-      padding: 0.65rem;
-      background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      color: var(--text-primary);
-      font-family: 'Outfit', sans-serif;
-      font-size: 0.8rem;
-      font-weight: 600;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: all 0.2s;
-      margin-top: auto;
-    }
-
-    .card:hover .card-btn:not(.waitlist-btn) {
-      background: var(--text-primary);
-      color: var(--bg-primary);
-      border-color: var(--text-primary);
-    }
-
-    .card-btn.waitlist-btn {
-      border-color: rgba(245, 158, 11, 0.35);
-      color: #fbbf24;
-    }
-
-    .card:hover .card-btn.waitlist-btn {
-      background: #fbbf24;
-      color: var(--bg-primary);
-      border-color: #fbbf24;
-    }
-
-    .card-btn:disabled {
-      background: rgba(255, 255, 255, 0.03) !important;
-      border-color: rgba(255, 255, 255, 0.03) !important;
-      color: rgba(255, 255, 255, 0.2) !important;
-      cursor: not-allowed;
-    }
-
-    /* System Prep Section */
-    .prep-section {
-      padding: 6rem 0;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .prep-box {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2rem;
-      padding: 2.25rem !important;
-    }
-
-    .prep-checklist h3 {
-      font-size: 1.15rem;
-      margin-bottom: 1.5rem;
-      font-weight: 700;
-    }
-
-    .check-item {
-      display: flex;
-      gap: 1rem;
-      align-items: flex-start;
-      margin-bottom: 1.25rem;
-    }
-
-    .check-status {
-      font-family: 'Fira Code', monospace;
-      font-size: 1rem;
-      line-height: 1.2;
-      width: 15px;
-      text-align: center;
-    }
-    
-    .status-pending { color: var(--text-muted); }
-    .status-success { color: #10b981; }
-    .status-warning { color: #f59e0b; }
-    .status-error { color: #ef4444; }
-
-    .check-text {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .check-text strong {
-      font-size: 0.9rem;
-      color: var(--text-primary);
-    }
-
-    .check-desc {
-      font-size: 0.75rem;
-      color: var(--text-secondary);
-      margin-top: 0.15rem;
-    }
-
-    .prep-scan-btn {
-      margin-top: 1rem;
-      padding: 0.65rem 1.25rem;
-      background: var(--text-primary);
-      color: var(--bg-primary);
-      border: 1px solid var(--text-primary);
-      font-family: 'Outfit', sans-serif;
-      font-size: 0.85rem;
-      font-weight: 600;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .prep-scan-btn:hover {
-      background: transparent;
-      color: var(--text-primary);
-    }
-
-    .prep-console {
-      background: rgba(0, 0, 0, 0.45);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 6px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      height: 230px;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-    }
-
-    .console-header {
-      height: 28px;
-      background: rgba(255,255,255,0.02);
-      border-bottom: 1px solid var(--border-color);
-      display: flex;
-      align-items: center;
-      padding: 0 0.75rem;
-    }
-
-    .console-title {
-      font-family: 'Fira Code', monospace;
-      font-size: 0.7rem;
-      color: var(--text-secondary);
-      opacity: 0.8;
-    }
-
-    .console-body {
-      flex: 1;
-      padding: 0.85rem 1rem;
-      font-family: 'Fira Code', monospace;
-      font-size: 0.75rem;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-      color: #a7f3d0;
-    }
-
-    .console-line {
-      line-height: 1.4;
-      white-space: pre-wrap;
-      word-break: break-all;
-    }
-
-    .console-line.text-muted {
-      color: #71717a;
-    }
-    
-    .console-line.text-success {
-      color: #10b981;
-    }
-
-    .console-line.text-warning {
-      color: #fbbf24;
-    }
-
-    /* Whitish Glassmorphism Modal */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(7, 7, 8, 0.55);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-    }
-
-    .modal-overlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .modal {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.03) 100%);
-      border: 1px solid rgba(255, 255, 255, 0.22);
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2), 0 30px 60px rgba(0, 0, 0, 0.5);
-      border-radius: 12px;
-      padding: 2.25rem;
-      max-width: 440px;
-      width: 90%;
-      transform: scale(0.96);
-      transition: transform 0.3s ease;
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-    }
-
-    .modal-overlay.active .modal {
-      transform: scale(1);
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.75rem;
-    }
-
-    .modal-title {
-      font-size: 1.25rem;
-      font-weight: 800;
-      color: var(--text-primary);
-      letter-spacing: -0.02em;
-    }
-
-    .modal-close {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 50%;
-      width: 28px;
-      height: 28px;
-      color: var(--text-secondary);
-      font-size: 0.95rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      line-height: 1;
-      transition: all 0.2s;
-    }
-
-    .modal-close:hover {
-      background: rgba(255, 255, 255, 0.12);
-      border-color: rgba(255, 255, 255, 0.24);
-      color: var(--text-primary);
-    }
-
-    .form {
-      display: flex;
-      flex-direction: column;
-      gap: 1.15rem;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-    }
-
-    .form-label {
-      font-size: 0.75rem;
-      color: var(--text-secondary);
-      font-weight: 600;
-    }
-
-    .form-input {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 4px;
-      color: var(--text-primary);
-      padding: 0.65rem;
-      font-family: 'Outfit', sans-serif;
-      font-size: 0.9rem;
-      outline: none;
-      transition: all 0.2s;
-    }
-
-    .form-input:focus {
-      border-color: rgba(255, 255, 255, 0.35);
-      background: rgba(255, 255, 255, 0.07);
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
-    }
-
-    .submit-btn {
-      padding: 0.75rem;
-      background: var(--text-primary);
-      border: 1px solid var(--text-primary);
-      color: var(--bg-primary);
-      font-family: 'Outfit', sans-serif;
-      font-size: 0.85rem;
-      font-weight: 700;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: all 0.2s;
-      margin-top: 0.5rem;
-    }
-
-    .submit-btn:hover:not(.waitlist-btn) {
-      background: transparent;
-      color: var(--text-primary);
-    }
-
-    .submit-btn.waitlist-btn {
-      background: #fbbf24;
-      border-color: #fbbf24;
-      color: var(--bg-primary);
-    }
-
-    .submit-btn.waitlist-btn:hover {
-      background: transparent;
-      color: #fbbf24;
-      border-color: #fbbf24;
-    }
-
-    /* Success State */
-    .success-msg {
-      text-align: center;
-      animation: fadeIn 0.3s ease-out;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(5px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .success-icon {
-      font-size: 2.25rem;
-      margin-bottom: 0.5rem;
-      color: #10b981;
-    }
-
-    .success-title {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: #10b981;
-      margin-bottom: 0.25rem;
-    }
-
-    .success-desc {
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-      margin-bottom: 1.25rem;
-    }
-
-    .confirmation-box {
-      font-family: 'Fira Code', monospace;
-      font-size: 0.8rem;
-      padding: 0.75rem;
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 4px;
-      color: var(--text-primary);
-      word-break: break-all;
-      margin-bottom: 1rem;
-      text-align: center;
-    }
-
-    .copy-token-btn {
-      width: 100%;
-      padding: 0.5rem;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: var(--text-primary);
-      font-family: 'Outfit', sans-serif;
-      font-size: 0.8rem;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .copy-token-btn:hover {
-      background: var(--text-primary);
-      color: var(--bg-primary);
-      border-color: var(--text-primary);
-    }
-
-    .cli-cmd-box {
-      text-align: left;
-      margin-top: 1.5rem;
-      border-top: 1px dashed var(--border-color);
-      padding-top: 1rem;
-    }
-
-    .cli-cmd-box span {
-      font-family: 'Fira Code', monospace;
-      font-size: 0.65rem;
-      color: var(--text-secondary);
-      display: block;
-      margin-bottom: 0.25rem;
-    }
-
-    .cli-cmd-box code {
-      display: block;
-      background: #000;
-      padding: 0.65rem;
-      border-radius: 4px;
-      font-family: 'Fira Code', monospace;
-      font-size: 0.65rem;
-      color: #a7f3d0;
-      word-break: break-all;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    /* Footer */
-    .footer {
-      height: 100px;
-      border-top: 1px solid var(--border-color);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.8rem;
-      color: var(--text-secondary);
-      margin-top: 4rem;
-    }
-
-    /* ── Responsive / mobile ── */
-    @media (max-width: 768px) {
-      .container { padding: 0 1.15rem; }
-
-      /* header: allow logo + nav to breathe, keep nav usable */
-      .header { height: auto; flex-wrap: wrap; gap: 0.5rem 1rem; padding: 1rem 0; }
-      .nav { gap: 1.1rem; }
-      .nav a { font-size: 0.8rem; }
-
-      /* tighten oversized section paddings */
-      .hero { padding: 4rem 0 3.5rem 0; }
-      .workshops-section,
-      .prep-section,
-      .agenda-section,
-      .faq-section { padding: 3.5rem 0; }
-      .section-header { margin-bottom: 2.25rem; }
-      .section-title { font-size: 1.45rem; }
-
-      /* single-column grids (minmax(300px) overflows narrow phones) */
-      .grid { grid-template-columns: 1fr; }
-      .prep-box { grid-template-columns: 1fr; padding: 1.5rem !important; }
-      .agenda-container { padding: 1.5rem; }
-      .card { padding: 1.4rem; }
-
-      /* FAQ "IDE": let the long tab filenames scroll instead of overflow */
-      .ide-header { gap: 0.75rem; }
-      .ide-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-      .ide-tab { font-size: 0.68rem; padding: 0 0.7rem; white-space: nowrap; }
-      .ide-body { padding: 1rem; }
-      .code-editor { font-size: 0.72rem; }
-
-      /* footer: stack + center */
-      .footer { height: auto; flex-direction: column; gap: 0.75rem; text-align: center; padding: 2rem 0; }
-    }
-
-    @media (max-width: 560px) {
-      /* header stacks: logo over centered nav */
-      .header { flex-direction: column; align-items: center; text-align: center; }
-      .nav { flex-wrap: wrap; justify-content: center; gap: 0.9rem; }
-
-      .title { font-size: clamp(2.2rem, 11vw, 3rem); }
-      .subtitle { font-size: 0.85rem; }
-
-      /* hero buttons stack full-width */
-      .hero-actions { flex-direction: column; width: 100%; max-width: 320px; }
-      .btn-primary, .btn-secondary { justify-content: center; width: 100%; }
-
-      .terminal-body { font-size: 0.72rem; padding: 0.65rem 0.85rem; }
-      .agenda-item { padding: 1rem 1.1rem; }
-    }
-
-    /* Agenda Timeline Section */
-    .agenda-section {
-      padding: 6rem 0;
-      border-bottom: 1px solid var(--border-color);
-    }
-    .agenda-container {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 12px 30px rgba(0, 0, 0, 0.25);
-      border-radius: 8px;
-      padding: 2.5rem;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-    }
-    .agenda-timeline {
-      position: relative;
-      padding-left: 2rem;
-    }
-    .agenda-timeline::after {
-      content: "";
-      position: absolute;
-      left: 7px;
-      top: 0.5rem;
-      bottom: 0.5rem;
-      width: 2px;
-      background: rgba(255, 255, 255, 0.08);
-    }
-    .agenda-item {
-      position: relative;
-      margin-bottom: 1.25rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-      padding: 1.25rem 1.5rem;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 6px;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .agenda-item:last-child {
-      margin-bottom: 0;
-    }
-    .agenda-time {
-      font-family: 'Fira Code', monospace;
-      font-size: 0.75rem;
-      color: var(--accent);
-      font-weight: 500;
-    }
-    .agenda-marker {
-      position: absolute;
-      left: -2rem;
-      top: 1.55rem;
-      transform: translateX(-50%);
-      width: 28px;
-      height: 28px;
-      background: var(--bg-primary);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 5;
-      color: var(--text-primary);
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .agenda-item:hover {
-      transform: translateX(6px);
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.03) 100%);
-      border-color: rgba(255, 255, 255, 0.2);
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.12), 0 8px 20px rgba(0, 0, 0, 0.2);
-    }
-    .agenda-item:hover .agenda-marker {
-      border-color: var(--accent);
-      color: var(--accent);
-      background: rgba(29, 78, 216, 0.1);
-      box-shadow: 0 0 14px rgba(29, 78, 216, 0.3);
-      transform: translateX(-50%) scale(1.15);
-    }
-    .agenda-marker svg {
-      width: 12px;
-      height: 12px;
-    }
-    .agenda-details h4 {
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 0.25rem;
-      transition: color 0.2s;
-    }
-    .agenda-item:hover .agenda-details h4 {
-      color: #fff;
-      text-shadow: 0 0 8px rgba(255, 255, 255, 0.15);
-    }
-    .agenda-details p {
-      font-size: 0.825rem;
-      color: var(--text-secondary);
-      line-height: 1.5;
-    }
-
-    /* FAQ Code Editor Section */
-    .faq-section {
-      padding: 6rem 0;
-      border-bottom: 1px solid var(--border-color);
-    }
-    .faq-ide {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 20px 45px rgba(0, 0, 0, 0.35);
-      border-radius: 10px;
-      overflow: hidden;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-    }
-    .ide-header {
-      height: 36px;
-      background: rgba(255, 255, 255, 0.03);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      display: flex;
-      align-items: center;
-      padding: 0 1rem;
-      gap: 1.5rem;
-    }
-    .ide-dots {
-      display: flex;
-      gap: 0.35rem;
-      align-items: center;
-    }
-    .ide-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-    }
-    .ide-dot.red { background: #ef4444; }
-    .ide-dot.yellow { background: #f59e0b; }
-    .ide-dot.green { background: #10b981; }
-    .ide-tabs {
-      display: flex;
-      height: 100%;
-    }
-    .ide-tab {
-      background: transparent;
-      border: none;
-      border-right: 1px solid rgba(255, 255, 255, 0.05);
-      color: var(--text-muted);
-      font-family: 'Fira Code', monospace;
-      font-size: 0.75rem;
-      padding: 0 1rem;
-      height: 100%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      position: relative;
-    }
-    .ide-tab.active {
-      background: rgba(255, 255, 255, 0.06);
-      color: var(--text-primary);
-    }
-    .ide-tab.active::after {
-      content: "";
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: var(--accent-gradient);
-      box-shadow: 0 0 8px rgba(29, 78, 216, 0.4);
-    }
-    .ide-tab:hover:not(.active) {
-      background: rgba(255, 255, 255, 0.03);
-      color: var(--text-secondary);
-    }
-    .ide-body {
-      padding: 1.5rem;
-      overflow-x: auto;
-    }
-    .code-editor {
-      margin: 0;
-      font-family: 'Fira Code', monospace;
-      font-size: 0.8rem;
-      line-height: 1.6;
-      color: var(--text-primary);
-      tab-size: 2;
-    }
-
-    /* Console Interactive Input Line */
-    .console-input-line {
-      display: flex;
-      align-items: center;
-      padding: 0.5rem 1rem;
-      background: rgba(255, 255, 255, 0.04);
-      border-top: 1px solid rgba(255, 255, 255, 0.12);
-      gap: 0.5rem;
-      font-family: 'Fira Code', monospace;
-      font-size: 0.75rem;
-    }
-    .console-prompt {
-      color: var(--accent);
-      white-space: nowrap;
-      user-select: none;
-    }
-    .console-terminal-input {
-      background: transparent;
-      border: none;
-      outline: none;
-      color: var(--text-primary);
-      font-family: 'Fira Code', monospace;
-      font-size: 0.75rem;
-      flex: 1;
-    }
-    .console-terminal-input::placeholder {
-      color: rgba(255, 255, 255, 0.2);
-    }
-  </style>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Fira+Code:wght@400;500&family=Inter:wght@200;300;400;500;700;800&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <script src="https://unpkg.com/lucide@latest" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>/motion workshops — the 2026 tour</title>
+    <meta name="description" content="The /motion 2026 workshop tour. A one-day, hands-on intensive on building with coding agents — agentic coding, workspace automation, custom skills, and multi-agent orchestration. Six cities. Thirty seats each.">
+    <meta name="keywords" content="coding agents workshop, agentic coding, workspace automation, custom agent skills, multi-agent orchestration, developer workshop, WebGL, creative coding, motion">
+    <meta name="author" content="murderszn">
+    <meta name="robots" content="index, follow">
+    <link rel="icon" type="image/png" href="/assets/favicon.png">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="/motion workshops — the 2026 tour">
+    <meta property="og:description" content="A one-day, hands-on intensive on building with coding agents. Six cities. Thirty seats each. Your laptop, our playbook.">
+    <meta property="og:image" content="/assets/favicon.png">
+    <meta property="og:site_name" content="/motion workshops">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="/motion workshops — the 2026 tour">
+    <meta name="twitter:description" content="A one-day, hands-on intensive on building with coding agents. Six cities. Thirty seats each.">
+    <meta name="twitter:image" content="/assets/favicon.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+        :root {
+            --bg: #06040a;
+            --text-color: #ffffff;
+            --accent: #d43636;
+            --text-dim: rgba(255,255,255,0.65);
+            --text-muted: rgba(255,255,255,0.95);
+            --text-sub: rgba(255,255,255,0.9);
+            --border: rgba(255,255,255,0.22);
+            --border-hover: rgba(255,255,255,0.18);
+            --btn-bg: rgba(255,255,255,0.015);
+            --btn-ghost-hover: rgba(255,255,255,0.04);
+            --panel-bg: rgba(6,4,10,0.55);
+            --vignette-radial: radial-gradient(ellipse at center, transparent 30%, rgba(6,4,10,0.85) 100%);
+            --vignette-linear: linear-gradient(to bottom, rgba(6,4,10,0.4) 0%, transparent 30%, transparent 70%, rgba(6,4,10,0.7) 100%);
+            --cta-bg: rgba(224,58,58,0.12);
+            --mix-blend: difference;
+        }
+
+        :root[data-theme="motion-light"] {
+            --bg: #f4f4f6;
+            --text-color: #1c1c1e;
+            --accent: #d32f2f;
+            --text-dim: rgba(28,28,30,0.65);
+            --text-muted: rgba(28,28,30,0.95);
+            --text-sub: rgba(28,28,30,0.9);
+            --border: rgba(28,28,30,0.22);
+            --border-hover: rgba(28,28,30,0.18);
+            --btn-bg: rgba(28,28,30,0.015);
+            --btn-ghost-hover: rgba(28,28,30,0.04);
+            --panel-bg: rgba(244,244,246,0.55);
+            --vignette-radial: radial-gradient(ellipse at center, transparent 30%, rgba(244,244,246,0.85) 100%);
+            --vignette-linear: linear-gradient(to bottom, rgba(244,244,246,0.4) 0%, transparent 30%, transparent 70%, rgba(244,244,246,0.7) 100%);
+            --cta-bg: rgba(211,47,47,0.12);
+            --mix-blend: normal;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            background: var(--bg);
+            transition: background 0.4s, color 0.4s;
+        }
+        body {
+            width:100%;
+            background: var(--bg);
+            font-family: 'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;
+            color: var(--text-color);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            transition: background 0.4s, color 0.4s;
+        }
+
+        /* ============================================================
+           BACKGROUND — WebGL flow shader, fixed full-viewport
+           ============================================================ */
+        #bg-canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+            will-change: transform;
+        }
+        #vignette {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            background: var(--vignette-radial), var(--vignette-linear);
+            transition: background 0.4s;
+        }
+        #scrim {
+            position: fixed;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+            background: var(--bg);
+            opacity: 0.28;
+            transition: opacity 0.6s ease, background 0.4s;
+        }
+
+        /* ============================================================
+           NAV
+           ============================================================ */
+        .nav {
+            position: fixed;
+            top: 1.5rem; left: 0; right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.8rem;
+            z-index: 20;
+            pointer-events: none;
+            mix-blend-mode: var(--mix-blend);
+        }
+        .mark {
+            font-weight: 800;
+            font-size: 1.05rem;
+            letter-spacing: -0.02em;
+            text-transform: lowercase;
+            color: var(--text-color);
+            user-select: none;
+            transition: color 0.4s;
+        }
+        .mark span { color: var(--accent); transition: color 0.4s; }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 1.8rem;
+            pointer-events: auto;
+        }
+        .nav-link {
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            font-size: 0.82rem;
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.2s ease;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+        .nav-link:hover { color: var(--accent); }
+
+        /* ============================================================
+           SECTIONS
+           ============================================================ */
+        section {
+            position: relative;
+            z-index: 5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 5rem 2rem;
+        }
+        .section-inner {
+            max-width: 48rem;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* ---- HERO ---- */
+        #hero { padding: 0 2rem; }
+        #hero .section-inner {
+            max-width: 64rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        @keyframes titleIn {
+            0%   { opacity: 0; transform: translateY(20px); filter: blur(5px); }
+            100% { opacity: 1; transform: translateY(0);    filter: blur(0); }
+        }
+        @keyframes fadeUp {
+            0%   { opacity: 0; transform: translateY(14px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        #hero .title {
+            font-family: 'Inter', -apple-system, sans-serif;
+            font-weight: 600;
+            font-size: clamp(3.2rem, 9vw, 5.6rem);
+            letter-spacing: -0.04em;
+            text-transform: lowercase;
+            line-height: 1.08;
+            text-align: center;
+            max-width: 100%;
+            user-select: none;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.35);
+            animation: titleIn 2.4s cubic-bezier(0.16,1,0.3,1) both;
+            color: var(--text-color);
+        }
+        #hero .title .slash { color: #c0392b; }
+        #hero .title span { color: var(--accent); transition: color 0.4s; }
+        #hero .subtitle {
+            margin-top: 1.4rem;
+            font-family: 'Inter', -apple-system, sans-serif;
+            font-weight: 400;
+            font-size: clamp(0.95rem, 2.2vw, 1.15rem);
+            color: var(--text-sub);
+            text-shadow: 0 1px 10px rgba(0,0,0,0.45);
+            max-width: 640px;
+            text-align: center;
+            line-height: 1.6;
+            user-select: none;
+            opacity: 0;
+            animation: fadeUp 1.4s 0.7s cubic-bezier(0.16,1,0.3,1) both;
+            transition: color 0.4s;
+        }
+        .hero-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            font-size: 0.7rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--accent);
+            background: rgba(224, 58, 58, 0.12);
+            border: 1px solid rgba(224, 58, 58, 0.25);
+            padding: 5px 16px;
+            border-radius: 100px;
+            margin-bottom: 2rem;
+            box-shadow: 0 0 16px rgba(224, 58, 58, 0.12);
+            opacity: 0;
+            animation: fadeUp 1.4s 0.4s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        .actions {
+            margin-top: 2.8rem;
+            display: flex;
+            gap: 1.1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            pointer-events: auto;
+            opacity: 0;
+            animation: fadeUp 1.4s 1.0s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        .btn {
+            font-family: 'Inter', -apple-system, sans-serif;
+            font-weight: 500;
+            font-size: 0.88rem;
+            letter-spacing: -0.01em;
+            text-decoration: none;
+            padding: 0.75rem 1.8rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--btn-bg);
+            color: var(--text-color);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            transition: all 0.25s ease;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn:hover {
+            border-color: var(--accent);
+            background: var(--btn-ghost-hover);
+            color: var(--text-color);
+        }
+        .btn.primary {
+            background: var(--accent);
+            color: #ffffff;
+            border-color: var(--accent);
+        }
+        .btn.primary:hover {
+            background: var(--accent);
+            filter: brightness(1.15);
+            border-color: var(--accent);
+            color: #ffffff;
+        }
+        .btn.white {
+            background: #ffffff;
+            color: var(--bg);
+            border-color: #ffffff;
+        }
+        .btn.white:hover {
+            background: #ffffff;
+            filter: brightness(0.9);
+            border-color: #ffffff;
+            color: var(--bg);
+        }
+
+        /* ---- Scroll indicator ---- */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.4rem;
+            animation: bob 2.4s ease-in-out infinite;
+            pointer-events: none;
+        }
+        .scroll-indicator span {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.48rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: #ffffff;
+            text-shadow: 0 1px 6px rgba(0,0,0,0.5);
+        }
+        .scroll-indicator .chevron {
+            width: 1.2rem; height: 1.2rem;
+            border-right: 2px solid #ffffff;
+            border-bottom: 2px solid #ffffff;
+            transform: rotate(45deg);
+        }
+        @keyframes bob {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50%      { transform: translateX(-50%) translateY(8px); }
+        }
+
+        /* ---- STORY SECTIONS ---- */
+        .story {
+            min-height: 100vh;
+            padding: 8rem 2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+        .story .section-inner {
+            padding: 2rem;
+            max-width: 56rem;
+            margin: 0 auto;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .story + .story::before {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 1px;
+            background: var(--accent);
+            margin: 0 auto 4rem;
+            opacity: 0.5;
+        }
+        section h2 {
+            font-family: 'Inter', -apple-system, sans-serif;
+            font-weight: 600;
+            font-size: clamp(2.4rem, 6vw, 3.6rem);
+            letter-spacing: -0.03em;
+            line-height: 1.2;
+            user-select: none;
+            text-align: center;
+            color: var(--text-color);
+            text-shadow: 0 2px 14px rgba(0,0,0,0.5);
+        }
+        section h2 .accent { color: var(--accent); transition: color 0.4s; }
+        .story p {
+            margin-top: 1.8rem;
+            font-weight: 200;
+            font-size: clamp(1.05rem, 1.8vw, 1.3rem);
+            line-height: 1.7;
+            letter-spacing: 0.01em;
+            color: var(--text-sub);
+            max-width: 42rem;
+            margin-left: auto;
+            margin-right: auto;
+            transition: color 0.4s;
+            text-align: center;
+        }
+        .meta-pull {
+            margin-bottom: 1.2rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--accent);
+        }
+
+        /* ---- REVEAL ---- */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            filter: blur(4px);
+            transition: opacity 1s cubic-bezier(0.16,1,0.3,1),
+                        transform 1s cubic-bezier(0.16,1,0.3,1),
+                        filter 1s cubic-bezier(0.16,1,0.3,1);
+        }
+        .reveal.visible { opacity: 1; transform: translateY(0); filter: blur(0); }
+        .reveal.d1 { transition-delay: 0.1s; }
+        .reveal.d2 { transition-delay: 0.3s; }
+        .reveal.d3 { transition-delay: 0.5s; }
+        .reveal.d4 { transition-delay: 0.7s; }
+        .reveal.d5 { transition-delay: 0.9s; }
+        .reveal.d6 { transition-delay: 1.1s; }
+
+        /* ---- CORNERS ---- */
+        .corner {
+            position: fixed;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 300;
+            font-size: 0.56rem;
+            letter-spacing: 0.18em;
+            text-transform: lowercase;
+            color: var(--text-dim);
+            z-index: 20;
+            pointer-events: none;
+            mix-blend-mode: var(--mix-blend);
+            transition: color 0.4s;
+        }
+        .bl { bottom: 1.6rem; left: 1.8rem; }
+        .br { bottom: 1.6rem; right: 1.8rem; }
+
+        /* ---- inline stroke icons ---- */
+        .ico {
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+        }
+
+        /* ============================================================
+           BY THE NUMBERS
+           ============================================================ */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            width: 100%;
+            max-width: 600px;
+            margin: 1rem auto 0;
+        }
+        .stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 0.55rem;
+            padding: 0.4rem 0.75rem;
+        }
+        .stat + .stat { border-left: 1px solid var(--border); }
+        .stat-num {
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: clamp(2.6rem, 7vw, 3.8rem);
+            line-height: 1;
+            letter-spacing: -0.03em;
+            color: var(--accent);
+            text-shadow: 0 2px 14px rgba(0,0,0,0.5);
+        }
+        .stat-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.62rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--text-sub);
+            line-height: 1.4;
+        }
+
+        /* ---- TOPIC ROSTER ---- */
+        .roster-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem 2.2rem;
+            margin-top: 2.5rem;
+            max-width: 52rem;
+        }
+        .roster-grid span {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+            font-size: 0.85rem;
+            letter-spacing: 0.2em;
+            text-transform: lowercase;
+            color: #ffffff;
+        }
+        .roster-grid span.live { color: var(--accent); }
+
+        /* ============================================================
+           CARDS (tour + speaker)
+           ============================================================ */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 1000px;
+            margin-top: 3rem;
+            text-align: left;
+        }
+        .card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.03) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 12px 30px rgba(0, 0, 0, 0.25);
+            border-radius: 10px;
+            padding: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.35);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.05) 100%);
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.25), 0 20px 40px rgba(0, 0, 0, 0.35);
+        }
+        .card-btn {
+            width: 100%;
+            padding: 0.7rem;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: auto;
+        }
+        .card:hover .card-btn:not(.waitlist-btn) {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+        .card-btn.waitlist-btn {
+            border-color: rgba(245, 158, 11, 0.35);
+            color: #fbbf24;
+        }
+        .card:hover .card-btn.waitlist-btn {
+            background: #fbbf24;
+            color: var(--bg);
+            border-color: #fbbf24;
+        }
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.58rem;
+            letter-spacing: 0.18em;
+            color: var(--accent);
+            margin-bottom: 0.9rem;
+        }
+        .card-meta .stop-no { color: var(--text-dim); }
+        .card-location {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 0.35rem;
+            text-shadow: 0 1px 8px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .card-date {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-sub);
+            margin-bottom: 1.25rem;
+        }
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-top: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+        .tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            padding: 3px 9px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-dim);
+        }
+        .card-capacity { margin-bottom: 1.25rem; font-family: 'JetBrains Mono', monospace; }
+        .capacity-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            margin-bottom: 0.45rem;
+        }
+        .capacity-row .left { display: flex; align-items: center; gap: 0.35rem; }
+        .bar {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .bar-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 2px;
+            transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* ---- SPEAKER ---- */
+        .speaker-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 520px;
+            margin-top: 3rem;
+            padding: 2.75rem 2.25rem !important;
+            text-align: center;
+        }
+        .speaker-avatar {
+            width: 88px;
+            height: 88px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e03a3a, #f43f5e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.1rem;
+            font-weight: 800;
+            box-shadow: 0 0 24px rgba(224, 58, 58, 0.4);
+            color: #ffffff;
+            margin-bottom: 1.35rem;
+        }
+        .speaker-name {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin: 0 0 0.65rem;
+        }
+        .speaker-badge {
+            display: inline-block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            padding: 4px 11px;
+            border-radius: 100px;
+            background: rgba(212, 54, 54, 0.1);
+            border: 1px solid rgba(212, 54, 54, 0.25);
+            color: var(--accent);
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            margin-bottom: 1.4rem;
+        }
+        .speaker-bio {
+            font-size: 0.92rem;
+            color: var(--text-sub);
+            line-height: 1.7;
+            font-weight: 300;
+            max-width: 30rem;
+            margin: 0 auto 1.6rem;
+        }
+        .speaker-bio code {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent);
+            font-size: 0.85em;
+        }
+        .speaker-divider {
+            width: 36px;
+            height: 1px;
+            background: var(--border);
+            margin: 0 auto 1.4rem;
+        }
+        .speaker-socials { display: flex; gap: 1.1rem; align-items: center; justify-content: center; }
+        .speaker-socials a { color: var(--text-dim); transition: color 0.2s; display: inline-flex; }
+        .speaker-socials a:hover { color: var(--accent); }
+        .speaker-note {
+            margin-top: 2rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.05em;
+            color: var(--text-dim);
+        }
+
+        /* ---- AGENDA TIMELINE ---- */
+        .agenda-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            width: 100%;
+            max-width: 760px;
+            margin-top: 3rem;
+            text-align: center;
+        }
+        .agenda-item {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.12), 0 12px 30px rgba(0, 0, 0, 0.22);
+            border-radius: 10px;
+            padding: 2rem 1.75rem;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .agenda-item:hover {
+            transform: translateY(-3px);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.11) 0%, rgba(255, 255, 255, 0.04) 100%);
+            border-color: rgba(255, 255, 255, 0.28);
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2), 0 20px 40px rgba(0, 0, 0, 0.32);
+        }
+        .agenda-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--accent);
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.9rem;
+        }
+        .agenda-item h4 {
+            font-size: 1.08rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 0.7rem;
+        }
+        .agenda-item p {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            line-height: 1.6;
+            font-weight: 300;
+            max-width: 26rem;
+        }
+
+        /* ---- FAQ ACCORDION ---- */
+        .faq-list {
+            width: 100%;
+            max-width: 720px;
+            margin-top: 3rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            text-align: left;
+        }
+        .faq-item {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 8px;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            overflow: hidden;
+            transition: border-color 0.25s, background 0.25s;
+        }
+        .faq-item[open] {
+            border-color: rgba(255, 255, 255, 0.3);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.03) 100%);
+        }
+        .faq-item summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 1.2rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 600;
+            font-size: 0.98rem;
+            color: var(--text-color);
+        }
+        .faq-item summary::-webkit-details-marker { display: none; }
+        .faq-item summary .q-icon {
+            flex-shrink: 0;
+            width: 18px;
+            height: 18px;
+            color: var(--accent);
+            transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+        }
+        .faq-item[open] summary .q-icon { transform: rotate(45deg); }
+        .faq-a {
+            padding: 0 1.5rem 1.4rem;
+            color: var(--text-sub);
+            font-weight: 300;
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+        .faq-a code {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent);
+            font-size: 0.85em;
+        }
+
+        /* ---- CTA ---- */
+        #cta .btn-enter {
+            display: inline-block;
+            margin-top: 2rem;
+            font-weight: 300;
+            font-size: clamp(0.7rem,1.2vw,0.85rem);
+            letter-spacing: 0.5em;
+            text-transform: uppercase;
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 1.2rem 3rem;
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            background: var(--cta-bg);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            transition: background 0.5s, border-color 0.5s, letter-spacing 0.5s, color 0.5s;
+            cursor: pointer;
+        }
+        #cta .btn-enter:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+            letter-spacing: 0.6em;
+        }
+
+        /* ============================================================
+           REGISTRATION MODAL
+           ============================================================ */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(6, 4, 10, 0.55);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            padding: 1.5rem;
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.03) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2), 0 30px 60px rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            padding: 2.25rem;
+            max-width: 440px;
+            width: 100%;
+            transform: scale(0.96);
+            transition: transform 0.3s ease;
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            text-align: left;
+        }
+        .modal-overlay.active .modal { transform: scale(1); }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.75rem;
+        }
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--text-color);
+            letter-spacing: -0.02em;
+        }
+        .modal-close {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            transition: all 0.2s;
+        }
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.24);
+            color: var(--text-color);
+        }
+        .form { display: flex; flex-direction: column; gap: 1.15rem; }
+        .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+        .form-label { font-size: 0.75rem; color: var(--text-sub); font-weight: 600; }
+        .form-input {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 4px;
+            color: var(--text-color);
+            padding: 0.65rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .form-input:focus {
+            border-color: rgba(255, 255, 255, 0.35);
+            background: rgba(255, 255, 255, 0.07);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
+        }
+        .submit-btn {
+            padding: 0.8rem;
+            background: var(--accent);
+            border: 1px solid var(--accent);
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .submit-btn:hover { filter: brightness(1.15); }
+        .submit-btn.waitlist-btn { border-color: #fbbf24; background: #fbbf24; color: var(--bg); }
+        .submit-btn.waitlist-btn:hover { filter: brightness(1.08); }
+        .confirmation-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+        .copy-token-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            margin: 0 auto;
+            padding: 0.55rem 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-color);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        .copy-token-btn:hover { background: rgba(255, 255, 255, 0.1); }
+
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (max-width: 768px) {
+            .grid { grid-template-columns: 1fr; margin-top: 2rem; }
+            .agenda-grid { grid-template-columns: 1fr; margin-top: 2rem; }
+            .speaker-card { padding: 1.6rem !important; gap: 1.5rem; margin-top: 2rem; }
+            .corner { display: none; }
+        }
+        @media (max-width: 560px) {
+            .nav { flex-direction: column; align-items: center; gap: 0.75rem; }
+            .nav-links { flex-wrap: wrap; justify-content: center; gap: 0.8rem; }
+            .actions { flex-direction: column; width: 100%; max-width: 320px; }
+            .btn { justify-content: center; width: 100%; }
+            .agenda-item { padding: 1.5rem 1.25rem; }
+            .stat { padding: 0.4rem 0.4rem; }
+            .stat-label { font-size: 0.55rem; letter-spacing: 0.12em; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .reveal { opacity: 1; transform: none; filter: none; transition: none; }
+            html { scroll-behavior: auto; }
+            .scroll-indicator { animation: none; }
+        }
+    </style>
 </head>
 <body>
-  <canvas id="bg-canvas"></canvas>
-  
-  <div class="container">
-    <!-- Navbar -->
-    <header class="header">
-      <div class="logo" style="font-weight: 800; font-size: 1.15rem; letter-spacing: -0.02em; text-transform: lowercase; color: var(--text-primary); user-select: none;"><span style="color: #d43636;">/</span>motion</div>
-      <nav class="nav">
-        <a href="#workshops">Workshops</a>
-        <a href="#agenda">Agenda</a>
-        <a href="#prep">System Prep</a>
-        <a href="https://github.com/murderszn/motion" target="_blank">GitHub</a>
-      </nav>
-    </header>
 
-    <!-- Hero Section -->
-    <main class="hero">
-      <div class="hero-tag">Tour 2026</div>
-      <h1 class="title"><span style="color: #d43636;">/</span>motion<br>developer workshops</h1>
-      <p class="subtitle">Join us for a full day of hands-on technical training covering agentic coding, workspace automation, custom agent skills, and multi-agent systems orchestration.</p>
-      
-      <div class="terminal">
-        <div class="terminal-header">
-          <span class="terminal-dot"></span>
-          <span class="terminal-dot"></span>
-          <span class="terminal-dot"></span>
-        </div>
-        <div class="terminal-body">
-          <code class="code-line"><span class="prompt">$</span>npm i -g @motion/cli && motion register</code>
-          <button class="copy-btn" id="copyBtn" style="display: flex; align-items: center; gap: 0.35rem;">
-            <i data-lucide="copy" style="width: 12px; height: 12px;"></i>
-            <span>Copy</span>
-          </button>
-        </div>
-      </div>
-      
-      <div class="hero-actions">
-        <a href="#workshops" class="btn-primary">Reserve Spot</a>
-        <a href="https://github.com/murderszn/motion" target="_blank" class="btn-secondary">GitHub Repository</a>
-      </div>
-    </main>
+    <!-- WebGL flow shader background -->
+    <canvas id="bg-canvas"></canvas>
+    <div id="vignette"></div>
+    <div id="scrim"></div>
 
-    <!-- Workshops Section -->
-    <section class="workshops-section" id="workshops">
-      <div class="section-header">
-        <h2 class="section-title">Tour Locations</h2>
-        <p class="section-subtitle">Select a city to register for the workshop.</p>
-      </div>
-      <div class="grid" id="grid">
-        <!-- Cards dynamically injected -->
-      </div>
+    <!-- Navigation -->
+    <nav class="nav">
+        <span class="mark"><span>/</span>motion workshops</span>
+        <div class="nav-links">
+            <a href="#format" class="nav-link">format</a>
+            <a href="#agenda" class="nav-link">agenda</a>
+            <a href="#tour" class="nav-link">tour</a>
+            <a href="#speaker" class="nav-link">speaker</a>
+            <a href="#faq" class="nav-link">faq</a>
+            <a href="splash.html" class="nav-link">home</a>
+        </div>
+    </nav>
+
+    <span class="corner bl" id="timer">0:00</span>
+
+    <!-- ============ HERO ============ -->
+    <section id="hero">
+        <div class="section-inner">
+            <h1 class="title"><span class="slash">/</span>motion<br>workshops</h1>
+            <div class="subtitle">A one-day, hands-on intensive on building with coding agents — from your first autonomous loop to orchestrating a fleet of them. Six cities. Thirty seats each. Bring a laptop; leave with a workflow.</div>
+            <div class="actions">
+                <a class="btn white" href="#agenda">See the agenda</a>
+                <a class="btn primary" href="#tour">Reserve a seat</a>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <span>scroll</span>
+            <div class="chevron"></div>
+        </div>
     </section>
 
-    <!-- Workshop Agenda Section -->
-    <section class="agenda-section" id="agenda">
-      <div class="section-header">
-        <h2 class="section-title">Workshop Agenda</h2>
-        <p class="section-subtitle">A breakdown of the 3-hour intensive technical curriculum.</p>
-      </div>
-      <div class="agenda-container card">
-        <div class="agenda-timeline">
-          <div class="agenda-item">
-            <div class="agenda-time">09:00 - 09:45</div>
-            <div class="agenda-marker"><i data-lucide="sparkles"></i></div>
-            <div class="agenda-details">
-              <h4>AI Capabilities & Foundations</h4>
-              <p>Exploring state-of-the-art LLM capabilities, advanced prompt engineering, context window mechanics, and vector embedding pipelines. Establishing base models and parameters using Claude and Codex.</p>
-            </div>
-          </div>
-          <div class="agenda-item">
-            <div class="agenda-time">09:45 - 10:30</div>
-            <div class="agenda-marker"><i data-lucide="code-2"></i></div>
-            <div class="agenda-details">
-              <h4>Agentic Coding & Workspace Automation</h4>
-              <p>Implementing autonomous code generation loops, real-time syntax checking, self-correcting logic runtimes, and local workspace file patching using Codex APIs and custom workspace tool calls.</p>
-            </div>
-          </div>
-          <div class="agenda-item">
-            <div class="agenda-time">10:30 - 11:15</div>
-            <div class="agenda-marker"><i data-lucide="git-branch"></i></div>
-            <div class="agenda-details">
-              <h4>AI Skills, Hooks & Stateful Workflows</h4>
-              <p>Designing reusable agent skill catalogs, dynamic tool hooking protocols, stateful multi-step workflows, and asynchronous system trigger hooks to orchestrate complex execution patterns.</p>
-            </div>
-          </div>
-          <div class="agenda-item">
-            <div class="agenda-time">11:15 - 12:00</div>
-            <div class="agenda-marker"><i data-lucide="cpu"></i></div>
-            <div class="agenda-details">
-              <h4>Full-Scale AI Systems Orchestration</h4>
-              <p>Building end-to-end multi-agent orchestration frameworks. Deploying collaborative networks of Claude and Codex instances to solve complex, parallel software development workflows.</p>
-            </div>
-          </div>
+    <!-- ============ STATEMENT ============ -->
+    <section class="story" id="statement">
+        <div class="section-inner reveal">
+            <h2 style="max-width:42rem;margin:0 auto;">
+                You won't watch slides.<br>
+                You'll <span class="accent">ship agents</span>.
+            </h2>
         </div>
-      </div>
     </section>
 
-    <!-- System Prep Section -->
-    <section class="prep-section" id="prep">
-      <div class="section-header">
-        <h2 class="section-title">System Preparation</h2>
-        <p class="section-subtitle">Verify your local machine environment is configured for the hands-on lab sessions.</p>
-      </div>
-
-      <div class="prep-box card">
-        <div class="prep-checklist">
-          <h3>Local Requirements Checklist</h3>
-          <div class="check-item" id="check-os">
-            <span class="check-status status-pending" style="display: flex; align-items: center;"><i data-lucide="laptop" style="width: 16px; height: 16px;"></i></span>
-            <div class="check-text">
-              <strong>Operating System</strong>
-              <span class="check-desc" id="desc-os">Windows, macOS, or Linux supported</span>
+    <!-- ============ FORMAT / BY THE NUMBERS ============ -->
+    <section class="story" id="format">
+        <div class="section-inner">
+            <p class="meta-pull reveal">the format</p>
+            <div class="stats reveal d1">
+                <div class="stat"><span class="stat-num">6</span><span class="stat-label">cities</span></div>
+                <div class="stat"><span class="stat-num">1</span><span class="stat-label">intensive day</span></div>
+                <div class="stat"><span class="stat-num">30</span><span class="stat-label">seats per room</span></div>
             </div>
-          </div>
-          <div class="check-item" id="check-cpu">
-            <span class="check-status status-pending" style="display: flex; align-items: center;"><i data-lucide="cpu" style="width: 16px; height: 16px;"></i></span>
-            <div class="check-text">
-              <strong>Processor Core Allocation</strong>
-              <span class="check-desc" id="desc-cpu">Minimum 4 logical processor threads recommended</span>
+            <p class="reveal d2">Small rooms, real keyboards, working code. Every session pairs a short framing with a build you do yourself, on your own machine — no prior agent experience required.</p>
+            <div class="roster-grid reveal d3">
+                <span>agentic coding</span>
+                <span>workspace automation</span>
+                <span class="live">custom skills</span>
+                <span>agent hooks</span>
+                <span>multi-agent orchestration</span>
+                <span>context engineering</span>
+                <span>tool calls</span>
+                <span>eval loops</span>
             </div>
-          </div>
-          <div class="check-item" id="check-gpu">
-            <span class="check-status status-pending" style="display: flex; align-items: center;"><i data-lucide="zap" style="width: 16px; height: 16px;"></i></span>
-            <div class="check-text">
-              <strong>GPU CUDA Compatibility</strong>
-              <span class="check-desc" id="desc-gpu">Dedicated WebGL 3D context active</span>
-            </div>
-          </div>
-          <div class="check-item" id="check-storage">
-            <span class="check-status status-pending" style="display: flex; align-items: center;"><i data-lucide="database" style="width: 16px; height: 16px;"></i></span>
-            <div class="check-text">
-              <strong>Browser Storage Sandbox</strong>
-              <span class="check-desc" id="desc-storage">Required for caching offline workspace containers</span>
-            </div>
-          </div>
-          <button class="prep-scan-btn" id="runScanBtn">Run Browser Compatibility Check</button>
         </div>
-
-        <div class="prep-console">
-          <div class="console-header">
-            <span class="console-title">diagnostic_output.log</span>
-          </div>
-          <div class="console-body" id="consoleBody">
-            <div class="console-line text-muted">Awaiting diagnostic scan protocol...</div>
-          </div>
-          <div class="console-input-line">
-            <span class="console-prompt">motion verify &gt;</span>
-            <input type="text" id="consoleTerminalInput" class="console-terminal-input" placeholder="Enter seat key (ABX-XXXX-XXXX) to verify...">
-          </div>
-        </div>
-      </div>
     </section>
 
-    <!-- FAQ Section -->
-    <section class="faq-section" id="faq">
-      <div class="section-header">
-        <h2 class="section-title">Technical FAQs</h2>
-        <p class="section-subtitle">Common technical and registration inquiries compiled in code layout.</p>
-      </div>
-      <div class="faq-ide card">
-        <div class="ide-header">
-          <div class="ide-dots">
-            <span class="ide-dot red"></span>
-            <span class="ide-dot yellow"></span>
-            <span class="ide-dot green"></span>
-          </div>
-          <div class="ide-tabs">
-            <button class="ide-tab active" data-file="general">faq_general.yaml</button>
-            <button class="ide-tab" data-file="hardware">faq_hardware.yaml</button>
-            <button class="ide-tab" data-file="logistics">faq_logistics.yaml</button>
-          </div>
+    <!-- ============ AGENDA ============ -->
+    <section class="story" id="agenda">
+        <div class="section-inner">
+            <p class="meta-pull reveal">the curriculum</p>
+            <h2 class="reveal d1">A day, <span class="accent">in four builds</span>.</h2>
+            <p class="reveal d2">Four ninety-minute blocks, each ending with something running.</p>
+
+            <div class="agenda-grid reveal d3">
+                <div class="agenda-item">
+                    <div class="agenda-time">09:00 — 10:30</div>
+                    <h4>01 · Foundations</h4>
+                    <p>How a coding agent actually works: models, context windows, tool calls, and the loop that turns a prompt into a diff. By the end you'll have one running locally and pointed at a repo.</p>
+                </div>
+                <div class="agenda-item">
+                    <div class="agenda-time">10:45 — 12:15</div>
+                    <h4>02 · Agentic coding &amp; automation</h4>
+                    <p>Wire up an agent that reads your codebase, plans a change, edits files, and checks its own work. We'll automate the repetitive parts of your real workspace — tests, scaffolding, refactors.</p>
+                </div>
+                <div class="agenda-item">
+                    <div class="agenda-time">13:15 — 14:45</div>
+                    <h4>03 · Skills &amp; hooks</h4>
+                    <p>Package the workflows you repeat into reusable skills, then fire them automatically with hooks and stateful, multi-step triggers. Build your own and share it with the room.</p>
+                </div>
+                <div class="agenda-item">
+                    <div class="agenda-time">15:00 — 16:30</div>
+                    <h4>04 · Orchestration</h4>
+                    <p>Coordinate several agents working in parallel across one codebase — dividing work, staying in sync, and merging cleanly. We close by turning the room's builds loose at once.</p>
+                </div>
+            </div>
         </div>
-        <div class="ide-body">
-          <pre class="code-editor"><code id="faqCodeBlock"># faq_general.yaml
-workshops:
-  prerequisites:
-    required: "Intermediate JS/TS or Rust experience."
-    recommended: "Basic understanding of container systems (Docker)."
-  group_registrations:
-    capacity: "Yes, teams of 4+ can request bundled seat keys."
-    contact: "dev-relations@motion.design"
-  waitlists:
-    policy: "Sold out slots will open waitlist entry dynamically."</code></pre>
-        </div>
-      </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="footer">
-      <div>&copy; 2026 /motion. All rights reserved.</div>
-      <div style="display: flex; align-items: center; gap: 1.1rem;">
-        <a href="https://github.com/murderszn/motion" target="_blank" rel="noopener" aria-label="GitHub" style="display: flex; color: var(--text-secondary); transition: color 0.2s;" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-secondary)'">
-          <svg viewBox="0 0 24 24" aria-hidden="true" style="width: 18px; height: 18px; fill: currentColor;"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222 0 1.606-.014 2.898-.014 3.293 0 .322.216.694.825.576C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
-        </a>
-        <a href="https://discord.gg/F9Vy9ByYbB" target="_blank" rel="noopener" aria-label="Discord" style="display: flex; color: var(--text-secondary); transition: color 0.2s;" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-secondary)'">
-          <svg viewBox="0 0 24 24" aria-hidden="true" style="width: 18px; height: 18px; fill: currentColor;"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg>
-        </a>
-      </div>
-      <div>Train hard. Build harder.</div>
-    </footer>
-  </div>
+    <!-- ============ TOUR / LOCATIONS ============ -->
+    <section class="story" id="tour">
+        <div class="section-inner">
+            <p class="meta-pull reveal">the tour</p>
+            <h2 class="reveal d1">Six stops. <span class="accent">Pick yours.</span></h2>
+            <p class="reveal d2">Each city runs once. Thirty seats, first come first served — when a room fills, the waitlist opens automatically.</p>
+            <div class="grid reveal d3" id="grid">
+                <!-- Cards injected by JS -->
+            </div>
+        </div>
+    </section>
 
-  <!-- Registration Modal -->
-  <div class="modal-overlay" id="modalOverlay">
-    <div class="modal">
-      <div class="modal-header">
-        <h3 class="modal-title" id="modalTitle">Register</h3>
-        <button class="modal-close" id="modalClose">&times;</button>
-      </div>
-      <div id="modalBody">
-        <!-- Forms and success views populated by JS -->
-      </div>
+    <!-- ============ SPEAKER ============ -->
+    <section class="story" id="speaker">
+        <div class="section-inner">
+            <p class="meta-pull reveal">your host</p>
+            <h2 class="reveal d1">Taught by the <span class="accent">maintainer</span>.</h2>
+            <p class="reveal d2">Learn the workflow from the person who built the tools — not a deck about them.</p>
+
+            <div class="card speaker-card reveal d3">
+                <div class="speaker-avatar">JJ</div>
+                <h3 class="speaker-name">Josh Johnson</h3>
+                <span class="speaker-badge">CREATOR &amp; BDFL</span>
+                <p class="speaker-bio">Creator and maintainer of <code>/motion</code>. Spends his days living inside coding agents and shipping with them. He'll run every build live — agentic coding, workspace automation, and the multi-agent setups he uses on real work.</p>
+                <div class="speaker-divider"></div>
+                <div class="speaker-socials">
+                    <a href="https://github.com/murderszn" target="_blank" rel="noopener" aria-label="GitHub">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;fill:currentColor;"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222 0 1.606-.014 2.898-.014 3.293 0 .322.216.694.825.576C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                    </a>
+                    <a href="https://x.com/jahflyx" target="_blank" rel="noopener" aria-label="X (Twitter)">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" style="width:17px;height:17px;fill:currentColor;"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    </a>
+                </div>
+            </div>
+            <p class="speaker-note reveal d4">+ a guest engineer joins in each city.</p>
+        </div>
+    </section>
+
+    <!-- ============ FAQ ============ -->
+    <section class="story" id="faq">
+        <div class="section-inner">
+            <p class="meta-pull reveal">good to know</p>
+            <h2 class="reveal d1">Before you <span class="accent">register</span>.</h2>
+            <div class="faq-list reveal d2">
+                <details class="faq-item" open>
+                    <summary>Who is this for?
+                        <svg class="ico q-icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    </summary>
+                    <div class="faq-a">Working developers who want to build with coding agents in their day-to-day. If you're comfortable in a codebase and a terminal, you're ready — no prior AI or agent experience needed.</div>
+                </details>
+                <details class="faq-item">
+                    <summary>What should I bring?
+                        <svg class="ico q-icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    </summary>
+                    <div class="faq-a">A laptop you can install software on (macOS, Windows, or Linux) and a modern browser. We'll send a short setup checklist a week before — nothing exotic, just Node and an editor you like.</div>
+                </details>
+                <details class="faq-item">
+                    <summary>Do I need to pay?
+                        <svg class="ico q-icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    </summary>
+                    <div class="faq-a">Seats are free while the tour is in beta — that's why rooms are capped at thirty. Reserve early; once a city fills you'll land on the waitlist and we'll open more seats as we can.</div>
+                </details>
+                <details class="faq-item">
+                    <summary>Can my team come together?
+                        <svg class="ico q-icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    </summary>
+                    <div class="faq-a">Yes — teams of four or more can grab a block of seats. Reach out at <code>jjohnso75@gmail.com</code> and we'll hold a table for you.</div>
+                </details>
+                <details class="faq-item">
+                    <summary>Will I leave with something usable?
+                        <svg class="ico q-icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    </summary>
+                    <div class="faq-a">That's the whole point. You'll walk out with working agent configs, a custom skill, and an orchestration setup you built — plus the repo to keep iterating on after.</div>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ CTA ============ -->
+    <section id="cta">
+        <div class="section-inner">
+            <h2 class="reveal">Build the <span style="color:var(--accent);">future</span>.</h2>
+            <div style="margin-top:2rem;text-align:center;">
+                <a class="btn-enter reveal d1" href="#tour">Reserve a seat</a>
+            </div>
+            <div class="reveal d2" style="margin-top:3rem;font-family:'JetBrains Mono',monospace;font-size:0.5rem;letter-spacing:0.25em;color:var(--text-dim);text-align:center;">
+                /motion workshops · 2026 tour · <a href="splash.html" style="color:var(--text-dim);text-decoration:none;border-bottom:1px solid var(--border);">home</a> · <a href="https://discord.gg/F9Vy9ByYbB" target="_blank" rel="noopener" style="color:var(--text-dim);text-decoration:none;border-bottom:1px solid var(--border);">discord</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Registration Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Register</h3>
+                <button class="modal-close" id="modalClose">&times;</button>
+            </div>
+            <div id="modalBody"></div>
+        </div>
     </div>
-  </div>
 
-  <script>
+    <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // City Workshop Data
-      const cities = [
-        { id: 'chicago', name: 'Chicago', date: 'July 11, 2026', tags: ['AI Workflows', 'dbt-core', 'CUDA Optimization'] },
-        { id: 'boston', name: 'Boston', date: 'August 8, 2026', tags: ['Coding Agents', 'Rust WASM', 'LangChain'] },
-        { id: 'newyork', name: 'New York', date: 'September 12, 2026', tags: ['AI Systems', 'Vector Databases', 'TypeScript'] },
-        { id: 'sandiego', name: 'San Diego', date: 'October 17, 2026', tags: ['AI Workflows', 'LlamaIndex', 'Node.js'] },
-        { id: 'atlanta', name: 'Atlanta', date: 'November 14, 2026', tags: ['Coding Agents', 'PyTorch', 'Agentic APIs'] },
-        { id: 'stlouis', name: 'St. Louis', date: 'December 12, 2026', tags: ['AI Systems', 'Docker', 'Kubernetes'] }
-      ];
-
-      const MAX_SEATS = 30;
-
-    // LocalStorage signups
-    function loadSignups() {
-      const data = localStorage.getItem('motion_signups');
-      return data ? JSON.parse(data) : {};
-    }
-
-    function saveSignups(signups) {
-      localStorage.setItem('motion_signups', JSON.stringify(signups));
-    }
-
-    function getSignupCount(cityId) {
-      const signups = loadSignups();
-      return signups[cityId] ? signups[cityId].length : 0;
-    }
-
-    function generateConfirmationCode(name, email, cityId) {
-      const timestamp = Date.now();
-      const random = Math.random().toString(36).substring(2, 10);
-      const raw = `${name}${email}${cityId}${timestamp}${random}`;
-      
-      let hash = 0;
-      for (let i = 0; i < raw.length; i++) {
-        const char = raw.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash;
-      }
-      
-      const hex = Math.abs(hash).toString(16).toUpperCase().padStart(8, '0');
-      return `ABX-${hex.substring(0, 4)}-${hex.substring(4, 8)}-${random.substring(0, 4).toUpperCase()}`;
-    }
-
-    // Render city workshop cards
-    function renderCities() {
-      const grid = document.getElementById('grid');
-      grid.innerHTML = '';
-      
-      cities.forEach(city => {
-        const count = getSignupCount(city.id);
-        const seatsLeft = MAX_SEATS - count;
-        const isSoldOut = seatsLeft <= 0;
-        const fillPercentage = (count / MAX_SEATS) * 100;
-        
-        const card = document.createElement('div');
-        card.className = 'card';
-        
-        let capacityHTML = '';
-        if (isSoldOut) {
-          capacityHTML = `
-            <div class="card-capacity" style="margin-bottom: 1.25rem;">
-              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
-                <span style="display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.25rem 0.5rem; border-radius: 4px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); color: #fbbf24; font-family: 'Fira Code', monospace; font-size: 0.7rem;">
-                  <i data-lucide="alert-circle" style="width: 10px; height: 10px;"></i>
-                  WAITLIST ACTIVE
-                </span>
-                <span style="font-size: 0.75rem; color: var(--text-muted);">0 seats remaining</span>
-              </div>
-              <div class="bar" style="background: rgba(255, 255, 255, 0.05);">
-                <div class="bar-fill" style="width: 100%; background: var(--text-muted); opacity: 0.3;"></div>
-              </div>
-            </div>
-          `;
-        } else {
-          capacityHTML = `
-            <div class="card-capacity">
-              <div class="capacity-row">
-                <span style="display: flex; align-items: center; gap: 0.3rem;">
-                  <i data-lucide="users" style="width: 12px; height: 12px; color: var(--text-muted);"></i>
-                  Availability
-                </span>
-                <span>${seatsLeft} / ${MAX_SEATS} seats remaining</span>
-              </div>
-              <div class="bar">
-                <div class="bar-fill" style="width: ${fillPercentage}%"></div>
-              </div>
-            </div>
-          `;
-        }
-
-        card.innerHTML = `
-          <div class="card-meta">
-            <span>LOCATION</span>
-            <span>AVAILABLE</span>
-          </div>
-          <h3 class="card-location" style="display: flex; align-items: center; gap: 0.5rem;">
-            <i data-lucide="map-pin" style="width: 16px; height: 16px; color: var(--accent);"></i>
-            <span>${city.name}</span>
-          </h3>
-          <div class="card-date" style="display: flex; align-items: center; gap: 0.4rem; font-family: 'Fira Code', monospace; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
-            <i data-lucide="calendar" style="width: 14px; height: 14px; color: var(--text-muted);"></i>
-            <span>${city.date.toUpperCase()}</span>
-          </div>
-          
-          ${capacityHTML}
-          
-          <div class="tags">
-            ${city.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
-          </div>
-          
-          <button class="card-btn ${isSoldOut ? 'waitlist-btn' : ''}">
-            ${isSoldOut ? 'Join Waitlist' : 'Reserve Spot'}
-          </button>
-        `;
-        
-        card.querySelector('.card-btn').addEventListener('click', () => openSignupModal(city.id));
-        grid.appendChild(card);
-      });
-      lucide.createIcons();
-    }
-
-    // Modal Operations
-    function openSignupModal(cityId) {
-      const city = cities.find(c => c.id === cityId);
-      const count = getSignupCount(cityId);
-      const seatsLeft = MAX_SEATS - count;
-      const isRegistered = localStorage.getItem('motion_registered_' + cityId);
-      
-      const modalOverlay = document.getElementById('modalOverlay');
-      document.getElementById('modalTitle').textContent = seatsLeft <= 0 ? `Join Waitlist: ${city.name}` : `Register for ${city.name}`;
-      
-      const modalBody = document.getElementById('modalBody');
-      
-      if (isRegistered) {
-        const regData = JSON.parse(isRegistered);
-        showSuccessView(city, regData.name, regData.seatKey, regData.isWaitlist);
-      } else {
-        modalBody.innerHTML = `
-          <form id="signupForm" class="form">
-            <div class="form-group">
-              <label class="form-label" for="fullName">Full Name</label>
-              <input type="text" class="form-input" id="fullName" placeholder="Linus Torvalds" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="email">Email Address</label>
-              <input type="email" class="form-input" id="email" placeholder="linus@git.org" required>
-            </div>
-            <button type="submit" class="submit-btn ${seatsLeft <= 0 ? 'waitlist-btn' : ''}" id="submitBtn">
-              ${seatsLeft <= 0 ? 'Join Waitlist' : 'Reserve Spot'}
-            </button>
-          </form>
-        `;
-        
-        document.getElementById('signupForm').addEventListener('submit', (e) => {
-          e.preventDefault();
-          handleSignup(cityId);
-        });
-      }
-      
-      modalOverlay.classList.add('active');
-    }
-
-    function handleSignup(cityId) {
-      const name = document.getElementById('fullName').value.trim();
-      const email = document.getElementById('email').value.trim();
-      
-      if (!name || !email) return;
-      
-      const signups = loadSignups();
-      if (!signups[cityId]) signups[cityId] = [];
-      
-      const existing = signups[cityId].find(s => s.email === email);
-      if (existing) {
-        alert('You are already registered for this workshop.');
-        return;
-      }
-      
-      const count = getSignupCount(cityId);
-      const isWaitlist = count >= MAX_SEATS;
-      const seatKey = generateConfirmationCode(name, email, cityId);
-      const regData = { name, email, seatKey, timestamp: new Date().toISOString(), isWaitlist };
-      
-      signups[cityId].push(regData);
-      saveSignups(signups);
-      
-      localStorage.setItem('motion_registered_' + cityId, JSON.stringify(regData));
-      
-      const city = cities.find(c => c.id === cityId);
-      showSuccessView(city, name, seatKey, isWaitlist);
-      renderCities();
-    }
-
-    function showSuccessView(city, name, seatKey, isWaitlist = false) {
-      const title = isWaitlist ? "Waitlist Confirmed" : "Registration Successful";
-      const desc = isWaitlist ? `Waitlist reservation code generated for ${name}:` : `Confirmation code generated for ${name}:`;
-      const badgeIcon = isWaitlist ? "alert-circle" : "check-circle-2";
-      const badgeColor = isWaitlist ? "#fbbf24" : "#10b981";
-      const keyPrefix = isWaitlist ? `<span style="font-size: 0.75rem; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); color: #fbbf24; padding: 1px 6px; border-radius: 3px; font-family: 'Fira Code', monospace; margin-right: 6px; font-weight: 600;">WAITLIST</span>` : "";
-      
-      document.getElementById('modalBody').innerHTML = `
-        <div class="success-msg">
-          <div class="success-icon" style="display: flex; align-items: center; justify-content: center; margin-bottom: 0.5rem; color: ${badgeColor};"><i data-lucide="${badgeIcon}" style="width: 42px; height: 42px;"></i></div>
-          <h4 class="success-title">${title}</h4>
-          <p class="success-desc" style="margin-bottom: 1rem;">${desc}</p>
-          <div class="confirmation-box" id="seatKey" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1rem; padding: 0.75rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px;">
-            <i data-lucide="ticket" style="width: 16px; height: 16px; color: var(--accent);"></i>
-            <span style="font-family: 'Fira Code', monospace; font-size: 0.85rem; display: flex; align-items: center;">${keyPrefix}${seatKey}</span>
-          </div>
-          <button class="copy-token-btn" id="copyTokenBtn" style="display: flex; align-items: center; justify-content: center; gap: 0.4rem; margin: 0 auto 1.25rem auto; width: auto; padding: 0.5rem 1.5rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12); color: var(--text-primary); border-radius: 4px; cursor: pointer; transition: all 0.2s;">
-            <i data-lucide="copy" style="width: 14px; height: 14px;"></i>
-            <span>Copy Code</span>
-          </button>
-          <div class="cli-cmd-box" style="text-align: left; padding: 0.85rem; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 6px;">
-            <span style="display: block; font-size: 0.7rem; color: var(--text-muted); margin-bottom: 0.35rem; font-family: 'Fira Code', monospace;">VERIFY VIA CLI:</span>
-            <code style="font-family: 'Fira Code', monospace; font-size: 0.725rem; color: #a7f3d0; word-break: break-all;">curl -H "Authorization: Bearer ${seatKey}" https://api.motion.design/verify</code>
-          </div>
-        </div>
-      `;
-      lucide.createIcons({ scope: document.getElementById('modalBody') });
-      
-      document.getElementById('copyTokenBtn').addEventListener('click', () => {
-        navigator.clipboard.writeText(seatKey).then(() => {
-          const btn = document.getElementById('copyTokenBtn');
-          btn.innerHTML = `<i data-lucide="check" style="width: 14px; height: 14px; color: #10b981;"></i><span>Copied!</span>`;
-          lucide.createIcons({ scope: btn });
-          setTimeout(() => {
-            btn.innerHTML = `<i data-lucide="copy" style="width: 14px; height: 14px;"></i><span>Copy Code</span>`;
-            lucide.createIcons({ scope: btn });
-          }, 2000);
-        });
-      });
-    }
-
-    // Modal Close
-    document.getElementById('modalClose').addEventListener('click', () => {
-      document.getElementById('modalOverlay').classList.remove('active');
-    });
-
-    document.getElementById('modalOverlay').addEventListener('click', (e) => {
-      if (e.target === document.getElementById('modalOverlay')) {
-        document.getElementById('modalOverlay').classList.remove('active');
-      }
-    });
-
-    // Copy Hero CLI Command
-    document.getElementById('copyBtn').addEventListener('click', () => {
-      const text = "npm i -g @motion/cli && motion register";
-      navigator.clipboard.writeText(text).then(() => {
-        const btn = document.getElementById('copyBtn');
-        btn.innerHTML = `<i data-lucide="check" style="width: 12px; height: 12px; color: #10b981;"></i><span>Copied!</span>`;
-        lucide.createIcons({ scope: btn });
-        setTimeout(() => {
-          btn.innerHTML = `<i data-lucide="copy" style="width: 12px; height: 12px;"></i><span>Copy</span>`;
-          lucide.createIcons({ scope: btn });
-        }, 2000);
-      });
-    });
-
-    // Scan tool execution
-    document.getElementById('runScanBtn').addEventListener('click', () => {
-      const consoleBody = document.getElementById('consoleBody');
-      consoleBody.innerHTML = '';
-      
-      const printLine = (text, type = '') => {
-        const div = document.createElement('div');
-        div.className = `console-line ${type}`;
-        div.textContent = text;
-        consoleBody.appendChild(div);
-        consoleBody.scrollTop = consoleBody.scrollHeight;
-      };
-
-      const setStatus = (id, status) => {
-        const el = document.querySelector(`#check-${id} .check-status`);
-        el.className = `check-status status-${status}`;
-        if (status === 'success') el.innerHTML = '<i data-lucide="check-circle-2" style="width: 16px; height: 16px;"></i>';
-        else if (status === 'warning') el.innerHTML = '<i data-lucide="alert-triangle" style="width: 16px; height: 16px;"></i>';
-        else if (status === 'error') el.innerHTML = '<i data-lucide="x-circle" style="width: 16px; height: 16px;"></i>';
-        lucide.createIcons({ scope: el });
-      };
-
-      printLine('[info] Starting local environment diagnostics...', 'text-muted');
-      
-       // 1. OS check & Coder Recommendation
-      setTimeout(() => {
-        let os = 'Unknown OS';
-        let recCoder = 'Open Code / OpenHands';
-        const ua = navigator.userAgent;
-        if (ua.indexOf('Win') !== -1) {
-          os = 'Windows';
-          recCoder = 'Codex';
-        } else if (ua.indexOf('Mac') !== -1) {
-          os = 'macOS';
-          recCoder = 'Claude';
-        } else if (ua.indexOf('Linux') !== -1) {
-          os = 'Linux';
-          recCoder = 'OpenHands';
-        }
-        
-        printLine(`[sys] OS detected: ${os}`);
-        printLine(`[rec] Recommended Agentic Coder: ${recCoder}`);
-        printLine(`[rec] All platforms can use Open Code tools`);
-        document.getElementById('desc-os').textContent = `System: ${os} detected (Rec: ${recCoder})`;
-        setStatus('os', 'success');
-      }, 100);
-
-      // 2. CPU Threads check
-      setTimeout(() => {
-        const cores = navigator.hardwareConcurrency || 2;
-        printLine(`[sys] Processor Threads: ${cores} allocation detected`);
-        document.getElementById('desc-cpu').textContent = `Processor: ${cores} logical threads active`;
-        if (cores >= 4) {
-          setStatus('cpu', 'success');
-        } else {
-          setStatus('cpu', 'warning');
-          printLine('[warning] Less than 4 hardware threads available. Workspaces may experience drag.', 'text-warning');
-        }
-      }, 200);
-
-      // 3. GPU/WebGL context check
-      setTimeout(() => {
-        const canvas = document.createElement('canvas');
-        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-        if (!gl) {
-          printLine('[error] GPU acceleration context missing.', 'text-warning');
-          document.getElementById('desc-gpu').textContent = 'Dedicated GPU: WebGL Context Failed';
-          setStatus('gpu', 'error');
-          return;
-        }
-        
-        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-        const renderer = debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : 'Browser default renderer';
-        
-        printLine(`[sys] GPU Renderer: ${renderer}`);
-        document.getElementById('desc-gpu').textContent = `GPU: ${renderer.split('Direct3D')[0].split('vs_')[0].trim()}`;
-        setStatus('gpu', 'success');
-      }, 300);
-
-      // 4. LocalStorage sandbox test
-      setTimeout(() => {
-        try {
-          localStorage.setItem('motion_sandbox_test', 'test');
-          localStorage.removeItem('motion_sandbox_test');
-          printLine('[sys] Browser sandbox write permission check: OK');
-          document.getElementById('desc-storage').textContent = 'Storage Sandbox: LocalStorage write confirmed';
-          setStatus('storage', 'success');
-        } catch (e) {
-          printLine('[error] Storage sandbox access denied.', 'text-warning');
-          document.getElementById('desc-storage').textContent = 'Storage Sandbox: Disabled/Full';
-          setStatus('storage', 'error');
-        }
-      }, 400);
-
-      // 5. Finished
-      setTimeout(() => {
-        printLine('[success] Diagnostic scan completed successfully.', 'text-success');
-      }, 500);
-    });
-
-    // Initial Render
-    renderCities();
-
-    // FAQ Tab Switcher Logic
-    const faqData = {
-      general: `# faq_general.yaml
-workshops:
-  prerequisites:
-    required: "Intermediate JS/TS or Rust experience."
-    recommended: "Basic understanding of container systems (Docker)."
-  group_registrations:
-    capacity: "Yes, teams of 4+ can request bundled seat keys."
-    contact: "dev-relations@motion.design"
-  waitlists:
-    policy: "Sold out slots will open waitlist entry dynamically."`,
-      hardware: `# faq_hardware.yaml
-workshops:
-  gpu_requirements:
-    cuda: "Optional for local. Cloud-hosted NVIDIA H100 instances are provided."
-    webgl: "A WebGL-enabled browser is required for local visual lab shaders."
-  cpu_and_ram:
-    threads: "Minimum 4 logical threads allocated."
-    memory: "8GB RAM minimum. 16GB RAM recommended for Docker environments."`,
-      logistics: `# faq_logistics.yaml
-workshops:
-  duration:
-    session: "3-hour intensive hands-on lab session."
-  certificates:
-    type: "Cryptographic workshop completion key signed by /motion ledger."
-  cancellations:
-    refunds: "Full refund up to 7 days before. Keys are transferable."`
-    };
-
-    document.querySelectorAll('.ide-tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.ide-tab').forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        const file = tab.getAttribute('data-file');
-        document.getElementById('faqCodeBlock').textContent = faqData[file];
-      });
-    });
-
-    // Console Interactive CLI input Verification
-    const consoleInput = document.getElementById('consoleTerminalInput');
-    if (consoleInput) {
-      consoleInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          const val = consoleInput.value.trim();
-          consoleInput.value = '';
-          if (!val) return;
-
-          printLine(`motion verify > ${val}`, 'text-muted');
-          printLine('[info] Querying registration ledger for seat validation...', 'text-muted');
-
-          setTimeout(() => {
-            let found = false;
-            let foundData = null;
-            let cityFound = '';
-            
-            for (let i = 0; i < localStorage.length; i++) {
-              const key = localStorage.key(i);
-              if (key.startsWith('motion_registered_')) {
-                try {
-                  const data = JSON.parse(localStorage.getItem(key));
-                  if (data.seatKey.toUpperCase() === val.toUpperCase()) {
-                    found = true;
-                    foundData = data;
-                    const cityId = key.replace('motion_registered_', '');
-                    const city = cities.find(c => c.id === cityId);
-                    cityFound = city ? city.name : cityId;
-                    break;
-                  }
-                } catch (err) {
-                  console.error(err);
-                }
-              }
-            }
-
-            if (found && foundData) {
-              if (foundData.isWaitlist) {
-                printLine(`[info] Validation completed: Waitlist matches ${cityFound} workshop!`, 'text-success');
-                printLine(`[sys] Waitlist Registered: ${foundData.name}`, 'text-success');
-                printLine(`[sys] Email Address: ${foundData.email}`, 'text-success');
-                printLine(`[sys] Status: Waitlisted (Seat Allocation Pending)`, 'text-warning');
-              } else {
-                printLine(`[success] Validation completed: Seat matches ${cityFound} workshop!`, 'text-success');
-                printLine(`[sys] Seat Registered: ${foundData.name}`, 'text-success');
-                printLine(`[sys] Email Address: ${foundData.email}`, 'text-success');
-                printLine(`[sys] Cryptographic confirmation code verified: OK`, 'text-success');
-              }
-            } else {
-              printLine(`[error] Token ${val} not registered. Verification protocol failed.`, 'text-warning');
-            }
-          }, 600);
-        }
-      });
-    }
-
-    // Developer Easter Egg F12 Prints
-    console.log(
-      `%c      _                  _   _              
-     / / _ __ ___   ___ | |_(_) ___  _ __   
-    / / | '_ \` _ \\ / _ \\| __| |/ _ \\| '_ \\  
-   / /  | | | | | | (_) | |_| | (_) | | | | 
-  /_/   |_| |_| |_|\\___/ \\__|_|\\___/|_| |_|`,
-      "color: #1d4ed8; font-weight: bold;"
-    );
-    console.log("%cSYSTEM: /motion Dev Deck Connected.", "color: #10b981; font-weight: bold;");
-    console.log("Want a free ticket? Solve our base64 puzzle:");
-    console.log(">> echo 'bW90aW9uX3RpY2tldF9lYXN0ZXJfZWdnXzIwMjY=' | base64 --decode");
-
-    // Initialize lucide icons
-    console.log("%cSYSTEM: /motion Dev Deck Connected.", "color: #10b981; font-weight: bold;");
-    console.log("Want a free ticket? Solve our base64 puzzle:");
-    console.log(">> echo 'bW90aW9uX3RpY2tldF9lYXN0ZXJfZWdnXzIwMjY=' | base64 --decode");
-
-    // WebGL Canvas Subtle Background Animation (Fixed, calm teal-indigo nebula) - Deferred to window load
-    window.addEventListener('load', () => {
-  const canvas = document.getElementById('bg-canvas');
-      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-      if (!gl) return;
-
-      const VS = `attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }`;
-      const FS = `
-  precision highp float;
-
-  uniform vec2  u_res;
-  uniform float u_phase;
-  uniform float u_seed;
-  uniform int   u_mode;
-  uniform float u_speed, u_scale, u_density, u_distort, u_detail, u_grain;
-  uniform vec3  u_c0, u_c1, u_c2, u_c3;
-  uniform sampler2D u_texture;
-  uniform float u_mix, u_pixel, u_invert;
-
-  #define TAU 6.28318530718
-
-  float hash21(vec2 p){
-      p = fract(p * vec2(234.34, 435.345));
-      p += dot(p, p + 34.23);
-      return fract(p.x * p.y);
-  }
-
-  float vnoise(vec2 p){
-      vec2 i = floor(p), f = fract(p);
-      f = f * f * (3.0 - 2.0 * f);
-      float a = hash21(i);
-      float b = hash21(i + vec2(1.0, 0.0));
-      float c = hash21(i + vec2(0.0, 1.0));
-      float d = hash21(i + vec2(1.0, 1.0));
-      return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
-  }
-
-  float fbm(vec2 p){
-      float v = 0.0, a = 0.5;
-      mat2 r = mat2(0.80, 0.60, -0.60, 0.80);
-      for (int i = 0; i < 5; i++){
-          v += a * vnoise(p);
-          p  = r * p * 2.1 + vec2(1.7, 9.2);
-          a *= 0.5;
-      }
-      return v;
-  }
-
-  vec2 loopOff(){
-      return vec2(cos(u_phase), sin(u_phase)) * (0.10 + 0.55 * u_speed);
-  }
-
-  vec3 grad4(float t){
-      t = clamp(t, 0.0, 1.0);
-      vec3 c = mix(u_c0, u_c1, smoothstep(0.00, 0.35, t));
-      c = mix(c, u_c2, smoothstep(0.35, 0.70, t));
-      c = mix(c, u_c3, smoothstep(0.70, 1.00, t));
-      return c;
-  }
-
-  float metaf(vec2 p, float ar){
-      float s  = u_seed;
-      float rA = 0.08 + 0.20 * u_speed;
-      vec2 b1 = vec2((0.28 + 0.06 * sin(s))       * ar, 0.62 + 0.05 * cos(s * 1.3))
-              + rA        * vec2(cos(u_phase + s),             sin(u_phase + s));
-      vec2 b2 = vec2((0.72 + 0.05 * cos(s * 2.1)) * ar, 0.40 + 0.06 * sin(s * 0.7))
-              + rA * 0.85 * vec2(cos(-2.0 * u_phase + s * 1.7), sin(-2.0 * u_phase + s * 1.7));
-      vec2 b3 = vec2((0.50 + 0.07 * sin(s * 1.6)) * ar, 0.24 + 0.05 * cos(s * 2.4))
-              + rA * 0.70 * vec2(cos(u_phase + s * 2.3 + 2.0),  sin(u_phase + s * 2.3 + 2.0));
-      return 0.30 / (length(p - b1) + 0.07)
-           + 0.22 / (length(p - b2) + 0.07)
-           + 0.16 / (length(p - b3) + 0.07);
-  }
-
-  void main(){
-      vec2 uv = gl_FragCoord.xy / u_res;
-      uv.y = 1.0 - uv.y;
-      float ar = u_res.x / u_res.y;
-      vec2 sOff = vec2(fract(u_seed * 0.193), fract(u_seed * 0.317)) * 47.0;
-
-      vec3 col = vec3(0.0);
-
-      /* ─── 0 · aurora ─── */
-      if (u_mode == 0){
-          vec3 night  = u_c0 * 0.40;
-          float light = 0.0;
-          vec3  tint  = vec3(0.0);
-          for (int i = 0; i < 3; i++){
-              float fi = float(i) + 1.0;
-              float xx = uv.x * ar * (1.0 + 0.35 * fi) + u_seed * fi * 1.7;
-              float wave = fbm(vec2(xx * 0.6, fi * 4.0) + loopOff() * 1.2) - 0.5;
-              float cy   = 0.42 + 0.12 * fi + wave * 0.38;
-              float streak = fbm(vec2(xx * (3.0 + 4.0 * u_detail),
-                                      uv.y * (1.0 + 1.5 * u_scale)) + loopOff());
-              float dist  = uv.y - cy;
-              float band  = exp(-dist * dist * (8.0 + 34.0 * u_density));
-              float inten = max(band * (0.25 + 0.95 * streak), 0.0);
-              light += inten / fi;
-              tint  += grad4(clamp(0.15 + (1.0 - uv.y) * 0.95, 0.0, 1.0)) * inten / fi;
-          }
-          col  = night + tint * (1.3 + 1.0 * u_distort);
-          col += u_c3 * pow(clamp(light, 0.0, 1.0), 3.0) * 0.30;
-      }
-
-      /* ─── 1 · electricity ─── */
-      else if (u_mode == 1){
-          vec2 p = uv * vec2(ar, 1.0) * mix(1.5, 5.0, u_scale) + sOff;
-          vec2 q = vec2(fbm(p + loopOff()),
-                        fbm(p + vec2(5.2, 1.3) - loopOff()));
-          float n = fbm(p * 1.4 + q * (1.0 + 2.5 * u_distort) + loopOff());
-          float ridge = 1.0 - abs(2.0 * n - 1.0);
-          float veins = pow(ridge, mix(6.0, 24.0, u_detail));
-          veins *= 0.55 + 0.45 * cos(3.0 * u_phase + u_seed);
-          col  = u_c0 * 0.55;
-          col += grad4(clamp(veins * 1.3, 0.0, 1.0)) * veins;
-          col += u_c3 * pow(veins, 2.0) * 0.9;
-          col += grad4(n * 0.35) * (0.10 + 0.10 * u_density);
-      }
-
-      /* ─── 2 · flow ─── */
-      else if (u_mode == 2){
-          vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.2, 5.0, u_scale) + sOff;
-          float w = 1.0 + 3.0 * u_distort;
-          vec2 q = vec2(fbm(p + loopOff()),
-                        fbm(p + vec2(5.2, 1.3) - loopOff()));
-          vec2 r = vec2(fbm(p + q * w + vec2(1.7, 9.2) + loopOff() * 0.7),
-                        fbm(p + q * w + vec2(8.3, 2.8) - loopOff() * 0.4));
-          float f = fbm(p + r * (1.0 + 2.5 * u_detail));
-          col = grad4(clamp(f * 1.45 + 0.10 * r.x - 0.05, 0.0, 1.0));
-          col = mix(col, u_c2, q.y * q.x * 0.25);
-      }
-
-      /* ─── 3 · fractal square ─── */
-      else if (u_mode == 3){
-          vec2 p = uv - 0.5;
-          p.x *= ar;
-          float s = 1.0;
-          float orbit = 0.0;
-          for (int i = 0; i < 6; i++){
-              p = abs(p) - 0.12 * (0.6 + 0.4 * u_scale);
-              float r2 = dot(p,p);
-              orbit += exp(-4.0 * r2);
-              p = p / r2 + sOff * 0.15;
-              p *= 1.15 + 0.15 * u_detail;
-          }
-          float f = clamp(orbit * 0.35, 0.0, 1.0);
-          col = grad4(f + 0.15 * u_distort);
-          col += u_c3 * pow(orbit, 3.0) * 0.08;
-      }
-
-      /* ─── 4 · glass ─── */
-      else if (u_mode == 4){
-          vec2 p = vec2(uv.x * ar, uv.y);
-          float frost = 0.0, rim = 0.0;
-          vec2  refr = vec2(0.0);
-          for (int i = 0; i < 4; i++){
-              float fi = float(i) + 1.0;
-              float ph = u_phase + u_seed * fi + fi * 1.9;
-              vec2  c  = vec2(0.5 * ar, 0.5) + vec2(cos(ph), sin(ph)) * (0.36 / fi);
-              float r  = 0.14 + 0.06 * fi * u_scale + 0.12 * u_density;
-              float dd = length(p - c);
-              float body = smoothstep(r, r * 0.6, dd);
-              float ring = smoothstep(r * 0.70, r * 0.88, dd) * (1.0 - smoothstep(r * 0.88, r, dd));
-              frost += body;
-              rim   += ring;
-              refr  += normalize(p - c + 0.0001) * body;
-          }
-          frost = clamp(frost, 0.0, 1.0);
-          float bg  = metaf(p, ar) + fbm(uv * (1.2 + 2.0 * u_scale) + loopOff() + sOff) * 0.30;
-          vec3 plain = grad4(bg * 0.45);
-          vec2 sUV = uv + refr * (0.03 + 0.10 * u_distort);
-          vec2 sp  = vec2(sUV.x * ar, sUV.y);
-          float bg2 = metaf(sp, ar) + fbm(sUV * (1.2 + 2.0 * u_scale) + loopOff() + sOff) * 0.30;
-          vec3 behind = grad4(bg2 * 0.45);
-          vec3 frosted = mix(behind, vec3(dot(behind, vec3(0.333))), 0.30) + u_c3 * 0.10;
-          col = mix(plain, frosted, frost * 0.92);
-          col += u_c3 * rim * (0.4 + 0.6 * u_detail);
-      }
-
-      /* ─── 5 · grain ─── */
-      else if (u_mode == 5){
-          vec2 p = vec2(uv.x * ar, uv.y);
-          float s = u_seed;
-          float rA = 0.10 + 0.22 * u_speed;
-          vec2 b1 = vec2(0.32 * ar, 0.60) + rA * vec2(cos(u_phase + s), sin(u_phase + s));
-          vec2 b2 = vec2(0.70 * ar, 0.35) + rA * 0.8 * vec2(cos(-u_phase + s * 1.9), sin(-u_phase + s * 1.9));
-          float f = 0.55 / (length(p - b1) + 0.30)
-                  + 0.45 / (length(p - b2) + 0.30)
-                  + fbm(uv * (1.0 + 1.5 * u_scale) + loopOff() + sOff) * 0.25 * u_detail;
-          col = grad4(f * (0.45 + 0.25 * u_density));
-          col += (hash21(gl_FragCoord.xy + vec2(u_phase * 43.7)) - 0.5) * (0.10 + 0.30 * u_distort);
-      }
-
-      /* ─── 6 · halftone ─── */
-      else if (u_mode == 6){
-          vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.2, 4.0, u_scale) + sOff;
-          vec2 q = vec2(fbm(p + loopOff()), fbm(p + vec2(5.2, 1.3) - loopOff()));
-          float f = fbm(p + q * (1.0 + 2.5 * u_distort));
-          float cells = mix(18.0, 80.0, u_density);
-          vec2 g = fract(vec2(uv.x * ar, uv.y) * cells) - 0.5;
-          float rdot = clamp(f * (0.5 + 0.6 * u_detail), 0.05, 0.62);
-          float mask = smoothstep(rdot, rdot - 0.12, length(g) * 1.45);
-          col = mix(u_c0 * 0.7, grad4(clamp(f * 1.5, 0.0, 1.0)), mask);
-      }
-
-      /* ─── 7 · kaleidoscope ─── */
-      else if (u_mode == 7){
-          vec2 p = uv - 0.5;
-          p.x *= ar;
-          float angle = atan(p.y, p.x);
-          float rad   = length(p);
-          float slices = mix(4.0, 12.0, u_density);
-          angle = mod(angle, 3.14159 / slices * 2.0);
-          angle = abs(angle - 3.14159 / slices);
-          p = vec2(cos(angle), sin(angle)) * rad;
-          vec2 np = p * mix(1.5, 4.0, u_scale) + sOff;
-          vec2 q = vec2(fbm(np + loopOff()),
-                        fbm(np + vec2(5.2, 1.3) - loopOff()));
-          float f = fbm(np + q * (1.0 + 2.0 * u_distort) + loopOff() * 0.6);
-          col = grad4(clamp(f * 1.3, 0.0, 1.0));
-          col += u_c3 * pow(rad * 1.8, 3.0) * 0.12;
-      }
-
-      /* ─── 8 · orbs ─── */
-      else if (u_mode == 8){
-          vec2 p = vec2(uv.x * ar, uv.y);
-          float f = metaf(p, ar) * (0.30 + 0.30 * u_density)
-                  + fbm(uv * (1.0 + 2.0 * u_scale) + loopOff() + sOff) * 0.20 * u_detail;
-          col = grad4(f);
-      }
-
-      /* ─── 9 · plasma ─── */
-      else if (u_mode == 9){
-          vec2 p = uv * mix(1.0, 3.5, u_scale);
-          float t = u_phase * mix(0.3, 1.2, u_speed);
-          float v = 0.0;
-          v += sin(p.x * 4.0 + t) * 0.5 + 0.5;
-          v += sin(p.y * 5.0 - t * 1.3) * 0.4;
-          v += sin((p.x + p.y) * 6.0 + t * 0.7) * 0.3;
-          v += sin(length(p - 0.5) * 8.0 - t * 1.1) * 0.3;
-          v += fbm(p * 1.5 + loopOff() + sOff) * 0.35 * u_detail;
-          v *= 0.5 + 0.5 * u_density;
-          col = grad4(clamp(v * 1.2, 0.0, 1.0));
-          col = mix(col, grad4(clamp(v * 0.8 + 0.3, 0.0, 1.0)), 0.3 * u_distort);
-      }
-
-      /* ─── 10 · reeded ─── */
-      else if (u_mode == 10){
-          float N  = mix(24.0, 110.0, u_density);
-          float rx = uv.x * N;
-          float ri = floor(rx);
-          float rf = fract(rx);
-
-          float lens = (rf - 0.5) * ((0.3 + 2.2 * u_distort) / N);
-          vec2 sUV = vec2(clamp(uv.x + lens, 0.001, 0.999), uv.y);
-
-          vec2 p = vec2(sUV.x * ar, sUV.y);
-          float f = metaf(p, ar)
-                  + fbm(sUV * (1.2 + 2.4 * u_scale) + loopOff() + sOff) * (0.12 + 0.28 * u_detail);
-          col = grad4(f * 0.42);
-
-          float shimmer = 0.028 * sin(ri * 2.399 + u_seed + 2.0 * u_phase);
-          float h1 = exp(-pow((rf - 0.27 - shimmer) * 13.5, 2.0)) * 0.62;
-          float h2 = exp(-pow((rf - 0.75) * 22.0, 2.0)) * 0.10;
-          float groove = smoothstep(0.0, 0.07, rf) * smoothstep(1.0, 0.93, rf);
-
-          col  = col * (0.70 + groove * 0.30);
-          col += u_c3 * h1;
-          col += u_c3 * 0.85 * h2;
-          col *= 0.87 + fbm(vec2(ri * 0.09, uv.y * 3.1) + loopOff() * 0.8 + sOff) * 0.15;
-      }
-
-      /* ─── 11 · rings ─── */
-      else if (u_mode == 11){
-          vec2 p = (uv - 0.5) * vec2(ar, 1.0);
-          float rad = length(p);
-          float n = fbm(p * mix(1.0, 4.0, u_scale) + loopOff() + sOff);
-          float rings = sin((rad * mix(8.0, 30.0, u_density) + n * 2.0 * u_distort - u_phase * 1.5) * 3.14159);
-          float f = 0.5 + 0.5 * rings;
-          col = grad4(clamp(f * (0.7 + 0.5 * u_detail), 0.0, 1.0));
-          float glow = exp(-rad * 3.0) * 0.3;
-          col += u_c3 * glow;
-      }
-
-      /* ─── 12 · sd rosette ─── */
-      else if (u_mode == 12){
-          vec2 p = uv - 0.5;
-          p.x *= ar;
-          float n = 5.0 + floor(mix(3.0, 9.0, u_density));
-          float a = atan(p.y, p.x);
-          float r = length(p);
-          float sector = 3.14159 / max(n, 2.0);
-          a = mod(a + u_phase * 0.25, sector * 2.0);
-          a = abs(a - sector);
-          vec2 q = vec2(cos(a), sin(a)) * r;
-          float f = abs(q.y) - 0.04 * (0.4 + 0.8 * u_scale);
-          float pulse = sin(r * mix(6.0, 24.0, u_detail) - u_phase * 1.6) * 0.5 + 0.5;
-          float edge = exp(-abs(f) * (18.0 + 40.0 * u_distort));
-          edge = smoothstep(0.0, 0.9, edge);
-          col = mix(u_c0 * 0.5, grad4(pulse), edge);
-          col += u_c3 * edge * 0.22;
-      }
-
-      /* ─── 13 · triangle lattice ─── */
-      else if (u_mode == 13){
-          vec2 p = uv - 0.5;
-          p.x *= ar;
-          float a = u_phase * (0.2 + 0.4 * u_speed);
-          float ca = cos(a), sa = sin(a);
-          p = mat2(ca, -sa, sa, ca) * p;
-          vec2 g = p * (8.0 + 18.0 * u_density);
-          vec2 f = fract(g) - 0.5;
-          float tri = abs(f.x) * 0.866 + f.y * 0.5;
-          float d = abs(tri);
-          float rings = sin(length(floor(g)) * 0.9 + u_phase) * 0.5 + 0.5;
-          float edge = smoothstep(0.08, 0.0, d);
-          col = grad4(clamp(rings * (0.6 + 0.6 * u_detail), 0.0, 1.0));
-          col = mix(col, u_c3, edge * (0.4 + 0.6 * u_scale));
-      }
-
-      /* ─── 14 · waves ─── */
-      else if (u_mode == 14){
-          float f = uv.y * mix(1.5, 5.0, u_scale);
-          f += sin(uv.x * (3.0 + 9.0 * u_density) + u_phase + u_seed) * 0.45;
-          f += sin(uv.x * (7.0 + 5.0 * u_density) - 2.0 * u_phase + u_seed * 1.7) * 0.20;
-          f += fbm(uv * vec2(ar, 1.0) * (1.5 + 2.0 * u_scale) + loopOff() + sOff)
-               * (0.30 + 0.90 * u_distort);
-          float t = 0.5 + 0.5 * sin(f * TAU * (0.4 + 0.9 * u_detail));
-          col = grad4(t);
-      }
-
-      /* film grain + vignette */
-      col += (hash21(gl_FragCoord.xy + vec2(u_phase * 91.3)) - 0.5) * u_grain * 0.22;
-      vec2 v = uv * 2.0 - 1.0;
-      col *= 1.0 - dot(v, v) * 0.16;
-
-      if (u_invert > 0.5) {
-          col = 1.0 - col;
-      }
-
-      gl_FragColor = vec4(col, 1.0);
-  }`;
-
-      // WebGL compilation helper
-      function compileShader(shaderType, source) {
-        const shader = gl.createShader(shaderType);
-        gl.shaderSource(shader, source);
-        gl.compileShader(shader);
-        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-          console.error('Shader compile failed: ' + gl.getShaderInfoLog(shader));
-          gl.deleteShader(shader);
-          return null;
-        }
-        return shader;
-      }
-
-      // WebGL setup
-      const VS_SOURCE = VS;
-      const FS_SOURCE = FS;
-
-      const vs = compileShader(gl.VERTEX_SHADER, VS_SOURCE);
-      const fs = compileShader(gl.FRAGMENT_SHADER, FS_SOURCE);
-      if (!vs || !fs) {
-        console.error('Shader compilation failed.');
-      }
-
-      const prog = gl.createProgram();
-      gl.attachShader(prog, vs);
-      gl.attachShader(prog, fs);
-      gl.linkProgram(prog);
-      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
-        console.error('Program linking failed: ' + gl.getProgramInfoLog(prog));
-      }
-      gl.useProgram(prog);
-
-      const buf = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
-      const aLoc = gl.getAttribLocation(prog, 'a');
-      gl.enableVertexAttribArray(aLoc);
-      gl.vertexAttribPointer(aLoc, 2, gl.FLOAT, false, 0, 0);
-
-      const U = {};
-      const uniforms = [
-        'u_res', 'u_phase', 'u_seed', 'u_mode',
-        'u_speed', 'u_scale', 'u_density', 'u_distort', 'u_detail', 'u_grain',
-        'u_c0', 'u_c1', 'u_c2', 'u_c3', 'u_texture', 'u_mix', 'u_pixel', 'u_invert'
-      ];
-      uniforms.forEach(n => { U[n] = gl.getUniformLocation(prog, n); });
-
-      // Hardcoded calm teal-indigo nebula variables (dimmed highlight for readability)
-      const P = {
-        "mode": 2, // Flow mode
-        "seed": 9015,
-        "sizeIdx": 1,
-        "loop": 8, // Slower cycle
-        "colors": [
-          "#030303", // Deep background
-          "#0f766e", // Teal
-          "#4338ca", // Indigo
-          "#cbd5e1"  // Soft slate highlight
-        ],
-        "speed": 0.12, // Slow drifting movement
-        "scale": 1.1,
-        "density": 0.5,
-        "distort": 0.3,
-        "detail": 0.4,
-        "grain": 0.06,
-        "mix": 0,
-        "pixel": 0,
-        "invert": 0
-      };
-
-      function hex2rgb(h) {
-        return [
-          parseInt(h.slice(1, 3), 16) / 255,
-          parseInt(h.slice(3, 5), 16) / 255,
-          parseInt(h.slice(5, 7), 16) / 255,
+        // ---- Inline icon helpers ----
+        const ICON = {
+            pin:   '<svg class="ico" style="width:16px;height:16px;color:var(--accent);" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+            cal:   '<svg class="ico" style="width:14px;height:14px;color:var(--text-dim);" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+            users: '<svg class="ico" style="width:12px;height:12px;color:var(--text-dim);" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+            warn:  '<svg class="ico" style="width:11px;height:11px;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+            ticket:'<svg class="ico" style="width:16px;height:16px;color:var(--accent);" viewBox="0 0 24 24"><path d="M3 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z"/></svg>',
+            check: '<svg class="ico" style="width:42px;height:42px;" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+            copy:  '<svg class="ico" style="width:14px;height:14px;" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'
+        };
+
+        // ---- Tour data ----
+        const cities = [
+            { id: 'chicago',  name: 'Chicago',   date: 'Jul 11, 2026', tags: ['agentic coding', 'workspace automation'] },
+            { id: 'boston',   name: 'Boston',    date: 'Aug 8, 2026',  tags: ['custom skills', 'hooks'] },
+            { id: 'newyork',  name: 'New York',  date: 'Sep 12, 2026', tags: ['orchestration', 'context engineering'] },
+            { id: 'sandiego', name: 'San Diego', date: 'Oct 17, 2026', tags: ['agentic coding', 'eval loops'] },
+            { id: 'atlanta',  name: 'Atlanta',   date: 'Nov 14, 2026', tags: ['automation', 'tool calls'] },
+            { id: 'stlouis',  name: 'St. Louis', date: 'Dec 12, 2026', tags: ['orchestration', 'skills'] }
         ];
-      }
+        const MAX_SEATS = 30;
 
-      function resize() {
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        canvas.width = Math.round(window.innerWidth * dpr);
-        canvas.height = Math.round(window.innerHeight * dpr);
-        gl.viewport(0, 0, canvas.width, canvas.height);
-      }
-      window.addEventListener('resize', resize);
-      resize(); 
+        const loadSignups = () => { const d = localStorage.getItem('motion_signups'); return d ? JSON.parse(d) : {}; };
+        const saveSignups = (s) => localStorage.setItem('motion_signups', JSON.stringify(s));
+        const getSignupCount = (id) => { const s = loadSignups(); return s[id] ? s[id].length : 0; };
 
-      const t0 = performance.now();
-      function render(now) {
-        const time = (now - t0) / 1000;
-        const phase = (time / P.loop * Math.PI * 2) % (Math.PI * 2);
+        function generateConfirmationCode(name, email, cityId) {
+            const raw = `${name}${email}${cityId}${Date.now()}${Math.random()}`;
+            let hash = 0;
+            for (let i = 0; i < raw.length; i++) { hash = ((hash << 5) - hash) + raw.charCodeAt(i); hash |= 0; }
+            const hex = Math.abs(hash).toString(16).toUpperCase().padStart(8, '0');
+            const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
+            return `MTN-${hex.substring(0, 4)}-${hex.substring(4, 8)}-${rand}`;
+        }
 
-        gl.uniform2f(U.u_res, canvas.width, canvas.height);
-        gl.uniform1f(U.u_phase, phase);
-        gl.uniform1f(U.u_seed, (P.seed % 10000) * 0.6180339887 % 12.566);
-        gl.uniform1i(U.u_mode, P.mode);
-        gl.uniform1f(U.u_speed, P.speed);
-        gl.uniform1f(U.u_scale, P.scale);
-        gl.uniform1f(U.u_density, P.density);
-        gl.uniform1f(U.u_distort, P.distort);
-        gl.uniform1f(U.u_detail, P.detail);
-        gl.uniform1f(U.u_grain, P.grain);
-        gl.uniform1f(U.u_mix, P.mix);
-        gl.uniform1f(U.u_pixel, P.pixel);
-        gl.uniform1f(U.u_invert, P.invert || 0);
-        gl.uniform3fv(U.u_c0, hex2rgb(P.colors[0]));
-        gl.uniform3fv(U.u_c1, hex2rgb(P.colors[1]));
-        gl.uniform3fv(U.u_c2, hex2rgb(P.colors[2]));
-        gl.uniform3fv(U.u_c3, hex2rgb(P.colors[3]));
+        function renderCities() {
+            const grid = document.getElementById('grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            cities.forEach((city, i) => {
+                const count = getSignupCount(city.id);
+                const seatsLeft = MAX_SEATS - count;
+                const isSoldOut = seatsLeft <= 0;
+                const fill = (count / MAX_SEATS) * 100;
 
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, null);
-        gl.uniform1i(U.u_texture, 0);
+                let capacityHTML;
+                if (isSoldOut) {
+                    capacityHTML = `
+                        <div class="card-capacity">
+                            <div class="capacity-row">
+                                <span class="left" style="color:#fbbf24;">${ICON.warn} waitlist active</span>
+                                <span>0 seats left</span>
+                            </div>
+                            <div class="bar"><div class="bar-fill" style="width:100%;background:var(--text-dim);opacity:0.3;"></div></div>
+                        </div>`;
+                } else {
+                    capacityHTML = `
+                        <div class="card-capacity">
+                            <div class="capacity-row">
+                                <span class="left">${ICON.users} availability</span>
+                                <span>${seatsLeft} / ${MAX_SEATS} seats</span>
+                            </div>
+                            <div class="bar"><div class="bar-fill" style="width:${fill}%"></div></div>
+                        </div>`;
+                }
 
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-        requestAnimationFrame(render);
-      }
-      requestAnimationFrame(render);
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="card-meta">
+                        <span class="stop-no">STOP ${String(i + 1).padStart(2, '0')}</span>
+                        <span>${isSoldOut ? 'WAITLIST' : 'OPEN'}</span>
+                    </div>
+                    <h3 class="card-location">${ICON.pin}<span>${city.name}</span></h3>
+                    <div class="card-date">${ICON.cal}<span>${city.date}</span></div>
+                    ${capacityHTML}
+                    <div class="tags">${city.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+                    <button class="card-btn ${isSoldOut ? 'waitlist-btn' : ''}">${isSoldOut ? 'Join waitlist' : 'Reserve spot'}</button>`;
+                card.querySelector('.card-btn').addEventListener('click', () => openSignupModal(city.id));
+                grid.appendChild(card);
+            });
+        }
+
+        function openSignupModal(cityId) {
+            const city = cities.find(c => c.id === cityId);
+            const seatsLeft = MAX_SEATS - getSignupCount(cityId);
+            const isWaitlist = seatsLeft <= 0;
+            const existing = localStorage.getItem('motion_registered_' + cityId);
+
+            document.getElementById('modalTitle').textContent = isWaitlist ? `Join waitlist · ${city.name}` : `Register · ${city.name}`;
+            const body = document.getElementById('modalBody');
+
+            if (existing) {
+                const reg = JSON.parse(existing);
+                showSuccessView(city, reg.name, reg.email, reg.seatKey, reg.isWaitlist);
+            } else {
+                body.innerHTML = `
+                    <form id="signupForm" class="form">
+                        <div class="form-group">
+                            <label class="form-label" for="fullName">Full name</label>
+                            <input type="text" class="form-input" id="fullName" placeholder="Ada Lovelace" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="email">Email address</label>
+                            <input type="email" class="form-input" id="email" placeholder="ada@example.com" required>
+                        </div>
+                        <button type="submit" class="submit-btn ${isWaitlist ? 'waitlist-btn' : ''}">${isWaitlist ? 'Join waitlist' : 'Reserve spot'}</button>
+                    </form>`;
+                document.getElementById('signupForm').addEventListener('submit', (e) => { e.preventDefault(); handleSignup(cityId); });
+            }
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function handleSignup(cityId) {
+            const name = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            if (!name || !email) return;
+
+            const signups = loadSignups();
+            if (!signups[cityId]) signups[cityId] = [];
+            if (signups[cityId].some(s => s.email === email)) { alert('That email is already registered for this city.'); return; }
+
+            const isWaitlist = getSignupCount(cityId) >= MAX_SEATS;
+            const seatKey = generateConfirmationCode(name, email, cityId);
+            const reg = { name, email, seatKey, timestamp: new Date().toISOString(), isWaitlist };
+            signups[cityId].push(reg);
+            saveSignups(signups);
+            localStorage.setItem('motion_registered_' + cityId, JSON.stringify(reg));
+
+            showSuccessView(cities.find(c => c.id === cityId), name, email, seatKey, isWaitlist);
+            renderCities();
+        }
+
+        function showSuccessView(city, name, email, seatKey, isWaitlist) {
+            const color = isWaitlist ? '#fbbf24' : '#10b981';
+            const title = isWaitlist ? "You're on the list" : "You're in";
+            const sub = isWaitlist
+                ? `Waitlist hold for <strong>${name}</strong> · ${city.name}. We'll email you the moment a seat opens.`
+                : `Seat confirmed for <strong>${name}</strong> · ${city.name}.`;
+
+            document.getElementById('modalBody').innerHTML = `
+                <div style="text-align:center;">
+                    <div style="display:flex;align-items:center;justify-content:center;margin-bottom:0.6rem;color:${color};">${ICON.check}</div>
+                    <h4 style="font-size:1.15rem;font-weight:700;margin-bottom:0.4rem;">${title}</h4>
+                    <p style="margin-bottom:1.1rem;font-size:0.82rem;color:var(--text-sub);line-height:1.5;">${sub}</p>
+                    <div class="confirmation-box">${ICON.ticket}<span>${seatKey}</span></div>
+                    <button class="copy-token-btn" id="copyTokenBtn">${ICON.copy}<span>Copy code</span></button>
+                    <p style="margin-top:1.1rem;font-size:0.72rem;color:var(--text-dim);line-height:1.5;">A confirmation and a short prep checklist are on the way to <strong>${email}</strong>.</p>
+                </div>`;
+
+            document.getElementById('copyTokenBtn').addEventListener('click', () => {
+                navigator.clipboard.writeText(seatKey).then(() => {
+                    const btn = document.getElementById('copyTokenBtn');
+                    btn.innerHTML = `${ICON.copy}<span>Copied!</span>`;
+                    setTimeout(() => { btn.innerHTML = `${ICON.copy}<span>Copy code</span>`; }, 2000);
+                });
+            });
+        }
+
+        // ---- Modal close ----
+        const overlay = document.getElementById('modalOverlay');
+        document.getElementById('modalClose').addEventListener('click', () => overlay.classList.remove('active'));
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('active'); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') overlay.classList.remove('active'); });
+
+        // ---- Bottom-corner timer ----
+        const timerEl = document.getElementById('timer');
+        if (timerEl) {
+            const t0 = performance.now();
+            let last = -1;
+            (function tick() {
+                const s = Math.floor((performance.now() - t0) / 1000);
+                if (s !== last) { last = s; timerEl.textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+                requestAnimationFrame(tick);
+            })();
+        }
+
+        // ---- Scroll reveals ----
+        const revealObserver = new IntersectionObserver(entries => {
+            entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+        }, { threshold: 0.15 });
+        document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+        renderCities();
     });
-  });
-  </script>
+
+
+    // WebGL Canvas Calm Teal-Indigo Flow Shader
+    window.addEventListener('load', () => {
+        const canvas = document.getElementById('bg-canvas');
+        if (!canvas) return;
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        if (!gl) return;
+
+        const VS = `attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }`;
+        const FS = `
+        precision highp float;
+
+        uniform vec2  u_res;
+        uniform float u_phase;
+        uniform float u_seed;
+        uniform int   u_mode;
+        uniform float u_speed, u_scale, u_density, u_distort, u_detail, u_grain;
+        uniform vec3  u_c0, u_c1, u_c2, u_c3;
+        uniform sampler2D u_texture;
+        uniform float u_mix, u_pixel, u_invert;
+
+        #define TAU 6.28318530718
+
+        float hash21(vec2 p){
+            p = fract(p * vec2(234.34, 435.345));
+            p += dot(p, p + 34.23);
+            return fract(p.x * p.y);
+        }
+
+        float vnoise(vec2 p){
+            vec2 i = floor(p), f = fract(p);
+            f = f * f * (3.0 - 2.0 * f);
+            float a = hash21(i);
+            float b = hash21(i + vec2(1.0, 0.0));
+            float c = hash21(i + vec2(0.0, 1.0));
+            float d = hash21(i + vec2(1.0, 1.0));
+            return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+        }
+
+        float fbm(vec2 p){
+            float v = 0.0, a = 0.5;
+            mat2 r = mat2(0.80, 0.60, -0.60, 0.80);
+            for (int i = 0; i < 5; i++){
+                v += a * vnoise(p);
+                p  = r * p * 2.1 + vec2(1.7, 9.2);
+                a *= 0.5;
+            }
+            return v;
+        }
+
+        vec2 loopOff(){
+            return vec2(cos(u_phase), sin(u_phase)) * (0.10 + 0.55 * u_speed);
+        }
+
+        vec3 grad4(float t){
+            t = clamp(t, 0.0, 1.0);
+            vec3 c = mix(u_c0, u_c1, smoothstep(0.00, 0.35, t));
+            c = mix(c, u_c2, smoothstep(0.35, 0.70, t));
+            c = mix(c, u_c3, smoothstep(0.70, 1.00, t));
+            return c;
+        }
+
+        float metaf(vec2 p, float ar){
+            float s  = u_seed;
+            float rA = 0.08 + 0.20 * u_speed;
+            vec2 b1 = vec2((0.28 + 0.06 * sin(s))       * ar, 0.62 + 0.05 * cos(s * 1.3))
+                    + rA        * vec2(cos(u_phase + s),             sin(u_phase + s));
+            vec2 b2 = vec2((0.72 + 0.05 * cos(s * 2.1)) * ar, 0.40 + 0.06 * sin(s * 0.7))
+                    + rA * 0.85 * vec2(cos(-2.0 * u_phase + s * 1.7), sin(-2.0 * u_phase + s * 1.7));
+            vec2 b3 = vec2((0.50 + 0.07 * sin(s * 1.6)) * ar, 0.24 + 0.05 * cos(s * 2.4))
+                    + rA * 0.70 * vec2(cos(u_phase + s * 2.3 + 2.0),  sin(u_phase + s * 2.3 + 2.0));
+            return 0.30 / (length(p - b1) + 0.07)
+                 + 0.22 / (length(p - b2) + 0.07)
+                 + 0.16 / (length(p - b3) + 0.07);
+        }
+
+        void main(){
+            vec2 uv = gl_FragCoord.xy / u_res;
+            uv.y = 1.0 - uv.y;
+            float ar = u_res.x / u_res.y;
+            vec2 sOff = vec2(fract(u_seed * 0.193), fract(u_seed * 0.317)) * 47.0;
+
+            vec3 col = vec3(0.0);
+
+            /* ─── 0 · aurora ─── */
+            if (u_mode == 0){
+                vec3 night  = u_c0 * 0.40;
+                float light = 0.0;
+                vec3  tint  = vec3(0.0);
+                for (int i = 0; i < 3; i++){
+                    float fi = float(i) + 1.0;
+                    float xx = uv.x * ar * (1.0 + 0.35 * fi) + u_seed * fi * 1.7;
+                    float wave = fbm(vec2(xx * 0.6, fi * 4.0) + loopOff() * 1.2) - 0.5;
+                    float cy   = 0.42 + 0.12 * fi + wave * 0.38;
+                    float streak = fbm(vec2(xx * (3.0 + 4.0 * u_detail),
+                                            uv.y * (1.0 + 1.5 * u_scale)) + loopOff());
+                    float dist  = uv.y - cy;
+                    float band  = exp(-dist * dist * (8.0 + 34.0 * u_density));
+                    float inten = max(band * (0.25 + 0.95 * streak), 0.0);
+                    light += inten / fi;
+                    tint  += grad4(clamp(0.15 + (1.0 - uv.y) * 0.95, 0.0, 1.0)) * inten / fi;
+                }
+                col  = night + tint * (1.3 + 1.0 * u_distort);
+                col += u_c3 * pow(clamp(light, 0.0, 1.0), 3.0) * 0.30;
+            }
+
+            /* ─── 1 · electricity ─── */
+            else if (u_mode == 1){
+                vec2 p = uv * vec2(ar, 1.0) * mix(1.5, 5.0, u_scale) + sOff;
+                vec2 q = vec2(fbm(p + loopOff()),
+                              fbm(p + vec2(5.2, 1.3) - loopOff()));
+                float n = fbm(p * 1.4 + q * (1.0 + 2.5 * u_distort) + loopOff());
+                float ridge = 1.0 - abs(2.0 * n - 1.0);
+                float veins = pow(ridge, mix(6.0, 24.0, u_detail));
+                veins *= 0.55 + 0.45 * cos(3.0 * u_phase + u_seed);
+                col  = u_c0 * 0.55;
+                col += grad4(clamp(veins * 1.3, 0.0, 1.0)) * veins;
+                col += u_c3 * pow(veins, 2.0) * 0.9;
+                col += grad4(n * 0.35) * (0.10 + 0.10 * u_density);
+            }
+
+            /* ─── 2 · flow ─── */
+            else if (u_mode == 2){
+                vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.2, 5.0, u_scale) + sOff;
+                float w = 1.0 + 3.0 * u_distort;
+                vec2 q = vec2(fbm(p + loopOff()),
+                              fbm(p + vec2(5.2, 1.3) - loopOff()));
+                vec2 r = vec2(fbm(p + q * w + vec2(1.7, 9.2) + loopOff() * 0.7),
+                              fbm(p + q * w + vec2(8.3, 2.8) - loopOff() * 0.4));
+                float f = fbm(p + r * (1.0 + 2.5 * u_detail));
+                col = grad4(clamp(f * 1.45 + 0.10 * r.x - 0.05, 0.0, 1.0));
+                col = mix(col, u_c2, q.y * q.x * 0.25);
+            }
+
+            /* ─── 3 · fractal square ─── */
+            else if (u_mode == 3){
+                vec2 p = uv - 0.5;
+                p.x *= ar;
+                float s = 1.0;
+                float orbit = 0.0;
+                for (int i = 0; i < 6; i++){
+                    p = abs(p) - 0.12 * (0.6 + 0.4 * u_scale);
+                    float r2 = dot(p,p);
+                    orbit += exp(-4.0 * r2);
+                    p = p / r2 + sOff * 0.15;
+                    p *= 1.15 + 0.15 * u_detail;
+                }
+                float f = clamp(orbit * 0.35, 0.0, 1.0);
+                col = grad4(f + 0.15 * u_distort);
+                col += u_c3 * pow(orbit, 3.0) * 0.08;
+            }
+
+            /* ─── 4 · glass ─── */
+            else if (u_mode == 4){
+                vec2 p = vec2(uv.x * ar, uv.y);
+                float frost = 0.0, rim = 0.0;
+                vec2  refr = vec2(0.0);
+                for (int i = 0; i < 4; i++){
+                    float fi = float(i) + 1.0;
+                    float ph = u_phase + u_seed * fi + fi * 1.9;
+                    vec2  c  = vec2(0.5 * ar, 0.5) + vec2(cos(ph), sin(ph)) * (0.36 / fi);
+                    float r  = 0.14 + 0.06 * fi * u_scale + 0.12 * u_density;
+                    float dd = length(p - c);
+                    float body = smoothstep(r, r * 0.6, dd);
+                    float ring = smoothstep(r * 0.70, r * 0.88, dd) * (1.0 - smoothstep(r * 0.88, r, dd));
+                    frost += body;
+                    rim   += ring;
+                    refr  += normalize(p - c + 0.0001) * body;
+                }
+                frost = clamp(frost, 0.0, 1.0);
+                float bg  = metaf(p, ar) + fbm(uv * (1.2 + 2.0 * u_scale) + loopOff() + sOff) * 0.30;
+                vec3 plain = grad4(bg * 0.45);
+                vec2 sUV = uv + refr * (0.03 + 0.10 * u_distort);
+                vec2 sp  = vec2(sUV.x * ar, sUV.y);
+                float bg2 = metaf(sp, ar) + fbm(sUV * (1.2 + 2.0 * u_scale) + loopOff() + sOff) * 0.30;
+                vec3 behind = grad4(bg2 * 0.45);
+                vec3 frosted = mix(behind, vec3(dot(behind, vec3(0.333))), 0.30) + u_c3 * 0.10;
+                col = mix(plain, frosted, frost * 0.92);
+                col += u_c3 * rim * (0.4 + 0.6 * u_detail);
+            }
+
+            /* ─── 5 · grain ─── */
+            else if (u_mode == 5){
+                vec2 p = vec2(uv.x * ar, uv.y);
+                float s = u_seed;
+                float rA = 0.10 + 0.22 * u_speed;
+                vec2 b1 = vec2(0.32 * ar, 0.60) + rA * vec2(cos(u_phase + s), sin(u_phase + s));
+                vec2 b2 = vec2(0.70 * ar, 0.35) + rA * 0.8 * vec2(cos(-u_phase + s * 1.9), sin(-u_phase + s * 1.9));
+                float f = 0.55 / (length(p - b1) + 0.30)
+                        + 0.45 / (length(p - b2) + 0.30)
+                        + fbm(uv * (1.0 + 1.5 * u_scale) + loopOff() + sOff) * 0.25 * u_detail;
+                col = grad4(f * (0.45 + 0.25 * u_density));
+                col += (hash21(gl_FragCoord.xy + vec2(u_phase * 43.7)) - 0.5) * (0.10 + 0.30 * u_distort);
+            }
+
+            /* ─── 6 · halftone ─── */
+            else if (u_mode == 6){
+                vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.2, 4.0, u_scale) + sOff;
+                vec2 q = vec2(fbm(p + loopOff()), fbm(p + vec2(5.2, 1.3) - loopOff()));
+                float f = fbm(p + q * (1.0 + 2.5 * u_distort));
+                float cells = mix(18.0, 80.0, u_density);
+                vec2 g = fract(vec2(uv.x * ar, uv.y) * cells) - 0.5;
+                float rdot = clamp(f * (0.5 + 0.6 * u_detail), 0.05, 0.62);
+                float mask = smoothstep(rdot, rdot - 0.12, length(g) * 1.45);
+                col = mix(u_c0 * 0.7, grad4(clamp(f * 1.5, 0.0, 1.0)), mask);
+            }
+
+            /* ─── 7 · kaleidoscope ─── */
+            else if (u_mode == 7){
+                vec2 p = uv - 0.5;
+                p.x *= ar;
+                float angle = atan(p.y, p.x);
+                float rad   = length(p);
+                float slices = mix(4.0, 12.0, u_density);
+                angle = mod(angle, 3.14159 / slices * 2.0);
+                angle = abs(angle - 3.14159 / slices);
+                p = vec2(cos(angle), sin(angle)) * rad;
+                vec2 np = p * mix(1.5, 4.0, u_scale) + sOff;
+                vec2 q = vec2(fbm(np + loopOff()),
+                              fbm(np + vec2(5.2, 1.3) - loopOff()));
+                float f = fbm(np + q * (1.0 + 2.0 * u_distort) + loopOff() * 0.6);
+                col = grad4(clamp(f * 1.3, 0.0, 1.0));
+                col += u_c3 * pow(rad * 1.8, 3.0) * 0.12;
+            }
+
+            /* ─── 8 · orbs ─── */
+            else if (u_mode == 8){
+                vec2 p = vec2(uv.x * ar, uv.y);
+                float f = metaf(p, ar) * (0.30 + 0.30 * u_density)
+                        + fbm(uv * (1.0 + 2.0 * u_scale) + loopOff() + sOff) * 0.20 * u_detail;
+                col = grad4(f);
+            }
+
+            /* ─── 9 · plasma ─── */
+            else if (u_mode == 9){
+                vec2 p = uv * mix(1.0, 3.5, u_scale);
+                float t = u_phase * mix(0.3, 1.2, u_speed);
+                float v = 0.0;
+                v += sin(p.x * 4.0 + t) * 0.5 + 0.5;
+                v += sin(p.y * 5.0 - t * 1.3) * 0.4;
+                v += sin((p.x + p.y) * 6.0 + t * 0.7) * 0.3;
+                v += sin(length(p - 0.5) * 8.0 - t * 1.1) * 0.3;
+                v += fbm(p * 1.5 + loopOff() + sOff) * 0.35 * u_detail;
+                v *= 0.5 + 0.5 * u_density;
+                col = grad4(clamp(v * 1.2, 0.0, 1.0));
+                col = mix(col, grad4(clamp(v * 0.8 + 0.3, 0.0, 1.0)), 0.3 * u_distort);
+            }
+
+            /* ─── 10 · reeded ─── */
+            else if (u_mode == 10){
+                float N  = mix(24.0, 110.0, u_density);
+                float rx = uv.x * N;
+                float ri = floor(rx);
+                float rf = fract(rx);
+
+                float lens = (rf - 0.5) * ((0.3 + 2.2 * u_distort) / N);
+                vec2 sUV = vec2(clamp(uv.x + lens, 0.001, 0.999), uv.y);
+
+                vec2 p = vec2(sUV.x * ar, sUV.y);
+                float f = metaf(p, ar)
+                        + fbm(sUV * (1.2 + 2.4 * u_scale) + loopOff() + sOff) * (0.12 + 0.28 * u_detail);
+                col = grad4(f * 0.42);
+
+                float shimmer = 0.028 * sin(ri * 2.399 + u_seed + 2.0 * u_phase);
+                float h1 = exp(-pow((rf - 0.27 - shimmer) * 13.5, 2.0)) * 0.62;
+                float h2 = exp(-pow((rf - 0.75) * 22.0, 2.0)) * 0.10;
+                float groove = smoothstep(0.0, 0.07, rf) * smoothstep(1.0, 0.93, rf);
+
+                col  = col * (0.70 + groove * 0.30);
+                col += u_c3 * h1;
+                col += u_c3 * 0.85 * h2;
+                col *= 0.87 + fbm(vec2(ri * 0.09, uv.y * 3.1) + loopOff() * 0.8 + sOff) * 0.15;
+            }
+
+            /* ─── 11 · rings ─── */
+            else if (u_mode == 11){
+                vec2 p = (uv - 0.5) * vec2(ar, 1.0);
+                float rad = length(p);
+                float n = fbm(p * mix(1.0, 4.0, u_scale) + loopOff() + sOff);
+                float rings = sin((rad * mix(8.0, 30.0, u_density) + n * 2.0 * u_distort - u_phase * 1.5) * 3.14159);
+                float f = 0.5 + 0.5 * rings;
+                col = grad4(clamp(f * (0.7 + 0.5 * u_detail), 0.0, 1.0));
+                float glow = exp(-rad * 3.0) * 0.3;
+                col += u_c3 * glow;
+            }
+
+            /* ─── 12 · sd rosette ─── */
+            else if (u_mode == 12){
+                vec2 p = uv - 0.5;
+                p.x *= ar;
+                float n = 5.0 + floor(mix(3.0, 9.0, u_density));
+                float a = atan(p.y, p.x);
+                float r = length(p);
+                float sector = 3.14159 / max(n, 2.0);
+                a = mod(a + u_phase * 0.25, sector * 2.0);
+                a = abs(a - sector);
+                vec2 q = vec2(cos(a), sin(a)) * r;
+                float f = abs(q.y) - 0.04 * (0.4 + 0.8 * u_scale);
+                float pulse = sin(r * mix(6.0, 24.0, u_detail) - u_phase * 1.6) * 0.5 + 0.5;
+                float edge = exp(-abs(f) * (18.0 + 40.0 * u_distort));
+                edge = smoothstep(0.0, 0.9, edge);
+                col = mix(u_c0 * 0.5, grad4(pulse), edge);
+                col += u_c3 * edge * 0.22;
+            }
+
+            /* ─── 13 · triangle lattice ─── */
+            else if (u_mode == 13){
+                vec2 p = uv - 0.5;
+                p.x *= ar;
+                float a = u_phase * (0.2 + 0.4 * u_speed);
+                float ca = cos(a), sa = sin(a);
+                p = mat2(ca, -sa, sa, ca) * p;
+                vec2 g = p * (8.0 + 18.0 * u_density);
+                vec2 f = fract(g) - 0.5;
+                float tri = abs(f.x) * 0.866 + f.y * 0.5;
+                float d = abs(tri);
+                float rings = sin(length(floor(g)) * 0.9 + u_phase) * 0.5 + 0.5;
+                float edge = smoothstep(0.08, 0.0, d);
+                col = grad4(clamp(rings * (0.6 + 0.6 * u_detail), 0.0, 1.0));
+                col = mix(col, u_c3, edge * (0.4 + 0.6 * u_scale));
+            }
+
+            /* ─── 14 · waves ─── */
+            else if (u_mode == 14){
+                float f = uv.y * mix(1.5, 5.0, u_scale);
+                f += sin(uv.x * (3.0 + 9.0 * u_density) + u_phase + u_seed) * 0.45;
+                f += sin(uv.x * (7.0 + 5.0 * u_density) - 2.0 * u_phase + u_seed * 1.7) * 0.20;
+                f += fbm(uv * vec2(ar, 1.0) * (1.5 + 2.0 * u_scale) + loopOff() + sOff)
+                     * (0.30 + 0.90 * u_distort);
+                float t = 0.5 + 0.5 * sin(f * TAU * (0.4 + 0.9 * u_detail));
+                col = grad4(t);
+            }
+
+            /* film grain + vignette */
+            col += (hash21(gl_FragCoord.xy + vec2(u_phase * 91.3)) - 0.5) * u_grain * 0.22;
+            vec2 v = uv * 2.0 - 1.0;
+            col *= 1.0 - dot(v, v) * 0.16;
+
+            if (u_invert > 0.5) {
+                col = 1.0 - col;
+            }
+
+            gl_FragColor = vec4(col, 1.0);
+        }`;
+
+        // WebGL compilation helper
+        function compileShader(shaderType, source) {
+            const shader = gl.createShader(shaderType);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                console.error('Shader compile failed: ' + gl.getShaderInfoLog(shader));
+                gl.deleteShader(shader);
+                return null;
+            }
+            return shader;
+        }
+
+        const vs = compileShader(gl.VERTEX_SHADER, VS);
+        const fs = compileShader(gl.FRAGMENT_SHADER, FS);
+        if (!vs || !fs) return;
+
+        const prog = gl.createProgram();
+        gl.attachShader(prog, vs);
+        gl.attachShader(prog, fs);
+        gl.linkProgram(prog);
+        if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
+        gl.useProgram(prog);
+
+        const buf = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+        const aLoc = gl.getAttribLocation(prog, 'a');
+        gl.enableVertexAttribArray(aLoc);
+        gl.vertexAttribPointer(aLoc, 2, gl.FLOAT, false, 0, 0);
+
+        const U = {};
+        const uniforms = [
+            'u_res', 'u_phase', 'u_seed', 'u_mode',
+            'u_speed', 'u_scale', 'u_density', 'u_distort', 'u_detail', 'u_grain',
+            'u_c0', 'u_c1', 'u_c2', 'u_c3', 'u_texture', 'u_mix', 'u_pixel', 'u_invert'
+        ];
+        uniforms.forEach(n => { U[n] = gl.getUniformLocation(prog, n); });
+
+        // Hardcoded calm teal-indigo nebula variables
+        const P = {
+            "mode": 2, // Flow mode
+            "seed": 9015,
+            "sizeIdx": 1,
+            "loop": 8, // Slower cycle
+            "colors": [
+                "#030303", // Deep background
+                "#0f766e", // Teal
+                "#4338ca", // Indigo
+                "#cbd5e1"  // Soft slate highlight
+            ],
+            "speed": 0.12, // Slow drifting movement
+            "scale": 1.1,
+            "density": 0.5,
+            "distort": 0.3,
+            "detail": 0.4,
+            "grain": 0.06,
+            "mix": 0,
+            "pixel": 0,
+            "invert": 0
+        };
+
+        function hex2rgb(h) {
+            return [
+                parseInt(h.slice(1, 3), 16) / 255,
+                parseInt(h.slice(3, 5), 16) / 255,
+                parseInt(h.slice(5, 7), 16) / 255,
+            ];
+        }
+
+        function resize() {
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            canvas.width = Math.round(window.innerWidth * dpr);
+            canvas.height = Math.round(window.innerHeight * dpr);
+            gl.viewport(0, 0, canvas.width, canvas.height);
+        }
+        window.addEventListener('resize', resize);
+        resize(); 
+
+        const t0 = performance.now();
+        function render(now) {
+            const time = (now - t0) / 1000;
+            const phase = (time / P.loop * Math.PI * 2) % (Math.PI * 2);
+
+            gl.uniform2f(U.u_res, canvas.width, canvas.height);
+            gl.uniform1f(U.u_phase, phase);
+            gl.uniform1f(U.u_seed, (P.seed % 10000) * 0.6180339887 % 12.566);
+            gl.uniform1i(U.u_mode, P.mode);
+            gl.uniform1f(U.u_speed, P.speed);
+            gl.uniform1f(U.u_scale, P.scale);
+            gl.uniform1f(U.u_density, P.density);
+            gl.uniform1f(U.u_distort, P.distort);
+            gl.uniform1f(U.u_detail, P.detail);
+            gl.uniform1f(U.u_grain, P.grain);
+            gl.uniform1f(U.u_mix, P.mix);
+            gl.uniform1f(U.u_pixel, P.pixel);
+            gl.uniform1f(U.u_invert, P.invert || 0);
+            gl.uniform3fv(U.u_c0, hex2rgb(P.colors[0]));
+            gl.uniform3fv(U.u_c1, hex2rgb(P.colors[1]));
+            gl.uniform3fv(U.u_c2, hex2rgb(P.colors[2]));
+            gl.uniform3fv(U.u_c3, hex2rgb(P.colors[3]));
+
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, null);
+            gl.uniform1i(U.u_texture, 0);
+
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            requestAnimationFrame(render);
+        }
+        requestAnimationFrame(render);
+    });
+    </script>
 </body>
 </html>
-

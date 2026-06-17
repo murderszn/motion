@@ -20,7 +20,7 @@
   <meta name="twitter:image" content="/assets/favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
@@ -122,7 +122,7 @@
     }
     .status .dot {
       width: 4px; height: 4px; border-radius: 50%;
-      background: #c0392b;
+      background: #e03a3a;
       animation: blink 2.5s ease-in-out infinite;
     }
     @keyframes blink { 0%,100% { opacity: 0.25; } 50% { opacity: 1; } }
@@ -143,7 +143,7 @@
       text-transform: lowercase;
     }
     .title .slash {
-      color: #c0392b;
+      color: #e03a3a;
     }
     @keyframes titleIn {
       0% { opacity: 0; transform: translateY(20px); filter: blur(5px); }
@@ -275,18 +275,24 @@
       background: rgba(255,255,255,0.12);
     }
     .btn.primary {
-      background: #c0392b;
+      background: #e03a3a;
       color: #ffffff;
-      border-color: #c0392b;
+      border-color: #e03a3a;
     }
     .btn.primary:hover {
       background: #e74c3c;
       border-color: #e74c3c;
       color: #ffffff;
     }
-    .btn:hover {
-      border-color: rgba(255,255,255,0.4);
-      background: rgba(255,255,255,0.12);
+    .btn.white {
+      background: #ffffff;
+      color: #0f172a;
+      border-color: #ffffff;
+    }
+    .btn.white:hover {
+      background: #e2e8f0;
+      border-color: #e2e8f0;
+      color: #0f172a;
     }
 
     /* ── github bar ── */
@@ -367,12 +373,12 @@
     }
     .steps-title {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem;
-      font-weight: 500;
-      letter-spacing: 0.3em;
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 0.28em;
       text-transform: uppercase;
-      color: #c0392b;
-      margin-bottom: 3.5rem;
+      color: #e03a3a;
+      margin-bottom: 1rem;
     }
     .steps-grid {
       display: grid;
@@ -404,7 +410,7 @@
       font-family: 'JetBrains Mono', monospace;
       font-size: 1.8rem;
       font-weight: 200;
-      color: rgba(192, 57, 43, 0.25);
+      color: rgba(224, 58, 58, 0.25);
     }
     .step-heading {
       font-weight: 500;
@@ -482,7 +488,7 @@
     }
 
     .navbar-logo .slash {
-      color: #c0392b;
+      color: #e03a3a;
     }
 
     .navbar-links {
@@ -500,7 +506,7 @@
     }
 
     .navbar-links a:hover {
-      color: #c0392b;
+      color: #e03a3a;
     }
 
     .navbar-actions {
@@ -575,12 +581,12 @@
 
     .playground-title {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem;
-      font-weight: 500;
-      letter-spacing: 0.25em;
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 0.28em;
       text-transform: uppercase;
-      color: #c0392b;
-      margin-bottom: 0.5rem;
+      color: #e03a3a;
+      margin-bottom: 1rem;
     }
 
     .playground-container {
@@ -623,16 +629,15 @@
     }
 
     .agent-pane {
-      border-right: 1px solid rgba(255, 255, 255, 0.08);
+      border-left: 1px solid rgba(255, 255, 255, 0.08);
       display: flex;
       flex-direction: column;
-      background: rgba(255, 255, 255, 0.05);
     }
 
     @media (max-width: 900px) {
       .agent-pane {
-        border-right: none;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        border-left: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
       }
     }
 
@@ -642,7 +647,6 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: rgba(255, 255, 255, 0.1);
     }
 
     .pane-title {
@@ -704,7 +708,7 @@
 
     .chat-bubble.user {
       align-self: flex-end;
-      background: #c0392b;
+      background: #e03a3a;
       color: #ffffff;
       border-bottom-right-radius: 2px;
     }
@@ -759,7 +763,7 @@
       font-size: 0.65rem;
       color: #a9b2c3;
       margin-top: 6px;
-      border-left: 2px solid #c0392b;
+      border-left: 2px solid #e03a3a;
       box-shadow: inset 0 2px 6px rgba(0,0,0,0.15);
     }
 
@@ -782,7 +786,6 @@
       display: flex;
       flex-direction: column;
       gap: 16px;
-      background: rgba(255, 255, 255, 0.08);
     }
 
     .control-group {
@@ -804,7 +807,7 @@
     }
 
     .control-label span.val {
-      color: #c0392b;
+      color: #e03a3a;
     }
 
     .preset-pills {
@@ -832,23 +835,12 @@
     }
 
     .preset-pill.active {
-      background: #c0392b;
-      border-color: #c0392b;
+      background: #e03a3a;
+      border-color: #e03a3a;
       color: #ffffff;
-      box-shadow: 0 4px 10px rgba(192, 57, 43, 0.3);
+      box-shadow: 0 4px 10px rgba(224, 58, 58, 0.3);
     }
 
-    .preset-pill:hover {
-      background: rgba(255, 255, 255, 0.05);
-      border-color: rgba(255, 255, 255, 0.12);
-    }
-
-    .preset-pill.active {
-      background: #1a1a2e;
-      border-color: #ffffff;
-      color: #ffffff;
-      box-shadow: 0 4px 10px rgba(255, 255, 255, 0.12);
-    }
 
     .slider-container {
       display: flex;
@@ -872,7 +864,7 @@
       width: 12px;
       height: 12px;
       border-radius: 50%;
-      background: #c0392b;
+      background: #e03a3a;
       cursor: pointer;
       transition: transform 0.1s ease;
     }
@@ -894,11 +886,11 @@
 
     .platforms-title {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem;
-      font-weight: 500;
-      letter-spacing: 0.25em;
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 0.28em;
       text-transform: uppercase;
-      color: #c0392b;
+      color: #e03a3a;
       margin-bottom: 1rem;
     }
 
@@ -906,7 +898,7 @@
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 1.5rem;
-      margin-top: 2.5rem;
+      margin-top: 0;
     }
 
     @media (max-width: 768px) {
@@ -943,7 +935,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #c0392b;
+      color: #e03a3a;
       margin-bottom: 4px;
     }
 
@@ -991,11 +983,11 @@
 
     .faq-title {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem;
-      font-weight: 500;
-      letter-spacing: 0.25em;
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 0.28em;
       text-transform: uppercase;
-      color: #c0392b;
+      color: #e03a3a;
       margin-bottom: 1rem;
     }
 
@@ -1004,7 +996,7 @@
       flex-direction: column;
       gap: 12px;
       text-align: left;
-      margin-top: 2.5rem;
+      margin-top: 1.7rem;
     }
 
     .faq-item {
@@ -1096,11 +1088,11 @@
 
     .rundown-title {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem;
-      font-weight: 500;
-      letter-spacing: 0.25em;
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 0.28em;
       text-transform: uppercase;
-      color: #c0392b;
+      color: #e03a3a;
       margin-bottom: 1rem;
     }
 
@@ -1108,7 +1100,7 @@
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 1.2rem;
-      margin-top: 2.5rem;
+      margin-top: 1.7rem;
     }
 
     @media (max-width: 768px) {
@@ -1181,9 +1173,6 @@
       width: 100%;
       max-width: 1000px;
       margin-top: 7rem;
-      background: rgba(255, 255, 255, 0.5);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 6px;
       padding: 3.5rem 2rem;
       color: #ffffff;
       text-align: center;
@@ -1194,8 +1183,6 @@
       opacity: 0;
       animation: fadeUp 1.4s 2.4s cubic-bezier(0.16,1,0.3,1) both;
       pointer-events: auto;
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
     }
 
     .cta-banner h2 {
@@ -1383,7 +1370,6 @@
     .platform-card,
     .faq-item,
     .rundown-card,
-    .cta-banner,
     .github-bar {
       background: rgba(255, 255, 255, 0.13) !important;
       -webkit-backdrop-filter: blur(26px) saturate(180%);
@@ -1439,6 +1425,7 @@
         <a href="#playground">Playground</a>
         <a href="#how-it-works">How It Works</a>
         <a href="#faq">FAQ</a>
+        <a href="developer-training.html">Workshops</a>
         <a href="https://github.com/murderszn/motion#readme" target="_blank">Docs</a>
       </nav>
   </header>
@@ -1459,7 +1446,7 @@
       </div>
 
       <div class="actions">
-        <a href="https://github.com/murderszn/motion" target="_blank" rel="noopener" class="btn">
+        <a href="https://github.com/murderszn/motion" target="_blank" rel="noopener" class="btn white">
           <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222 0 1.606-.014 2.898-.014 3.293 0 .322.216.694.825.576C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
           GitHub
         </a>
@@ -1475,7 +1462,7 @@
     <div class="playground-section reveal" id="playground">
       <div class="playground-title">interactive config builder</div>
       <h3 style="font-family:'Inter',sans-serif;font-weight:600;font-size: clamp(1.4rem, 4vw, 2rem);color:#ffffff;text-shadow:0 2px 14px rgba(0,0,0,0.5);margin-top:-0.3rem;margin-bottom:0.8rem;letter-spacing:-0.03em;">Tweak shader parameters dynamically</h3>
-      <p style="font-family:'Inter',sans-serif;font-size:0.82rem;color:rgba(255,255,255,0.85);max-width:650px;text-shadow:0 1px 8px rgba(0,0,0,0.5);margin:0 auto 1.5rem auto;line-height:1.5;">Tweak the shader parameters on the right. `/motion` dynamically updates the schema config on the left. Feed this JSON structure to your favorite AI assistant to automate shader styling.</p>
+      <p style="font-family:'Inter',sans-serif;font-size:0.82rem;color:rgba(255,255,255,0.85);max-width:650px;text-shadow:0 1px 8px rgba(0,0,0,0.5);margin:0 auto 2.5rem auto;line-height:1.5;">Tweak the shader parameters on the right. `/motion` dynamically updates the schema config on the left. Feed this JSON structure to your favorite AI assistant to automate shader styling.</p>
       
       <div class="playground-container">
         <!-- Live preview (decoupled from the page background) -->
@@ -1483,25 +1470,7 @@
           <span class="preview-tag">live preview</span>
           <canvas id="preview-canvas"></canvas>
         </div>
-        <!-- Left Pane: JSON Config View -->
-        <div class="agent-pane">
-          <div class="pane-header">
-            <div class="pane-title">
-              <span class="dot"></span>
-              motion.config.json
-            </div>
-            <div class="pane-actions">
-              <span class="window-dot"></span>
-              <span class="window-dot"></span>
-              <span class="window-dot"></span>
-            </div>
-          </div>
-          <div class="code-editor-body" style="padding: 20px; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; line-height: 1.5; color: #a9b2c3; background: #1a1a2e; height: 330px; overflow-y: auto; display: flex; flex-direction: column; justify-content: flex-start; border-bottom-left-radius: 0; box-shadow: inset 0 4px 15px rgba(0,0,0,0.2);">
-            <pre style="margin: 0;"><code id="json-code"></code></pre>
-          </div>
-        </div>
-        
-        <!-- Right Pane: Controls and Presets -->
+        <!-- Left Pane: Controls and Presets -->
         <div class="controls-pane">
           <div class="control-group">
             <div class="control-label">Shader Presets</div>
@@ -1510,8 +1479,6 @@
               <div class="preset-pill" onclick="loadPreset('grid')">Cyber Grid</div>
               <div class="preset-pill" onclick="loadPreset('lava')">Lava Flow</div>
               <div class="preset-pill" onclick="loadPreset('nebula')">Cosmic Nebula</div>
-              <div class="preset-pill" onclick="loadPreset('fractal')">Fractal Orbit</div>
-              <div class="preset-pill" onclick="loadPreset('plasma')">Digital Plasma</div>
             </div>
           </div>
           
@@ -1541,6 +1508,24 @@
             <div class="slider-container">
               <input type="range" id="slide-detail" min="0.0" max="1.0" step="0.02" value="0.32" oninput="updateShaderParam('detail', parseFloat(this.value))">
             </div>
+          </div>
+        </div>
+
+        <!-- Right Pane: JSON Config View -->
+        <div class="agent-pane">
+          <div class="pane-header">
+            <div class="pane-title">
+              <span class="dot"></span>
+              motion.config.json
+            </div>
+            <div class="pane-actions">
+              <span class="window-dot"></span>
+              <span class="window-dot"></span>
+              <span class="window-dot"></span>
+            </div>
+          </div>
+          <div class="code-editor-body" style="padding: 20px; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; line-height: 1.5; color: #a9b2c3; background: transparent; height: 330px; overflow-y: auto; display: flex; flex-direction: column; justify-content: flex-start; border-bottom-right-radius: 0; box-shadow: inset 0 4px 15px rgba(0,0,0,0.2);">
+            <pre style="margin: 0;"><code id="json-code"></code></pre>
           </div>
         </div>
       </div>
@@ -1611,7 +1596,7 @@
     <div class="platforms-section reveal" id="platforms">
       <div class="platforms-title">meets you where you code</div>
       <h3 style="font-family:'Inter',sans-serif;font-weight:600;font-size: clamp(1.4rem, 4vw, 2rem);color:#ffffff;text-shadow:0 2px 14px rgba(0,0,0,0.5);margin-top:-0.3rem;margin-bottom:0.8rem;letter-spacing:-0.03em;">Integrate seamlessly with your workflow</h3>
-      <p style="font-family:'Inter',sans-serif;font-size:0.82rem;color:rgba(255,255,255,0.85);max-width:650px;text-shadow:0 1px 8px rgba(0,0,0,0.5);margin:0 auto 1.5rem auto;line-height:1.5;">`/motion` runs anywhere you need visual assets: local CLI workspaces, integrated dev environments, or direct exports.</p>
+      <p style="font-family:'Inter',sans-serif;font-size:0.82rem;color:rgba(255,255,255,0.85);max-width:650px;text-shadow:0 1px 8px rgba(0,0,0,0.5);margin:0 auto 2.5rem auto;line-height:1.5;">`/motion` runs anywhere you need visual assets: local CLI workspaces, integrated dev environments, or direct exports.</p>
       
       <div class="platforms-grid">
         <div class="platform-card">
@@ -2135,22 +2120,6 @@ void main(){
         distort: 1.20,
         detail: 0.80,
         colors: ["#0b031a", "#7c3aed", "#ec4899", "#fdf2f8"]
-      },
-      fractal: {
-        mode: 3,
-        scale: 0.80,
-        density: 0.15,
-        distort: 0.65,
-        detail: 0.50,
-        colors: ["#020617", "#0d9488", "#2dd4bf", "#f0fdfa"]
-      },
-      plasma: {
-        mode: 9,
-        scale: 1.50,
-        density: 0.40,
-        distort: 0.20,
-        detail: 0.70,
-        colors: ["#020617", "#e11d48", "#2563eb", "#ffffff"]
       }
     };
 
