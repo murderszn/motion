@@ -13,7 +13,7 @@ const $ = (id: string) => document.getElementById(id)!;
 function fname(ext: string): string {
   return 'lumen-' + PRESETS[P.mode].id + '-' + String(P.seed).padStart(4, '0') + '.' + ext;
 }
-function download(blob: Blob, name: string): void {
+function anchorDownload(blob: Blob, name: string): void {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = name;
@@ -23,15 +23,52 @@ function download(blob: Blob, name: string): void {
   document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 }
+
+export type Saver = (blob: Blob) => Promise<void>;
+
+// Acquire a file saver while we still hold the user's click activation.
+//
+// Prefer the File System Access API: it writes straight to a user-chosen file
+// and never creates a chrome.downloads item, so download-manager extensions
+// can't intercept it and discard the `download` filename (that interception is
+// what produces the UUID-named, extension-less files in a normal browser).
+// Anywhere the API is unavailable (Firefox/Safari, insecure contexts) we fall
+// back to a plain anchor download, which preserves the name fine there.
+export async function pickSaver(name: string, mime: string): Promise<Saver> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const picker = (window as any).showSaveFilePicker;
+  if (typeof picker === 'function') {
+    try {
+      const ext = name.slice(name.lastIndexOf('.') + 1).toLowerCase();
+      const handle = await picker.call(window, {
+        suggestedName: name,
+        types: [{ accept: { [mime || 'application/octet-stream']: ['.' + ext] } }],
+      });
+      return async (blob: Blob) => {
+        const writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+      };
+    } catch (err) {
+      // User dismissed the save dialog — propagate so the export aborts.
+      if (err && (err as { name?: string }).name === 'AbortError') throw err;
+      // Any other failure (e.g. no activation, insecure context): fall back.
+    }
+  }
+  return (blob: Blob) => { anchorDownload(blob, name); return Promise.resolve(); };
+}
 function msg(t: string): void { setStatusMsg(t); }
 
 // ── PNG ──────────────────────────────────────────────────
 
-export function exportPNG(): void {
+export async function exportPNG(): Promise<void> {
+  let saver: Saver;
+  try { saver = await pickSaver(fname('png'), 'image/png'); }
+  catch { return; } // save dialog cancelled
   draw(getPhase());
   gl.finish();
   const ec = composeExportCanvas(canvas, canvas.width, canvas.height);
-  ec.toBlob(b => { if (b) { download(b, fname('png')); msg('image saved'); } }, 'image/png');
+  ec.toBlob(async b => { if (b) { await saver(b); msg('image saved'); } }, 'image/png');
 }
 
 // ── WebM / MP4 Video ─────────────────────────────────────
@@ -41,27 +78,35 @@ let exportCv: HTMLCanvasElement | null = null;
 let ectx: CanvasRenderingContext2D | null = null;
 let videoAnimId: number | null = null;
 let activeExportExt = 'webm';
+let videoSaver: Saver | null = null;
 
-export function startWebmExport(pauseBtn: HTMLButtonElement): void {
+export async function startWebmExport(pauseBtn: HTMLButtonElement): Promise<void> {
   if (recorder) return;
-  setExporting(true);
 
-  // Determine supported container and codec
+  // Determine supported container and codec.
+  // Prefer MP4/H.264 first: it opens natively in QuickTime, Preview, Photos,
+  // and every video editor. Plain .webm downloads look like an "unknown
+  // format" to macOS and won't open without VLC, so it's only a fallback.
+  const candidates: Array<[string, string]> = [
+    ['video/mp4;codecs=avc1.42E01E', 'mp4'], // H.264 baseline — most compatible
+    ['video/mp4;codecs=avc1', 'mp4'],
+    ['video/mp4', 'mp4'],
+    ['video/webm;codecs=vp9', 'webm'],
+    ['video/webm;codecs=vp8', 'webm'],
+    ['video/webm', 'webm'],
+  ];
   let mime = 'video/webm';
   activeExportExt = 'webm';
-  if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) {
-    mime = 'video/webm;codecs=vp9';
-  } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp8')) {
-    mime = 'video/webm;codecs=vp8';
-  } else if (MediaRecorder.isTypeSupported('video/webm')) {
-    mime = 'video/webm';
-  } else if (MediaRecorder.isTypeSupported('video/mp4;codecs=avc1')) {
-    mime = 'video/mp4;codecs=avc1';
-    activeExportExt = 'mp4';
-  } else if (MediaRecorder.isTypeSupported('video/mp4')) {
-    mime = 'video/mp4';
-    activeExportExt = 'mp4';
+  for (const [m, ext] of candidates) {
+    if (MediaRecorder.isTypeSupported(m)) { mime = m; activeExportExt = ext; break; }
   }
+
+  // Grab the save target now, while the click activation is still live —
+  // recording finishes seconds later, long after the activation expires.
+  try { videoSaver = await pickSaver(fname(activeExportExt), mime.split(';')[0]); }
+  catch { return; } // save dialog cancelled
+
+  setExporting(true);
 
   exportCv = document.createElement('canvas');
   exportCv.width = canvas.width; exportCv.height = canvas.height;
@@ -90,12 +135,11 @@ export function startWebmExport(pauseBtn: HTMLButtonElement): void {
     if (exportCv && exportCv.parentNode) {
       exportCv.parentNode.removeChild(exportCv);
     }
-    if (chunks.length) {
+    if (chunks.length && videoSaver) {
       const baseMime = mime.split(';')[0];
-      download(new Blob(chunks, { type: baseMime }), fname(activeExportExt));
-      msg('video saved');
+      videoSaver(new Blob(chunks, { type: baseMime })).then(() => msg('video saved'));
     }
-    recorder = null; exportCv = null; ectx = null;
+    recorder = null; exportCv = null; ectx = null; videoSaver = null;
     setExporting(false);
   };
 
@@ -160,6 +204,7 @@ export function cancelExport(): void {
       recorder = null;
       exportCv = null;
       ectx = null;
+      videoSaver = null;
       setExporting(false);
     };
     recorder.stop();
@@ -190,6 +235,9 @@ function loadGifLib(): Promise<string> {
 
 export async function exportGIF(): Promise<void> {
   if (recorder) return; // already exporting webm
+  let saver: Saver;
+  try { saver = await pickSaver(fname('gif'), 'image/gif'); }
+  catch { return; } // save dialog cancelled
   setExporting(true); gifCancel = false;
   $('recText').textContent = 'rendering gif';
   $('recStatus').classList.add('on');
@@ -239,7 +287,7 @@ export async function exportGIF(): Promise<void> {
       gif.on('progress', (p: number) => { $('recText').textContent = 'encoding gif ' + Math.round(p * 100) + '%'; });
       try { gif.render(); } catch (e) { rej(e); }
     });
-    download(blob, fname('gif')); msg('gif saved');
+    await saver(blob); msg('gif saved');
   } catch (e) {
     const err = e instanceof Error ? e.message : String(e);
     msg(err === 'cancelled' ? 'cancelled' : 'gif export needs internet (first use)');

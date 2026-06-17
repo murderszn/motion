@@ -7,8 +7,42 @@ import { FS, texLoaded, texObj } from '../webgl';
 import { texts } from './text';
 import { logToTerminal } from './terminal';
 import { setStatusMsg } from './statusbar';
+import { pickSaver } from './export';
 
-export function exportHtmlEmbed(): void {
+// Strip the fragment-shader uber-switch down to just the active mode's branch.
+// The studio shader bundles every preset as `if (u_mode == N){...} else if ...`,
+// but an exported page only ever renders one baked mode — the rest is dead code
+// (and dead `/* ─── N · name ─── */` comments). Keep the matching branch,
+// dropping its `else` so it runs unconditionally; shared helper functions are
+// left intact since branches depend on them.
+function pruneShaderToMode(src: string, mode: number): string {
+  const re = /(\/\*[^*]*\*\/\s*)?(else\s+if|if)\s*\(\s*u_mode\s*==\s*(\d+)\s*\)\s*\{/g;
+  const blocks: Array<{ start: number; end: number; n: number }> = [];
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(src))) {
+    const braceOpen = re.lastIndex - 1; // index of the opening '{'
+    let depth = 1, i = braceOpen + 1;
+    for (; i < src.length && depth > 0; i++) {
+      if (src[i] === '{') depth++;
+      else if (src[i] === '}') depth--;
+    }
+    blocks.push({ start: m.index, end: i, n: parseInt(m[3], 10) });
+  }
+  if (!blocks.some(b => b.n === mode)) return src; // unknown mode — leave as-is
+
+  let out = '', cursor = 0;
+  for (const b of blocks) {
+    out += src.slice(cursor, b.start);
+    if (b.n === mode) {
+      out += src.slice(b.start, b.end).replace(/^((?:\/\*[^*]*\*\/\s*)?)else\s+if/, '$1if');
+    }
+    cursor = b.end;
+  }
+  out += src.slice(cursor);
+  return out;
+}
+
+export async function exportHtmlEmbed(): Promise<void> {
   // Convert uploaded image to Base64 if loaded
   let base64Tex = '';
   if (texLoaded && texObj) {
@@ -110,7 +144,7 @@ export function exportHtmlEmbed(): void {
 
     // Shaders
     const VS = \`attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }\`;
-    const FS = \`${FS.replace(/`/g, '\\`').replace(/\${/g, '\\${')}\`;
+    const FS = \`${pruneShaderToMode(FS, P.mode).replace(/`/g, '\\`').replace(/\${/g, '\\${')}\`;
 
     function compileShader(type, src) {
       const s = gl.createShader(type);
@@ -241,17 +275,14 @@ export function exportHtmlEmbed(): void {
 </body>
 </html>`;
 
-  // Trigger download of self-contained HTML file
+  // Save the self-contained HTML file. Use the same File System Access path as
+  // the other exports so a download-manager extension can't strip the filename.
   const blob = new Blob([html], { type: 'text/html' });
   const filename = 'lumen-splash-' + PRESETS[P.mode].id + '.html';
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  a.style.display = 'none';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  let saver;
+  try { saver = await pickSaver(filename, 'text/html'); }
+  catch { return; } // save dialog cancelled
+  await saver(blob);
 
   logToTerminal('exported html splash page: ' + filename, 'ok');
   setStatusMsg('html saved');
