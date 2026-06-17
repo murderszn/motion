@@ -41,9 +41,13 @@ This is the [[Index|home]] note. Everything links back here.
 ## Design
 
 - [[Design Principles]] — 10 generative design tenets
+- [[Design Philosophy]] — shader art philosophy references
 - [[Color Theory for Shaders]] — palette construction
 - [[Composition Guide]] — aspect ratios, timing, mood
-- [[Design Philosophy]] — shader art philosophy references
+- [[Modern Web Design]] — what "sexy" contemporary web design looks like
+- [[WebGL Techniques]] — shader patterns for web backgrounds and effects
+- [[JavaScript & Animation Patterns]] — motion, interaction, scroll effects
+- [[Visual Language Reference]] — hierarchy, grid, color, typography, anti-patterns
 
 ## Development
 
