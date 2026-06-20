@@ -252,3 +252,113 @@ Smoothstep creates perceptually smooth color transitions without banding.
 - [[Shader Architecture]] — lumen·local's shader system
 - [[Modern Web Design]] — broader web aesthetic context
 - [[JavaScript & Animation Patterns]] — motion and interaction
+- [[Fractal & Pattern Vocabulary]] — mathematical patterns for shaders
+
+---
+
+## Three.js Integration
+
+### ShaderMaterial Pattern
+```js
+const mat = new THREE.ShaderMaterial({
+    uniforms: { uTime: { value: 0 }, uMouse: { value: new THREE.Vector2() } },
+    vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
+    fragmentShader: `uniform float uTime; varying vec2 vUv; void main(){ ... }`,
+});
+// Update in render loop: mat.uniforms.uTime.value = clock.getElapsedTime();
+```
+
+### Post-Processing (Three.js)
+```js
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+composer.addPass(new UnrealBloomPass(resolution, strength, radius, threshold));
+composer.addPass(new OutputPass()); // always last
+// render: composer.render()
+```
+
+### Post-Processing (pmndrs — faster, merges passes)
+```js
+import { EffectComposer, EffectPass, RenderPass, BloomEffect } from 'postprocessing';
+const composer = new EffectComposer(renderer, { frameBufferType: THREE.HalfFloatType });
+composer.addPass(new RenderPass(scene, camera));
+composer.addPass(new EffectPass(camera, new BloomEffect({ intensity: 1.5 })));
+```
+
+### Performance (Three.js)
+- Use `InstancedMesh` for thousands of objects in one draw call
+- Cap pixel ratio at 2
+- Pause RAF on `visibilitychange`
+- Merge static geometries with `BufferGeometryUtils.mergeGeometries`
+- Use `THREE.Clock` for frame-independent timing
+
+### Integration Patterns
+- Fullscreen background: `position:fixed; z-index:-1`
+- Scrollytelling: `position:sticky; top:0; height:100vh`
+- Responsive: listen to resize, update camera aspect + renderer size
+- CSS2D/CSS3D overlays for DOM elements tracking 3D positions
+
+---
+
+## Interactive Effects
+
+### Mouse-Reactive Distortion
+```glsl
+vec2 mouseDelta = uv - uMouse;
+float dist = length(mouseDelta);
+float influence = smoothstep(0.3, 0.0, dist) * uStrength;
+uv += normalize(mouseDelta) * influence * 0.05;
+```
+
+### Cursor-Reactive Gradient
+```glsl
+float dist = distance(uv, uMouse);
+vec3 glow = vec3(0.2, 0.5, 1.0) * smoothstep(0.4, 0.0, dist);
+```
+
+### Text + WebGL
+Render text to offscreen Canvas2D, use as WebGL texture. Reveal via `step(uv.x, uReveal)`. Glitch: displace UVs per scanline + RGB split.
+
+### Particle Systems
+Use instanced rendering for thousands of particles. Store positions in Float32Array, update in JS or via transform feedback for GPU-only updates.
+
+---
+
+## Page Transitions
+Shader-based transitions between two textures using `uProgress` (0..1):
+```glsl
+float radius = uProgress * 1.5;
+float edge = smoothstep(radius - 0.1, radius, distance(uv, vec2(0.5)));
+gl_FragColor = mix(to, from, edge);
+```
+Keep transitions under 800ms with ease-in-out curves.
+
+---
+
+## Mobile WebGL
+
+### Performance Budget
+- Frame budget: 10ms (60fps), 16ms safe target
+- Reduce particles (500-1000 vs 5000+ on desktop)
+- Disable post-processing on low-end GPUs
+- Touch: normalize touch coords same as mouse
+
+### Fallback Strategy
+```javascript
+function getShaderQuality() {
+    const gl = document.createElement('canvas').getContext('webgl');
+    if (!gl) return 'none';
+    const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+    const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+    if (/SwiftShader|llvmpipe|Software/i.test(renderer)) return 'low';
+    return 'high';
+}
+```
+- **High:** Full particles, post-processing, 60fps
+- **Low:** Static noise, no particles, 30fps, simplified shaders
+- **None:** CSS fallback (gradients, `backdrop-filter: blur()`)

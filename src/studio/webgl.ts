@@ -40,6 +40,34 @@ float vnoise(vec2 p){
     return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
 
+vec2 fade(vec2 t) { return t*t*t*(t*(t*6.0-15.0)+10.0); }
+vec4 permute(vec4 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
+float cnoise(vec2 P) {
+    vec4 Pi = floor(P.xyxy) + vec4(0.0, 0.0, 1.0, 1.0);
+    vec4 Pf = fract(P.xyxy) - vec4(0.0, 0.0, 1.0, 1.0);
+    Pi = mod(Pi, 289.0);
+    vec4 ix = Pi.xzxz; vec4 iy = Pi.yyww;
+    vec4 fx = Pf.xzxz; vec4 fy = Pf.yyww;
+    vec4 i = permute(permute(ix) + iy);
+    vec4 gx = fract(i * (1.0 / 41.0)) * 2.0 - 1.0;
+    vec4 gy = abs(gx) - 0.5;
+    vec4 tx = floor(gx + 0.5);
+    gx = gx - tx;
+    vec2 g00 = vec2(gx.x,gy.x);
+    vec2 g10 = vec2(gx.y,gy.y);
+    vec2 g01 = vec2(gx.z,gy.z);
+    vec2 g11 = vec2(gx.w,gy.w);
+    vec4 norm = 1.79284291400159 - 0.85373472095314 * vec4(dot(g00, g00), dot(g01, g01), dot(g10, g10), dot(g11, g11));
+    g00 *= norm.x; g01 *= norm.y; g10 *= norm.z; g11 *= norm.w;
+    float n00 = dot(g00, vec2(fx.x, fy.x));
+    float n10 = dot(g10, vec2(fx.y, fy.y));
+    float n01 = dot(g01, vec2(fx.z, fy.z));
+    float n11 = dot(g11, vec2(fx.w, fy.w));
+    vec2 fade_xy = fade(Pf.xy);
+    vec2 n_x = mix(vec2(n00, n01), vec2(n10, n11), fade_xy.x);
+    return 2.3 * mix(n_x.x, n_x.y, fade_xy.y);
+}
+
 float fbm(vec2 p){
     float v = 0.0, a = 0.5;
     mat2 r = mat2(0.80, 0.60, -0.60, 0.80);
@@ -107,8 +135,42 @@ void main(){
         col += u_c3 * pow(clamp(light, 0.0, 1.0), 3.0) * 0.30;
     }
 
-    /* ─── 1 · electricity ─── */
+    /* ─── 1 · contour waves ─── */
     else if (u_mode == 1){
+        vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.5, 5.0, u_scale) + sOff;
+        float t = u_phase * mix(0.3, 1.0, u_speed);
+        float n = cnoise(p * 1.5 + loopOff() * 0.8);
+        float bands = mix(6.0, 20.0, u_density);
+        float waves = sin((n * bands + t * 2.0) * 3.14159);
+        waves = smoothstep(0.0, 0.1, waves) * smoothstep(0.2, 0.1, waves);
+        float glow = waves * mix(0.5, 2.0, u_detail);
+        col = mix(u_c0 * 0.4, u_c2, waves);
+        col += u_c3 * glow * 0.3;
+        float pulse = sin(n * bands * 0.5 + t) * 0.5 + 0.5;
+        col += u_c2 * pulse * 0.08 * u_distort;
+    }
+
+    /* ─── 2 · curl noise ─── */
+    else if (u_mode == 2){
+        vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.5, 4.0, u_scale) + sOff;
+        float t = u_phase * mix(0.3, 1.0, u_speed);
+        float eps = 0.01;
+        vec2 off = loopOff();
+        float n1 = cnoise(p + vec2(eps, 0.0) + off);
+        float n2 = cnoise(p - vec2(eps, 0.0) + off);
+        float n3 = cnoise(p + vec2(0.0, eps) + off);
+        float n4 = cnoise(p - vec2(0.0, eps) + off);
+        vec2 curl = vec2(n3 - n4, n2 - n1) / (2.0 * eps);
+        float mag = length(curl);
+        float angle = atan(curl.y, curl.x);
+        float swirl = sin(angle * mix(2.0, 8.0, u_density) + mag * 6.0 + t * 2.0) * 0.5 + 0.5;
+        swirl += fbm(p * 1.5 + curl * u_distort * 2.0 + loopOff()) * 0.3 * u_detail;
+        col = grad4(clamp(swirl, 0.0, 1.0));
+        col += u_c3 * pow(mag, 2.0) * 0.2;
+    }
+
+    /* ─── 3 · electricity ─── */
+    else if (u_mode == 3){
         vec2 p = uv * vec2(ar, 1.0) * mix(1.5, 5.0, u_scale) + sOff;
         vec2 q = vec2(fbm(p + loopOff()),
                       fbm(p + vec2(5.2, 1.3) - loopOff()));
@@ -122,8 +184,8 @@ void main(){
         col += grad4(n * 0.35) * (0.10 + 0.10 * u_density);
     }
 
-    /* ─── 2 · flow ─── */
-    else if (u_mode == 2){
+    /* ─── 4 · flow ─── */
+    else if (u_mode == 4){
         vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.2, 5.0, u_scale) + sOff;
         float w = 1.0 + 3.0 * u_distort;
         vec2 q = vec2(fbm(p + loopOff()),
@@ -135,30 +197,26 @@ void main(){
         col = mix(col, u_c2, q.y * q.x * 0.25);
     }
 
-    /* ─── 3 · golden swirl (multi-arm spiral) ─── */
-    else if (u_mode == 3){
+    /* ─── 5 · golden (phyllotaxis) ─── */
+    else if (u_mode == 5){
         vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.5, 5.0, u_scale) + sOff;
-        float t = u_phase * mix(0.3, 1.2, u_speed);
-        float r = length(p);
+        float t = u_phase * mix(0.3, 1.0, u_speed);
+        float r = length(p) * (1.3 + u_distort * 0.18);
         float a = atan(p.y, p.x);
+        float n = r * r * mix(0.8, 1.5, u_density);
         float golden = 2.39996323;
-        float arms = mix(3.0, 8.0, u_density);
-        float twist = mix(2.0, 12.0, u_distort);
-        float s1 = cos(a * arms - r * twist + t);
-        float s2 = cos(a * arms * 2.0 - r * twist * 1.5 - t * 0.7) * 0.4;
-        float spiral = s1 + s2;
-        float rings = cos(r * mix(6.0, 18.0, u_density) + t * 0.4);
-        rings += 0.3 * cos(r * 12.0 - t * 0.6) * u_detail;
-        float f = 0.5 + 0.35 * spiral + 0.15 * rings;
-        vec2 warp = vec2(fbm(p * 0.8 + loopOff()),
-                         fbm(p * 0.8 + vec2(5.2, 1.3) - loopOff()));
-        f += fbm(p + warp * u_distort * 1.5) * 0.2 * u_detail;
+        float spiral = cos(a - n * golden + t * 0.2);
+        float rings  = cos(n * 3.14159265 - t * 0.1);
+        float f = 0.5 + 0.5 * spiral * rings;
+        vec2 warp = vec2(fbm(p * 0.6 + loopOff()),
+                         fbm(p * 0.6 + vec2(5.2, 1.3) - loopOff()));
+        f += fbm(p + warp * u_distort) * 0.15 * u_detail;
         col = grad4(clamp(f, 0.0, 1.0));
-        col += u_c3 * pow(max(0.5 + 0.5 * spiral, 0.0), 4.0) * mix(0.08, 0.22, u_distort);
+        col += u_c3 * pow(max(0.5 + 0.5 * spiral, 0.0), mix(3.0, 8.0, u_detail)) * mix(0.08, 0.20, u_distort);
     }
 
-    /* ─── 4 · glass ─── */
-    else if (u_mode == 4){
+    /* ─── 6 · glass ─── */
+    else if (u_mode == 6){
         vec2 p = vec2(uv.x * ar, uv.y);
         float frost = 0.0, rim = 0.0;
         vec2  refr = vec2(0.0);
@@ -186,8 +244,8 @@ void main(){
         col += u_c3 * rim * (0.4 + 0.6 * u_detail);
     }
 
-    /* ─── 5 · grain ─── */
-    else if (u_mode == 5){
+    /* ─── 7 · grain ─── */
+    else if (u_mode == 7){
         vec2 p = vec2(uv.x * ar, uv.y);
         float s = u_seed;
         float rA = 0.10 + 0.22 * u_speed;
@@ -200,8 +258,8 @@ void main(){
         col += (hash21(gl_FragCoord.xy + vec2(u_phase * 43.7)) - 0.5) * (0.10 + 0.30 * u_distort);
     }
 
-    /* ─── 6 · halftone ─── */
-    else if (u_mode == 6){
+    /* ─── 8 · halftone ─── */
+    else if (u_mode == 8){
         vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.2, 4.0, u_scale) + sOff;
         vec2 q = vec2(fbm(p + loopOff()), fbm(p + vec2(5.2, 1.3) - loopOff()));
         float f = fbm(p + q * (1.0 + 2.5 * u_distort));
@@ -212,8 +270,8 @@ void main(){
         col = mix(u_c0 * 0.7, grad4(clamp(f * 1.5, 0.0, 1.0)), mask);
     }
 
-    /* ─── 7 · kaleidoscope ─── */
-    else if (u_mode == 7){
+    /* ─── 9 · kaleidoscope ─── */
+    else if (u_mode == 9){
         vec2 p = uv - 0.5;
         p.x *= ar;
         float angle = atan(p.y, p.x);
@@ -230,16 +288,43 @@ void main(){
         col += u_c3 * pow(rad * 1.8, 3.0) * 0.12;
     }
 
-    /* ─── 8 · orbs ─── */
-    else if (u_mode == 8){
+    /* ─── 10 · lines ─── */
+    else if (u_mode == 10){
+        vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.5, 5.0, u_scale) + sOff;
+        float t = u_phase * mix(0.3, 1.0, u_speed);
+        float ang = u_distort * 0.35 + t * 0.05;
+        float ca = cos(ang), sa = sin(ang);
+        vec2 q = vec2(ca * p.x - sa * p.y, sa * p.x + ca * p.y);
+        float freq = mix(3.0, 8.0, u_density) + u_distort * 1.4;
+        float wave = 0.6 * sin(q.y * 0.7 + t * 0.3);
+        wave += 0.3 * sin(q.y * 1.4 - t * 0.5) * u_detail;
+        float f = 0.5 + 0.5 * sin(q.x * freq + wave);
+        f += fbm(p * 0.3 + loopOff()) * 0.08 * u_detail;
+        col = grad4(clamp(f, 0.0, 1.0));
+    }
+
+    /* ─── 11 · marble ─── */
+    else if (u_mode == 11){
+        vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.5, 4.0, u_scale) + sOff;
+        float t = u_phase * mix(0.2, 0.8, u_speed);
+        vec2 q2 = p + vec2(cnoise(p * 0.8 + loopOff()),
+                           cnoise(p * 0.8 + vec2(5.2, 1.3) - loopOff())) * u_distort;
+        float v = sin(q2.x * mix(4.0, 12.0, u_density) + fbm(q2 * mix(1.5, 4.0, u_detail)) * 5.0) * 0.5 + 0.5;
+        col = grad4(clamp(v, 0.0, 1.0));
+        float vein = pow(abs(sin(q2.x * 8.0 + fbm(q2 * 3.0 + loopOff()) * 4.0)), 8.0);
+        col += u_c3 * vein * 0.15;
+    }
+
+    /* ─── 12 · orbs ─── */
+    else if (u_mode == 12){
         vec2 p = vec2(uv.x * ar, uv.y);
         float f = metaf(p, ar) * (0.30 + 0.30 * u_density)
                 + fbm(uv * (1.0 + 2.0 * u_scale) + loopOff() + sOff) * 0.20 * u_detail;
         col = grad4(f);
     }
 
-    /* ─── 9 · plasma ─── */
-    else if (u_mode == 9){
+    /* ─── 13 · plasma ─── */
+    else if (u_mode == 13){
         vec2 p = uv * mix(1.0, 3.5, u_scale);
         float t = u_phase * mix(0.3, 1.2, u_speed);
         float v = 0.0;
@@ -253,34 +338,30 @@ void main(){
         col = mix(col, grad4(clamp(v * 0.8 + 0.3, 0.0, 1.0)), 0.3 * u_distort);
     }
 
-    /* ─── 10 · reeded ─── */
-    else if (u_mode == 10){
+    /* ─── 14 · reeded ─── */
+    else if (u_mode == 14){
         float N  = mix(24.0, 110.0, u_density);
         float rx = uv.x * N;
         float ri = floor(rx);
         float rf = fract(rx);
-
         float lens = (rf - 0.5) * ((0.3 + 2.2 * u_distort) / N);
         vec2 sUV = vec2(clamp(uv.x + lens, 0.001, 0.999), uv.y);
-
         vec2 p = vec2(sUV.x * ar, sUV.y);
         float f = metaf(p, ar)
                 + fbm(sUV * (1.2 + 2.4 * u_scale) + loopOff() + sOff) * (0.12 + 0.28 * u_detail);
         col = grad4(f * 0.42);
-
         float shimmer = 0.028 * sin(ri * 2.399 + u_seed + 2.0 * u_phase);
         float h1 = exp(-pow((rf - 0.27 - shimmer) * 13.5, 2.0)) * 0.62;
         float h2 = exp(-pow((rf - 0.75) * 22.0, 2.0)) * 0.10;
         float groove = smoothstep(0.0, 0.07, rf) * smoothstep(1.0, 0.93, rf);
-
         col  = col * (0.70 + groove * 0.30);
         col += u_c3 * h1;
         col += u_c3 * 0.85 * h2;
         col *= 0.87 + fbm(vec2(ri * 0.09, uv.y * 3.1) + loopOff() * 0.8 + sOff) * 0.15;
     }
 
-    /* ─── 11 · rings ─── */
-    else if (u_mode == 11){
+    /* ─── 15 · rings ─── */
+    else if (u_mode == 15){
         vec2 p = (uv - 0.5) * vec2(ar, 1.0);
         float rad = length(p);
         float n = fbm(p * mix(1.0, 4.0, u_scale) + loopOff() + sOff);
@@ -291,8 +372,56 @@ void main(){
         col += u_c3 * glow;
     }
 
-    /* ─── 12 · sd rosette ─── */
-    else if (u_mode == 12){
+    /* ─── 16 · rorschach ─── */
+    else if (u_mode == 16){
+        vec2 mp = uv;
+        mp.x = abs(mp.x - 0.5) * 2.0;
+        vec2 p = (vec2(mp.x * ar, mp.y) - vec2(0.5 * ar, 0.5)) * mix(2.0, 6.0, u_scale) + sOff;
+        float t = u_phase * mix(0.3, 1.0, u_speed);
+        vec2 off = loopOff();
+        vec2 q2 = vec2(fbm(p * 0.8 + off), fbm(p * 0.8 + vec2(5.2, 1.3) - off));
+        vec2 r2 = vec2(fbm(p + q2 * (1.0 + 2.0 * u_distort) + off),
+                       fbm(p + q2 * (1.0 + 2.0 * u_distort) + vec2(1.7, 9.2) - off));
+        float f = fbm(p + r2 * (1.0 + 1.5 * u_detail));
+        float ink = smoothstep(0.2, 0.6, f);
+        float bleed = smoothstep(0.0, 0.3, f) * (1.0 - smoothstep(0.7, 1.0, f));
+        vec3 paper = u_c3 * 0.35 + vec3(0.65);
+        vec3 inkCol = mix(u_c0, u_c1, 0.6);
+        col = mix(paper, inkCol, ink * mix(0.5, 1.0, u_distort));
+        col -= u_c2 * bleed * 0.08;
+        float stain = pow(1.0 - abs(f - 0.45) * 4.0, 6.0);
+        col += u_c3 * stain * 0.06 * u_detail;
+        float edge = smoothstep(0.18, 0.22, f) * (1.0 - smoothstep(0.58, 0.62, f));
+        col += inkCol * edge * 0.12;
+    }
+
+    /* ─── 17 · ridged ─── */
+    else if (u_mode == 17){
+        vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(2.0, 6.0, u_scale) + sOff;
+        float t = u_phase * mix(0.2, 0.8, u_speed);
+        mat2 rot = mat2(0.8, 0.6, -0.6, 0.8);
+        float v = 0.0, a = 0.5, w = 1.0;
+        vec2 q2 = p + loopOff();
+        float offset = mix(0.5, 1.2, u_distort);
+        for (int i = 0; i < 8; i++){
+            float fi = float(i);
+            if (fi >= mix(3.0, 8.0, u_density)) break;
+            float n = cnoise(q2) * w;
+            n = abs(n);
+            n = offset - n;
+            n = n * n;
+            v += n * a;
+            q2 = rot * q2 * 2.1 + vec2(1.7, 9.2);
+            a *= mix(0.35, 0.65, u_detail);
+            w = clamp(0.0, 1.0, n * 2.0);
+        }
+        col = grad4(clamp(v * 1.2, 0.0, 1.0));
+        float ridge = pow(clamp(v, 0.0, 1.0), 2.0);
+        col += u_c3 * ridge * mix(0.1, 0.4, u_detail);
+    }
+
+    /* ─── 18 · sd rosette ─── */
+    else if (u_mode == 18){
         vec2 p = uv - 0.5;
         p.x *= ar;
         float n = 5.0 + floor(mix(3.0, 9.0, u_density));
@@ -310,36 +439,8 @@ void main(){
         col += u_c3 * edge * 0.22;
     }
 
-    /* ─── 13 · triangle lattice ─── */
-    else if (u_mode == 13){
-        vec2 p = uv - 0.5;
-        p.x *= ar;
-        float a = u_phase * (0.2 + 0.4 * u_speed);
-        float ca = cos(a), sa = sin(a);
-        p = mat2(ca, -sa, sa, ca) * p;
-        vec2 g = p * (8.0 + 18.0 * u_density);
-        vec2 f = fract(g) - 0.5;
-        float tri = abs(f.x) * 0.866 + f.y * 0.5;
-        float d = abs(tri);
-        float rings = sin(length(floor(g)) * 0.9 + u_phase) * 0.5 + 0.5;
-        float edge = smoothstep(0.08, 0.0, d);
-        col = grad4(clamp(rings * (0.6 + 0.6 * u_detail), 0.0, 1.0));
-        col = mix(col, u_c3, edge * (0.4 + 0.6 * u_scale));
-    }
-
-    /* ─── 14 · waves ─── */
-    else if (u_mode == 14){
-        float f = uv.y * mix(1.5, 5.0, u_scale);
-        f += sin(uv.x * (3.0 + 9.0 * u_density) + u_phase + u_seed) * 0.45;
-        f += sin(uv.x * (7.0 + 5.0 * u_density) - 2.0 * u_phase + u_seed * 1.7) * 0.20;
-        f += fbm(uv * vec2(ar, 1.0) * (1.5 + 2.0 * u_scale) + loopOff() + sOff)
-             * (0.30 + 0.90 * u_distort);
-        float t = 0.5 + 0.5 * sin(f * TAU * (0.4 + 0.9 * u_detail));
-        col = grad4(t);
-    }
-
-    /* ─── 15 · truchet (tile arc maze) ─── */
-    else if (u_mode == 15){
+    /* ─── 19 · truchet ─── */
+    else if (u_mode == 19){
         float tileN = mix(2.0, 8.0, u_scale);
         vec2 p = (uv - 0.5) * vec2(ar, 1.0) * tileN + sOff;
         float t = u_phase * mix(0.5, 1.5, u_speed);
@@ -357,37 +458,50 @@ void main(){
         col += u_c3 * edge * mix(0.15, 0.40, u_distort);
     }
 
-    /* ─── 16 · golden (phyllotaxis / sunflower) ─── */
-    else if (u_mode == 16){
-        vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.5, 5.0, u_scale) + sOff;
-        float t = u_phase * mix(0.3, 1.0, u_speed);
-        float r = length(p) * (1.3 + u_distort * 0.18);
-        float a = atan(p.y, p.x);
-        float n = r * r * mix(0.8, 1.5, u_density);
-        float golden = 2.39996323;
-        float spiral = cos(a - n * golden + t * 0.2);
-        float rings  = cos(n * 3.14159265 - t * 0.1);
-        float f = 0.5 + 0.5 * spiral * rings;
-        vec2 warp = vec2(fbm(p * 0.6 + loopOff()),
-                         fbm(p * 0.6 + vec2(5.2, 1.3) - loopOff()));
-        f += fbm(p + warp * u_distort) * 0.15 * u_detail;
-        col = grad4(clamp(f, 0.0, 1.0));
-        col += u_c3 * pow(max(0.5 + 0.5 * spiral, 0.0), mix(3.0, 8.0, u_detail)) * mix(0.08, 0.20, u_distort);
+    /* ─── 20 · triangle lattice ─── */
+    else if (u_mode == 20){
+        vec2 p = uv - 0.5;
+        p.x *= ar;
+        float a = u_phase * (0.2 + 0.4 * u_speed);
+        float ca = cos(a), sa = sin(a);
+        p = mat2(ca, -sa, sa, ca) * p;
+        vec2 g = p * (8.0 + 18.0 * u_density);
+        vec2 f = fract(g) - 0.5;
+        float tri = abs(f.x) * 0.866 + f.y * 0.5;
+        float d = abs(tri);
+        float rings = sin(length(floor(g)) * 0.9 + u_phase) * 0.5 + 0.5;
+        float edge = smoothstep(0.08, 0.0, d);
+        col = grad4(clamp(rings * (0.6 + 0.6 * u_detail), 0.0, 1.0));
+        col = mix(col, u_c3, edge * (0.4 + 0.6 * u_scale));
     }
 
-    /* ─── 17 · lines (rotated parallel bands) ─── */
-    else if (u_mode == 17){
-        vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.5, 5.0, u_scale) + sOff;
+    /* ─── 21 · turbulence ─── */
+    else if (u_mode == 21){
+        vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(2.0, 6.0, u_scale) + sOff;
         float t = u_phase * mix(0.3, 1.0, u_speed);
-        float ang = u_distort * 0.35 + t * 0.05;
-        float ca = cos(ang), sa = sin(ang);
-        vec2 q = vec2(ca * p.x - sa * p.y, sa * p.x + ca * p.y);
-        float freq = mix(3.0, 8.0, u_density) + u_distort * 1.4;
-        float wave = 0.6 * sin(q.y * 0.7 + t * 0.3);
-        wave += 0.3 * sin(q.y * 1.4 - t * 0.5) * u_detail;
-        float f = 0.5 + 0.5 * sin(q.x * freq + wave);
-        f += fbm(p * 0.3 + loopOff()) * 0.08 * u_detail;
-        col = grad4(clamp(f, 0.0, 1.0));
+        mat2 rot = mat2(0.8, 0.6, -0.6, 0.8);
+        float v = 0.0, a = 0.5;
+        vec2 q2 = p + vec2(t * 0.4, t * 0.2);
+        for (int i = 0; i < 8; i++){
+            float fi = float(i);
+            if (fi >= mix(3.0, 8.0, u_density)) break;
+            v += a * abs(cnoise(q2));
+            q2 = rot * q2 * 2.0 + vec2(100.0);
+            a *= mix(0.35, 0.65, u_detail);
+        }
+        col = grad4(clamp(v, 0.0, 1.0));
+        col += u_c3 * pow(clamp(v, 0.0, 1.0), 3.0) * 0.2;
+    }
+
+    /* ─── 22 · waves ─── */
+    else if (u_mode == 22){
+        float f = uv.y * mix(1.5, 5.0, u_scale);
+        f += sin(uv.x * (3.0 + 9.0 * u_density) + u_phase + u_seed) * 0.45;
+        f += sin(uv.x * (7.0 + 5.0 * u_density) - 2.0 * u_phase + u_seed * 1.7) * 0.20;
+        f += fbm(uv * vec2(ar, 1.0) * (1.5 + 2.0 * u_scale) + loopOff() + sOff)
+             * (0.30 + 0.90 * u_distort);
+        float t = 0.5 + 0.5 * sin(f * TAU * (0.4 + 0.9 * u_detail));
+        col = grad4(t);
     }
 
     /* texture overlay */

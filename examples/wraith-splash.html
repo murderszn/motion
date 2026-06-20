@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WRAITH — december 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;600;800;900&family=Outfit:wght@200;400;700;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  <style>
+    :root { --accent: #06b6d4; --accent-rgb: 6, 182, 212; }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%; height: 100%;
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: #000;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      color: #fff;
+    }
+    #bg-canvas {
+      position: fixed; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover; z-index: 0;
+      will-change: transform; display: block;
+    }
+    .scroll-container {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      pointer-events: none;
+    }
+    .scroll-container > * { pointer-events: auto; }
+
+    section {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 80px 24px;
+    }
+
+    .label {
+      font-weight: 600;
+      font-size: clamp(10px, 0.9vw, 13px);
+      letter-spacing: 0.40em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 16px;
+      user-select: none;
+    }
+
+    .logo {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 900;
+      font-size: clamp(80px, 20vw, 220px);
+      letter-spacing: -0.04em;
+      line-height: 0.8;
+      background: linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.85) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: none;
+      margin-bottom: 8px;
+      user-select: none;
+    }
+
+    .drop {
+      font-weight: 800;
+      font-size: clamp(16px, 2.8vw, 36px);
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--accent);
+      text-shadow: none;
+      margin-bottom: 48px;
+      user-select: none;
+    }
+
+    .divider {
+      width: 60px; height: 1px;
+      background: rgba(var(--accent-rgb),0.4);
+      margin: 24px auto;
+    }
+
+    .copy {
+      font-weight: 200;
+      font-size: clamp(14px, 1.6vw, 20px);
+      line-height: 1.6;
+      letter-spacing: 0.06em;
+      color: rgba(255,255,255,0.85);
+      max-width: 640px;
+      margin-bottom: 24px;
+    }
+    .copy strong {
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .section-title {
+      font-weight: 800;
+      font-size: clamp(11px, 1.0vw, 14px);
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 48px;
+      user-select: none;
+    }
+
+    .pillars {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px;
+      max-width: 900px;
+      width: 100%;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 600px) {
+      .pillars { grid-template-columns: 1fr; gap: 32px; }
+    }
+    .pillar {
+      border-top: 1px solid rgba(var(--accent-rgb),0.15);
+      padding-top: 24px;
+    }
+    .pillar-icon {
+      width: 36px; height: 36px;
+      margin-bottom: 12px;
+      color: var(--accent);
+      opacity: 0.6;
+    }
+    .pillar-icon svg {
+      width: 100%; height: 100%;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .pillar h3 {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: clamp(13px, 1.2vw, 16px);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #ffffff;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 16px rgba(0,0,0,0.5);
+    }
+    .pillar p {
+      font-weight: 200;
+      font-size: clamp(12px, 1.1vw, 14px);
+      line-height: 1.7;
+      color: rgba(255,255,255,0.75);
+      text-shadow: 0 2px 16px rgba(0,0,0,0.5);
+    }
+
+    .testimonials {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 32px;
+      max-width: 860px;
+      width: 100%;
+    }
+    @media (max-width: 600px) {
+      .testimonials { grid-template-columns: 1fr; }
+    }
+    .testimonial {
+      text-align: left;
+      padding: 28px 32px;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 4px;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      transition: border-color 0.3s ease;
+    }
+    .testimonial:hover {
+      border-color: rgba(var(--accent-rgb),0.3);
+    }
+    .quote-mark {
+      width: 28px; height: 28px;
+      color: rgba(var(--accent-rgb),0.2);
+      margin-bottom: 8px;
+    }
+    .quote-mark svg {
+      width: 100%; height: 100%;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+    }
+    .testimonial .quote {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-weight: 400;
+      font-size: clamp(14px, 1.3vw, 17px);
+      line-height: 1.6;
+      color: rgba(255,255,255,0.95);
+      text-shadow: 0 2px 20px rgba(0,0,0,0.5);
+      margin-bottom: 16px;
+    }
+    .testimonial .attribution {
+      font-weight: 600;
+      font-size: clamp(10px, 0.85vw, 12px);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .testimonial .source {
+      font-weight: 200;
+      font-size: clamp(9px, 0.75vw, 11px);
+      color: rgba(255,255,255,0.55);
+    }
+
+    .btn {
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: clamp(11px, 1.0vw, 14px);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 16px 44px;
+      border-radius: 4px;
+      border: 1.5px solid rgba(var(--accent-rgb),0.25);
+      background: rgba(var(--accent-rgb),0.06);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: var(--accent);
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn:hover {
+      background: rgba(var(--accent-rgb),0.15);
+      border-color: rgba(255,255,255,0.3);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    }
+
+    .footer-note {
+      padding: 40px 24px;
+      text-align: center;
+      font-weight: 200;
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.25);
+      user-select: none;
+    }
+
+    /* scroll animations */
+    @keyframes fadeUp {
+      0% { opacity: 0; transform: translateY(36px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .fade-section .anim {
+      animation: fadeUp 0.7s cubic-bezier(0.15, 0.85, 0.3, 1) both;
+    }
+    .fade-section[data-revealed="false"] .anim {
+      animation: none;
+      opacity: 0;
+      transform: translateY(36px);
+    }
+    .fade-section[data-revealed="true"] .label       { animation-delay: 0.00s; }
+    .fade-section[data-revealed="true"] .logo        { animation-delay: 0.10s; }
+    .fade-section[data-revealed="true"] .drop        { animation-delay: 0.20s; }
+    .fade-section[data-revealed="true"] .divider     { animation-delay: 0.30s; }
+    .fade-section[data-revealed="true"] .copy        { animation-delay: 0.40s; }
+    .fade-section[data-revealed="true"] .section-title { animation-delay: 0.00s; }
+    .fade-section[data-revealed="true"] .pillar      { animation-delay: 0.10s; }
+    .fade-section[data-revealed="true"] .pillar:nth-child(1) { animation-delay: 0.05s; }
+    .fade-section[data-revealed="true"] .pillar:nth-child(2) { animation-delay: 0.15s; }
+    .fade-section[data-revealed="true"] .pillar:nth-child(3) { animation-delay: 0.25s; }
+    .fade-section[data-revealed="true"] .testimonial { animation-delay: 0.05s; }
+    .fade-section[data-revealed="true"] .testimonial:nth-child(1) { animation-delay: 0.00s; }
+    .fade-section[data-revealed="true"] .testimonial:nth-child(2) { animation-delay: 0.10s; }
+    .fade-section[data-revealed="true"] .testimonial:nth-child(3) { animation-delay: 0.20s; }
+    .fade-section[data-revealed="true"] .testimonial:nth-child(4) { animation-delay: 0.30s; }
+    .fade-section[data-revealed="true"] .btn         { animation-delay: 0.50s; }
+    .fade-section[data-revealed="true"] .footer-note { animation-delay: 0.60s; }
+
+    /* scroll-down indicator */
+    .scroll-hint {
+      position: absolute;
+      bottom: 36px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255,255,255,0.25);
+      animation: bob 2.4s ease-in-out infinite;
+    }
+    .scroll-hint span {
+      font-size: 8px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+    }
+    .scroll-hint svg {
+      width: 16px; height: 16px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+    }
+    @keyframes bob {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(8px); }
+    }
+
+    /* section nav dots */
+    .nav-dots {
+      position: fixed;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .nav-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      pointer-events: auto;
+      transition: background 0.4s ease, transform 0.3s ease;
+    }
+    .nav-dot:hover {
+      background: rgba(255,255,255,0.3);
+      transform: scale(1.4);
+    }
+    .nav-dot.active {
+      background: var(--accent);
+      box-shadow: 0 0 8px rgba(var(--accent-rgb),0.4);
+    }
+    @media (max-width: 600px) {
+      .nav-dots { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bg-canvas"></canvas>
+
+  <nav class="nav-dots" id="navDots"></nav>
+
+  <div class="scroll-container">
+
+    <section class="fade-section" data-revealed="false" data-section="0">
+      <div class="label anim">the first timepiece</div>
+      <div class="logo anim">WRAITH</div>
+      <div class="drop anim">december 2026</div>
+      <div class="divider anim"></div>
+      <div class="copy anim">
+        <strong>Time is not seen.</strong> It is felt. WRAITH is born from the 
+        space between ticks — where precision meets shadow. Every curve cut 
+        from black steel. Every movement a quiet threat. This is not a watch 
+        for the light. This is for those who move through it.
+      </div>
+      <div class="scroll-hint anim">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="4" x2="12" y2="16"/><polyline points="16,12 12,16 8,12"/></svg>
+        <span>scroll</span>
+      </div>
+    </section>
+
+    <section class="fade-section" data-revealed="false" data-section="1">
+      <div class="section-title anim">three principles</div>
+      <div class="pillars">
+        <div class="pillar anim">
+          <div class="pillar-icon"><svg viewBox="0 0 24 24"><path d="M12 2l3 3h4v4l3 3-3 3v4h-4l-3 3-3-3H5v-4l-3-3 3-3V5h4z"/><circle cx="12" cy="12" r="3"/></svg></div>
+          <h3>black steel</h3>
+          <p>DLC-coated titanium, micro-blasted till it absorbs 99.6% of visible light. No shine. No reflection. Just depth.</p>
+        </div>
+        <div class="pillar anim">
+          <div class="pillar-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/><line x1="12" y1="3" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="21"/><line x1="3" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="21" y2="12"/></svg></div>
+          <h3>the void dial</h3>
+          <p>No logos. No numerals. Only a single hand sweeping an abyss. Time told in absence. Recognized by intuition.</p>
+        </div>
+        <div class="pillar anim">
+          <div class="pillar-icon"><svg viewBox="0 0 24 24"><path d="M4 4c4 4 12 12 16 16"/><path d="M4 20c4-4 12-12 16-16"/><circle cx="12" cy="12" r="2"/></svg></div>
+          <h3>ghost movement</h3>
+          <p>In-house caliber W1 — entirely skeletonized, bridges carved from darkened german silver. Beats at 28,800. Silent as a held breath.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="fade-section" data-revealed="false" data-section="2">
+      <div class="section-title anim">what they're saying</div>
+      <div class="testimonials">
+        <div class="testimonial anim">
+          <div class="quote-mark"><svg viewBox="0 0 24 24"><path d="M4 14c-1.5 0-3-1-3-3 0-4 2-6 6-7l1 2c-3 .5-4 2-4 4h0c0 .5.5 1 1 1 1 0 2 .5 2 2s-1 2-2 2h0z"/><path d="M14 14c-1.5 0-3-1-3-3 0-4 2-6 6-7l1 2c-3 .5-4 2-4 4h0c0 .5.5 1 1 1 1 0 2 .5 2 2s-1 2-2 2h0z"/></svg></div>
+          <div class="quote">"The most menacing thing I've ever seen on a wrist. It doesn't just tell time — it threatens it."</div>
+          <div class="attribution">horologic</div>
+          <div class="source">watch intelligence quarterly</div>
+        </div>
+        <div class="testimonial anim">
+          <div class="quote-mark"><svg viewBox="0 0 24 24"><path d="M4 14c-1.5 0-3-1-3-3 0-4 2-6 6-7l1 2c-3 .5-4 2-4 4h0c0 .5.5 1 1 1 1 0 2 .5 2 2s-1 2-2 2h0z"/><path d="M14 14c-1.5 0-3-1-3-3 0-4 2-6 6-7l1 2c-3 .5-4 2-4 4h0c0 .5.5 1 1 1 1 0 2 .5 2 2s-1 2-2 2h0z"/></svg></div>
+          <div class="quote">"WRAITH has achieved something rare — a watch that feels genuinely dangerous. Collectors are already circling."</div>
+          <div class="attribution">m. tanaka</div>
+          <div class="source">tokyo design week 2026</div>
+        </div>
+        <div class="testimonial anim">
+          <div class="quote-mark"><svg viewBox="0 0 24 24"><path d="M4 14c-1.5 0-3-1-3-3 0-4 2-6 6-7l1 2c-3 .5-4 2-4 4h0c0 .5.5 1 1 1 1 0 2 .5 2 2s-1 2-2 2h0z"/><path d="M14 14c-1.5 0-3-1-3-3 0-4 2-6 6-7l1 2c-3 .5-4 2-4 4h0c0 .5.5 1 1 1 1 0 2 .5 2 2s-1 2-2 2h0z"/></svg></div>
+          <div class="quote">"I've held prototypes from every independent in the last decade. Nothing prepares you for this. It's not a watch. It's a statement of intent."</div>
+          <div class="attribution">a. kessler</div>
+          <div class="source">founder, kessler & co.</div>
+        </div>
+        <div class="testimonial anim">
+          <div class="quote-mark"><svg viewBox="0 0 24 24"><path d="M4 14c-1.5 0-3-1-3-3 0-4 2-6 6-7l1 2c-3 .5-4 2-4 4h0c0 .5.5 1 1 1 1 0 2 .5 2 2s-1 2-2 2h0z"/><path d="M14 14c-1.5 0-3-1-3-3 0-4 2-6 6-7l1 2c-3 .5-4 2-4 4h0c0 .5.5 1 1 1 1 0 2 .5 2 2s-1 2-2 2h0z"/></svg></div>
+          <div class="quote">"The W1 movement is a masterwork of industrial darkness. They've skeletonized everything — leaving only the essential, and the essential is menace."</div>
+          <div class="attribution">révolution</div>
+          <div class="source">horology review</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="fade-section" data-revealed="false" data-section="3">
+      <div class="copy anim" style="max-width: 520px;">
+        <strong>500 pieces.</strong> One run. After december, the mold is destroyed. 
+        No restocks. No second chances. This is not a collection. It is a single 
+        note struck in the dark.
+      </div>
+      <div class="divider anim"></div>
+      <div class="drop anim" style="margin-bottom: 40px;">december 2026</div>
+      <a class="btn anim" href="#">register your interest</a>
+      <div class="footer-note anim" style="margin-top: 60px;">wraith — disappear into time</div>
+    </section>
+
+  </div>
+
+  <script>
+    const canvas = document.getElementById('bg-canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (!gl) {
+      document.body.innerHTML = '<p style="padding:40px;color:#fff;font-family:sans-serif">WebGL not supported.</p>';
+    }
+
+    const VS = `attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }`;
+    const FS = `
+precision highp float;
+
+uniform vec2  u_res;
+uniform float u_phase;
+uniform float u_seed;
+uniform int   u_mode;
+uniform float u_speed, u_scale, u_density, u_distort, u_detail, u_grain;
+uniform vec3  u_c0, u_c1, u_c2, u_c3;
+uniform sampler2D u_texture;
+uniform float u_mix, u_pixel, u_invert;
+
+#define TAU 6.28318530718
+
+float hash21(vec2 p){
+    p = fract(p * vec2(234.34, 435.345));
+    p += dot(p, p + 34.23);
+    return fract(p.x * p.y);
+}
+
+float vnoise(vec2 p){
+    vec2 i = floor(p), f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    float a = hash21(i);
+    float b = hash21(i + vec2(1.0, 0.0));
+    float c = hash21(i + vec2(0.0, 1.0));
+    float d = hash21(i + vec2(1.0, 1.0));
+    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+}
+
+float fbm(vec2 p){
+    float v = 0.0, a = 0.5;
+    mat2 r = mat2(0.80, 0.60, -0.60, 0.80);
+    for (int i = 0; i < 5; i++){
+        v += a * vnoise(p);
+        p  = r * p * 2.1 + vec2(1.7, 9.2);
+        a *= 0.5;
+    }
+    return v;
+}
+
+vec2 loopOff(){
+    return vec2(cos(u_phase), sin(u_phase)) * (0.10 + 0.55 * u_speed);
+}
+
+vec3 grad4(float t){
+    t = clamp(t, 0.0, 1.0);
+    vec3 c = mix(u_c0, u_c1, smoothstep(0.00, 0.35, t));
+    c = mix(c, u_c2, smoothstep(0.35, 0.70, t));
+    c = mix(c, u_c3, smoothstep(0.70, 1.00, t));
+    return c;
+}
+
+float metaf(vec2 p, float ar){
+    float s  = u_seed;
+    float rA = 0.08 + 0.20 * u_speed;
+    vec2 b1 = vec2((0.28 + 0.06 * sin(s))       * ar, 0.62 + 0.05 * cos(s * 1.3))
+            + rA        * vec2(cos(u_phase + s),             sin(u_phase + s));
+    vec2 b2 = vec2((0.72 + 0.05 * cos(s * 2.1)) * ar, 0.40 + 0.06 * sin(s * 0.7))
+            + rA * 0.85 * vec2(cos(-2.0 * u_phase + s * 1.7), sin(-2.0 * u_phase + s * 1.7));
+    vec2 b3 = vec2((0.50 + 0.07 * sin(s * 1.6)) * ar, 0.24 + 0.05 * cos(s * 2.4))
+            + rA * 0.70 * vec2(cos(u_phase + s * 2.3 + 2.0),  sin(u_phase + s * 2.3 + 2.0));
+    return 0.30 / (length(p - b1) + 0.07)
+         + 0.22 / (length(p - b2) + 0.07)
+         + 0.16 / (length(p - b3) + 0.07);
+}
+
+void main(){
+    vec2 uv = gl_FragCoord.xy / u_res;
+    uv.y = 1.0 - uv.y;
+    float ar = u_res.x / u_res.y;
+    vec2 sOff = vec2(fract(u_seed * 0.193), fract(u_seed * 0.317)) * 47.0;
+
+    vec3 col = vec3(0.0);
+
+    /* --- 0 . aurora --- */
+    if (u_mode == 0){
+        vec3 night  = u_c0 * 0.40;
+        float light = 0.0;
+        vec3  tint  = vec3(0.0);
+        for (int i = 0; i < 3; i++){
+            float fi = float(i) + 1.0;
+            float xx = uv.x * ar * (1.0 + 0.35 * fi) + u_seed * fi * 1.7;
+            float wave = fbm(vec2(xx * 0.6, fi * 4.0) + loopOff() * 1.2) - 0.5;
+            float cy   = 0.42 + 0.12 * fi + wave * 0.38;
+            float streak = fbm(vec2(xx * (3.0 + 4.0 * u_detail),
+                                    uv.y * (1.0 + 1.5 * u_scale)) + loopOff());
+            float dist  = uv.y - cy;
+            float band  = exp(-dist * dist * (8.0 + 34.0 * u_density));
+            float inten = max(band * (0.25 + 0.95 * streak), 0.0);
+            light += inten / fi;
+            tint  += grad4(clamp(0.15 + (1.0 - uv.y) * 0.95, 0.0, 1.0)) * inten / fi;
+        }
+        col  = night + tint * (1.3 + 1.0 * u_distort);
+        col += u_c3 * pow(clamp(light, 0.0, 1.0), 3.0) * 0.30;
+    }
+
+    col += (hash21(gl_FragCoord.xy + vec2(u_phase * 91.3)) - 0.5) * u_grain * 0.22;
+    vec2 v = uv * 2.0 - 1.0;
+    col *= 1.0 - dot(v, v) * 0.16;
+
+    if (u_invert > 0.5) {
+        col = 1.0 - col;
+    }
+
+    gl_FragColor = vec4(col, 1.0);
+}`;
+
+    function compileShader(type, src) {
+      const s = gl.createShader(type);
+      gl.shaderSource(s, src);
+      gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+        console.error(gl.getShaderInfoLog(s));
+        gl.deleteShader(s);
+        return null;
+      }
+      return s;
+    }
+
+    const vs = compileShader(gl.VERTEX_SHADER, VS);
+    const fs = compileShader(gl.FRAGMENT_SHADER, FS);
+    if (!vs || !fs) {
+      console.error('Shader compilation failed.');
+    }
+
+    const prog = gl.createProgram();
+    gl.attachShader(prog, vs);
+    gl.attachShader(prog, fs);
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+      console.error('Program linking failed: ' + gl.getProgramInfoLog(prog));
+    }
+    gl.useProgram(prog);
+
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+    const aLoc = gl.getAttribLocation(prog, 'a');
+    gl.enableVertexAttribArray(aLoc);
+    gl.vertexAttribPointer(aLoc, 2, gl.FLOAT, false, 0, 0);
+
+    const U = {};
+    const uniforms = [
+      'u_res', 'u_phase', 'u_seed', 'u_mode',
+      'u_speed', 'u_scale', 'u_density', 'u_distort', 'u_detail', 'u_grain',
+      'u_c0', 'u_c1', 'u_c2', 'u_c3', 'u_texture', 'u_mix', 'u_pixel', 'u_invert'
+    ];
+    uniforms.forEach(n => { U[n] = gl.getUniformLocation(prog, n); });
+
+    const P = {
+  "mode": 0,
+  "seed": 2159,
+  "sizeIdx": 1,
+  "loop": 4,
+  "colors": [
+    "#0a0a10",
+    "#0a1a30",
+    "#06b6d4",
+    "#e0f8ff"
+  ],
+  "speed": 0.3917598643031771,
+  "scale": 0.824210373359977,
+  "density": 0.3212989779112581,
+  "distort": 0.5317679635339001,
+  "detail": 0.7988495176860132,
+  "grain": 0,
+  "mix": 0,
+  "pixel": 0,
+  "invert": 0
+};
+
+    function hex2rgb(h) {
+      return [
+        parseInt(h.slice(1, 3), 16) / 255,
+        parseInt(h.slice(3, 5), 16) / 255,
+        parseInt(h.slice(5, 7), 16) / 255,
+      ];
+    }
+
+    function resize() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(window.innerWidth * dpr);
+      canvas.height = Math.round(window.innerHeight * dpr);
+      gl.viewport(0, 0, canvas.width, canvas.height);
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    const t0 = performance.now();
+    function render(now) {
+      const time = (now - t0) / 1000;
+      const phase = (time / P.loop * Math.PI * 2) % (Math.PI * 2);
+
+      gl.uniform2f(U.u_res, canvas.width, canvas.height);
+      gl.uniform1f(U.u_phase, phase);
+      gl.uniform1f(U.u_seed, (P.seed % 10000) * 0.6180339887 % 12.566);
+      gl.uniform1i(U.u_mode, P.mode);
+      gl.uniform1f(U.u_speed, P.speed);
+      gl.uniform1f(U.u_scale, P.scale);
+      gl.uniform1f(U.u_density, P.density);
+      gl.uniform1f(U.u_distort, P.distort);
+      gl.uniform1f(U.u_detail, P.detail);
+      gl.uniform1f(U.u_grain, P.grain);
+      gl.uniform1f(U.u_mix, P.mix);
+      gl.uniform1f(U.u_pixel, P.pixel);
+      gl.uniform1f(U.u_invert, P.invert || 0);
+      gl.uniform3fv(U.u_c0, hex2rgb(P.colors[0]));
+      gl.uniform3fv(U.u_c1, hex2rgb(P.colors[1]));
+      gl.uniform3fv(U.u_c2, hex2rgb(P.colors[2]));
+      gl.uniform3fv(U.u_c3, hex2rgb(P.colors[3]));
+
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, null);
+      gl.uniform1i(U.u_texture, 0);
+
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      requestAnimationFrame(render);
+    }
+    requestAnimationFrame(render);
+
+    // scroll fade-in — reveal sections one at a time as they enter viewport
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.setAttribute('data-revealed', 'true');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { rootMargin: '0px 0px -80px 0px' });
+    document.querySelectorAll('.fade-section').forEach(s => observer.observe(s));
+
+    // nav dots
+    const sections = document.querySelectorAll('.fade-section');
+    const dots = document.getElementById('navDots');
+    sections.forEach((_, i) => {
+      const dot = document.createElement('button');
+      dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+      dot.addEventListener('click', () => sections[i].scrollIntoView({ behavior: 'smooth' }));
+      dots.appendChild(dot);
+    });
+    let activeIdx = 0;
+    const dotObserver = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const idx = parseInt(e.target.dataset.section);
+          if (!isNaN(idx) && idx !== activeIdx) {
+            dots.children[activeIdx]?.classList.remove('active');
+            activeIdx = idx;
+            dots.children[activeIdx]?.classList.add('active');
+          }
+        }
+      });
+    }, { threshold: 0.4 });
+    sections.forEach(s => dotObserver.observe(s));
+  </script>
+</body>
+</html>

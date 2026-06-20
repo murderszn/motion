@@ -28,7 +28,7 @@ FBM, domain warping, ridged noise — these are the primary generative primitive
 
 ## 5. Constraints Breed Creativity
 
-4-digit seed, 7 sliders, 4 palette stops. Limitations force strong choices. 14 presets is a vocabulary, not a limitation.
+4-digit seed, 7 sliders, 4 palette stops. Limitations force strong choices. 23 presets is a vocabulary, not a limitation.
 
 *Processing Foundation, Inigo Quilez (4KB demoscene)*
 

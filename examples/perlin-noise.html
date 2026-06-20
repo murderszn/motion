@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Textureless 2D Classic Perlin Noise — Live WebGL Studio</title>
+    <meta name="description" content="An interactive, GPU-accelerated 2D Perlin noise studio using Stefan Gustavson's textureless GLSL implementation.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark: #070709;
+            --text-main: #f3f3f7;
+            --text-dim: #9292a6;
+            --accent: #8b5cf6;
+            --accent-glow: rgba(139, 92, 246, 0.35);
+            --panel-bg: rgba(15, 15, 20, 0.65);
+            --border: rgba(255, 255, 255, 0.08);
+            --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #gl-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            display: block;
+        }
+
+        /* Glass Panel Container */
+        .ui-panel {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            width: 380px;
+            max-height: calc(100vh - 60px);
+            background: var(--panel-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #fff 30%, var(--text-dim) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-top: 6px;
+            font-family: 'Outfit', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Tabs Selection */
+        .tabs-header {
+            display: flex;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            padding: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            text-align: center;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .tab-btn.active {
+            color: var(--text-main);
+            border-bottom: 2px solid var(--accent);
+            background: rgba(139, 92, 246, 0.08);
+        }
+
+        /* Tab Content area */
+        .tabs-content {
+            padding: 24px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        /* Forms / Controls */
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+            font-family: 'Outfit', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .control-value {
+            color: var(--text-main);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+        }
+
+        /* Range Slider Styling */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            transition: var(--transition-smooth);
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--text-main);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            transition: var(--transition-smooth);
+        }
+
+        input[type="range"]:hover::-webkit-slider-thumb {
+            background: var(--accent);
+            box-shadow: 0 0 12px var(--accent-glow);
+            transform: scale(1.15);
+        }
+
+        /* Select styling */
+        .select-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        select {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-main);
+            padding: 10px 14px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            outline: none;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            -webkit-appearance: none;
+        }
+
+        select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .select-wrapper::after {
+            content: '▼';
+            font-size: 10px;
+            color: var(--text-dim);
+            position: absolute;
+            right: 14px;
+            top: 14px;
+            pointer-events: none;
+        }
+
+        /* Code Block Scrollable */
+        .code-container {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            overflow-x: auto;
+            max-height: 320px;
+        }
+
+        pre {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            line-height: 1.6;
+            color: #d1d1e0;
+        }
+
+        .keyword { color: #ff79c6; }
+        .type { color: #8be9fd; }
+        .function { color: #50fa7b; }
+        .comment { color: #6272a4; }
+
+        /* Description text */
+        .desc-text {
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--text-dim);
+            margin-bottom: 12px;
+        }
+
+        .desc-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 8px;
+            margin-top: 16px;
+        }
+
+        /* Quick Info Overlay */
+        .fps-counter {
+            position: absolute;
+            bottom: 24px;
+            right: 24px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--text-dim);
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Main Canvas -->
+    <canvas id="gl-canvas"></canvas>
+
+    <!-- Glass UI Panel -->
+    <div class="ui-panel">
+        <div class="header">
+            <h1 id="main-title">2D Classic Perlin Noise</h1>
+            <div class="subtitle">Stefan Gustavson Textureless GPU Implementation</div>
+        </div>
+
+        <div class="tabs-header">
+            <button class="tab-btn active" onclick="switchTab('controls')">Controls</button>
+            <button class="tab-btn" onclick="switchTab('code')">GLSL Code</button>
+            <button class="tab-btn" onclick="switchTab('about')">About</button>
+        </div>
+
+        <div class="tabs-content">
+            <!-- CONTROLS TAB -->
+            <div id="tab-controls" class="tab-pane active">
+                <div class="control-group">
+                    <label class="control-label" for="mode-select">
+                        <span>Visualization Mode</span>
+                    </label>
+                    <div class="select-wrapper">
+                        <select id="mode-select" onchange="updateMode(this.value)">
+                            <option value="0">Raw Grayscale Noise</option>
+                            <option value="1">Fractional Brownian Motion (fBm)</option>
+                            <option value="2">Contour Waves (Isolines)</option>
+                            <option value="3">Domain Warped Flow</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="scale-slider">
+                        <span>Frequency / Scale</span>
+                        <span id="scale-val" class="control-value">3.00</span>
+                    </label>
+                    <input type="range" id="scale-slider" min="1" max="15" step="0.05" value="3.0" oninput="updateVal('scale', this.value)">
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="speed-slider">
+                        <span>Animation Speed</span>
+                        <span id="speed-val" class="control-value">0.40</span>
+                    </label>
+                    <input type="range" id="speed-slider" min="0" max="2" step="0.01" value="0.4" oninput="updateVal('speed', this.value)">
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="detail-slider">
+                        <span>Detail Multiplier</span>
+                        <span id="detail-val" class="control-value">0.50</span>
+                    </label>
+                    <input type="range" id="detail-slider" min="0" max="1" step="0.01" value="0.5" oninput="updateVal('detail', this.value)">
+                </div>
+            </div>
+
+            <!-- CODE TAB -->
+            <div id="tab-code" class="tab-pane">
+                <div class="code-container">
+                    <pre><code><span class="comment">// Fade curve</span>
+<span class="type">vec2</span> <span class="function">fade</span>(<span class="type">vec2</span> t) {
+  <span class="keyword">return</span> t*t*t*(t*(t*6.0-15.0)+10.0);
+}
+
+<span class="comment">// Hash coordinate</span>
+<span class="type">vec4</span> <span class="function">permute</span>(<span class="type">vec4</span> x) {
+  <span class="keyword">return</span> <span class="function">mod</span>(((x*34.0)+1.0)*x, 289.0);
+}
+
+<span class="comment">// 2D Classic Perlin Noise</span>
+<span class="type">float</span> <span class="function">cnoise</span>(<span class="type">vec2</span> P) {
+  <span class="type">vec4</span> Pi = <span class="function">floor</span>(P.xyxy) + <span class="type">vec4</span>(0.,0.,1.,1.);
+  <span class="type">vec4</span> Pf = <span class="function">fract</span>(P.xyxy) - <span class="type">vec4</span>(0.,0.,1.,1.);
+  Pi = <span class="function">mod</span>(Pi, 289.0);
+  <span class="type">vec4</span> ix = Pi.xzxz; <span class="type">vec4</span> iy = Pi.yyww;
+  <span class="type">vec4</span> fx = Pf.xzxz; <span class="type">vec4</span> fy = Pf.yyww;
+  <span class="type">vec4</span> i = <span class="function">permute</span>(<span class="function">permute</span>(ix) + iy);
+  <span class="type">vec4</span> gx = <span class="function">fract</span>(i * (1.0 / 41.0)) * 2. - 1.;
+  <span class="type">vec4</span> gy = <span class="function">abs</span>(gx) - 0.5;
+  <span class="type">vec4</span> tx = <span class="function">floor</span>(gx + 0.5);
+  gx = gx - tx;
+  <span class="type">vec2</span> g00 = <span class="type">vec2</span>(gx.x,gy.x);
+  <span class="type">vec2</span> g10 = <span class="type">vec2</span>(gx.y,gy.y);
+  <span class="type">vec2</span> g01 = <span class="type">vec2</span>(gx.z,gy.z);
+  <span class="type">vec2</span> g11 = <span class="type">vec2</span>(gx.w,gy.w);
+  <span class="type">vec4</span> norm = 1.7928 - 0.8537 * 
+    <span class="type">vec4</span>(<span class="function">dot</span>(g00,g00), <span class="function">dot</span>(g01,g01),
+         <span class="function">dot</span>(g10,g10), <span class="function">dot</span>(g11,g11));
+  g00 *= norm.x; g01 *= norm.y;
+  g10 *= norm.z; g11 *= norm.w;
+  <span class="type">float</span> n00 = <span class="function">dot</span>(g00, <span class="type">vec2</span>(fx.x,fy.x));
+  <span class="type">float</span> n10 = <span class="function">dot</span>(g10, <span class="type">vec2</span>(fx.y,fy.y));
+  <span class="type">float</span> n01 = <span class="function">dot</span>(g01, <span class="type">vec2</span>(fx.z,fy.z));
+  <span class="type">float</span> n11 = <span class="function">dot</span>(g11, <span class="type">vec2</span>(fx.w,fy.w));
+  <span class="type">vec2</span> fade_xy = <span class="function">fade</span>(Pf.xy);
+  <span class="type">vec2</span> n_x = <span class="function">mix</span>(<span class="type">vec2</span>(n00,n01),
+                 <span class="type">vec2</span>(n10,n11), fade_xy.x);
+  <span class="keyword">return</span> 2.3 * <span class="function">mix</span>(n_x.x, n_x.y, fade_xy.y);
+}</code></pre>
+                </div>
+            </div>
+
+            <!-- ABOUT TAB -->
+            <div id="tab-about" class="tab-pane">
+                <p class="desc-text">
+                    This example implements Stefan Gustavson's textureless 2D Classic Perlin Noise.
+                </p>
+                <div class="desc-title">Why Textureless?</div>
+                <p class="desc-text">
+                    Traditional noise implementations read precomputed numbers from 2D/3D textures. Textureless noise computes gradients procedurally on-the-fly, reducing texture binding swaps and memory bandwidth.
+                </p>
+                <div class="desc-title">Quintic Hermite Interpolation</div>
+                <p class="desc-text">
+                    This implementation utilizes the quintic fade curve: 
+                    <br>
+                    <code style="font-family: monospace; color: var(--accent);">s(t) = 6t⁵ - 15t⁴ + 10t³</code>
+                    <br>
+                    This mathematically guarantees C² continuity, preventing lighting and derivative banding artifacts.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- HUD Overlay Info -->
+    <div class="fps-counter" id="fps-hud">FPS: --</div>
+
+    <!-- WebGL Scripts -->
+    <script>
+        const canvas = document.getElementById('gl-canvas');
+        const gl = canvas.getContext('webgl', { antialias: true, alpha: false });
+
+        if (!gl) {
+            alert('WebGL 1.0 is not supported on this device.');
+        }
+
+        // Program State Variables
+        let state = {
+            scale: 3.0,
+            speed: 0.4,
+            detail: 0.5,
+            mode: 0,
+            time: 0.0,
+            mouseX: 0.5,
+            mouseY: 0.5
+        };
+
+        // Vertex Shader
+        const VS_SOURCE = `
+            attribute vec2 position;
+            void main() {
+                gl_Position = vec4(position, 0.0, 1.0);
+            }
+        `;
+
+        // Fragment Shader
+        const FS_SOURCE = `
+            precision highp float;
+
+            uniform vec2 u_resolution;
+            uniform float u_time;
+            uniform vec2 u_mouse;
+            uniform int u_mode;
+            uniform float u_scale;
+            uniform float u_speed;
+            uniform float u_detail;
+
+            // Classic Perlin 2D Noise by Stefan Gustavson
+            vec2 fade(vec2 t) {
+                return t*t*t*(t*(t*6.0-15.0)+10.0);
+            }
+
+            vec4 permute(vec4 x) {
+                return mod(((x*34.0)+1.0)*x, 289.0);
+            }
+
+            float cnoise(vec2 P) {
+                vec4 Pi = floor(P.xyxy) + vec4(0.0, 0.0, 1.0, 1.0);
+                vec4 Pf = fract(P.xyxy) - vec4(0.0, 0.0, 1.0, 1.0);
+                Pi = mod(Pi, 289.0);
+                vec4 ix = Pi.xzxz;
+                vec4 iy = Pi.yyww;
+                vec4 fx = Pf.xzxz;
+                vec4 fy = Pf.yyww;
+
+                vec4 i = permute(permute(ix) + iy);
+
+                vec4 gx = fract(i * (1.0 / 41.0)) * 2.0 - 1.0 ;
+                vec4 gy = abs(gx) - 0.5 ;
+                vec4 tx = floor(gx + 0.5);
+                gx = gx - tx;
+
+                vec2 g00 = vec2(gx.x,gy.x);
+                vec2 g10 = vec2(gx.y,gy.y);
+                vec2 g01 = vec2(gx.z,gy.z);
+                vec2 g11 = vec2(gx.w,gy.w);
+
+                vec4 norm = 1.79284291400159 - 0.85373472095314 * 
+                    vec4(dot(g00, g00), dot(g01, g01), dot(g10, g10), dot(g11, g11));
+                g00 *= norm.x;
+                g01 *= norm.y;
+                g10 *= norm.z;
+                g11 *= norm.w;
+
+                float n00 = dot(g00, vec2(fx.x, fy.x));
+                float n10 = dot(g10, vec2(fx.y, fy.y));
+                float n01 = dot(g01, vec2(fx.z, fy.z));
+                float n11 = dot(g11, vec2(fx.w, fy.w));
+
+                vec2 fade_xy = fade(Pf.xy);
+                vec2 n_x = mix(vec2(n00, n01), vec2(n10, n11), fade_xy.x);
+                float n_xy = mix(n_x.x, n_x.y, fade_xy.y);
+                return 2.3 * n_xy;
+            }
+
+            // Fractal Brownian Motion (FBM) using 4 octaves
+            float fbm(vec2 p) {
+                float value = 0.0;
+                float amplitude = 0.5;
+                float frequency = 1.0;
+                mat2 rot = mat2(0.80, 0.60, -0.60, 0.80);
+                for (int i = 0; i < 4; i++) {
+                    value += amplitude * cnoise(p * frequency);
+                    p = rot * p * 2.0;
+                    frequency *= 2.0;
+                    amplitude *= 0.5;
+                }
+                return value;
+            }
+
+            void main() {
+                vec2 st = gl_FragCoord.xy / u_resolution.xy;
+                float ar = u_resolution.x / u_resolution.y;
+                vec2 uv = st - vec2(0.5);
+                uv.x *= ar;
+
+                float t = u_time * u_speed;
+                vec2 coord = uv * u_scale;
+                
+                // Track mouse displacement
+                vec2 m = (u_mouse - 0.5) * 2.0;
+                m.x *= ar;
+
+                vec3 color = vec3(0.0);
+
+                // Mode 0: Raw Grayscale Noise
+                if (u_mode == 0) {
+                    float n = cnoise(coord + vec2(t, 0.0));
+                    n = n * 0.5 + 0.5; // map to [0, 1]
+                    color = vec3(n);
+                } 
+                // Mode 1: Fractal Brownian Motion (fBm)
+                else if (u_mode == 1) {
+                    float n = fbm(coord + vec2(t, t * 0.5));
+                    n = n * 0.5 + 0.5;
+                    // Apply a subtle deep blue and purple gradient
+                    vec3 col1 = vec3(0.03, 0.05, 0.15);
+                    vec3 col2 = vec3(0.5, 0.3, 0.9);
+                    vec3 col3 = vec3(0.2, 0.9, 0.8);
+                    color = mix(col1, col2, smoothstep(0.1, 0.6, n));
+                    color = mix(color, col3, smoothstep(0.6, 0.95, n));
+                }
+                // Mode 2: Contour Waves (Isolines)
+                else if (u_mode == 2) {
+                    float n = cnoise(coord + vec2(t * 0.5));
+                    float waves = sin((n * 10.0 + t * 2.0) * 3.14159);
+                    waves = smoothstep(0.0, 0.1, waves) * smoothstep(0.2, 0.1, waves);
+                    // Dark theme with glowing purple isolines
+                    color = mix(vec3(0.04, 0.04, 0.06), vec3(0.54, 0.36, 0.96), waves);
+                    color += vec3(0.54, 0.36, 0.96) * waves * u_detail * 1.5;
+                }
+                // Mode 3: Domain Warped Flow
+                else if (u_mode == 3) {
+                    vec2 q = vec2(
+                        cnoise(coord + vec2(t * 0.8)),
+                        cnoise(coord + vec2(0.0, t * 0.8))
+                    );
+                    vec2 r = vec2(
+                        cnoise(coord + q * (1.5 + u_detail * 2.0) + vec2(1.7, 9.2) + vec2(t * 0.4)),
+                        cnoise(coord + q * (1.5 + u_detail * 2.0) + vec2(8.3, 2.8) - vec2(t * 0.3))
+                    );
+                    float n = cnoise(coord + r * 2.0);
+                    n = n * 0.5 + 0.5;
+
+                    vec3 col1 = vec3(0.02, 0.02, 0.05);
+                    vec3 col2 = vec3(0.3, 0.1, 0.4);
+                    vec3 col3 = vec3(0.85, 0.25, 0.6);
+                    vec3 col4 = vec3(0.1, 0.85, 0.8);
+
+                    color = mix(col1, col2, smoothstep(0.0, 0.35, n));
+                    color = mix(color, col3, smoothstep(0.35, 0.7, n));
+                    color = mix(color, col4, smoothstep(0.7, 1.0, n));
+                }
+
+                gl_FragColor = vec4(color, 1.0);
+            }
+        `;
+
+        // WebGL Utility Functions
+        function createShader(gl, source, type) {
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                console.error(gl.getShaderInfoLog(shader));
+                gl.deleteShader(shader);
+                return null;
+            }
+            return shader;
+        }
+
+        const vs = createShader(gl, VS_SOURCE, gl.VERTEX_SHADER);
+        const fs = createShader(gl, FS_SOURCE, gl.FRAGMENT_SHADER);
+        const program = gl.createProgram();
+        gl.attachShader(program, vs);
+        gl.attachShader(program, fs);
+        gl.linkProgram(program);
+
+        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+            console.error(gl.getProgramInfoLog(program));
+        }
+
+        // Setup Screen Quad Geometry
+        const positionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        const vertices = new Float32Array([
+            -1.0, -1.0,
+             1.0, -1.0,
+            -1.0,  1.0,
+            -1.0,  1.0,
+             1.0, -1.0,
+             1.0,  1.0
+        ]);
+        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
+        const positionLocation = gl.getAttribLocation(program, "position");
+        gl.enableVertexAttribArray(positionLocation);
+        gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+        // Uniform Locations
+        const uniforms = {
+            resolution: gl.getUniformLocation(program, "u_resolution"),
+            time: gl.getUniformLocation(program, "u_time"),
+            mouse: gl.getUniformLocation(program, "u_mouse"),
+            mode: gl.getUniformLocation(program, "u_mode"),
+            scale: gl.getUniformLocation(program, "u_scale"),
+            speed: gl.getUniformLocation(program, "u_speed"),
+            detail: gl.getUniformLocation(program, "u_detail")
+        };
+
+        // Resize handler
+        function resize() {
+            const dpr = Math.min(window.devicePixelRatio, 2.0); // Clamp to 2.0 for performance
+            const width = Math.floor(window.innerWidth * dpr);
+            const height = Math.floor(window.innerHeight * dpr);
+
+            if (canvas.width !== width || canvas.height !== height) {
+                canvas.width = width;
+                canvas.height = height;
+                gl.viewport(0, 0, width, height);
+            }
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Mouse move listener
+        window.addEventListener('mousemove', (e) => {
+            state.mouseX = e.clientX / window.innerWidth;
+            state.mouseY = 1.0 - (e.clientY / window.innerHeight);
+        });
+
+        // FPS Calculations
+        let lastTime = 0;
+        let frameCount = 0;
+        let fpsText = document.getElementById('fps-hud');
+
+        function updateFPS(now) {
+            frameCount++;
+            if (now - lastTime >= 1000) {
+                const fps = Math.round((frameCount * 1000) / (now - lastTime));
+                fpsText.innerText = `FPS: ${fps}`;
+                frameCount = 0;
+                lastTime = now;
+            }
+        }
+
+        // Render loop
+        let clock = 0;
+        let lastFrameTime = performance.now();
+
+        function render(now) {
+            updateFPS(now);
+            const deltaTime = (now - lastFrameTime) / 1000.0;
+            lastFrameTime = now;
+
+            // Increment clock base time
+            clock += deltaTime;
+
+            gl.useProgram(program);
+
+            // Push Uniforms
+            gl.uniform2f(uniforms.resolution, canvas.width, canvas.height);
+            gl.uniform1f(uniforms.time, clock);
+            gl.uniform2f(uniforms.mouse, state.mouseX, state.mouseY);
+            gl.uniform1i(uniforms.mode, state.mode);
+            gl.uniform1f(uniforms.scale, state.scale);
+            gl.uniform1f(uniforms.speed, state.speed);
+            gl.uniform1f(uniforms.detail, state.detail);
+
+            // Draw Fullscreen Quad
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+            requestAnimationFrame(render);
+        }
+        requestAnimationFrame(render);
+
+        // Interactive UI functions
+        function updateVal(key, val) {
+            state[key] = parseFloat(val);
+            document.getElementById(`${key}-val`).innerText = parseFloat(val).toFixed(2);
+        }
+
+        function updateMode(mode) {
+            state.mode = parseInt(mode);
+        }
+
+        function switchTab(tabId) {
+            // Deactivate all tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+
+            // Activate target tab
+            const btn = document.querySelector(`.tab-btn[onclick="switchTab('${tabId}')"]`);
+            const pane = document.getElementById(`tab-${tabId}`);
+            if (btn && pane) {
+                btn.classList.add('active');
+                pane.classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>

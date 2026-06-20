@@ -26,14 +26,24 @@
 - [Laws of UX](https://lawsofux.com/) — psychology of design
 - [CSS Triggers](https://csstriggers.com/) — what properties trigger layout/paint/composite
 - [web.dev](https://web.dev/) — Google's modern web development guidance
+- [web.dev Rendering Performance](https://web.dev/articles/rendering-performance) — frame budget, pixel pipeline
+- [Codrops](https://tympanus.net/codrops/) — creative WebGL tutorials and demos
 - [MDN Web Docs](https://developer.mozilla.org/) — authoritative browser API reference
 
 ### WebGL & GPU
 - [WebGL Fundamentals](https://webglfundamentals.org/) — WebGL1/2 reference
 - [GLSL ES 1.0 Spec](https://www.khronos.org/registry/OpenGL/specs/es/2.0/GLSL_ES_Specification_1.00.pdf) — the exact standard used
 - [WebGPU Fundamentals](https://webgpufundamentals.org/) — next-gen GPU API
+- [Three.js Docs](https://threejs.org/docs/) — core API, materials, postprocessing
 - [Three.js Examples](https://threejs.org/examples/) — WebGL patterns and effects
+- [pmndrs/postprocessing](https://github.com/pmndrs/postprocessing) — high-perf post-processing
+- [LYGIA Shader Library](https://lygia.xyz/generative) — reusable GLSL generative functions
 - [Raw WebGL](https://cgvr.cs.uni-bremen.de/teaching/uhrdum2012/webgl.pdf) — low-level WebGL reference
+
+### Creative Coding Libraries
+- [troika-three-text](https://github.com/protectwise/troika/tree/main/packages/troika-three-text) — SDF text in 3D
+- [three-nebula](https://github.com/creativelifeform/three-nebula) — GPU/CPU particle systems
+- [lil-gui](https://github.com/georgealways/lil-gui) — quick debug UI for Three.js
 
 ### Animation & Interaction
 - [Animation vs. Motion](https://web.dev/articles/motion) — Google's motion design guide

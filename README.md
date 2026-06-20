@@ -49,7 +49,9 @@ PNG and GIF work everywhere.
 | `tsconfig.json` | TypeScript config (strict, ES2020, bundler resolution) |
 | `server/server.mjs` | Node.js PTY + WebSocket server (terminal panel backend) |
 | `server/api.mjs` | Express + MongoDB signup API backend for workshops |
-| `brain/` | The studio's documentation vault (Obsidian notes on architecture, presets, and design principles) |
+| `brain/` | The studio's documentation vault — 59 Obsidian notes on architecture, presets, design, and development |
+| `references/` | Compiled research reference (shaders, WebGL, Three.js, generative patterns) |
+| `CLAUDE.md` | Project context for Claude Code agents |
 | `DEVELOPER_AGENT_GUIDE.md` | Integration guide for developers and AI agents |
 | `.agents/skills/motion-studio/` | AI agent skill files for the studio |
 
@@ -89,22 +91,30 @@ src/
 The layout: canvas preview in the center, control panels on the left and right,
 status bar at the bottom.
 
-1. **Pick a preset** — 15 generative shader modes:
-   - `reeded` — vertical reeded-glass rods refracting drifting color blobs
-   - `flow` — domain-warped liquid noise gradients
-   - `orbs` — soft metaballs drifting on orbits
-   - `waves` — flowing contour bands
-   - `halftone` — animated dot-grid over a flow field
-   - `grain` — soft grainy gradient washes
-   - `glass` — glassmorphism: drifting frosted panes refracting a colour backdrop
+1. **Pick a preset** — 23 generative shader modes (alphabetical):
    - `aurora` — wavy glowing curtains of light across a dark night sky
+   - `contour waves` — glowing isoline patterns from noise-modulated sine bands
+   - `curl noise` — divergence-free swirling fluid motion
    - `electric` — branching, flickering lightning filaments
+   - `flow` — domain-warped liquid noise gradients
+   - `golden` — phyllotaxis / sunflower spiral pattern
+   - `glass` — glassmorphism: drifting frosted panes refracting a colour backdrop
+   - `grain` — soft grainy gradient washes
+   - `halftone` — animated dot-grid over a flow field
    - `kaleidoscope` — mirrored radial symmetry slices
-   - `rings` — concentric glowing rings modulated by noise
+   - `lines` — rotated parallel bands with wave distortion
+   - `marble` — domain-warped sine wave with fBM veining
+   - `orbs` — soft metaballs drifting on orbits
    - `plasma` — classic multi-frequency sine wave plasma
-   - `fractal square` — recursive fractal orbit trap
-   - `triangle lattice` — rotating triangular grid
-   - `sd rosette` — signed-distance rosette pattern
+   - `reeded` — vertical reeded-glass rods refracting drifting color blobs
+   - `rings` — concentric glowing rings modulated by noise
+   - `rorschach` — bilateral inkblot symmetry from mirrored noise
+   - `ridged` — sharp mountain ridges from inverted multi-fractal noise
+   - `sd rosette` — signed-distance petal symmetry with edge glow
+   - `truchet` — tile arc maze with hash-based orientation
+   - `triangle lattice` — rotating hexagonal triangle grid
+   - `turbulence` — flame-like fBM patterns with absolute noise
+   - `waves` — flowing contour bands
 
 2. **Set a seed** — a 4-digit number that deterministically positions everything.
    Same seed + preset + settings always reproduces the same graphic. Dice (⚄) for random.
@@ -162,11 +172,24 @@ The bottom panel has a **hotkeys** tab with the full shortcut reference.
 
 ## Documentation Vault (`brain/`)
 
-The repository includes a comprehensive documentation vault located in the [`brain/`](file:///Users/jahflyx/motion/brain) directory. It is structured as an **Obsidian** knowledge base containing notes on the system design, concepts, presets, and development guidelines:
+The repository includes a comprehensive documentation vault located in the [`brain/`](file:///Users/jahflyx/motion/brain) directory. It is structured as an **Obsidian** knowledge base containing 59 notes on the system design, concepts, presets, and development guidelines:
 - **Architecture**: In-depth explanations of the [UI System](file:///Users/jahflyx/motion/brain/Architecture/UI%20System.md), [Shader Architecture](file:///Users/jahflyx/motion/brain/Architecture/Shader%20Architecture.md), and [Plugin System](file:///Users/jahflyx/motion/brain/Architecture/Plugin%20System.md).
 - **Concepts**: Core mathematics and systems, including [Seed-Based Determinism](file:///Users/jahflyx/motion/brain/Concepts/Seed-Based%20Determinism.md) and the [Seamless Loop Invariant](file:///Users/jahflyx/motion/brain/Concepts/Seamless%20Loop%20Invariant.md).
-- **Design**: Guidelines for aesthetic rendering, [Color Theory for Shaders](file:///Users/jahflyx/motion/brain/Design/Color%20Theory%20for%20Shaders.md), and composition.
+- **Design**: Guidelines for aesthetic rendering, [Color Theory for Shaders](file:///Users/jahflyx/motion/brain/Design/Color%20Theory%20for%20Shaders.md), [WebGL Techniques](file:///Users/jahflyx/motion/brain/Design/WebGL%20Techniques.md), [Modern Web Design](file:///Users/jahflyx/motion/brain/Design/Modern%20Web%20Design.md), and the [Fractal & Pattern Vocabulary](file:///Users/jahflyx/motion/brain/Design/Fractal%20%26%20Pattern%20Vocabulary.md).
+- **Presets**: One note per preset with slider outcome tables, technique breakdowns, and best palettes.
 - **Development**: Practical guides for adding features (e.g., [Adding a Preset](file:///Users/jahflyx/motion/brain/Development/Adding%20a%20Preset.md), [Adding a Slider](file:///Users/jahflyx/motion/brain/Development/Adding%20a%20Slider.md), [Adding a Palette](file:///Users/jahflyx/motion/brain/Development/Adding%20a%20Palette.md)).
+- **References**: [Shader Development Guide](file:///Users/jahflyx/motion/brain/References/Shader_Development.md), [Three.js Reference](file:///Users/jahflyx/motion/brain/References/ThreeJS_Reference.md), [WebGL Reference](file:///Users/jahflyx/motion/brain/References/WebGL_Reference.md), [Resources](file:///Users/jahflyx/motion/brain/References/Resources.md), and [Glossary](file:///Users/jahflyx/motion/brain/References/Glossary.md).
+
+## Research Reference (`references/`)
+
+Additional research compiled from The Book of Shaders, Inigo Quilez, Three.js docs, and ShaderToy:
+- [`references/shader-web-research.md`](references/shader-web-research.md) — comprehensive 15-section reference covering GLSL fundamentals, noise algorithms, fBM variants, SDF primitives, fractals, organic patterns, post-processing, Three.js integration, and modern web design with WebGL.
+
+## Agent Configuration
+
+- [`CLAUDE.md`](CLAUDE.md) — project context for Claude Code (architecture, rules, how to add presets/sliders)
+- [`AGENTS.md`](AGENTS.md) — project-scoped agent guidelines (shader invariants, GLSL constraints, skill references)
+- `.agents/skills/` — preloaded agent skills for the studio, shader development, and web design
 
 ---
 
@@ -199,7 +222,7 @@ It's now a proper TypeScript project with:
 ### WebGL
 
 WebGL1 context with `preserveDrawingBuffer: true` (required for PNG/GIF capture).
-One fullscreen triangle strip, one fragment shader containing all 15 presets
+One fullscreen triangle strip, one fragment shader containing all 23 presets
 branched on `u_mode`. `draw(phase)` pushes all uniforms from `P` and renders
 one frame. The live shader editor calls `compileNewFS()` to hot-swap the program.
 
@@ -218,11 +241,11 @@ violates it will produce a visible seam.
 
 ### Adding things
 
-- **Preset:** append to `PRESETS` in `state.ts`, add `else if (u_mode == N)` in `webgl.ts`
-- **Palette:** append a 4-hex array to `PALETTES` in `state.ts`
+- **Preset:** append to `PRESETS` in `state.ts`, add `else if (u_mode == N)` in `webgl.ts` (currently 23 presets, modes 0–22, alphabetical)
+- **Palette:** append a 4-hex array to `PALETTES` in `state.ts` (currently 11 palettes)
 - **Slider:** append to `SLIDERS` in `state.ts`, add `u_<id>` uniform to `webgl.ts`
 - **Canvas size:** append `{label, w, h}` to `SIZES` in `state.ts`
-- **Theme:** append to `THEMES` in `state.ts`
+- **Theme:** append to `THEMES` in `state.ts` (currently 13 themes)
 
 ### Gotchas
 

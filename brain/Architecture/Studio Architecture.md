@@ -38,7 +38,7 @@ src/studio/
 ## Shader Pipeline
 
 Two-pass rendering in `webgl.ts`:
-1. **Scene pass** — all 14 presets (branched on `u_mode`), film grain, vignette → FBO
+1. **Scene pass** — all 23 presets (branched on `u_mode`), film grain, vignette → FBO
 2. **Post-process pass** — chromatic aberration via per-channel UV offset on FBO texture
 
 Shader hot-swap: `compileNewFS()` recompiles the scene fragment shader at runtime (live editor in sidebar).

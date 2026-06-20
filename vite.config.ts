@@ -9,6 +9,7 @@ export default defineConfig({
         studio: resolve(__dirname, 'studio.html'),
         'developer-training': resolve(__dirname, 'developer-training.html'),
         splash: resolve(__dirname, 'splash.html'),
+        workshops: resolve(__dirname, 'workshops.html'),
       },
     },
     outDir: 'dist',

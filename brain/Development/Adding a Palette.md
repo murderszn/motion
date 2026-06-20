@@ -19,7 +19,7 @@
 - Stops should be perceptually evenly spaced
 - Skip pure black/white — add hue
 - The 2→3 jump is the energy shift
-- Test with all 14 presets before committing
+- Test with all 23 presets before committing
 
 ## Related
 

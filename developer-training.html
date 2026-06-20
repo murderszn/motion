@@ -625,15 +625,10 @@
             width: 88px;
             height: 88px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #e03a3a, #f43f5e);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.1rem;
-            font-weight: 800;
             box-shadow: 0 0 24px rgba(224, 58, 58, 0.4);
-            color: #ffffff;
             margin-bottom: 1.35rem;
+            object-fit: cover;
+            border: 2px solid var(--accent);
         }
         .speaker-name {
             font-size: 1.35rem;
@@ -1021,6 +1016,18 @@
         </div>
     </section>
 
+    <!-- ============ GRAPHIC FEATURE ============ -->
+    <section class="story" id="environment-preview">
+        <div class="section-inner reveal">
+            <p class="meta-pull">live sandbox</p>
+            <h2>Build in <span class="accent">real-time</span>.</h2>
+            <p>Every seat is equipped with a live development container. Write shader parameters, trigger agent actions, and see the rendering pipeline update at 60fps.</p>
+            <div class="graphic-container" style="margin-top: 3rem; width: 100%; max-width: 900px; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+                <img src="media/workshop_hero_graphic.jpg" alt="WebGL & Agent Workspace Preview" style="width: 100%; height: auto; display: block;" />
+            </div>
+        </div>
+    </section>
+
     <!-- ============ FORMAT / BY THE NUMBERS ============ -->
     <section class="story" id="format">
         <div class="section-inner">
@@ -1096,7 +1103,7 @@
             <p class="reveal d2">Learn the workflow from the person who built the tools — not a deck about them.</p>
 
             <div class="card speaker-card reveal d3">
-                <div class="speaker-avatar">JJ</div>
+                <img src="media/instructor_avatar.jpg" alt="Josh Johnson" class="speaker-avatar">
                 <h3 class="speaker-name">Josh Johnson</h3>
                 <span class="speaker-badge">CREATOR &amp; BDFL</span>
                 <p class="speaker-bio">Creator and maintainer of <code>/motion</code>. Spends his days living inside coding agents and shipping with them. He'll run every build live — agentic coding, workspace automation, and the multi-agent setups he uses on real work.</p>

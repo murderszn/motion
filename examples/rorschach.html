@@ -1,0 +1,3673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RORSCHACH // Subconscious Streetwear</title>
+  <style>
+    /* Global Styles */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --bg-dark: #020204;
+      --text-light: #ffffff;
+      --text-muted: #cbd5e1; /* Brighter grey for high readability */
+      --accent: #ef4444; /* VIBRANT RED ACCENT */
+      --accent-glow: rgba(239, 68, 68, 0.45);
+      --glass-bg: rgba(6, 8, 12, 0.82); /* Darker, more opaque glass background for readability */
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --glass-border-hover: rgba(239, 68, 68, 0.4);
+      --font-display: 'Outfit', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-code: 'Fira Code', monospace;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: var(--bg-dark);
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #020204;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent);
+    }
+
+    /* WebGL Canvas Background */
+    #bg-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+      will-change: transform;
+      pointer-events: none;
+    }
+
+    /* Immersive Grid Pattern Overlay */
+    .grid-overlay {
+      position: fixed;
+      inset: 0;
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Noise Texture Overlay */
+    .noise-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      opacity: 0.05;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    /* Page Container */
+    #app {
+      position: relative;
+      z-index: 10;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Glassmorphism Classes */
+    .glass-panel {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      --sheen-x: 50%;
+      --sheen-y: 50%;
+    }
+
+    .glass-panel::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at var(--sheen-x) var(--sheen-y), rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 60%);
+      pointer-events: none;
+      z-index: 2;
+      transition: background 0.15s ease;
+    }
+
+    /* Header Nav (Simplified per request: no nav menu, pure high-contrast white elements) */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 80px;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 4%;
+      transition: all 0.4s ease;
+      background: rgba(2, 2, 4, 0.2);
+      border-bottom: 1px solid transparent;
+    }
+
+    header.scrolled {
+      background: rgba(2, 2, 4, 0.85);
+      border-bottom: 1px solid var(--glass-border);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+    }
+
+    .logo-symbol {
+      width: 28px;
+      height: 28px;
+      stroke: #ffffff; /* HIGH CONTRAST WHITE */
+      stroke-width: 2.5;
+      fill: none;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .logo-container:hover .logo-symbol {
+      stroke: var(--accent);
+      transform: scale(1.1) rotate(180deg);
+      filter: drop-shadow(0 0 8px var(--accent-glow));
+    }
+
+    .logo-text {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 1.5rem;
+      letter-spacing: 4px;
+      color: #ffffff; /* HIGH CONTRAST WHITE */
+      text-transform: uppercase;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .nav-btn {
+      background: none;
+      border: none;
+      color: #ffffff; /* HIGH CONTRAST WHITE */
+      cursor: pointer;
+      position: relative;
+      padding: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .nav-btn svg {
+      width: 22px;
+      height: 22px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+
+    .nav-btn:hover {
+      color: var(--accent);
+      filter: drop-shadow(0 0 6px var(--accent-glow));
+    }
+
+    .cart-count {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      background: var(--accent);
+      color: #ffffff;
+      font-family: var(--font-code);
+      font-size: 10px;
+      font-weight: 900;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 8px var(--accent);
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+    }
+
+    .hero-content {
+      max-width: 800px;
+      z-index: 5;
+      background: rgba(2, 2, 4, 0.75); /* Darker backdrop wrapper for hero readability */
+      padding: 50px 40px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .hero-tagline {
+      font-family: var(--font-code);
+      font-size: 0.95rem;
+      letter-spacing: 4px;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 24px;
+      display: inline-block;
+      border-bottom: 1px solid var(--accent);
+      padding-bottom: 4px;
+      animation: pulse 3s infinite alternate;
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(3.2rem, 7.5vw, 6.5rem);
+      font-weight: 900;
+      line-height: 0.9;
+      letter-spacing: -2px;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+      color: var(--text-light);
+      text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .hero-desc {
+      font-family: var(--font-body);
+      font-size: 1.15rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto 40px auto;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .btn {
+      position: relative;
+      padding: 16px 36px;
+      font-family: var(--font-code);
+      font-size: 0.85rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      background: transparent;
+      color: var(--text-light);
+      border: 1px solid var(--text-light);
+      cursor: pointer;
+      overflow: hidden;
+      transition: all 0.4s ease;
+      font-weight: 700;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: var(--text-light);
+      transition: all 0.4s ease;
+      z-index: -1;
+    }
+
+    .btn:hover {
+      color: #000000;
+    }
+
+    .btn:hover::before {
+      left: 0;
+    }
+
+    .btn-primary {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 15px rgba(239, 68, 68, 0.15);
+    }
+
+    .btn-primary::before {
+      background: var(--accent);
+    }
+
+    .btn-primary:hover {
+      color: #ffffff;
+      box-shadow: 0 0 25px var(--accent-glow);
+    }
+
+    /* Scroll Indicator */
+    .scroll-indicator {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-muted);
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .scroll-indicator:hover {
+      color: var(--accent);
+    }
+
+    .scroll-line {
+      width: 1px;
+      height: 60px;
+      background: linear-gradient(to bottom, var(--text-muted), transparent);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .scroll-line::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 15px;
+      background: var(--accent);
+      animation: scrollDown 2s infinite ease-in-out;
+    }
+
+    /* Shop Section */
+
+    .section-header {
+      margin-bottom: 60px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-bottom: 1px solid var(--glass-border);
+      padding-bottom: 24px;
+    }
+
+    .section-info h2 {
+      font-family: var(--font-display);
+      font-size: 2.75rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--text-light);
+    }
+
+    .section-info p {
+      font-family: var(--font-code);
+      font-size: 0.85rem;
+      color: var(--accent);
+      margin-top: 8px;
+    }
+
+    /* Filter Controls */
+    .filters {
+      display: flex;
+      gap: 12px;
+    }
+
+    .filter-btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--glass-border);
+      color: var(--text-muted);
+      padding: 8px 18px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+    }
+
+    .filter-btn.active, .filter-btn:hover {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: var(--accent);
+      color: var(--text-light);
+    }
+
+    /* Product Grid */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 40px;
+    }
+
+    .product-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border-radius: 12px;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      height: 100%;
+    }
+
+    .product-image-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1;
+      overflow: hidden;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      background: #090c10;
+      border: 1px solid var(--glass-border);
+      transition: border-color 0.3s ease;
+    }
+
+    .product-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .product-tag {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: var(--bg-dark);
+      color: var(--text-light);
+      font-family: var(--font-code);
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      padding: 6px 12px;
+      border: 1px solid var(--glass-border);
+      border-radius: 4px;
+      z-index: 2;
+    }
+
+    /* Actions on Hover */
+    .product-actions {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      transform: translateY(120%);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 2;
+    }
+
+    .product-image-container:hover .product-actions {
+      transform: translateY(0);
+    }
+
+    .product-image-container:hover .product-image {
+      transform: scale(1.05);
+    }
+
+    .product-image-container:hover {
+      border-color: var(--accent);
+      box-shadow: 0 10px 30px rgba(239, 68, 68, 0.08);
+    }
+
+    .card-btn {
+      flex: 1;
+      padding: 12px;
+      background: rgba(2, 2, 4, 0.9);
+      border: 1px solid var(--glass-border);
+      color: var(--text-light);
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: all 0.3s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-btn:hover {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    .product-details {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 0 4px;
+    }
+
+    .product-title {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-light);
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .product-title:hover {
+      color: var(--accent);
+    }
+
+    .product-meta {
+      font-family: var(--font-code);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .product-price {
+      font-family: var(--font-code);
+      font-size: 1.1rem;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    /* Sub-Level Lookbook Section */
+
+    .lookbook-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 40px;
+    }
+
+    .lookbook-item {
+      overflow: hidden;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      border: 1px solid var(--glass-border);
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+    }
+
+    .lookbook-item img {
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .lookbook-item:hover img {
+      transform: scale(1.02);
+    }
+
+    .lookbook-caption {
+      padding: 24px;
+      background: rgba(2, 2, 4, 0.7);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .lookbook-caption .spec-label {
+      font-family: var(--font-code);
+      font-size: 0.8rem;
+      color: var(--accent);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+
+    .lookbook-caption .spec-val {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    /* Interactive Sizing Table Metric Section */
+
+    .metrics-container {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid var(--glass-border);
+    }
+
+    .metrics-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    .metrics-table th, .metrics-table td {
+      padding: 20px 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .metrics-table th {
+      font-family: var(--font-code);
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 2px;
+      color: var(--accent);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .metrics-table td {
+      color: var(--text-muted);
+    }
+
+    .metrics-table td:first-child {
+      font-family: var(--font-code);
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    .metrics-table tr:hover td {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Interactive Rorschach Diagnostic Assessment */
+
+    .assessment-container {
+      max-width: 750px;
+      width: 100%;
+      padding: 60px 40px;
+      text-align: center;
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+    }
+
+    .assessment-progress {
+      font-family: var(--font-code);
+      font-size: 0.8rem;
+      color: var(--accent);
+      margin-bottom: 24px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .assessment-question {
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 4vw, 2.25rem);
+      font-weight: 700;
+      margin-bottom: 40px;
+      color: var(--text-light);
+      line-height: 1.3;
+    }
+
+    .assessment-options {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-bottom: 30px;
+    }
+
+    .assessment-opt-btn {
+      padding: 18px 24px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--glass-border);
+      color: var(--text-muted);
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .assessment-opt-btn:hover {
+      background: rgba(239, 68, 68, 0.08);
+      border-color: var(--accent);
+      color: var(--text-light);
+    }
+
+    .assessment-opt-btn::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: transparent;
+      border: 1px solid var(--text-muted);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .assessment-opt-btn:hover::before {
+      background: var(--accent);
+      border-color: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+    }
+
+    .assessment-result {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      animation: zoomIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .assessment-result.active {
+      display: flex;
+    }
+
+    .result-shirt-rec {
+      display: flex;
+      gap: 30px;
+      align-items: center;
+      text-align: left;
+      margin: 30px 0;
+      padding: 24px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      width: 100%;
+    }
+
+    .result-shirt-img {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid var(--glass-border);
+      flex-shrink: 0;
+    }
+
+    .result-shirt-info h4 {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-light);
+    }
+
+    .result-shirt-info p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Cognitive Resonance & Laundry Protocols Grid */
+
+    .protocols-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+    }
+
+    .protocol-card {
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      border-radius: 12px;
+    }
+
+    .protocol-card h3 {
+      font-family: var(--font-code);
+      font-size: 1.1rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .protocol-card p {
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    /* Brand Philosophy Section */
+    .philosophy-section {
+      padding-bottom: 180px;
+    }
+
+    .philosophy-card {
+      max-width: 900px;
+      width: 100%;
+      padding: 80px 60px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .philosophy-card::before {
+      content: '"';
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--font-display);
+      font-size: 12rem;
+      font-weight: 900;
+      color: rgba(255,255,255,0.03);
+      line-height: 1;
+    }
+
+    .philosophy-title {
+      font-family: var(--font-code);
+      font-size: 0.85rem;
+      color: var(--accent);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    .philosophy-text {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 200;
+      line-height: 1.4;
+      color: var(--text-light);
+      margin-bottom: 30px;
+      letter-spacing: -0.5px;
+    }
+
+    .philosophy-text span {
+      font-weight: 700;
+      color: var(--accent);
+      text-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    .philosophy-author {
+      font-family: var(--font-code);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* Cart Drawer */
+    .cart-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 100%;
+      max-width: 460px;
+      height: 100%;
+      z-index: 200;
+      transform: translateX(100%);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: -10px 0 40px rgba(0,0,0,0.8);
+      border-left: 1px solid var(--glass-border);
+    }
+
+    .cart-drawer.open {
+      transform: translateX(0);
+    }
+
+    .cart-header {
+      padding: 24px;
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .cart-header h3 {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-light);
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--text-light);
+      cursor: pointer;
+      padding: 8px;
+      transition: color 0.3s ease;
+    }
+
+    .close-btn:hover {
+      color: var(--accent);
+    }
+
+    .cart-items {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .empty-cart-message {
+      text-align: center;
+      color: var(--text-muted);
+      font-family: var(--font-code);
+      font-size: 0.85rem;
+      margin-top: 40px;
+    }
+
+    .cart-item {
+      display: flex;
+      gap: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding-bottom: 20px;
+    }
+
+    .cart-item-image {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid var(--glass-border);
+    }
+
+    .cart-item-details {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .cart-item-title {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-light);
+    }
+
+    .cart-item-meta {
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .cart-item-qty {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .qty-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      border: 1px solid var(--glass-border);
+      background: rgba(255,255,255,0.05);
+      color: #fff;
+      font-family: var(--font-code);
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+
+    .qty-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .cart-item-qty span {
+      font-family: var(--font-code);
+      font-size: 0.85rem;
+      color: var(--text-light);
+    }
+
+    .cart-item-price {
+      font-family: var(--font-code);
+      font-size: 0.95rem;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .cart-item-remove {
+      background: none;
+      border: none;
+      color: #ef4444;
+      font-family: var(--font-code);
+      font-size: 0.7rem;
+      cursor: pointer;
+      align-self: flex-start;
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .cart-item-remove:hover {
+      text-decoration: underline;
+    }
+
+    .cart-footer {
+      padding: 24px;
+      border-top: 1px solid var(--glass-border);
+      background: rgba(2, 2, 4, 0.4);
+    }
+
+    .cart-summary-line {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-code);
+      font-size: 0.85rem;
+      margin-bottom: 12px;
+    }
+
+    .cart-summary-line.total {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: #fff;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      padding-top: 12px;
+      margin-top: 12px;
+    }
+
+    .cart-summary-line.total span:last-child {
+      color: var(--accent);
+    }
+
+    .checkout-btn {
+      width: 100%;
+      margin-top: 16px;
+    }
+
+    /* Product Detail Drawer */
+    .detail-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 100%;
+      max-width: 600px;
+      height: 100%;
+      z-index: 180;
+      transform: translateX(100%);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: -10px 0 40px rgba(0,0,0,0.8);
+      border-left: 1px solid var(--glass-border);
+    }
+
+    .detail-drawer.open {
+      transform: translateX(0);
+    }
+
+    .detail-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 40px;
+    }
+
+    .detail-image-box {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--glass-border);
+      margin-bottom: 30px;
+      background: #090c10;
+    }
+
+    .detail-image-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .detail-title {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      color: var(--text-light);
+    }
+
+    .detail-price {
+      font-family: var(--font-code);
+      font-size: 1.5rem;
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 24px;
+    }
+
+    .detail-desc {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+      margin-bottom: 30px;
+    }
+
+    .detail-spec-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 30px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding: 20px 0;
+    }
+
+    .detail-spec-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .detail-spec-label {
+      font-family: var(--font-code);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .detail-spec-val {
+      font-size: 0.85rem;
+      color: #fff;
+    }
+
+    .size-selector {
+      margin-bottom: 30px;
+    }
+
+    .size-label {
+      font-family: var(--font-code);
+      font-size: 0.8rem;
+      color: var(--text-light);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .size-guide-btn {
+      color: var(--accent);
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-transform: none;
+      font-size: 0.75rem;
+    }
+
+    .size-guide-btn:hover {
+      text-decoration: underline;
+    }
+
+    .size-options {
+      display: flex;
+      gap: 10px;
+    }
+
+    .size-opt {
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--glass-border);
+      background: rgba(255,255,255,0.03);
+      color: var(--text-muted);
+      font-family: var(--font-code);
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.3s ease;
+      border-radius: 4px;
+    }
+
+    .size-opt:hover {
+      border-color: var(--accent);
+      color: var(--text-light);
+    }
+
+    .size-opt.active {
+      border-color: var(--accent);
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--accent);
+      box-shadow: 0 0 10px var(--accent-glow);
+      transform: scale(1.05);
+    }
+
+    /* Stripe Checkout Modal */
+    .stripe-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(2,2,4,0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 300;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .stripe-modal-overlay.open {
+      display: flex;
+    }
+
+    .stripe-modal {
+      width: 100%;
+      max-width: 580px;
+      border-radius: 12px;
+      border: 1px solid var(--glass-border);
+      overflow: hidden;
+      animation: zoomIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .stripe-header {
+      padding: 24px;
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255,255,255,0.02);
+    }
+
+    .stripe-header h3 {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #fff;
+    }
+
+    .stripe-header svg {
+      width: 50px;
+      height: 22px;
+      fill: var(--text-light);
+    }
+
+    .stripe-body {
+      padding: 30px;
+      max-height: calc(100vh - 180px);
+      overflow-y: auto;
+    }
+
+    .stripe-form-group {
+      margin-bottom: 20px;
+    }
+
+    .stripe-label {
+      display: block;
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+
+    .stripe-input {
+      width: 100%;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--glass-border);
+      border-radius: 6px;
+      padding: 12px 16px;
+      color: #fff;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+
+    .stripe-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    .stripe-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .stripe-card-element {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--glass-border);
+      border-radius: 6px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .stripe-card-element input {
+      border: none;
+      background: transparent;
+      color: #fff;
+      flex: 1;
+      font-family: var(--font-code);
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+    }
+
+    .stripe-card-element input::placeholder {
+      color: var(--text-muted);
+      letter-spacing: 0;
+    }
+
+    .stripe-card-element input:focus {
+      outline: none;
+    }
+
+    .stripe-card-icon {
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+    }
+
+    .order-summary-box {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .order-summary-box .summary-item-row {
+      color: var(--text-light);
+    }
+
+    .summary-title {
+      font-family: var(--font-code);
+      font-size: 0.8rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding-bottom: 8px;
+    }
+
+    .summary-item-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      margin-bottom: 8px;
+    }
+
+    .summary-total-row {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 700;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      padding-top: 10px;
+      margin-top: 10px;
+    }
+
+    .payment-status {
+      margin-top: 20px;
+      padding: 12px 16px;
+      border-radius: 6px;
+      font-family: var(--font-code);
+      font-size: 0.8rem;
+      display: none;
+      text-align: center;
+    }
+
+    .payment-status.processing {
+      display: block;
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      animation: pulse 1.5s infinite alternate;
+    }
+
+    .payment-status.success {
+      display: block;
+      background: rgba(34, 197, 94, 0.1);
+      color: #22c55e;
+      border: 1px solid #22c55e;
+    }
+
+    .payment-status.error {
+      display: block;
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border: 1px solid #ef4444;
+    }
+
+    /* The Psyche Lab Panel */
+    .psyche-lab {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      z-index: 150;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .psyche-toggle {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      z-index: 2;
+    }
+
+    .psyche-toggle svg {
+      width: 22px;
+      height: 22px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .psyche-toggle:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 20px var(--accent-glow);
+      transform: rotate(45deg);
+    }
+
+    .psyche-toggle.active svg {
+      transform: rotate(135deg);
+    }
+
+    .psyche-panel {
+      position: absolute;
+      bottom: 64px;
+      left: 0;
+      width: 320px;
+      padding: 24px;
+      opacity: 0;
+      transform: translateY(20px) scale(0.95);
+      pointer-events: none;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+      z-index: 1;
+    }
+
+    .psyche-panel.open {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+
+    .psyche-panel-header {
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .psyche-panel-header h4 {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #fff;
+    }
+
+    .psyche-panel-header span {
+      font-family: var(--font-code);
+      font-size: 10px;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .psyche-control-group {
+      margin-bottom: 16px;
+    }
+
+    .psyche-control-label {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-code);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .psyche-control-label span:last-child {
+      color: var(--text-light);
+    }
+
+    .psyche-slider {
+      width: 100%;
+      -webkit-appearance: none;
+      background: #1e293b;
+      height: 4px;
+      border-radius: 2px;
+      outline: none;
+    }
+
+    .psyche-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 0 0 6px var(--accent);
+      transition: transform 0.2s ease;
+    }
+
+    .psyche-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    .palette-selector {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .palette-dot {
+      aspect-ratio: 1;
+      border-radius: 4px;
+      border: 1px solid var(--glass-border);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      overflow: hidden;
+      transform: rotate(45deg) scale(0.8);
+    }
+
+    .palette-dot span {
+      flex: 1;
+      height: 100%;
+    }
+
+    .palette-dot:hover {
+      border-color: #fff;
+      transform: rotate(45deg) scale(0.95);
+    }
+
+    .palette-dot.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 10px var(--accent-glow);
+      transform: rotate(45deg) scale(1);
+    }
+
+    .psyche-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .psyche-btn {
+      flex: 1;
+      padding: 10px;
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      background: transparent;
+      border: 1px solid var(--glass-border);
+      color: var(--text-light);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .psyche-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.15);
+    }
+
+    .psyche-checkbox-group {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .psyche-checkbox {
+      position: relative;
+      width: 36px;
+      height: 20px;
+      -webkit-appearance: none;
+      background: #1e293b;
+      outline: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      border: 1px solid var(--glass-border);
+    }
+
+    .psyche-checkbox:checked {
+      background: var(--accent);
+    }
+
+    .psyche-checkbox::before {
+      content: '';
+      position: absolute;
+      top: 1px;
+      left: 1px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .psyche-checkbox:checked::before {
+      transform: translateX(16px);
+    }
+
+    /* Footer */
+    footer {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 120px 4% 80px 4%;
+      position: relative;
+      z-index: 10;
+      box-sizing: border-box;
+      border-top: 1px solid var(--glass-border);
+      background: rgba(2,2,4,0.9);
+    }
+
+    footer > * {
+      width: 100%;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 40px;
+      margin-bottom: 60px;
+    }
+
+    .footer-col h5 {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 24px;
+      color: #fff;
+    }
+
+    .footer-col ul {
+      list-style: none;
+    }
+
+    .footer-col ul li {
+      margin-bottom: 12px;
+    }
+
+    .footer-col ul li a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color 0.3s ease;
+    }
+
+    .footer-col ul li a:hover {
+      color: var(--accent);
+    }
+
+    .footer-logo-desc {
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+      margin-top: 16px;
+      max-width: 280px;
+    }
+
+    .newsletter-form {
+      display: flex;
+      gap: 8px;
+    }
+
+    .newsletter-input {
+      flex: 1;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--glass-border);
+      padding: 10px 14px;
+      color: #fff;
+      font-size: 0.85rem;
+      border-radius: 4px;
+    }
+
+    .newsletter-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .newsletter-btn {
+      padding: 10px 20px;
+      background: var(--text-light);
+      color: #000;
+      border: none;
+      font-family: var(--font-code);
+      font-size: 0.8rem;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+    }
+
+    .newsletter-btn:hover {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      padding-top: 30px;
+      font-family: var(--font-code);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Backdrop Drawer Overlay */
+    .drawer-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 170;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+
+    .drawer-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Animations */
+    @keyframes pulse {
+      0% { opacity: 0.6; text-shadow: 0 0 4px var(--accent-glow); }
+      100% { opacity: 1; text-shadow: 0 0 12px var(--accent); }
+    }
+
+    @keyframes scrollDown {
+      0% { top: -15px; opacity: 0; }
+      30% { top: 0; opacity: 1; }
+      60% { top: 45px; opacity: 1; }
+      100% { top: 60px; opacity: 0; }
+    }
+
+    @keyframes zoomIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Mobile Responsive adjustments */
+    @media (max-width: 768px) {
+      header {
+        padding: 0 20px;
+      }
+      .hero-title {
+        font-size: 3rem;
+      }
+      .lookbook-grid {
+        grid-template-columns: 1fr;
+      }
+      .protocols-grid {
+        grid-template-columns: 1fr;
+      }
+      .philosophy-card {
+        padding: 40px 20px;
+      }
+      .footer-grid {
+        grid-template-columns: 1fr;
+      }
+      .stripe-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ── scroll reveal animation (from studio / splash assets) ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      filter: blur(4px);
+      transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 1s cubic-bezier(0.16, 1, 0.3, 1),
+                  filter 1s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+    .reveal.d1 { transition-delay: 0.1s; }
+    .reveal.d2 { transition-delay: 0.3s; }
+    .reveal.d3 { transition-delay: 0.5s; }
+    .reveal.d4 { transition-delay: 0.7s; }
+    .reveal.d5 { transition-delay: 0.9s; }
+
+    /* Space buffer adjustments for sections to be better spaced */
+    section {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 120px 4% 100px 4%;
+      position: relative;
+      z-index: 10;
+      box-sizing: border-box;
+    }
+
+    section > * {
+      width: 100%;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Outfit:wght@200;400;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Three.js Dependency -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+  <!-- WebGL Dynamic Shader Canvas -->
+  <canvas id="bg-canvas"></canvas>
+  
+  <!-- Esthetics Overlays -->
+  <div class="grid-overlay"></div>
+  <div class="noise-overlay"></div>
+  <div class="drawer-overlay" id="drawer-overlay"></div>
+
+  <!-- Primary Application Layout -->
+  <div id="app">
+    
+    <!-- Top Nav Header (Simplified) -->
+    <header id="main-header">
+      <div class="logo-container" onclick="scrollToTop()">
+        <svg class="logo-symbol" viewBox="0 0 100 100">
+          <path d="M50 15 C42 15, 38 28, 30 35 C22 42, 10 38, 12 50 C14 62, 28 58, 35 68 C42 78, 45 85, 50 85 C55 85, 58 78, 65 68 C72 58, 86 62, 88 50 C90 38, 78 42, 70 35 C62 28, 58 15, 50 15 Z" />
+          <path d="M50 35 C46 35, 42 40, 38 45 C34 50, 42 55, 42 60 C42 65, 48 65, 50 65 C52 65, 58 65, 58 60 C58 55, 66 50, 62 45 C58 40, 54 35, 50 35 Z" opacity="0.7"/>
+        </svg>
+        <span class="logo-text">Rorschach</span>
+      </div>
+      
+      <div class="nav-actions">
+        <button class="nav-btn" onclick="toggleCartDrawer(true)" aria-label="Open Cart">
+          <svg viewBox="0 0 24 24">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4H6z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+          <span class="cart-count" id="cart-badge">0</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Hero Landing Cover -->
+    <section class="hero">
+      <div class="hero-content reveal">
+        <span class="hero-tagline">Project: Subconscious Symmetry</span>
+        <h1 class="hero-title">What Do<br>You See?</h1>
+        <p class="hero-desc">Streetwear born from generative psychology. Symmetrical organic structures reacting to your loop state. Explore the Rorschach drop.</p>
+        <div class="btn-group">
+          <a href="#shop" class="btn btn-primary" style="text-decoration:none; display:inline-block;">Shop Collection</a>
+          <button class="btn" onclick="togglePsycheLab(true)">Enter Psyche Lab</button>
+        </div>
+      </div>
+      
+      <div class="scroll-indicator" onclick="document.getElementById('shop').scrollIntoView({behavior: 'smooth'})">
+        <span>SCROLL DOWN</span>
+        <div class="scroll-line"></div>
+      </div>
+    </section>
+
+    <!-- Shop Storefront Section -->
+    <section class="shop-section" id="shop">
+      <div class="section-header reveal">
+        <div class="section-info">
+          <h2>T-Shirt Laboratory</h2>
+          <p>Drop 01 // Interactive Symmetries</p>
+        </div>
+        <div class="filters">
+          <button class="filter-btn active" onclick="filterCatalog('all', this)">Show All</button>
+          <button class="filter-btn" onclick="filterCatalog('light', this)">Light</button>
+          <button class="filter-btn" onclick="filterCatalog('dark', this)">Dark</button>
+        </div>
+      </div>
+
+      <!-- Store Products Grid -->
+      <div class="product-grid" id="product-grid">
+        <!-- Rendered dynamically via JS -->
+      </div>
+    </section>
+
+    <!-- Interactive Cognitive Diagnostic Assessment -->
+    <section class="assessment-section" id="assessment">
+      <div class="assessment-container glass-panel reveal">
+        <div id="assessment-quiz-flow">
+          <div class="assessment-progress" id="assessment-progress">STAGE 01 // 03</div>
+          <h2 class="assessment-question" id="assessment-question">Loading Visualizer...</h2>
+          <div class="assessment-options" id="assessment-options-container">
+            <!-- options generated in JS -->
+          </div>
+        </div>
+        
+        <!-- Results wrapper (initially hidden) -->
+        <div class="assessment-result" id="assessment-result">
+          <div class="assessment-progress" style="margin-bottom:8px;">COGNITIVE ANALYSIS COMPLETED</div>
+          <h2 class="detail-title" style="margin-bottom:12px; font-size:2.25rem;">YOUR PSYCHE READING IS: <span id="assessment-archetype" style="color:var(--accent);">VOID</span></h2>
+          <p id="assessment-result-desc" style="max-width:550px; margin-bottom:20px;">You are drawn to absolute silence, high-contrast configurations, and clean structure. The subconscious maps clean vector geometries over chaos.</p>
+          
+          <div class="result-shirt-rec">
+            <img class="result-shirt-img" id="result-shirt-img" src="" alt="Recommended Shirt">
+            <div class="result-shirt-info">
+              <h4 id="result-shirt-title">Void Symmetrics Tee</h4>
+              <p id="result-shirt-desc">Designed as a mirror of deep space configurations. Boxy heavyweight cotton.</p>
+            </div>
+          </div>
+          
+          <div class="btn-group" style="width: 100%;">
+            <button class="btn btn-primary" id="btn-add-recommended" style="flex:1; padding:18px;">Deploy Recommended Shirt</button>
+            <button class="btn" onclick="resetAssessmentQuiz()" style="padding:18px;">Retake Assessment</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Editorial Lookbook Collage Section -->
+    <section class="lookbook-section" id="lookbook">
+      <div class="section-header reveal">
+        <div class="section-info">
+          <h2>SUB-LEVEL LOOKBOOK</h2>
+          <p>Symmetry in the Wild // Captured Shadows</p>
+        </div>
+      </div>
+      <div class="lookbook-grid">
+        <div class="lookbook-item reveal">
+          <img src="../assets/rorschach_lookbook_1.jpg" alt="Lookbook Alley Photo">
+          <div class="lookbook-caption">
+            <span class="spec-label">FRAME 01 // VOID SYMMETRICS</span>
+            <span class="spec-val">Subconscious pattern observation in gritty urban alleys. Heavyweight block cut.</span>
+          </div>
+        </div>
+        <div class="lookbook-item reveal">
+          <img src="../assets/rorschach_lookbook_2.jpg" alt="Lookbook Brutalist Photo">
+          <div class="lookbook-caption">
+            <span class="spec-label">FRAME 02 // TOXIC PROJECTION</span>
+            <span class="spec-val">Brutalist interior shadow casting. Symmetrical graphic print study.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Metrics sizing protocol table -->
+    <section class="metrics-section" id="metrics">
+      <div class="section-header reveal">
+        <div class="section-info">
+          <h2>METRIC PROTOCOLS</h2>
+          <p>Sizing & Fit Specifications // All measurements in inches</p>
+        </div>
+      </div>
+      <div class="metrics-container glass-panel reveal">
+        <table class="metrics-table">
+          <thead>
+            <tr>
+              <th>Scale (Size)</th>
+              <th>Chest Width</th>
+              <th>Length (Collar to Hem)</th>
+              <th>Sleeve Length</th>
+              <th>Fit Profile</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>S (01)</td>
+              <td>23.0"</td>
+              <td>27.5"</td>
+              <td>8.5"</td>
+              <td>Oversized Boxy</td>
+            </tr>
+            <tr>
+              <td>M (02)</td>
+              <td>24.5"</td>
+              <td>28.5"</td>
+              <td>9.0"</td>
+              <td>Oversized Boxy</td>
+            </tr>
+            <tr>
+              <td>L (03)</td>
+              <td>26.0"</td>
+              <td>29.5"</td>
+              <td>9.5"</td>
+              <td>Oversized Boxy</td>
+            </tr>
+            <tr>
+              <td>XL (04)</td>
+              <td>27.5"</td>
+              <td>30.5"</td>
+              <td>10.0"</td>
+              <td>Extra Boxy</td>
+            </tr>
+            <tr>
+              <td>XXL (05)</td>
+              <td>29.0"</td>
+              <td>31.5"</td>
+              <td>10.5"</td>
+              <td>Extra Boxy</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Cognitive Resonance & Laundry Protocols -->
+    <section class="protocols-section" id="protocols">
+      <div class="section-header reveal">
+        <div class="section-info">
+          <h2>EXHIBIT PROTOCOLS</h2>
+          <p>Usage Warnings & Care Guidelines</p>
+        </div>
+      </div>
+      <div class="protocols-grid">
+        <div class="protocol-card glass-panel reveal">
+          <h3>01 / Washing Protocol</h3>
+          <p>Wash inside out in cold water with similar colors. Do not iron directly on the inkblot graphic. Hang dry to maintain the structural integrity of the high-density screen print.</p>
+        </div>
+        <div class="protocol-card glass-panel reveal d1">
+          <h3>02 / Symmetrical Resonance</h3>
+          <p>Due to the generative nature of the print, observers may report varying visual forms (moths, wolves, dancing figures, or abstract landscapes). Symmetrical patterns are psychologically safe for standard optical exposure.</p>
+        </div>
+        <div class="protocol-card glass-panel reveal d2">
+          <h3>03 / Sustainable Logistics</h3>
+          <p>Our packaging is 100% biodegradable cornstarch compostable mailers. All shipments are carbon neutral. Formulated in Portugal. Designed in the Void.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Brand Philosophy Section -->
+    <section class="philosophy-section" id="philosophy">
+      <div class="philosophy-card glass-panel reveal">
+        <span class="philosophy-title">The Mirror Thesis</span>
+        <p class="philosophy-text">
+          "We do not design the garment. <span>We design the mirror.</span> What you see in the symmetry is a projection of your own subconscious."
+        </p>
+        <span class="philosophy-author">RORSCHACH // EST. 2026</span>
+      </div>
+    </section>
+
+    <!-- Footer Area -->
+    <footer id="footer">
+      <div class="footer-grid reveal">
+        <div class="footer-col">
+          <div class="logo-container" style="margin-bottom: 20px;">
+            <svg class="logo-symbol" viewBox="0 0 100 100" style="width: 24px; height: 24px;">
+              <path d="M50 15 C42 15, 38 28, 30 35 C22 42, 10 38, 12 50 C14 62, 28 58, 35 68 C42 78, 45 85, 50 85 C55 85, 58 78, 65 68 C72 58, 86 62, 88 50 C90 38, 78 42, 70 35 C62 28, 58 15, 50 15 Z" />
+            </svg>
+            <span class="logo-text" style="font-size: 1.25rem;">Rorschach</span>
+          </div>
+          <p class="footer-logo-desc">High-contrast, generative streetwear brand. Experimenting with loops, mathematics, and psychological visual tests.</p>
+        </div>
+        
+        <div class="footer-col">
+          <h5>Navigation</h5>
+          <ul>
+            <li><a href="#shop">Shop</a></li>
+            <li><a href="#philosophy">The Thesis</a></li>
+            <li><button class="nav-btn" onclick="togglePsycheLab(true)" style="padding:0; font-size:0.85rem; color:var(--text-muted);">Open Psyche Lab</button></li>
+          </ul>
+        </div>
+        
+        <div class="footer-col">
+          <h5>Drop Alerts</h5>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">Sign up to get notified of seed changes and new inkblot releases.</p>
+          <div class="newsletter-form">
+            <input type="email" class="newsletter-input" placeholder="subconscious@domain.com">
+            <button class="newsletter-btn">SUBSCRIBE</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="footer-bottom reveal d1">
+        <span>&copy; 2026 Rorschach Laboratories. All rights reserved.</span>
+        <span>Connected to Stripe Test Environment</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Cart Drawer Overlay Pane -->
+  <div class="cart-drawer glass-panel" id="cart-drawer">
+    <div class="cart-header">
+      <h3>Your Cabinet</h3>
+      <button class="close-btn" onclick="toggleCartDrawer(false)" aria-label="Close Cart">
+        <svg style="width:24px; height:24px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    
+    <div class="cart-items" id="cart-items-container">
+      <!-- Items dynamically populated -->
+    </div>
+    
+    <div class="cart-footer">
+      <div class="cart-summary-line">
+        <span>Items Subtotal</span>
+        <span id="cart-subtotal">$0.00</span>
+      </div>
+      <div class="cart-summary-line">
+        <span>Shipping (Carbon Neutral)</span>
+        <span>FREE</span>
+      </div>
+      <div class="cart-summary-line total">
+        <span>Total Due</span>
+        <span id="cart-total">$0.00</span>
+      </div>
+      <button class="btn btn-primary checkout-btn" onclick="openCheckoutModal()">Initiate Checkout</button>
+    </div>
+  </div>
+
+  <!-- Product Detail Drawer Quick View -->
+  <div class="detail-drawer glass-panel" id="detail-drawer">
+    <div class="cart-header">
+      <h3 id="detail-product-id">SPECS</h3>
+      <button class="close-btn" onclick="toggleDetailDrawer(false)" aria-label="Close Details">
+        <svg style="width:24px; height:24px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    
+    <div class="detail-body" id="detail-body-container">
+      <!-- Details populated dynamically -->
+    </div>
+  </div>
+
+  <!-- Stripe Checkout Overlay Modal -->
+  <div class="stripe-modal-overlay" id="stripe-checkout-modal">
+    <div class="stripe-modal glass-panel">
+      <div class="stripe-header">
+        <h3>Secure Checkout via 
+          <svg viewBox="0 0 40 17" fill="currentColor">
+            <path d="M15.86 7.42c0-.98.78-1.42 2.1-1.42 1.15 0 2.29.35 2.29.35v-1.7s-1-.35-2.26-.35c-2.58 0-4.14 1.34-4.14 3.63 0 3.39 4.64 2.84 4.64 4.3 0 1.06-1 1.48-2.3 1.48-1.39 0-2.65-.45-2.65-.45v1.75s1.21.42 2.65.42c2.65 0 4.34-1.31 4.34-3.66 0-3.6-4.67-2.92-4.67-4.1zm8.39-2.93c-1 0-1.68.49-1.95.88V4.65h-1.95v11.23h2v-6.91a2.12 2.12 0 0 1 2.12-2.12h.27V4.5h-.49zm5.34-1.28a1.27 1.27 0 1 0 0 2.53 1.27 1.27 0 0 0 0-2.53zm-1 3.44h2v8.59h-2V6.65zm7.39.04c-1 0-1.65.5-1.92.89v-.74H31.7v11.1h2v-3.32a3 3 0 0 0 3.09 1.16c1.92 0 3.19-1.39 3.19-4.3 0-3.15-1.4-4.79-3.6-4.79zm-1.07 7.07c-1 0-1.84-.79-1.84-2.28s.82-2.28 1.84-2.28 1.84.81 1.84 2.28-.82 2.28-1.84 2.28zm8.68-4.22c-1.84-.52-2.39-.81-2.39-1.44 0-.52.52-.84 1.39-.84a4.19 4.19 0 0 1 2 .52V4.94a4.93 4.93 0 0 0-2-.39c-2.09 0-3.39 1-3.39 2.68 0 2.23 2.87 2.1 3.59 2.39.81.32.94.68.94 1.16 0 .68-.68 1-1.65 1a5 5 0 0 1-2.42-.65v1.87a6.22 6.22 0 0 0 2.49.52c2.29 0 3.65-1.13 3.65-2.88 0-2.39-2.38-2.2-4.21-2.7z"></path>
+          </svg>
+        </h3>
+        <button class="close-btn" onclick="closeCheckoutModal()" aria-label="Close Checkout">
+          <svg style="width:20px; height:20px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      
+      <div class="stripe-body">
+        <div class="order-summary-box">
+          <div class="summary-title">Order Ledger</div>
+          <div id="stripe-summary-items">
+            <!-- summary rows -->
+          </div>
+          <div class="summary-total-row">
+            <span>Total Bill</span>
+            <span id="stripe-summary-total">$0.00</span>
+          </div>
+        </div>
+
+        <form id="payment-form" onsubmit="handleStripeSubmit(event)">
+          <div class="stripe-form-group">
+            <label class="stripe-label">Customer Email</label>
+            <input type="email" id="stripe-email" required class="stripe-input" placeholder="psyche@domain.com">
+          </div>
+          
+          <div class="stripe-form-group">
+            <label class="stripe-label">Delivery Destination</label>
+            <input type="text" id="stripe-address" required class="stripe-input" placeholder="100 Symmetrical Blvd, Room 22" style="margin-bottom:8px;">
+            <div class="stripe-row">
+              <input type="text" id="stripe-city" required class="stripe-input" placeholder="City">
+              <input type="text" id="stripe-zip" required class="stripe-input" placeholder="Postal Code">
+            </div>
+          </div>
+          
+          <div class="stripe-form-group">
+            <label class="stripe-label">Card Credentials</label>
+            <div class="stripe-card-element">
+              <div class="stripe-card-icon">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                  <line x1="1" y1="10" x2="23" y2="10"></line>
+                </svg>
+              </div>
+              <input type="text" id="card-number" required class="stripe-card-input" placeholder="4242  4242  4242  4242" maxlength="19" oninput="formatCardNumber(this)">
+              <input type="text" id="card-expiry" required style="width: 70px; text-align: center;" placeholder="MM/YY" maxlength="5" oninput="formatExpiry(this)">
+              <input type="text" id="card-cvc" required style="width: 50px; text-align: center;" placeholder="CVC" maxlength="3">
+            </div>
+          </div>
+          
+          <button type="submit" class="btn btn-primary checkout-btn" id="pay-button" style="padding:18px;">
+            Authorize &amp; Pay
+          </button>
+          
+          <div class="payment-status" id="stripe-status-box"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- The Psyche Lab Customizer Dashboard -->
+  <div class="psyche-lab" id="psyche-lab-dashboard">
+    <!-- Sliding Glass Panel -->
+    <div class="psyche-panel glass-panel" id="psyche-panel">
+      <div class="psyche-panel-header">
+        <h4>THE PSYCHE LAB</h4>
+        <span id="psyche-active-seed">SEED: 5166</span>
+      </div>
+      
+      <div class="psyche-control-group">
+        <div class="psyche-control-label">
+          <span>Animation Speed</span>
+          <span id="val-speed">0.20</span>
+        </div>
+        <input type="range" class="psyche-slider" id="slide-speed" min="0" max="1" step="0.01" value="0.2">
+      </div>
+      
+      <div class="psyche-control-group">
+        <div class="psyche-control-label">
+          <span>Zoom Scale</span>
+          <span id="val-scale">0.35</span>
+        </div>
+        <input type="range" class="psyche-slider" id="slide-scale" min="0.05" max="0.95" step="0.01" value="0.35">
+      </div>
+      
+      <div class="psyche-control-group">
+        <div class="psyche-control-label">
+          <span>Liquid Distortion</span>
+          <span id="val-distort">0.60</span>
+        </div>
+        <input type="range" class="psyche-slider" id="slide-distort" min="0" max="1" step="0.01" value="0.6">
+      </div>
+
+      <div class="psyche-control-group">
+        <div class="psyche-control-label">
+          <span>Edge Detail</span>
+          <span id="val-detail">0.50</span>
+        </div>
+        <input type="range" class="psyche-slider" id="slide-detail" min="0" max="1" step="0.01" value="0.5">
+      </div>
+
+      <div class="psyche-control-group">
+        <div class="psyche-control-label">
+          <span>Film Grain</span>
+          <span id="val-grain">0.20</span>
+        </div>
+        <input type="range" class="psyche-slider" id="slide-grain" min="0" max="0.5" step="0.01" value="0.2">
+      </div>
+
+      <div class="psyche-control-group">
+        <div class="psyche-control-label">
+          <span>Symmetry Palette</span>
+        </div>
+        <div class="palette-selector">
+          <!-- Swapped first palette to be crimson red/dark tones to match request -->
+          <div class="palette-dot active" data-colors="#180303,#7f1d1d,#ef4444,#fef2f2" onclick="selectPalette(0, this)">
+            <span style="background:#180303"></span>
+            <span style="background:#7f1d1d"></span>
+            <span style="background:#ef4444"></span>
+          </div>
+          <div class="palette-dot" data-colors="#03121d,#075985,#22d3ee,#ecfeff" onclick="selectPalette(1, this)">
+            <span style="background:#03121d"></span>
+            <span style="background:#075985"></span>
+            <span style="background:#22d3ee"></span>
+          </div>
+          <div class="palette-dot" data-colors="#0b160b,#14532d,#4ade80,#f0fdf4" onclick="selectPalette(2, this)">
+            <span style="background:#0b160b"></span>
+            <span style="background:#14532d"></span>
+            <span style="background:#4ade80"></span>
+          </div>
+          <div class="palette-dot" data-colors="#0c0a09,#44403c,#d6d3d1,#fafaf9" onclick="selectPalette(3, this)">
+            <span style="background:#0c0a09"></span>
+            <span style="background:#44403c"></span>
+            <span style="background:#d6d3d1"></span>
+          </div>
+          <div class="palette-dot" data-colors="#120320,#581c87,#c084fc,#faf5ff" onclick="selectPalette(4, this)">
+            <span style="background:#120320"></span>
+            <span style="background:#581c87"></span>
+            <span style="background:#c084fc"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="psyche-checkbox-group">
+        <label class="psyche-control-label" style="margin-bottom:0;">Invert Light/Dark</label>
+        <input type="checkbox" class="psyche-checkbox" id="check-invert" checked onchange="toggleInvert(this.checked)">
+      </div>
+
+      <div class="psyche-actions">
+        <button class="psyche-btn" onclick="randomizeSeed()">MUTATE SEED</button>
+        <button class="psyche-btn" onclick="resetPsycheLab()">RESET ALL</button>
+      </div>
+    </div>
+
+    <!-- Toggle Orb Button -->
+    <div class="psyche-toggle glass-panel" id="psyche-toggle-btn" onclick="togglePsycheLab()">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"></path>
+        <path d="M12 6a6 6 0 1 0 6 6 6 6 0 0 0-6-6zm0 10a4 4 0 1 1 4-4 4 4 0 0 1-4 4z"></path>
+        <circle cx="12" cy="12" r="2"></circle>
+      </svg>
+    </div>
+  </div>
+
+  <script>
+    // Scroll-triggered reveal observer setup (from studio/splash assets)
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+    // -------------------------------------------------------------
+    // WebGL Shader Setup
+    // -------------------------------------------------------------
+    const canvas = document.getElementById('bg-canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    
+    if (!gl) {
+      console.error('WebGL is not supported in this environment.');
+    }
+
+    // Vertex & Fragment Shaders (Source matching lumen-splash-rorschach.html)
+    const VS = `attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }`;
+    const FS = `
+precision highp float;
+
+uniform vec2  u_res;
+uniform float u_phase;
+uniform float u_seed;
+uniform int   u_mode;
+uniform float u_speed, u_scale, u_density, u_distort, u_detail, u_grain;
+uniform vec3  u_c0, u_c1, u_c2, u_c3;
+uniform sampler2D u_texture;
+uniform float u_mix, u_pixel, u_invert;
+
+#define TAU 6.28318530718
+
+float hash21(vec2 p){
+    p = fract(p * vec2(234.34, 435.345));
+    p += dot(p, p + 34.23);
+    return fract(p.x * p.y);
+}
+
+float vnoise(vec2 p){
+    vec2 i = floor(p), f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    float a = hash21(i);
+    float b = hash21(i + vec2(1.0, 0.0));
+    float c = hash21(i + vec2(0.0, 1.0));
+    float d = hash21(i + vec2(1.0, 1.0));
+    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+}
+
+float fbm(vec2 p){
+    float v = 0.0, a = 0.5;
+    mat2 r = mat2(0.80, 0.60, -0.60, 0.80);
+    for (int i = 0; i < 5; i++){
+        v += a * vnoise(p);
+        p  = r * p * 2.1 + vec2(1.7, 9.2);
+        a *= 0.5;
+    }
+    return v;
+}
+
+vec2 loopOff(){
+    return vec2(cos(u_phase), sin(u_phase)) * (0.10 + 0.55 * u_speed);
+}
+
+void main(){
+    vec2 uv = gl_FragCoord.xy / u_res;
+    uv.y = 1.0 - uv.y;
+    float ar = u_res.x / u_res.y;
+    vec2 sOff = vec2(fract(u_seed * 0.193), fract(u_seed * 0.317)) * 47.0;
+
+    vec3 col = vec3(0.0);
+
+    /* ─── 22 · rorschach (inkblot) ─── */
+    if (u_mode == 22){
+        vec2 mp = uv;
+        mp.x = abs(mp.x - 0.5) * 2.0;
+        vec2 p = (vec2(mp.x * ar, mp.y) - vec2(0.5 * ar, 0.5)) * mix(2.0, 6.0, u_scale) + sOff;
+        float t = u_phase * mix(0.3, 1.0, u_speed);
+        vec2 off = loopOff();
+        vec2 q2 = vec2(fbm(p * 0.8 + off), fbm(p * 0.8 + vec2(5.2, 1.3) - off));
+        vec2 r2 = vec2(fbm(p + q2 * (1.0 + 2.0 * u_distort) + off),
+                       fbm(p + q2 * (1.0 + 2.0 * u_distort) + vec2(1.7, 9.2) - off));
+        float f = fbm(p + r2 * (1.0 + 1.5 * u_detail));
+        float ink = smoothstep(0.2, 0.6, f);
+        float bleed = smoothstep(0.0, 0.3, f) * (1.0 - smoothstep(0.7, 1.0, f));
+        vec3 paper = vec3(0.92, 0.90, 0.88);
+        vec3 inkCol = mix(u_c0, u_c1, 0.6);
+        col = mix(paper, inkCol, ink * mix(0.5, 1.0, u_distort));
+        col -= u_c2 * bleed * 0.08;
+        float stain = pow(1.0 - abs(f - 0.45) * 4.0, 6.0);
+        col += u_c3 * stain * 0.06 * u_detail;
+        float edge = smoothstep(0.18, 0.22, f) * (1.0 - smoothstep(0.58, 0.62, f));
+        col += inkCol * edge * 0.12;
+    }
+
+    /* film grain + vignette */
+    col += (hash21(gl_FragCoord.xy + vec2(u_phase * 91.3)) - 0.5) * u_grain * 0.22;
+    vec2 v = uv * 2.0 - 1.0;
+    col *= 1.0 - dot(v, v) * 0.16;
+
+    if (u_invert > 0.5) {
+        col = 1.0 - col;
+    }
+
+    gl_FragColor = vec4(col, 1.0);
+}`;
+
+    // Compile Shader helper
+    function compileShader(type, src) {
+      const s = gl.createShader(type);
+      gl.shaderSource(s, src);
+      gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+        console.error(gl.getShaderInfoLog(s));
+        gl.deleteShader(s);
+        return null;
+      }
+      return s;
+    }
+
+    const vs = compileShader(gl.VERTEX_SHADER, VS);
+    const fs = compileShader(gl.FRAGMENT_SHADER, FS);
+
+    const prog = gl.createProgram();
+    gl.attachShader(prog, vs);
+    gl.attachShader(prog, fs);
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+      console.error('Program linking failed: ' + gl.getProgramInfoLog(prog));
+    }
+    gl.useProgram(prog);
+
+    // Quad geometry setup
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+    const aLoc = gl.getAttribLocation(prog, 'a');
+    gl.enableVertexAttribArray(aLoc);
+    gl.vertexAttribPointer(aLoc, 2, gl.FLOAT, false, 0, 0);
+
+    // Uniform locations mapping
+    const U = {};
+    const uniformNames = [
+      'u_res', 'u_phase', 'u_seed', 'u_mode',
+      'u_speed', 'u_scale', 'u_density', 'u_distort', 'u_detail', 'u_grain',
+      'u_c0', 'u_c1', 'u_c2', 'u_c3', 'u_mix', 'u_pixel', 'u_invert'
+    ];
+    uniformNames.forEach(n => { U[n] = gl.getUniformLocation(prog, n); });
+
+    // Mutable Shader Parameter State Object (UPDATED default palette to Crimson red/dark tones)
+    const P = {
+      mode: 22,
+      seed: 5166,
+      loop: 4, 
+      colors: [
+        "#180303",
+        "#7f1d1d",
+        "#ef4444",
+        "#fef2f2"
+      ],
+      speed: 0.20,
+      scale: 0.35,
+      density: 0.55,
+      distort: 0.60,
+      detail: 0.50,
+      grain: 0.20,
+      mix: 0,
+      pixel: 0,
+      invert: 1 
+    };
+
+    function hex2rgb(h) {
+      return [
+        parseInt(h.slice(1, 3), 16) / 255,
+        parseInt(h.slice(3, 5), 16) / 255,
+        parseInt(h.slice(5, 7), 16) / 255,
+      ];
+    }
+
+    function resize() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2.0); 
+      canvas.width = Math.round(window.innerWidth * dpr);
+      canvas.height = Math.round(window.innerHeight * dpr);
+      gl.viewport(0, 0, canvas.width, canvas.height);
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // Render loop
+    const t0 = performance.now();
+    function render(now) {
+      const time = (now - t0) / 1000;
+      const phase = (time / P.loop * Math.PI * 2) % (Math.PI * 2);
+
+      gl.uniform2f(U.u_res, canvas.width, canvas.height);
+      gl.uniform1f(U.u_phase, phase);
+      gl.uniform1f(U.u_seed, (P.seed % 10000) * 0.6180339887 % 12.566);
+      gl.uniform1i(U.u_mode, P.mode);
+      gl.uniform1f(U.u_speed, P.speed);
+      gl.uniform1f(U.u_scale, P.scale);
+      gl.uniform1f(U.u_density, P.density);
+      gl.uniform1f(U.u_distort, P.distort);
+      gl.uniform1f(U.u_detail, P.detail);
+      gl.uniform1f(U.u_grain, P.grain);
+      gl.uniform1f(U.u_mix, P.mix);
+      gl.uniform1f(U.u_pixel, P.pixel);
+      gl.uniform1f(U.u_invert, P.invert);
+      gl.uniform3fv(U.u_c0, hex2rgb(P.colors[0]));
+      gl.uniform3fv(U.u_c1, hex2rgb(P.colors[1]));
+      gl.uniform3fv(U.u_c2, hex2rgb(P.colors[2]));
+      gl.uniform3fv(U.u_c3, hex2rgb(P.colors[3]));
+
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      requestAnimationFrame(render);
+    }
+    requestAnimationFrame(render);
+
+
+    // -------------------------------------------------------------
+    // Storefront Product Data
+    // -------------------------------------------------------------
+    const PRODUCTS = [
+      {
+        id: "rorschach-tee-black",
+        name: "Void Symmetrics Tee",
+        price: 55.00,
+        theme: "dark",
+        desc: "Constructed from premium 300GSM organic combed cotton. Features a high-density screen print of Symmetrical Inkblot No. 01 on the center chest. Fabric washed for a broken-in texture. Oversized silhouette, boxy fit with drop-shoulder tailoring.",
+        image: "../assets/rorschach_tee_black.jpg",
+        badge: "DROP 01",
+        fabric: "100% Combed Cotton",
+        weight: "300 GSM Heavyweight",
+        fit: "Oversized Boxy",
+        origin: "Made in Portugal"
+      },
+      {
+        id: "rorschach-tee-white",
+        name: "Liquid Mind Tee",
+        price: 55.00,
+        theme: "light",
+        desc: "Crafted from off-white heavyweight organic cotton jersey. Showcases an electric blue and cyan liquid-flow inkblot pattern, representing internal cognitive dynamics. Double-needle stitch construction for longevity. True-to-size boxy cut.",
+        image: "../assets/rorschach_tee_white.jpg",
+        badge: "ESSENTIAL",
+        fabric: "100% Organic Cotton",
+        weight: "280 GSM Midweight",
+        fit: "Relaxed Boxy",
+        origin: "Made in Portugal"
+      },
+      {
+        id: "rorschach-tee-charcoal",
+        name: "Toxic Projection Tee",
+        price: 60.00,
+        theme: "dark",
+        desc: "Pigment-dyed charcoal grey heavyweight tee, creating a worn vintage appearance. Highlights a striking neon volt green high-contrast Rorschach print. Ribbed crew collar, vintage shoulder tapes. Hand washed, subtle distressing.",
+        image: "../assets/rorschach_tee_charcoal.jpg",
+        badge: "LIMITED",
+        fabric: "100% Carded Cotton",
+        weight: "320 GSM Extra-Heavy",
+        fit: "Oversized Street",
+        origin: "Made in Portugal"
+      },
+      {
+        id: "rorschach-tee-red",
+        name: "Crimson Psyche Tee",
+        price: 60.00,
+        theme: "dark",
+        desc: "Special acid-wash washed black base. Printed with blood-crimson red ink in an organic, dripping symmetry layout. Features raw edge hem lines and distress-frayed collar. Every garment has a unique dye and wash gradient.",
+        image: "../assets/rorschach_tee_red.jpg",
+        badge: "EXPERIMENTAL",
+        fabric: "100% Ring-Spun Cotton",
+        weight: "300 GSM Heavyweight",
+        fit: "Oversized Boxy",
+        origin: "Made in Portugal"
+      }
+    ];
+
+    let cart = [];
+
+    // Render Products Grid
+    function renderProducts(items) {
+      const grid = document.getElementById('product-grid');
+      grid.innerHTML = '';
+      
+      items.forEach(product => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `
+          <div class="product-image-container">
+            ${product.badge ? `<span class="product-tag">${product.badge}</span>` : ''}
+            <img class="product-image" src="${product.image}" alt="${product.name}" onclick="openDetailDrawer('${product.id}')">
+            <div class="product-actions">
+              <button class="card-btn" onclick="addToCart('${product.id}', 'M')">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-bottom:-2px;">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg> Add to cart
+              </button>
+              <button class="card-btn" onclick="openDetailDrawer('${product.id}')">Specs</button>
+            </div>
+          </div>
+          <div class="product-details">
+            <div>
+              <h3 class="product-title" onclick="openDetailDrawer('${product.id}')">${product.name}</h3>
+              <div class="product-meta">${product.fit} // ${product.weight}</div>
+            </div>
+            <div class="product-price">$${product.price.toFixed(2)}</div>
+          </div>
+        `;
+        grid.appendChild(card);
+        // Dynamically register the product card with the scroll reveal observer!
+        if (typeof revealObserver !== 'undefined') {
+          revealObserver.observe(card);
+        }
+      });
+      if (typeof initTiltEffect === 'function') {
+        initTiltEffect();
+      }
+    }
+
+    function filterCatalog(category, btn) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      if (category === 'all') {
+        renderProducts(PRODUCTS);
+      } else {
+        const filtered = PRODUCTS.filter(p => p.theme === category);
+        renderProducts(filtered);
+      }
+    }
+
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    renderProducts(PRODUCTS);
+
+
+    // -------------------------------------------------------------
+    // Header Scroll Styling Behavior
+    // -------------------------------------------------------------
+    const header = document.getElementById('main-header');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 40) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+    });
+
+
+    // -------------------------------------------------------------
+    // Drawer Management & Cart State Functions
+    // -------------------------------------------------------------
+    const drawerOverlay = document.getElementById('drawer-overlay');
+    const cartDrawer = document.getElementById('cart-drawer');
+    const detailDrawer = document.getElementById('detail-drawer');
+
+    function toggleCartDrawer(isOpen) {
+      if (isOpen) {
+        toggleDetailDrawer(false);
+        cartDrawer.classList.add('open');
+        drawerOverlay.classList.add('open');
+      } else {
+        cartDrawer.classList.remove('open');
+        if (!detailDrawer.classList.contains('open')) {
+          drawerOverlay.classList.remove('open');
+        }
+      }
+    }
+
+    function toggleDetailDrawer(isOpen) {
+      if (isOpen) {
+        toggleCartDrawer(false);
+        detailDrawer.classList.add('open');
+        drawerOverlay.classList.add('open');
+      } else {
+        detailDrawer.classList.remove('open');
+        if (!cartDrawer.classList.contains('open')) {
+          drawerOverlay.classList.remove('open');
+        }
+        destroy3DView();
+      }
+    }
+
+    drawerOverlay.addEventListener('click', () => {
+      toggleCartDrawer(false);
+      toggleDetailDrawer(false);
+    });
+
+    function addToCart(productId, size) {
+      const product = PRODUCTS.find(p => p.id === productId);
+      if (!product) return;
+
+      const existingIndex = cart.findIndex(item => item.id === productId && item.size === size);
+      
+      if (existingIndex > -1) {
+        cart[existingIndex].qty += 1;
+      } else {
+        cart.push({
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          image: product.image,
+          size: size,
+          qty: 1
+        });
+      }
+      
+      updateCartUI();
+      toggleCartDrawer(true);
+      animateCartBadge();
+    }
+
+    function updateCartQty(index, change) {
+      cart[index].qty += change;
+      if (cart[index].qty <= 0) {
+        cart.splice(index, 1);
+      }
+      updateCartUI();
+    }
+
+    function removeFromCart(index) {
+      cart.splice(index, 1);
+      updateCartUI();
+    }
+
+    function updateCartUI() {
+      const container = document.getElementById('cart-items-container');
+      const badge = document.getElementById('cart-badge');
+      const subtotalEl = document.getElementById('cart-subtotal');
+      const totalEl = document.getElementById('cart-total');
+
+      container.innerHTML = '';
+      
+      if (cart.length === 0) {
+        container.innerHTML = '<div class="empty-cart-message">Cabinet is empty. Project pending stimulus.</div>';
+        badge.innerText = '0';
+        subtotalEl.innerText = '$0.00';
+        totalEl.innerText = '$0.00';
+        return;
+      }
+
+      let subtotal = 0;
+      let totalQty = 0;
+
+      cart.forEach((item, index) => {
+        subtotal += item.price * item.qty;
+        totalQty += item.qty;
+
+        const el = document.createElement('div');
+        el.className = 'cart-item';
+        el.innerHTML = `
+          <img class="cart-item-image" src="${item.image}" alt="${item.name}">
+          <div class="cart-item-details">
+            <div>
+              <div class="cart-item-title">${item.name}</div>
+              <div class="cart-item-meta">Size: ${item.size} // $${item.price.toFixed(2)} each</div>
+              <button class="cart-item-remove" onclick="removeFromCart(${index})">Delete</button>
+            </div>
+            <div class="cart-item-qty">
+              <button class="qty-btn" onclick="updateCartQty(${index}, -1)">-</button>
+              <span>${item.qty}</span>
+              <button class="qty-btn" onclick="updateCartQty(${index}, 1)">+</button>
+            </div>
+          </div>
+          <div class="cart-item-price">$${(item.price * item.qty).toFixed(2)}</div>
+        `;
+        container.appendChild(el);
+      });
+
+      badge.innerText = totalQty;
+      subtotalEl.innerText = `$${subtotal.toFixed(2)}`;
+      totalEl.innerText = `$${subtotal.toFixed(2)}`;
+    }
+
+    function animateCartBadge() {
+      const badge = document.getElementById('cart-badge');
+      badge.style.transform = 'scale(1.4)';
+      badge.style.boxShadow = '0 0 15px var(--accent)';
+      setTimeout(() => {
+        badge.style.transform = 'scale(1)';
+        badge.style.boxShadow = '0 0 8px var(--accent)';
+      }, 300);
+    }
+
+    let activeDetailProductId = null;
+    let selectedDetailSize = 'M';
+
+    function openDetailDrawer(productId) {
+      const product = PRODUCTS.find(p => p.id === productId);
+      if (!product) return;
+      
+      destroy3DView();
+      
+      activeDetailProductId = productId;
+      selectedDetailSize = 'M';
+
+      document.getElementById('detail-product-id').innerText = `SPEC SHEET // ${product.id.replace(/-/g, '_').toUpperCase()}`;
+      
+      const body = document.getElementById('detail-body-container');
+      body.innerHTML = `
+        <div class="detail-image-box" style="position:relative; overflow:hidden;">
+          <img id="detail-img-el" src="${product.image}" alt="${product.name}" style="width:100%; height:100%; object-fit:cover; transition:opacity 0.4s ease;">
+          <div id="threejs-canvas-container" style="position:absolute; inset:0; opacity:0; pointer-events:none; transition:opacity 0.4s ease; background:#090c10;"></div>
+          <button id="toggle-3d-btn" class="card-btn" style="position:absolute; bottom:12px; right:12px; width:auto; padding:6px 12px; z-index:20;" onclick="toggle3DView('${product.id}')">
+            View in 3D
+          </button>
+        </div>
+        <h2 class="detail-title">${product.name}</h2>
+        <div class="detail-price">$${product.price.toFixed(2)}</div>
+        <p class="detail-desc">${product.desc}</p>
+        
+        <div class="size-selector">
+          <div class="size-label">
+            <span>Choose Scale (Size)</span>
+            <button class="size-guide-btn" onclick="alert('Standard Streetwear sizing. Choose your regular size for an oversized aesthetic.')">Sizing Protocol</button>
+          </div>
+          <div class="size-options">
+            <button class="size-opt" data-size="S" onclick="setDetailSize('S', this)">S</button>
+            <button class="size-opt active" data-size="M" onclick="setDetailSize('M', this)">M</button>
+            <button class="size-opt" data-size="L" onclick="setDetailSize('L', this)">L</button>
+            <button class="size-opt" data-size="XL" onclick="setDetailSize('XL', this)">XL</button>
+            <button class="size-opt" data-size="XXL" onclick="setDetailSize('XXL', this)">XXL</button>
+          </div>
+        </div>
+
+        <div class="detail-spec-grid">
+          <div class="detail-spec-item">
+            <span class="detail-spec-label">Material weave</span>
+            <span class="detail-spec-val">${product.fabric}</span>
+          </div>
+          <div class="detail-spec-item">
+            <span class="detail-spec-label">Fabric Density</span>
+            <span class="detail-spec-val">${product.weight}</span>
+          </div>
+          <div class="detail-spec-item">
+            <span class="detail-spec-label">Fitting Profile</span>
+            <span class="detail-spec-val">${product.fit}</span>
+          </div>
+          <div class="detail-spec-item">
+            <span class="detail-spec-label">Dye Origin</span>
+            <span class="detail-spec-val">${product.origin}</span>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" style="width: 100%; padding: 18px;" onclick="addActiveDetailToCart()">
+          Deploy to Cart
+        </button>
+      `;
+
+      toggleDetailDrawer(true);
+    }
+
+    function setDetailSize(size, el) {
+      selectedDetailSize = size;
+      document.querySelectorAll('.size-opt').forEach(opt => opt.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    function addActiveDetailToCart() {
+      if (activeDetailProductId) {
+        addToCart(activeDetailProductId, selectedDetailSize);
+        toggleDetailDrawer(false);
+      }
+    }
+
+
+    // -------------------------------------------------------------
+    // Stripe Payments Mockup & Connection Pipeline Hooks
+    // -------------------------------------------------------------
+    const stripeModal = document.getElementById('stripe-checkout-modal');
+
+    function openCheckoutModal() {
+      if (cart.length === 0) {
+        alert("Your cart ledger is empty. Drop some garments to initiate the gateway.");
+        return;
+      }
+      
+      toggleCartDrawer(false);
+      
+      const summaryItems = document.getElementById('stripe-summary-items');
+      const summaryTotal = document.getElementById('stripe-summary-total');
+      summaryItems.innerHTML = '';
+      
+      let sumTotal = 0;
+      cart.forEach(item => {
+        sumTotal += item.price * item.qty;
+        const row = document.createElement('div');
+        row.className = 'summary-item-row';
+        row.innerHTML = `
+          <span>${item.name} (${item.size}) &times; ${item.qty}</span>
+          <span>$${(item.price * item.qty).toFixed(2)}</span>
+        `;
+        summaryItems.appendChild(row);
+      });
+      
+      summaryTotal.innerText = `$${sumTotal.toFixed(2)}`;
+      
+      const statusBox = document.getElementById('stripe-status-box');
+      statusBox.style.display = 'none';
+      statusBox.className = 'payment-status';
+      
+      stripeModal.classList.add('open');
+    }
+
+    function closeCheckoutModal() {
+      stripeModal.classList.remove('open');
+    }
+
+    function formatCardNumber(input) {
+      let v = input.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+      let matches = v.match(/\d{4,16}/g);
+      let match = matches && matches[0] || '';
+      let parts = [];
+
+      for (let i = 0, len = match.length; i < len; i += 4) {
+        parts.push(match.substring(i, i + 4));
+      }
+
+      if (parts.length > 0) {
+        input.value = parts.join('  ');
+      } else {
+        input.value = v;
+      }
+    }
+
+    function formatExpiry(input) {
+      let v = input.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+      if (v.length >= 2) {
+        input.value = v.substring(0, 2) + '/' + v.substring(2, 4);
+      } else {
+        input.value = v;
+      }
+    }
+
+    function handleStripeSubmit(event) {
+      event.preventDefault();
+      
+      const payButton = document.getElementById('pay-button');
+      const statusBox = document.getElementById('stripe-status-box');
+      
+      payButton.disabled = true;
+      payButton.innerText = "Encrypting Pipeline...";
+      
+      statusBox.innerText = "Initiating handshake with Stripe secure vault...";
+      statusBox.className = "payment-status processing";
+      
+      setTimeout(() => {
+        statusBox.innerText = "Authorizing credit tokens in sandbox mode...";
+        
+        setTimeout(() => {
+          statusBox.innerText = "Transaction Settled. Receipt generated: #RSC-" + Math.floor(100000 + Math.random() * 900000);
+          statusBox.className = "payment-status success";
+          
+          payButton.innerText = "SUCCESS";
+          
+          setTimeout(() => {
+            cart = [];
+            updateCartUI();
+            closeCheckoutModal();
+            payButton.disabled = false;
+            payButton.innerText = "Authorize & Pay";
+            alert("Psychological transaction complete. Order queued. Check console for API hooks documentation!");
+          }, 2000);
+          
+        }, 1500);
+        
+      }, 1500);
+
+      logStripeIntegrationPipeline();
+    }
+
+    function logStripeIntegrationPipeline() {
+      console.log(`
+=============================================================
+             STRIPE DEVELOPMENT PIPELINE CONNECTIONS
+=============================================================
+To deploy this on a live production Stripe environment:
+
+1. CLIENT-SIDE SETUP:
+   Add Stripe.js script tag to your header:
+   <script src="https://js.stripe.com/v3/"><\\/script>
+
+   Initialize stripe client with your public key inside scripts:
+   const stripe = Stripe('pk_live_yourActualKeyHere');
+
+2. PAYMENTS METHOD HOOK:
+   Replace mockup submission in handleStripeSubmit() with:
+   
+   async function handleStripeSubmit(event) {
+     event.preventDefault();
+     
+     // 1. Create a PaymentIntent on your backend node server.
+     const response = await fetch('/create-payment-intent', {
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify({ items: cart, email: document.getElementById('stripe-email').value })
+     });
+     const { clientSecret } = await response.json();
+
+     // 2. Authorize payment directly via Stripe SDK.
+     const result = await stripe.confirmCardPayment(clientSecret, {
+       payment_method: {
+         card: cardElementInstance, 
+         billing_details: {
+           email: document.getElementById('stripe-email').value,
+           address: { line1: document.getElementById('stripe-address').value }
+         }
+       }
+     });
+
+     if (result.error) {
+       showPaymentError(result.error.message);
+     } else {
+       if (result.paymentIntent.status === 'succeeded') {
+         showPaymentSuccess();
+       }
+     }
+   }
+
+3. SERVER-SIDE ENDPOINT (Node.js/Express example):
+   app.post('/create-payment-intent', async (req, res) => {
+     const { items } = req.body;
+     const amount = calculateOrderTotal(items); 
+     
+     const paymentIntent = await stripe.paymentIntents.create({
+       amount: amount,
+       currency: 'usd',
+       automatic_payment_methods: { enabled: true },
+     });
+     
+     res.send({ clientSecret: paymentIntent.client_secret });
+   });
+=============================================================
+      `);
+    }
+
+
+    // -------------------------------------------------------------
+    // Psyche Lab Generative Controls Settings Dashboard
+    // -------------------------------------------------------------
+    const psychePanel = document.getElementById('psyche-panel');
+    const psycheToggle = document.getElementById('psyche-toggle-btn');
+    const inputSpeed = document.getElementById('slide-speed');
+    const inputScale = document.getElementById('slide-scale');
+    const inputDistort = document.getElementById('slide-distort');
+    const inputDetail = document.getElementById('slide-detail');
+    const inputGrain = document.getElementById('slide-grain');
+    const inputInvert = document.getElementById('check-invert');
+    
+    const valSpeed = document.getElementById('val-speed');
+    const valScale = document.getElementById('val-scale');
+    const valDistort = document.getElementById('val-distort');
+    const valDetail = document.getElementById('val-detail');
+    const valGrain = document.getElementById('val-grain');
+    const activeSeedLabel = document.getElementById('psyche-active-seed');
+
+    function togglePsycheLab(forceOpen) {
+      const isOpen = psychePanel.classList.contains('open');
+      if (forceOpen || !isOpen) {
+        psychePanel.classList.add('open');
+        psycheToggle.classList.add('active');
+      } else {
+        psychePanel.classList.remove('open');
+        psycheToggle.classList.remove('active');
+      }
+    }
+
+    inputSpeed.addEventListener('input', (e) => {
+      P.speed = parseFloat(e.target.value);
+      valSpeed.innerText = P.speed.toFixed(2);
+    });
+
+    inputScale.addEventListener('input', (e) => {
+      P.scale = parseFloat(e.target.value);
+      valScale.innerText = P.scale.toFixed(2);
+    });
+
+    inputDistort.addEventListener('input', (e) => {
+      P.distort = parseFloat(e.target.value);
+      valDistort.innerText = P.distort.toFixed(2);
+    });
+
+    inputDetail.addEventListener('input', (e) => {
+      P.detail = parseFloat(e.target.value);
+      valDetail.innerText = P.detail.toFixed(2);
+    });
+
+    inputGrain.addEventListener('input', (e) => {
+      P.grain = parseFloat(e.target.value);
+      valGrain.innerText = P.grain.toFixed(2);
+    });
+
+    function toggleInvert(checked) {
+      P.invert = checked ? 1 : 0;
+    }
+
+    function selectPalette(idx, el) {
+      document.querySelectorAll('.palette-dot').forEach(dot => dot.classList.remove('active'));
+      el.classList.add('active');
+      
+      const colorsStr = el.getAttribute('data-colors');
+      P.colors = colorsStr.split(',');
+    }
+
+    function randomizeSeed() {
+      P.seed = Math.floor(Math.random() * 9999);
+      activeSeedLabel.innerText = `SEED: ${P.seed}`;
+    }
+
+    function resetPsycheLab() {
+      P.speed = 0.20;
+      P.scale = 0.35;
+      P.distort = 0.60;
+      P.detail = 0.50;
+      P.grain = 0.20;
+      P.invert = 1;
+      P.seed = 5166;
+      P.colors = ["#180303", "#7f1d1d", "#ef4444", "#fef2f2"];
+
+      inputSpeed.value = 0.2;
+      valSpeed.innerText = "0.20";
+      
+      inputScale.value = 0.35;
+      valScale.innerText = "0.35";
+      
+      inputDistort.value = 0.6;
+      valDistort.innerText = "0.60";
+      
+      inputDetail.value = 0.5;
+      valDetail.innerText = "0.50";
+      
+      inputGrain.value = 0.2;
+      valGrain.innerText = "0.20";
+
+      inputInvert.checked = true;
+      activeSeedLabel.innerText = `SEED: ${P.seed}`;
+
+      document.querySelectorAll('.palette-dot').forEach((dot, index) => {
+        if (index === 0) dot.classList.add('active');
+        else dot.classList.remove('active');
+      });
+    }
+
+
+    // -------------------------------------------------------------
+    // Interactive Rorschach Cognitive Assessment Quiz Script
+    // -------------------------------------------------------------
+    const ASSESS_QUESTIONS = [
+      {
+        question: "What is your primary cognitive reading of the current symmetry?",
+        seed: 5166, // Update shader to this seed during stage
+        options: [
+          { text: "A deep collapsing star or absolute void", archetype: "void" },
+          { text: "A liquid energy field flowing outward", archetype: "liquid" },
+          { text: "A toxic, hazard-like biological warning", archetype: "toxic" },
+          { text: "A beating heart or crimson flame", archetype: "crimson" }
+        ]
+      },
+      {
+        question: "What movement frequency does this configuration suggest?",
+        seed: 2394,
+        options: [
+          { text: "Deep, static silence", archetype: "void" },
+          { text: "Continuous waves drifting over water", archetype: "liquid" },
+          { text: "Chaotic chemical reaction or cellular glitch", archetype: "toxic" },
+          { text: "Organic pulse or internal warmth", archetype: "crimson" }
+        ]
+      },
+      {
+        question: "Choose the dominant path matching your current mindset:",
+        seed: 8812,
+        options: [
+          { text: "Total abstraction, pure structural minimalism", archetype: "void" },
+          { text: "Cohesive flow, dynamic adaptation", archetype: "liquid" },
+          { text: "High-contrast disruption, breaking paradigms", archetype: "toxic" },
+          { text: "Sensory density, emotional resonance", archetype: "crimson" }
+        ]
+      }
+    ];
+
+    let currentQuestionIdx = 0;
+    let scores = { void: 0, liquid: 0, toxic: 0, crimson: 0 };
+    let recommendedProduct = null;
+
+    function initAssessmentQuiz() {
+      currentQuestionIdx = 0;
+      scores = { void: 0, liquid: 0, toxic: 0, crimson: 0 };
+      
+      document.getElementById('assessment-quiz-flow').style.display = 'block';
+      document.getElementById('assessment-result').style.display = 'none';
+      
+      showQuestionStep();
+    }
+
+    function showQuestionStep() {
+      const step = ASSESS_QUESTIONS[currentQuestionIdx];
+      
+      // Update shader seed dynamically to represent the inkblot being observed!
+      P.seed = step.seed;
+      activeSeedLabel.innerText = `SEED: ${P.seed}`;
+      
+      document.getElementById('assessment-progress').innerText = `STAGE 0${currentQuestionIdx + 1} // 03`;
+      document.getElementById('assessment-question').innerText = step.question;
+      
+      const optionsContainer = document.getElementById('assessment-options-container');
+      optionsContainer.innerHTML = '';
+      
+      step.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'assessment-opt-btn';
+        btn.innerText = opt.text;
+        btn.onclick = () => selectAssessmentOption(opt.archetype);
+        optionsContainer.appendChild(btn);
+      });
+    }
+
+    function selectAssessmentOption(archetype) {
+      scores[archetype] += 1;
+      currentQuestionIdx++;
+      
+      if (currentQuestionIdx < ASSESS_QUESTIONS.length) {
+        showQuestionStep();
+      } else {
+        evaluateAssessmentResult();
+      }
+    }
+
+    function evaluateAssessmentResult() {
+      // Find archetype with highest score
+      let highestArchetype = "void";
+      let maxScore = -1;
+      
+      for (const arch in scores) {
+        if (scores[arch] > maxScore) {
+          maxScore = scores[arch];
+          highestArchetype = arch;
+        }
+      }
+      
+      // Map archetype to product recommendation
+      let mapping = {
+        void: {
+          productId: "rorschach-tee-black",
+          name: "Void Symmetrics Tee",
+          description: "You align with absolute structural silence. Symmetrical structures should remain minimal and high-contrast.",
+          colors: ["#0c0a09", "#44403c", "#d6d3d1", "#fafaf9"] // monochrome
+        },
+        liquid: {
+          productId: "rorschach-tee-white",
+          name: "Liquid Mind Tee",
+          description: "Your psyche reads patterns in flowing waves. Fluid blue and cyan symmetries indicate continuous adaptation.",
+          colors: ["#03121d", "#075985", "#22d3ee", "#ecfeff"] // blue/cyan
+        },
+        toxic: {
+          productId: "rorschach-tee-charcoal",
+          name: "Toxic Projection Tee",
+          description: "Your cognitive reading triggers high-contrast warnings. Volt green reflects aggressive cognitive signals.",
+          colors: ["#0b160b", "#14532d", "#4ade80", "#f0fdf4"] // volt green
+        },
+        crimson: {
+          productId: "rorschach-tee-red",
+          name: "Crimson Psyche Tee",
+          description: "You sense organic depth and vascular warmth. Crimson blood red shapes project emotional intensity.",
+          colors: ["#180303", "#7f1d1d", "#ef4444", "#fef2f2"] // crimson red
+        }
+      };
+
+      const result = mapping[highestArchetype];
+      recommendedProduct = PRODUCTS.find(p => p.id === result.productId);
+      
+      // Update shader color to recommended palette!
+      P.colors = result.colors;
+      
+      // Toggle palette dot visualizer active state
+      document.querySelectorAll('.palette-dot').forEach((dot, idx) => {
+        const colorsStr = dot.getAttribute('data-colors');
+        if (colorsStr.includes(result.colors[2])) {
+          dot.classList.add('active');
+        } else {
+          dot.classList.remove('active');
+        }
+      });
+      
+      // Update UI Result Details
+      document.getElementById('assessment-quiz-flow').style.display = 'none';
+      document.getElementById('assessment-result').style.display = 'flex';
+      
+      document.getElementById('assessment-archetype').innerText = highestArchetype.toUpperCase();
+      document.getElementById('assessment-result-desc').innerText = result.description;
+      
+      document.getElementById('result-shirt-img').src = recommendedProduct.image;
+      document.getElementById('result-shirt-title').innerText = recommendedProduct.name;
+      document.getElementById('result-shirt-desc').innerText = `${recommendedProduct.fit} // ${recommendedProduct.weight}. ${recommendedProduct.fabric}.`;
+      
+      // Configure Dynamic Cart Deployment button
+      const buyBtn = document.getElementById('btn-add-recommended');
+      buyBtn.innerText = `Deploy ${recommendedProduct.name} to Cart`;
+      buyBtn.onclick = () => {
+        addToCart(recommendedProduct.id, 'M');
+      };
+    }
+
+    // -------------------------------------------------------------
+    // Three.js Interactive 3D Artifact Engine
+    // -------------------------------------------------------------
+    let threeScene, threeCamera, threeRenderer, threeMesh, threeAnimId, threeResizeHandler;
+    let is3DActive = false;
+    let threeTargetRotX = 0, threeTargetRotY = 0;
+
+    function toggle3DView(productId) {
+      const imgEl = document.getElementById('detail-img-el');
+      const canvasContainer = document.getElementById('threejs-canvas-container');
+      const toggleBtn = document.getElementById('toggle-3d-btn');
+      
+      if (!is3DActive) {
+        is3DActive = true;
+        if (imgEl) imgEl.style.opacity = '0';
+        if (canvasContainer) {
+          canvasContainer.style.opacity = '1';
+          canvasContainer.style.pointerEvents = 'auto';
+        }
+        if (toggleBtn) toggleBtn.innerText = 'View Garment';
+        init3DView(productId, canvasContainer);
+      } else {
+        destroy3DView();
+      }
+    }
+
+    function destroy3DView() {
+      const imgEl = document.getElementById('detail-img-el');
+      const canvasContainer = document.getElementById('threejs-canvas-container');
+      const toggleBtn = document.getElementById('toggle-3d-btn');
+
+      is3DActive = false;
+      if (imgEl) imgEl.style.opacity = '1';
+      if (canvasContainer) {
+        canvasContainer.style.opacity = '0';
+        canvasContainer.style.pointerEvents = 'none';
+        canvasContainer.innerHTML = '';
+      }
+      if (toggleBtn) toggleBtn.innerText = 'View in 3D';
+
+      if (threeAnimId) {
+        cancelAnimationFrame(threeAnimId);
+        threeAnimId = null;
+      }
+      if (threeResizeHandler) {
+        window.removeEventListener('resize', threeResizeHandler);
+        threeResizeHandler = null;
+      }
+      if (threeMesh) {
+        if (threeMesh.geometry) threeMesh.geometry.dispose();
+        if (threeMesh.material) {
+          if (Array.isArray(threeMesh.material)) {
+            threeMesh.material.forEach(m => m.dispose());
+          } else {
+            threeMesh.material.dispose();
+          }
+        }
+        threeMesh = null;
+      }
+      threeScene = null;
+      threeCamera = null;
+      threeRenderer = null;
+      threeTargetRotX = 0;
+      threeTargetRotY = 0;
+    }
+
+    function init3DView(productId, container) {
+      if (threeRenderer) return;
+
+      const width = container.clientWidth || 400;
+      const height = container.clientHeight || 400;
+
+      threeScene = new THREE.Scene();
+
+      threeCamera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+      threeCamera.position.z = 5.2;
+
+      threeRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      threeRenderer.setSize(width, height);
+      threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2.0));
+      threeRenderer.toneMapping = THREE.ACESFilmicToneMapping;
+      threeRenderer.toneMappingExposure = 1.2;
+      container.appendChild(threeRenderer.domElement);
+
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.25);
+      threeScene.add(ambientLight);
+
+      const dirLight1 = new THREE.DirectionalLight(0xffffff, 1.5);
+      dirLight1.position.set(5, 5, 4);
+      threeScene.add(dirLight1);
+
+      const dirLight2 = new THREE.DirectionalLight(0xffffff, 0.6);
+      dirLight2.position.set(-5, -3, -2);
+      threeScene.add(dirLight2);
+
+      let keyColor = 0xef4444; // default red
+      if (productId === 'rorschach-tee-white') keyColor = 0x22d3ee; // cyan
+      if (productId === 'rorschach-tee-charcoal') keyColor = 0x4ade80; // neon green
+
+      const pointLight = new THREE.PointLight(keyColor, 4, 15);
+      pointLight.position.set(0, 0, 3);
+      threeScene.add(pointLight);
+
+      let geometry, material;
+      
+      if (productId === 'rorschach-tee-black') {
+        geometry = new THREE.IcosahedronGeometry(1.6, 5); 
+        material = new THREE.MeshStandardMaterial({
+          color: 0x050505,
+          roughness: 0.05,
+          metalness: 1.0,
+          flatShading: false
+        });
+      } else if (productId === 'rorschach-tee-white') {
+        geometry = new THREE.IcosahedronGeometry(1.6, 5);
+        material = new THREE.MeshPhysicalMaterial({
+          color: 0xffffff,
+          emissive: 0x075985,
+          emissiveIntensity: 0.2,
+          roughness: 0.02,
+          metalness: 0.0,
+          transmission: 0.95,
+          thickness: 1.8,
+          ior: 1.45,
+          clearcoat: 1.0,
+          clearcoatRoughness: 0.0
+        });
+      } else if (productId === 'rorschach-tee-charcoal') {
+        geometry = new THREE.IcosahedronGeometry(1.6, 2);
+        material = new THREE.MeshStandardMaterial({
+          color: 0x22c55e,
+          emissive: 0x4ade80,
+          emissiveIntensity: 0.8,
+          roughness: 0.4,
+          metalness: 0.9,
+          wireframe: true
+        });
+      } else {
+        geometry = new THREE.IcosahedronGeometry(1.6, 3);
+        material = new THREE.MeshPhysicalMaterial({
+          color: 0xef4444,
+          roughness: 0.12,
+          metalness: 0.1,
+          transmission: 0.75,
+          thickness: 1.5,
+          ior: 1.55,
+          clearcoat: 0.8
+        });
+      }
+
+      threeMesh = new THREE.Mesh(geometry, material);
+      threeScene.add(threeMesh);
+
+      const posAttr = geometry.attributes.position;
+      const originalPositions = posAttr.array.slice();
+
+      const onMouseMove = (e) => {
+        const rect = container.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        threeTargetRotY = x * 1.8;
+        threeTargetRotX = -y * 1.8;
+      };
+
+      const onMouseLeave = () => {
+        threeTargetRotX = 0;
+        threeTargetRotY = 0;
+      };
+
+      container.addEventListener('mousemove', onMouseMove);
+      container.addEventListener('mouseleave', onMouseLeave);
+
+      threeResizeHandler = () => {
+        if (!threeRenderer || !threeCamera) return;
+        const w = container.clientWidth;
+        const h = container.clientHeight;
+        threeCamera.aspect = w / h;
+        threeCamera.updateProjectionMatrix();
+        threeRenderer.setSize(w, h);
+      };
+      window.addEventListener('resize', threeResizeHandler);
+
+      function animate() {
+        if (!is3DActive) return;
+
+        threeAnimId = requestAnimationFrame(animate);
+
+        const time = performance.now() * 0.0025;
+        const pos = geometry.attributes.position.array;
+
+        for (let i = 0; i < pos.length; i += 3) {
+          const vx = originalPositions[i];
+          const vy = originalPositions[i+1];
+          const vz = originalPositions[i+2];
+
+          const len = Math.sqrt(vx*vx + vy*vy + vz*vz);
+          const nx = vx / len;
+          const ny = vy / len;
+          const nz = vz / len;
+
+          let wave = 0;
+          if (productId === 'rorschach-tee-black') {
+            wave = Math.sin(nx * 4.0 + time * 1.5) * Math.cos(ny * 4.0 - time) * Math.sin(nz * 4.0 + time) * 0.35;
+            wave += Math.sin(nx * 10.0 - time * 3.0) * 0.08;
+          } else if (productId === 'rorschach-tee-white') {
+            wave = Math.sin(nx * 2.5 + time) * Math.cos(ny * 2.5 + time) * 0.25;
+            wave += Math.sin(nz * 5.0 - time * 1.5) * 0.05;
+          } else if (productId === 'rorschach-tee-charcoal') {
+            wave = Math.sin(nx * 3.0 + time * 2.0) * Math.cos(ny * 3.0 - time * 2.0) * 0.22;
+            wave = Math.round(wave * 5.0) / 5.0;
+          } else {
+            const pulse = 1.0 + Math.sin(time * 3.0) * 0.12;
+            wave = (Math.sin(nx * 3.0 + time) * Math.cos(ny * 3.0 - time) * 0.15) + (pulse - 1.0);
+          }
+
+          pos[i] = vx + nx * wave;
+          pos[i+1] = vy + ny * wave;
+          pos[i+2] = vz + nz * wave;
+        }
+
+        geometry.attributes.position.needsUpdate = true;
+        geometry.computeVertexNormals();
+
+        threeMesh.rotation.y += (threeTargetRotY + time * 0.12 - threeMesh.rotation.y) * 0.06;
+        threeMesh.rotation.x += (threeTargetRotX + time * 0.08 - threeMesh.rotation.x) * 0.06;
+
+        threeRenderer.render(threeScene, threeCamera);
+      }
+
+      animate();
+    }
+
+    // -------------------------------------------------------------
+    // Glass Pane Tilt & Specular Sheen Effect
+    // -------------------------------------------------------------
+    function initTiltEffect() {
+      const targets = document.querySelectorAll('.glass-panel, .product-card, .lookbook-card');
+      targets.forEach(el => {
+        if (el.dataset.tiltBound === 'true') return;
+        el.dataset.tiltBound = 'true';
+
+        el.addEventListener('mousemove', (e) => {
+          const rect = el.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          const xc = rect.width / 2;
+          const yc = rect.height / 2;
+          const dx = x - xc;
+          const dy = y - yc;
+
+          const tiltX = (dy / yc) * 6; 
+          const tiltY = -(dx / xc) * 6;
+
+          el.style.transform = `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateY(-4px)`;
+          
+          if (el.classList.contains('glass-panel')) {
+            const pctX = (x / rect.width) * 100;
+            const pctY = (y / rect.height) * 100;
+            el.style.setProperty('--sheen-x', `${pctX}%`);
+            el.style.setProperty('--sheen-y', `${pctY}%`);
+          }
+        });
+
+        el.addEventListener('mouseleave', () => {
+          el.style.transform = '';
+          el.style.setProperty('--sheen-x', '50%');
+          el.style.setProperty('--sheen-y', '50%');
+        });
+      });
+    }
+
+    function resetAssessmentQuiz() {
+      initAssessmentQuiz();
+    }
+
+    // Launch assessment on load
+    initAssessmentQuiz();
+
+    // Initialize tilt effect for static glass elements on load
+    if (typeof initTiltEffect === 'function') {
+      initTiltEffect();
+    }
+
+    // Register all static reveal elements (headings, grids, panels)
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+  </script>
+</body>
+</html>

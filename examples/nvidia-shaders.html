@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NVIDIA GPU Gems — Shader Examples</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #08080a; --panel: #0e0e12; --line: #1c1c22;
+  --text: #b8b8c0; --dim: #55555e; --accent: #e03a3a; --white: #f4f4f6;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; }
+
+.hero {
+  min-height: 60vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center;
+  padding: 80px 24px 40px;
+  background: radial-gradient(ellipse at 50% 40%, #111118 0%, var(--bg) 70%);
+}
+.hero h1 {
+  font-family: 'JetBrains Mono', monospace; font-weight: 500;
+  font-size: clamp(28px, 5vw, 48px); color: var(--white);
+  letter-spacing: 0.08em; margin-bottom: 12px;
+}
+.hero h1 span { color: var(--accent); }
+.hero p { font-size: 15px; color: var(--dim); max-width: 600px; line-height: 1.6; }
+.hero .tag {
+  display: inline-block; margin-top: 20px; padding: 6px 16px;
+  border: 1px solid var(--line); border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  color: var(--dim); letter-spacing: 0.1em;
+}
+
+.grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+  gap: 24px; padding: 40px; max-width: 1400px; margin: 0 auto;
+}
+@media (max-width: 560px) { .grid { grid-template-columns: 1fr; padding: 16px; } }
+
+.card {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
+  overflow: hidden; transition: border-color .2s;
+}
+.card:hover { border-color: #2a2a34; }
+.card canvas { width: 100%; aspect-ratio: 16/9; display: block; background: #000; }
+.card-body { padding: 16px 20px; }
+.card-body h3 {
+  font-family: 'JetBrains Mono', monospace; font-size: 13px;
+  font-weight: 500; color: var(--white); letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+.card-body h3 span { color: var(--accent); font-weight: 400; }
+.card-body p { font-size: 12px; color: var(--dim); line-height: 1.5; margin-bottom: 12px; }
+.card-body .ref {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  color: var(--dim); letter-spacing: 0.1em; text-transform: lowercase;
+  border-top: 1px solid var(--line); padding-top: 10px;
+}
+
+.controls { display: flex; gap: 8px; flex-wrap: wrap; }
+.ctrl { flex: 1; min-width: 120px; }
+.ctrl label {
+  display: flex; justify-content: space-between; font-size: 10px;
+  font-family: 'JetBrains Mono', monospace; color: var(--dim);
+  letter-spacing: 0.08em; margin-bottom: 4px;
+}
+.ctrl label .v { color: var(--text); }
+.ctrl input[type=range] {
+  width: 100%; height: 12px; -webkit-appearance: none; appearance: none;
+  background: transparent; cursor: pointer;
+}
+.ctrl input[type=range]::-webkit-slider-runnable-track {
+  height: 2px; background: var(--line); border-radius: 1px;
+}
+.ctrl input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 8px; height: 8px; margin-top: -3px;
+  border-radius: 50%; background: var(--white); transition: background .15s;
+}
+.ctrl input[type=range]:hover::-webkit-slider-thumb { background: var(--accent); }
+.ctrl input[type=range]::-moz-range-track { height: 2px; background: var(--line); }
+.ctrl input[type=range]::-moz-range-thumb {
+  width: 8px; height: 8px; border: none; border-radius: 50%; background: var(--white);
+}
+
+footer {
+  text-align: center; padding: 40px 24px 60px;
+  font-size: 11px; color: var(--dim); letter-spacing: 0.08em;
+}
+footer a { color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1><span>NVIDIA</span> GPU Gems — Shader Examples</h1>
+  <p>Interactive WebGL implementations of techniques from the GPU Gems series: Perlin noise, depth of field, motion blur, and procedural textures.</p>
+  <div class="tag">WebGL 1.0 · GLSL ES 1.0 · No dependencies</div>
+</div>
+
+<div class="grid">
+
+  <!-- 1. Perlin Noise -->
+  <div class="card">
+    <canvas id="c-perlin"></canvas>
+    <div class="card-body">
+      <h3><span>01</span> Improved Perlin Noise</h3>
+      <p>Ken Perlin's quintic interpolation with Stefan Gustavson's textureless implementation. Quintic curve eliminates banding artifacts found in cubic hermite.</p>
+      <div class="controls">
+        <div class="ctrl">
+          <label>scale <span class="v" id="v-perlin-scale">4.0</span></label>
+          <input type="range" id="perlin-scale" min="1" max="12" step="0.5" value="4">
+        </div>
+        <div class="ctrl">
+          <label>octaves <span class="v" id="v-perlin-oct">5</span></label>
+          <input type="range" id="perlin-oct" min="1" max="10" step="1" value="5">
+        </div>
+        <div class="ctrl">
+          <label>speed <span class="v" id="v-perlin-speed">0.30</span></label>
+          <input type="range" id="perlin-speed" min="0" max="1" step="0.05" value="0.3">
+        </div>
+      </div>
+      <div class="ref">GPU Gems 2 & 3 · Chapter 26 · Textureless Procedural Noise</div>
+    </div>
+  </div>
+
+  <!-- 2. Turbulence -->
+  <div class="card">
+    <canvas id="c-turb"></canvas>
+    <div class="card-body">
+      <h3><span>02</span> Turbulence</h3>
+      <p>fBM with absolute value of noise at each octave. Creates sharp valleys and flame-like ridges — the "turbulence" variant of fractal noise.</p>
+      <div class="controls">
+        <div class="ctrl">
+          <label>octaves <span class="v" id="v-turb-oct">6</span></label>
+          <input type="range" id="turb-oct" min="2" max="10" step="1" value="6">
+        </div>
+        <div class="ctrl">
+          <label>gain <span class="v" id="v-turb-gain">0.50</span></label>
+          <input type="range" id="turb-gain" min="0.2" max="0.8" step="0.05" value="0.5">
+        </div>
+        <div class="ctrl">
+          <label>speed <span class="v" id="v-turb-speed">0.25</span></label>
+          <input type="range" id="turb-speed" min="0" max="1" step="0.05" value="0.25">
+        </div>
+      </div>
+      <div class="ref">GPU Gems 2 · Chapter 26 · fBM Turbulence Variant</div>
+    </div>
+  </div>
+
+  <!-- 3. Ridged Noise -->
+  <div class="card">
+    <canvas id="c-ridge"></canvas>
+    <div class="card-body">
+      <h3><span>03</span> Ridged Multi-Fractal</h3>
+      <p>Sharp mountain ridges and veins. Inverts and squares noise at each octave to create crisp ridgelines.</p>
+      <div class="controls">
+        <div class="ctrl">
+          <label>octaves <span class="v" id="v-ridge-oct">6</span></label>
+          <input type="range" id="ridge-oct" min="2" max="10" step="1" value="6">
+        </div>
+        <div class="ctrl">
+          <label>offset <span class="v" id="v-ridge-offset">0.80</span></label>
+          <input type="range" id="ridge-offset" min="0.1" max="1.5" step="0.05" value="0.8">
+        </div>
+        <div class="ctrl">
+          <label>gain <span class="v" id="v-ridge-gain">0.50</span></label>
+          <input type="range" id="ridge-gain" min="0.2" max="0.9" step="0.05" value="0.5">
+        </div>
+      </div>
+      <div class="ref">GPU Gems 2 · Chapter 26 · Ridged Multi-Fractal Noise</div>
+    </div>
+  </div>
+
+  <!-- 4. Marble -->
+  <div class="card">
+    <canvas id="c-marble"></canvas>
+    <div class="card-body">
+      <h3><span>04</span> Marble Texture</h3>
+      <p>Domain-warped sine wave modulated by fBM noise. The noise displaces the phase of the sine, creating natural veining patterns.</p>
+      <div class="controls">
+        <div class="ctrl">
+          <label>frequency <span class="v" id="v-marb-freq">8.0</span></label>
+          <input type="range" id="marb-freq" min="2" max="20" step="0.5" value="8">
+        </div>
+        <div class="ctrl">
+          <label>turbulence <span class="v" id="v-marb-turb">4.0</span></label>
+          <input type="range" id="marb-turb" min="0" max="10" step="0.5" value="4">
+        </div>
+        <div class="ctrl">
+          <label>speed <span class="v" id="v-marb-speed">0.15</span></label>
+          <input type="range" id="marb-speed" min="0" max="0.5" step="0.05" value="0.15">
+        </div>
+      </div>
+      <div class="ref">GPU Gems · Procedural Texturing · Marble Recipe</div>
+    </div>
+  </div>
+
+  <!-- 5. Domain Warping -->
+  <div class="card">
+    <canvas id="c-warp"></canvas>
+    <div class="card-body">
+      <h3><span>05</span> Domain Warping</h3>
+      <p>Feed fBM output back into its own input: <code>f(p + fBM(p + fBM(p)))</code>. Creates organic, fluid distortion — clouds, marble, swirling turbulence.</p>
+      <div class="controls">
+        <div class="ctrl">
+          <label>warp strength <span class="v" id="v-warp-str">4.0</span></label>
+          <input type="range" id="warp-str" min="0" max="8" step="0.5" value="4">
+        </div>
+        <div class="ctrl">
+          <label>octaves <span class="v" id="v-warp-oct">5</span></label>
+          <input type="range" id="warp-oct" min="2" max="8" step="1" value="5">
+        </div>
+        <div class="ctrl">
+          <label>speed <span class="v" id="v-warp-speed">0.20</span></label>
+          <input type="range" id="warp-speed" min="0" max="0.6" step="0.05" value="0.2">
+        </div>
+      </div>
+      <div class="ref">GPU Gems · Inigo Quilez · Domain Warping Technique</div>
+    </div>
+  </div>
+
+  <!-- 6. Circle of Confusion -->
+  <div class="card">
+    <canvas id="c-coc"></canvas>
+    <div class="card-body">
+      <h3><span>06</span> Circle of Confusion (DoF)</h3>
+      <p>Depth of field simulation using Circle of Confusion. Pixels far from the focus plane get variable-width blur. Simulates real camera lens optics.</p>
+      <div class="controls">
+        <div class="ctrl">
+          <label>focus dist <span class="v" id="v-coc-focus">0.50</span></label>
+          <input type="range" id="coc-focus" min="0" max="1" step="0.05" value="0.5">
+        </div>
+        <div class="ctrl">
+          <label>aperture <span class="v" id="v-coc-aperture">0.30</span></label>
+          <input type="range" id="coc-aperture" min="0" max="0.8" step="0.05" value="0.3">
+        </div>
+        <div class="ctrl">
+          <label>blur radius <span class="v" id="v-coc-radius">0.04</span></label>
+          <input type="range" id="coc-radius" min="0.005" max="0.08" step="0.005" value="0.04">
+        </div>
+      </div>
+      <div class="ref">GPU Gems 3 · Chapter 28 · Practical Depth of Field</div>
+    </div>
+  </div>
+
+  <!-- 7. Motion Blur -->
+  <div class="card">
+    <canvas id="c-mblur"></canvas>
+    <div class="card-body">
+      <h3><span>07</span> Velocity-Based Motion Blur</h3>
+      <p>Post-process motion blur using per-pixel velocity vectors. Samples along the direction of travel and averages for smooth streaks.</p>
+      <div class="controls">
+        <div class="ctrl">
+          <label>exposure <span class="v" id="v-mblur-exp">0.50</span></label>
+          <input type="range" id="mblur-exp" min="0" max="1" step="0.05" value="0.5">
+        </div>
+        <div class="ctrl">
+          <label>samples <span class="v" id="v-mblur-samp">8</span></label>
+          <input type="range" id="mblur-samp" min="2" max="16" step="2" value="8">
+        </div>
+        <div class="ctrl">
+          <label>speed <span class="v" id="v-mblur-speed">0.60</span></label>
+          <input type="range" id="mblur-speed" min="0.1" max="1.5" step="0.1" value="0.6">
+        </div>
+      </div>
+      <div class="ref">GPU Gems 3 · Chapter 27 · Motion Blur Post-Processing</div>
+    </div>
+  </div>
+
+  <!-- 8. Separable Gaussian Blur -->
+  <div class="card">
+    <canvas id="c-gauss"></canvas>
+    <div class="card-body">
+      <h3><span>08</span> Separable Gaussian Blur</h3>
+      <p>NVIDIA's bilinear optimization: sample between texel centers to halve texture fetches. Uses GPU's hardware bilinear unit for free blending.</p>
+      <div class="controls">
+        <div class="ctrl">
+          <label>radius <span class="v" id="v-gauss-rad">4</span></label>
+          <input type="range" id="gauss-rad" min="1" max="10" step="1" value="4">
+        </div>
+        <div class="ctrl">
+          <label>sigma <span class="v" id="v-gauss-sigma">2.0</span></label>
+          <input type="range" id="gauss-sigma" min="0.5" max="6" step="0.5" value="2">
+        </div>
+        <div class="ctrl">
+          <label>bilinear opt <span class="v" id="v-gauss-bil">on</span></label>
+          <input type="range" id="gauss-bil" min="0" max="1" step="1" value="1">
+        </div>
+      </div>
+      <div class="ref">GPU Gems 2 & 3 · Separable Bilinear Sampling Optimization</div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  Techniques from <a href="https://developer.nvidia.com/gpugems/gpugems/contributors">NVIDIA GPU Gems</a> 1–3 · WebGL 1.0 · Built for /motion
+</footer>
+
+<script>
+// ── Shared GL Helpers ──────────────────────────────────────
+const VS = `attribute vec2 a; void main(){ gl_Position=vec4(a,0,1); }`;
+
+function initGL(canvas) {
+  const gl = canvas.getContext('webgl', { preserveDrawingBuffer: true })
+          || canvas.getContext('experimental-webgl');
+  if (!gl) return null;
+  const vs = gl.createShader(gl.VERTEX_SHADER);
+  gl.shaderSource(vs, VS); gl.compileShader(vs);
+  return gl;
+}
+
+function makeProgram(gl, fsSrc) {
+  const vs = gl.createShader(gl.VERTEX_SHADER);
+  gl.shaderSource(vs, VS); gl.compileShader(vs);
+  const fs = gl.createShader(gl.FRAGMENT_SHADER);
+  gl.shaderSource(fs, fsSrc); gl.compileShader(fs);
+  if (!gl.getShaderParameter(fs, gl.COMPILE_STATUS))
+    console.error(gl.getShaderInfoLog(fs));
+  const p = gl.createProgram();
+  gl.attachShader(p, vs); gl.attachShader(p, fs); gl.linkProgram(p);
+  gl.useProgram(p);
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
+  const a = gl.getAttribLocation(p, 'a');
+  gl.enableVertexAttribArray(a);
+  gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
+  return p;
+}
+
+function uLoc(gl, p, name) { return gl.getUniformLocation(p, name); }
+
+// ── Shader Sources ─────────────────────────────────────────
+
+const PERLIN_FS = `
+precision highp float;
+uniform vec2 u_res; uniform float u_time;
+uniform float u_scale, u_oct, u_speed;
+vec2 fade(vec2 t){ return t*t*t*(t*(t*6.0-15.0)+10.0); }
+vec4 permute(vec4 x){ return mod(((x*34.0)+1.0)*x, 289.0); }
+float cnoise(vec2 P){
+  vec4 Pi=floor(P.xyxy)+vec4(0,0,1,1);
+  vec4 Pf=fract(P.xyxy)-vec4(0,0,1,1);
+  Pi=mod(Pi,289.0);
+  vec4 ix=Pi.xzxz, iy=Pi.yyww, fx=Pf.xzxz, fy=Pf.yyww;
+  vec4 i=permute(permute(ix)+iy);
+  vec4 gx=fract(i*(1.0/41.0))*2.0-1.0;
+  vec4 gy=abs(gx)-0.5;
+  vec4 tx=floor(gx+0.5); gx=gx-tx;
+  vec2 g00=vec2(gx.x,gy.x), g10=vec2(gx.y,gy.y);
+  vec2 g01=vec2(gx.z,gy.z), g11=vec2(gx.w,gy.w);
+  vec4 norm=1.79284291400159-0.85373472095314*vec4(dot(g00,g00),dot(g01,g01),dot(g10,g10),dot(g11,g11));
+  g00*=norm.x; g01*=norm.y; g10*=norm.z; g11*=norm.w;
+  float n00=dot(g00,vec2(fx.x,fy.x)), n10=dot(g10,vec2(fx.y,fy.y));
+  float n01=dot(g01,vec2(fx.z,fy.z)), n11=dot(g11,vec2(fx.w,fy.w));
+  vec2 fade_xy=fade(Pf.xy);
+  vec2 n_x=mix(vec2(n00,n01),vec2(n10,n11),fade_xy.x);
+  return 2.3*mix(n_x.x,n_x.y,fade_xy.y);
+}
+float fbm(vec2 p){
+  float v=0.0, a=0.5;
+  mat2 r=mat2(0.8,0.6,-0.6,0.8);
+  for(int i=0;i<10;i++){
+    if(float(i)>=u_oct) break;
+    v+=a*cnoise(p); p=r*p*2.1+vec2(1.7,9.2); a*=0.5;
+  }
+  return v;
+}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_res;
+  uv.x*=u_res.x/u_res.y;
+  float t=u_time*u_speed;
+  float n=fbm(uv*u_scale+vec2(t*0.3,t*0.2));
+  vec3 col=mix(vec3(0.02,0.01,0.06),vec3(0.9,0.35,0.15),n*0.5+0.5);
+  col+=vec3(0.05,0.15,0.3)*pow(max(n,0.0),3.0);
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const TURB_FS = `
+precision highp float;
+uniform vec2 u_res; uniform float u_time;
+uniform float u_oct, u_gain, u_speed;
+vec2 fade(vec2 t){ return t*t*t*(t*(t*6.0-15.0)+10.0); }
+vec4 permute(vec4 x){ return mod(((x*34.0)+1.0)*x, 289.0); }
+float cnoise(vec2 P){
+  vec4 Pi=floor(P.xyxy)+vec4(0,0,1,1); vec4 Pf=fract(P.xyxy)-vec4(0,0,1,1);
+  Pi=mod(Pi,289.0); vec4 ix=Pi.xzxz,iy=Pi.yyww,fx=Pf.xzxz,fy=Pf.yyww;
+  vec4 i=permute(permute(ix)+iy);
+  vec4 gx=fract(i*(1.0/41.0))*2.0-1.0; vec4 gy=abs(gx)-0.5;
+  vec4 tx=floor(gx+0.5); gx-=tx;
+  vec2 g00=vec2(gx.x,gy.x),g10=vec2(gx.y,gy.y),g01=vec2(gx.z,gy.z),g11=vec2(gx.w,gy.w);
+  vec4 norm=1.79284291400159-0.85373472095314*vec4(dot(g00,g00),dot(g01,g01),dot(g10,g10),dot(g11,g11));
+  g00*=norm.x;g01*=norm.y;g10*=norm.z;g11*=norm.w;
+  float n00=dot(g00,vec2(fx.x,fy.x)),n10=dot(g10,vec2(fx.y,fy.y));
+  float n01=dot(g01,vec2(fx.z,fy.z)),n11=dot(g11,vec2(fx.w,fy.w));
+  vec2 fade_xy=fade(Pf.xy); vec2 n_x=mix(vec2(n00,n01),vec2(n10,n11),fade_xy.x);
+  return 2.3*mix(n_x.x,n_x.y,fade_xy.y);
+}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_res; uv.x*=u_res.x/u_res.y;
+  float t=u_time*u_speed; vec2 p=uv*5.0+vec2(t*0.4,t*0.2);
+  float v=0.0, a=0.5;
+  mat2 r=mat2(0.8,0.6,-0.6,0.8);
+  for(int i=0;i<10;i++){
+    if(float(i)>=u_oct) break;
+    v+=a*abs(cnoise(p)); p=r*p*2.0+vec2(100.0); a*=u_gain;
+  }
+  vec3 col=mix(vec3(0.03,0.01,0.08),vec3(0.95,0.3,0.05),smoothstep(0.1,0.9,v));
+  col=mix(col,vec3(0.9,0.8,0.2),smoothstep(0.6,1.0,v)*0.4);
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const RIDGE_FS = `
+precision highp float;
+uniform vec2 u_res; uniform float u_time;
+uniform float u_oct, u_offset, u_gain;
+vec2 fade(vec2 t){ return t*t*t*(t*(t*6.0-15.0)+10.0); }
+vec4 permute(vec4 x){ return mod(((x*34.0)+1.0)*x, 289.0); }
+float cnoise(vec2 P){
+  vec4 Pi=floor(P.xyxy)+vec4(0,0,1,1); vec4 Pf=fract(P.xyxy)-vec4(0,0,1,1);
+  Pi=mod(Pi,289.0); vec4 ix=Pi.xzxz,iy=Pi.yyww,fx=Pf.xzxz,fy=Pf.yyww;
+  vec4 i=permute(permute(ix)+iy);
+  vec4 gx=fract(i*(1.0/41.0))*2.0-1.0; vec4 gy=abs(gx)-0.5;
+  vec4 tx=floor(gx+0.5); gx-=tx;
+  vec2 g00=vec2(gx.x,gy.x),g10=vec2(gx.y,gy.y),g01=vec2(gx.z,gy.z),g11=vec2(gx.w,gy.w);
+  vec4 norm=1.79284291400159-0.85373472095314*vec4(dot(g00,g00),dot(g01,g01),dot(g10,g10),dot(g11,g11));
+  g00*=norm.x;g01*=norm.y;g10*=norm.z;g11*=norm.w;
+  float n00=dot(g00,vec2(fx.x,fy.x)),n10=dot(g10,vec2(fx.y,fy.y));
+  float n01=dot(g01,vec2(fx.z,fy.z)),n11=dot(g11,vec2(fx.w,fy.w));
+  vec2 fade_xy=fade(Pf.xy); vec2 n_x=mix(vec2(n00,n01),vec2(n10,n11),fade_xy.x);
+  return 2.3*mix(n_x.x,n_x.y,fade_xy.y);
+}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_res; uv.x*=u_res.x/u_res.y;
+  vec2 p=uv*6.0+vec2(u_time*0.15);
+  float v=0.0, a=0.5, s=1.0;
+  mat2 r=mat2(0.8,0.6,-0.6,0.8);
+  for(int i=0;i<10;i++){
+    if(float(i)>=u_oct) break;
+    float n=cnoise(p)*s;
+    n=abs(n); n=u_offset-n; n=n*n;
+    v+=n*a; p=r*p*2.1+vec2(1.7,9.2); a*=u_gain; s*=0.9;
+  }
+  vec3 col=mix(vec3(0.01,0.02,0.06),vec3(0.95,0.35,0.1),smoothstep(0.0,0.8,v));
+  col=mix(col,vec3(1.0,0.95,0.8),smoothstep(0.4,1.0,v)*0.5);
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const MARBLE_FS = `
+precision highp float;
+uniform vec2 u_res; uniform float u_time;
+uniform float u_freq, u_turb, u_speed;
+vec2 fade(vec2 t){ return t*t*t*(t*(t*6.0-15.0)+10.0); }
+vec4 permute(vec4 x){ return mod(((x*34.0)+1.0)*x, 289.0); }
+float cnoise(vec2 P){
+  vec4 Pi=floor(P.xyxy)+vec4(0,0,1,1); vec4 Pf=fract(P.xyxy)-vec4(0,0,1,1);
+  Pi=mod(Pi,289.0); vec4 ix=Pi.xzxz,iy=Pi.yyww,fx=Pf.xzxz,fy=Pf.yyww;
+  vec4 i=permute(permute(ix)+iy);
+  vec4 gx=fract(i*(1.0/41.0))*2.0-1.0; vec4 gy=abs(gx)-0.5;
+  vec4 tx=floor(gx+0.5); gx-=tx;
+  vec2 g00=vec2(gx.x,gy.x),g10=vec2(gx.y,gy.y),g01=vec2(gx.z,gy.z),g11=vec2(gx.w,gy.w);
+  vec4 norm=1.79284291400159-0.85373472095314*vec4(dot(g00,g00),dot(g01,g01),dot(g10,g10),dot(g11,g11));
+  g00*=norm.x;g01*=norm.y;g10*=norm.z;g11*=norm.w;
+  float n00=dot(g00,vec2(fx.x,fy.x)),n10=dot(g10,vec2(fx.y,fy.y));
+  float n01=dot(g01,vec2(fx.z,fy.z)),n11=dot(g11,vec2(fx.w,fy.w));
+  vec2 fade_xy=fade(Pf.xy); vec2 n_x=mix(vec2(n00,n01),vec2(n10,n11),fade_xy.x);
+  return 2.3*mix(n_x.x,n_x.y,fade_xy.y);
+}
+float fbm(vec2 p){
+  float v=0.0, a=0.5;
+  for(int i=0;i<6;i++){ v+=a*cnoise(p); p*=2.1+vec2(1.7,9.2); a*=0.5; }
+  return v;
+}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_res; uv.x*=u_res.x/u_res.y;
+  float t=u_time*u_speed;
+  vec2 q=uv+vec2(cnoise(uv*3.0+vec2(t)),cnoise(uv*3.0+vec2(100.0+t)));
+  float v=sin(q.x*u_freq+fbm(q*u_turb)*6.0)*0.5+0.5;
+  vec3 col=mix(vec3(0.7,0.65,0.6),vec3(0.2,0.18,0.25),v);
+  col+=vec3(0.1,0.08,0.05)*smoothstep(0.3,0.7,v);
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const WARP_FS = `
+precision highp float;
+uniform vec2 u_res; uniform float u_time;
+uniform float u_str, u_oct, u_speed;
+vec2 fade(vec2 t){ return t*t*t*(t*(t*6.0-15.0)+10.0); }
+vec4 permute(vec4 x){ return mod(((x*34.0)+1.0)*x, 289.0); }
+float cnoise(vec2 P){
+  vec4 Pi=floor(P.xyxy)+vec4(0,0,1,1); vec4 Pf=fract(P.xyxy)-vec4(0,0,1,1);
+  Pi=mod(Pi,289.0); vec4 ix=Pi.xzxz,iy=Pi.yyww,fx=Pf.xzxz,fy=Pf.yyww;
+  vec4 i=permute(permute(ix)+iy);
+  vec4 gx=fract(i*(1.0/41.0))*2.0-1.0; vec4 gy=abs(gx)-0.5;
+  vec4 tx=floor(gx+0.5); gx-=tx;
+  vec2 g00=vec2(gx.x,gy.x),g10=vec2(gx.y,gy.y),g01=vec2(gx.z,gy.z),g11=vec2(gx.w,gy.w);
+  vec4 norm=1.79284291400159-0.85373472095314*vec4(dot(g00,g00),dot(g01,g01),dot(g10,g10),dot(g11,g11));
+  g00*=norm.x;g01*=norm.y;g10*=norm.z;g11*=norm.w;
+  float n00=dot(g00,vec2(fx.x,fy.x)),n10=dot(g10,vec2(fx.y,fy.y));
+  float n01=dot(g01,vec2(fx.z,fy.z)),n11=dot(g11,vec2(fx.w,fy.w));
+  vec2 fade_xy=fade(Pf.xy); vec2 n_x=mix(vec2(n00,n01),vec2(n10,n11),fade_xy.x);
+  return 2.3*mix(n_x.x,n_x.y,fade_xy.y);
+}
+float fbm(vec2 p){
+  float v=0.0, a=0.5;
+  mat2 r=mat2(0.8,0.6,-0.6,0.8);
+  for(int i=0;i<8;i++){
+    if(float(i)>=u_oct) break;
+    v+=a*cnoise(p); p=r*p*2.1+vec2(1.7,9.2); a*=0.5;
+  }
+  return v;
+}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_res; uv.x*=u_res.x/u_res.y;
+  float t=u_time*u_speed;
+  vec2 q=vec2(fbm(uv*3.0+vec2(t*0.1)),fbm(uv*3.0+vec2(5.2,1.3)+vec2(t*0.07)));
+  vec2 r=vec2(fbm(uv*3.0+u_str*q+vec2(1.7,9.2)+vec2(t*0.05)),
+              fbm(uv*3.0+u_str*q+vec2(8.3,2.8)-vec2(t*0.04)));
+  float f=fbm(uv*3.0+u_str*r);
+  vec3 col=mix(vec3(0.05,0.02,0.12),vec3(0.85,0.35,0.1),f*0.5+0.5);
+  col=mix(col,vec3(0.1,0.2,0.4),dot(q,q)*0.4);
+  col+=vec3(0.9,0.7,0.3)*pow(max(f,0.0),4.0)*0.3;
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const COC_FS = `
+precision highp float;
+uniform vec2 u_res; uniform float u_time;
+uniform float u_focus, u_aperture, u_blur;
+vec2 fade(vec2 t){ return t*t*t*(t*(t*6.0-15.0)+10.0); }
+vec4 permute(vec4 x){ return mod(((x*34.0)+1.0)*x, 289.0); }
+float cnoise(vec2 P){
+  vec4 Pi=floor(P.xyxy)+vec4(0,0,1,1); vec4 Pf=fract(P.xyxy)-vec4(0,0,1,1);
+  Pi=mod(Pi,289.0); vec4 ix=Pi.xzxz,iy=Pi.yyww,fx=Pf.xzxz,fy=Pf.yyww;
+  vec4 i=permute(permute(ix)+iy);
+  vec4 gx=fract(i*(1.0/41.0))*2.0-1.0; vec4 gy=abs(gx)-0.5;
+  vec4 tx=floor(gx+0.5); gx-=tx;
+  vec2 g00=vec2(gx.x,gy.x),g10=vec2(gx.y,gy.y),g01=vec2(gx.z,gy.z),g11=vec2(gx.w,gy.w);
+  vec4 norm=1.79284291400159-0.85373472095314*vec4(dot(g00,g00),dot(g01,g01),dot(g10,g10),dot(g11,g11));
+  g00*=norm.x;g01*=norm.y;g10*=norm.z;g11*=norm.w;
+  float n00=dot(g00,vec2(fx.x,fy.x)),n10=dot(g10,vec2(fx.y,fy.y));
+  float n01=dot(g01,vec2(fx.z,fy.z)),n11=dot(g11,vec2(fx.w,fy.w));
+  vec2 fade_xy=fade(Pf.xy); vec2 n_x=mix(vec2(n00,n01),vec2(n10,n11),fade_xy.x);
+  return 2.3*mix(n_x.x,n_x.y,fade_xy.y);
+}
+float scene(vec2 p){
+  float t=u_time*0.3;
+  float d=0.0;
+  d+=0.4/(length(p-vec2(0.3+0.1*sin(t),0.5))+0.08);
+  d+=0.3/(length(p-vec2(0.7,0.4+0.08*cos(t*1.3)))+0.06);
+  d+=0.25/(length(p-vec2(0.5,0.7+0.06*sin(t*0.7)))+0.07);
+  d+=0.2/(length(p-vec2(0.2,0.3))+0.05);
+  d+=cnoise(p*8.0+vec2(t*0.5))*0.15;
+  return clamp(d,0.0,1.0);
+}
+float depth(vec2 p){
+  return 0.3+0.4*length(p-vec2(0.5))+cnoise(p*3.0)*0.15;
+}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_res; uv.x*=u_res.x/u_res.y;
+  float d=depth(uv);
+  float coc=abs(d-u_focus)*u_aperture;
+  vec3 col=vec3(0.0);
+  float tw=0.0;
+  for(int y=-4;y<=4;y++){
+    for(int x=-4;x<=4;x++){
+      vec2 off=vec2(float(x),float(y))*u_blur*coc;
+      float w=1.0-length(vec2(float(x),float(y)))/5.66;
+      w=max(w,0.0);
+      vec2 s=uv+off/u_res.x;
+      float sd=depth(s);
+      if(sd>u_focus-0.1) w*=smoothstep(0.0,0.15,sd-d+0.1);
+      col+=scene(s)*w*vec3(0.9,0.85,0.8);
+      tw+=w;
+    }
+  }
+  col/=tw;
+  col+=vec3(0.02,0.01,0.04);
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const MBLUR_FS = `
+precision highp float;
+uniform vec2 u_res; uniform float u_time;
+uniform float u_exposure, u_samples, u_speed;
+vec2 fade(vec2 t){ return t*t*t*(t*(t*6.0-15.0)+10.0); }
+vec4 permute(vec4 x){ return mod(((x*34.0)+1.0)*x, 289.0); }
+float cnoise(vec2 P){
+  vec4 Pi=floor(P.xyxy)+vec4(0,0,1,1); vec4 Pf=fract(P.xyxy)-vec4(0,0,1,1);
+  Pi=mod(Pi,289.0); vec4 ix=Pi.xzxz,iy=Pi.yyww,fx=Pf.xzxz,fy=Pf.yyww;
+  vec4 i=permute(permute(ix)+iy);
+  vec4 gx=fract(i*(1.0/41.0))*2.0-1.0; vec4 gy=abs(gx)-0.5;
+  vec4 tx=floor(gx+0.5); gx-=tx;
+  vec2 g00=vec2(gx.x,gy.x),g10=vec2(gx.y,gy.y),g01=vec2(gx.z,gy.z),g11=vec2(gx.w,gy.w);
+  vec4 norm=1.79284291400159-0.85373472095314*vec4(dot(g00,g00),dot(g01,g01),dot(g10,g10),dot(g11,g11));
+  g00*=norm.x;g01*=norm.y;g10*=norm.z;g11*=norm.w;
+  float n00=dot(g00,vec2(fx.x,fy.x)),n10=dot(g10,vec2(fx.y,fy.y));
+  float n01=dot(g01,vec2(fx.z,fy.z)),n11=dot(g11,vec2(fx.w,fy.w));
+  vec2 fade_xy=fade(Pf.xy); vec2 n_x=mix(vec2(n00,n01),vec2(n10,n11),fade_xy.x);
+  return 2.3*mix(n_x.x,n_x.y,fade_xy.y);
+}
+vec3 scene(vec2 p){
+  float t=u_time*u_speed;
+  vec3 c=vec3(0.0);
+  c+=vec3(0.9,0.2,0.1)*smoothstep(0.12,0.0,length(p-vec2(0.3+0.2*sin(t),0.5)));
+  c+=vec3(0.1,0.5,0.9)*smoothstep(0.1,0.0,length(p-vec2(0.7,0.4+0.15*cos(t*1.3))));
+  c+=vec3(0.2,0.8,0.3)*smoothstep(0.08,0.0,length(p-vec2(0.5,0.6)));
+  c+=vec3(0.8,0.6,0.1)*smoothstep(0.06,0.0,length(p-vec2(0.4,0.3)));
+  c+=cnoise(p*6.0+vec2(t*0.2))*0.08;
+  return c;
+}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_res; uv.x*=u_res.x/u_res.y;
+  float t=u_time*u_speed;
+  vec2 vel=vec2(cos(t*2.0+length(uv-0.5)*3.0)*0.015,
+                sin(t*1.7+length(uv-0.5)*2.0)*0.01)*u_exposure;
+  vec3 col=vec3(0.0);
+  for(int i=0;i<16;i++){
+    float fi=float(i);
+    if(fi>=u_samples) break;
+    float w=1.0-abs(fi/(u_samples-1.0)-0.5)*2.0;
+    vec2 off=vel*(fi/(u_samples-1.0)-0.5);
+    col+=scene(uv+off)*w;
+  }
+  col/=u_samples*0.6;
+  col+=vec3(0.01,0.005,0.02);
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const GAUSS_FS = `
+precision highp float;
+uniform vec2 u_res; uniform float u_time;
+uniform float u_radius, u_sigma, u_bilinear;
+vec2 fade(vec2 t){ return t*t*t*(t*(t*6.0-15.0)+10.0); }
+vec4 permute(vec4 x){ return mod(((x*34.0)+1.0)*x, 289.0); }
+float cnoise(vec2 P){
+  vec4 Pi=floor(P.xyxy)+vec4(0,0,1,1); vec4 Pf=fract(P.xyxy)-vec4(0,0,1,1);
+  Pi=mod(Pi,289.0); vec4 ix=Pi.xzxz,iy=Pi.yyww,fx=Pf.xzxz,fy=Pf.yyww;
+  vec4 i=permute(permute(ix)+iy);
+  vec4 gx=fract(i*(1.0/41.0))*2.0-1.0; vec4 gy=abs(gx)-0.5;
+  vec4 tx=floor(gx+0.5); gx-=tx;
+  vec2 g00=vec2(gx.x,gy.x),g10=vec2(gx.y,gy.y),g01=vec2(gx.z,gy.z),g11=vec2(gx.w,gy.w);
+  vec4 norm=1.79284291400159-0.85373472095314*vec4(dot(g00,g00),dot(g01,g01),dot(g10,g10),dot(g11,g11));
+  g00*=norm.x;g01*=norm.y;g10*=norm.z;g11*=norm.w;
+  float n00=dot(g00,vec2(fx.x,fy.x)),n10=dot(g10,vec2(fx.y,fy.y));
+  float n01=dot(g01,vec2(fx.z,fy.z)),n11=dot(g11,vec2(fx.w,fy.w));
+  vec2 fade_xy=fade(Pf.xy); vec2 n_x=mix(vec2(n00,n01),vec2(n10,n11),fade_xy.x);
+  return 2.3*mix(n_x.x,n_x.y,fade_xy.y);
+}
+vec3 scene(vec2 p){
+  float t=u_time*0.2;
+  float n=cnoise(p*4.0+vec2(t));
+  return mix(vec3(0.05,0.02,0.1),vec3(0.9,0.4,0.15),n*0.5+0.5);
+}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_res; uv.x*=u_res.x/u_res.y;
+  vec3 col=vec3(0.0); float tw=0.0;
+  for(int i=-10;i<=10;i++){
+    float fi=float(i);
+    if(abs(fi)>u_radius) continue;
+    float w=exp(-fi*fi/(2.0*u_sigma*u_sigma));
+    vec2 off=vec2(fi/u_res.x,0.0);
+    if(u_bilinear>0.5 && abs(fi)<u_radius){
+      float frac=fract(fi);
+      if(frac>0.01){
+        vec2 s1=uv+vec2(floor(fi)/u_res.x,0.0);
+        vec2 s2=uv+vec2(ceil(fi)/u_res.x,0.0);
+        col+=(scene(s1)*(1.0-frac)+scene(s2)*frac)*w;
+      } else {
+        col+=scene(uv+off)*w;
+      }
+    } else {
+      col+=scene(uv+off)*w;
+    }
+    tw+=w;
+  }
+  vec3 hcol=col/tw; col=vec3(0.0); tw=0.0;
+  for(int i=-10;i<=10;i++){
+    float fi=float(i);
+    if(abs(fi)>u_radius) continue;
+    float w=exp(-fi*fi/(2.0*u_sigma*u_sigma));
+    vec2 off=vec2(0.0,fi/u_res.y);
+    col+=vec3(hcol.r+scene(uv+off).r*0.02,
+              hcol.g+scene(uv+off).g*0.02,
+              hcol.b+scene(uv+off).b*0.02)*w;
+    tw+=w;
+  }
+  col/=tw;
+  col+=vec3(0.01,0.005,0.02);
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+// ── Wiring ─────────────────────────────────────────────────
+
+function wire(canvasId, fsSrc, uniforms) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const gl = initGL(canvas);
+  if (!gl) return;
+  const p = makeProgram(gl, fsSrc);
+  const U = {};
+  uniforms.forEach(n => { U[n] = uLoc(gl, p, n); });
+
+  function resize() {
+    const dpr = Math.min(window.devicePixelRatio, 2);
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  return { gl, p, U, canvas };
+}
+
+function bindSlider(id, cb) {
+  const el = document.getElementById(id);
+  const vEl = document.getElementById('v-' + id);
+  if (!el) return;
+  el.addEventListener('input', () => {
+    const v = parseFloat(el.value);
+    if (vEl) vEl.textContent = v % 1 === 0 ? v.toString() : v.toFixed(2);
+    cb(v);
+  });
+  cb(parseFloat(el.value));
+}
+
+const t0 = performance.now();
+
+// ── Perlin ─────────────────────────────────────────────────
+(function(){
+  const ctx = wire('c-perlin', PERLIN_FS, ['u_res','u_time','u_scale','u_oct','u_speed']);
+  if (!ctx) return;
+  let scale=4, oct=5, speed=0.3;
+  bindSlider('perlin-scale', v => scale=v);
+  bindSlider('perlin-oct', v => oct=v);
+  bindSlider('perlin-speed', v => speed=v);
+  (function loop(){
+    const t=(performance.now()-t0)*0.001;
+    ctx.gl.uniform2f(ctx.U.u_res, ctx.canvas.width, ctx.canvas.height);
+    ctx.gl.uniform1f(ctx.U.u_time, t);
+    ctx.gl.uniform1f(ctx.U.u_scale, scale);
+    ctx.gl.uniform1f(ctx.U.u_oct, oct);
+    ctx.gl.uniform1f(ctx.U.u_speed, speed);
+    ctx.gl.drawArrays(ctx.gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(loop);
+  })();
+})();
+
+// ── Turbulence ─────────────────────────────────────────────
+(function(){
+  const ctx = wire('c-turb', TURB_FS, ['u_res','u_time','u_oct','u_gain','u_speed']);
+  if (!ctx) return;
+  let oct=6, gain=0.5, speed=0.25;
+  bindSlider('turb-oct', v => oct=v);
+  bindSlider('turb-gain', v => gain=v);
+  bindSlider('turb-speed', v => speed=v);
+  (function loop(){
+    const t=(performance.now()-t0)*0.001;
+    ctx.gl.uniform2f(ctx.U.u_res, ctx.canvas.width, ctx.canvas.height);
+    ctx.gl.uniform1f(ctx.U.u_time, t);
+    ctx.gl.uniform1f(ctx.U.u_oct, oct);
+    ctx.gl.uniform1f(ctx.U.u_gain, gain);
+    ctx.gl.uniform1f(ctx.U.u_speed, speed);
+    ctx.gl.drawArrays(ctx.gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(loop);
+  })();
+})();
+
+// ── Ridged ─────────────────────────────────────────────────
+(function(){
+  const ctx = wire('c-ridge', RIDGE_FS, ['u_res','u_time','u_oct','u_offset','u_gain']);
+  if (!ctx) return;
+  let oct=6, offset=0.8, gain=0.5;
+  bindSlider('ridge-oct', v => oct=v);
+  bindSlider('ridge-offset', v => offset=v);
+  bindSlider('ridge-gain', v => gain=v);
+  (function loop(){
+    const t=(performance.now()-t0)*0.001;
+    ctx.gl.uniform2f(ctx.U.u_res, ctx.canvas.width, ctx.canvas.height);
+    ctx.gl.uniform1f(ctx.U.u_time, t);
+    ctx.gl.uniform1f(ctx.U.u_oct, oct);
+    ctx.gl.uniform1f(ctx.U.u_offset, offset);
+    ctx.gl.uniform1f(ctx.U.u_gain, gain);
+    ctx.gl.drawArrays(ctx.gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(loop);
+  })();
+})();
+
+// ── Marble ─────────────────────────────────────────────────
+(function(){
+  const ctx = wire('c-marble', MARBLE_FS, ['u_res','u_time','u_freq','u_turb','u_speed']);
+  if (!ctx) return;
+  let freq=8, turb=4, speed=0.15;
+  bindSlider('marb-freq', v => freq=v);
+  bindSlider('marb-turb', v => turb=v);
+  bindSlider('marb-speed', v => speed=v);
+  (function loop(){
+    const t=(performance.now()-t0)*0.001;
+    ctx.gl.uniform2f(ctx.U.u_res, ctx.canvas.width, ctx.canvas.height);
+    ctx.gl.uniform1f(ctx.U.u_time, t);
+    ctx.gl.uniform1f(ctx.U.u_freq, freq);
+    ctx.gl.uniform1f(ctx.U.u_turb, turb);
+    ctx.gl.uniform1f(ctx.U.u_speed, speed);
+    ctx.gl.drawArrays(ctx.gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(loop);
+  })();
+})();
+
+// ── Domain Warping ─────────────────────────────────────────
+(function(){
+  const ctx = wire('c-warp', WARP_FS, ['u_res','u_time','u_str','u_oct','u_speed']);
+  if (!ctx) return;
+  let str=4, oct=5, speed=0.2;
+  bindSlider('warp-str', v => str=v);
+  bindSlider('warp-oct', v => oct=v);
+  bindSlider('warp-speed', v => speed=v);
+  (function loop(){
+    const t=(performance.now()-t0)*0.001;
+    ctx.gl.uniform2f(ctx.U.u_res, ctx.canvas.width, ctx.canvas.height);
+    ctx.gl.uniform1f(ctx.U.u_time, t);
+    ctx.gl.uniform1f(ctx.U.u_str, str);
+    ctx.gl.uniform1f(ctx.U.u_oct, oct);
+    ctx.gl.uniform1f(ctx.U.u_speed, speed);
+    ctx.gl.drawArrays(ctx.gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(loop);
+  })();
+})();
+
+// ── Circle of Confusion ────────────────────────────────────
+(function(){
+  const ctx = wire('c-coc', COC_FS, ['u_res','u_time','u_focus','u_aperture','u_blur']);
+  if (!ctx) return;
+  let focus=0.5, aperture=0.3, blur=0.04;
+  bindSlider('coc-focus', v => focus=v);
+  bindSlider('coc-aperture', v => aperture=v);
+  bindSlider('coc-radius', v => blur=v);
+  (function loop(){
+    const t=(performance.now()-t0)*0.001;
+    ctx.gl.uniform2f(ctx.U.u_res, ctx.canvas.width, ctx.canvas.height);
+    ctx.gl.uniform1f(ctx.U.u_time, t);
+    ctx.gl.uniform1f(ctx.U.u_focus, focus);
+    ctx.gl.uniform1f(ctx.U.u_aperture, aperture);
+    ctx.gl.uniform1f(ctx.U.u_blur, blur);
+    ctx.gl.drawArrays(ctx.gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(loop);
+  })();
+})();
+
+// ── Motion Blur ────────────────────────────────────────────
+(function(){
+  const ctx = wire('c-mblur', MBLUR_FS, ['u_res','u_time','u_exposure','u_samples','u_speed']);
+  if (!ctx) return;
+  let exposure=0.5, samples=8, speed=0.6;
+  bindSlider('mblur-exp', v => exposure=v);
+  bindSlider('mblur-samp', v => samples=v);
+  bindSlider('mblur-speed', v => speed=v);
+  (function loop(){
+    const t=(performance.now()-t0)*0.001;
+    ctx.gl.uniform2f(ctx.U.u_res, ctx.canvas.width, ctx.canvas.height);
+    ctx.gl.uniform1f(ctx.U.u_time, t);
+    ctx.gl.uniform1f(ctx.U.u_exposure, exposure);
+    ctx.gl.uniform1f(ctx.U.u_samples, samples);
+    ctx.gl.uniform1f(ctx.U.u_speed, speed);
+    ctx.gl.drawArrays(ctx.gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(loop);
+  })();
+})();
+
+// ── Gaussian Blur ──────────────────────────────────────────
+(function(){
+  const ctx = wire('c-gauss', GAUSS_FS, ['u_res','u_time','u_radius','u_sigma','u_bilinear']);
+  if (!ctx) return;
+  let radius=4, sigma=2, bil=1;
+  bindSlider('gauss-rad', v => radius=v);
+  bindSlider('gauss-sigma', v => sigma=v);
+  bindSlider('gauss-bil', v => { bil=v; document.getElementById('v-gauss-bil').textContent = v>0.5?'on':'off'; });
+  (function loop(){
+    const t=(performance.now()-t0)*0.001;
+    ctx.gl.uniform2f(ctx.U.u_res, ctx.canvas.width, ctx.canvas.height);
+    ctx.gl.uniform1f(ctx.U.u_time, t);
+    ctx.gl.uniform1f(ctx.U.u_radius, radius);
+    ctx.gl.uniform1f(ctx.U.u_sigma, sigma);
+    ctx.gl.uniform1f(ctx.U.u_bilinear, bil);
+    ctx.gl.drawArrays(ctx.gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(loop);
+  })();
+})();
+</script>
+</body>
+</html>

@@ -179,3 +179,181 @@ A site that can afford to show nothing is a site that knows what it is:
 - [[Design Philosophy]] — why generative art demands this aesthetic
 - [[WebGL Techniques]] — implementation details for web effects
 - [[JavaScript & Animation Patterns]] — motion on the web
+- [[Fractal & Pattern Vocabulary]] — mathematical patterns for backgrounds
+
+---
+
+## WebGL + Dark Mode
+
+### Why Dark + WebGL Works
+- Dark backgrounds (#0a0a0f to #1a1a2e) make shader effects pop
+- **Neon glow:** Additive blending (`gl.blendFunc(gl.SRC_ALPHA, gl.ONE)`) with bright colors on dark base
+- **OLED efficiency:** Dark pixels use less power on OLED screens
+- **Visual contrast:** Shader effects are visually high-impact with low perceptual cost
+
+### Glassmorphism with Shaders
+Render to framebuffer, blur it, composite with `mix()` at 0.1-0.3 alpha over dark base. Use `backdrop-filter: blur(8px)` for DOM panels.
+
+---
+
+## Scroll-Mapped Shader Uniforms
+
+Map scroll position to shader parameters. Use `IntersectionObserver` for section-aware mapping:
+```javascript
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) currentSection = entry.target.dataset.section;
+    });
+}, { threshold: 0.5 });
+```
+Multiply section-local scroll progress by effect intensity to prevent a 0-10000px page from mapping linearly to a single 0..1 uniform.
+
+---
+
+## Cursor Effects
+
+### Mouse-Following Gradient
+```glsl
+float dist = distance(uv, uMouse);
+vec3 glow = vec3(0.2, 0.5, 1.0) * smoothstep(0.4, 0.0, dist);
+```
+
+### Cursor-Reactive Distortion
+Displace texture UVs based on mouse proximity:
+```glsl
+vec2 mouseDelta = uv - uMouse;
+float influence = smoothstep(0.3, 0.0, length(mouseDelta)) * uStrength;
+uv += normalize(mouseDelta) * influence * 0.05;
+```
+
+### Interactive Particles
+Attract/repel particles toward mouse. Update in JS for <10K particles, transform feedback for >10K.
+
+---
+
+## Mobile WebGL
+
+### Performance Budget
+| Target | Budget |
+|--------|--------|
+| 60fps frame | 10ms |
+| Safe mobile | 16ms |
+| Particles (mobile) | 500-1000 |
+| Particles (desktop) | 5000+ |
+
+### Touch Interactions
+```javascript
+canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    uMouse[0] = touch.clientX / window.innerWidth;
+    uMouse[1] = 1.0 - touch.clientY / window.innerHeight;
+}, { passive: false });
+```
+
+### Fallback Strategy
+- **High:** Full particle system, post-processing, 60fps
+- **Low:** Static noise texture, no particles, 30fps cap
+- **None:** CSS-only fallback (gradients, `backdrop-filter: blur()`)
+
+### Core Principles
+1. Profile on mobile first — if it runs at 60fps on a 2022 mid-range phone, it runs everywhere
+2. Keep WebGL as a visual layer, never as a structural dependency
+3. Use `IntersectionObserver` to pause off-screen shader rendering
+4. Prefer `transform` and `opacity` for DOM animations (compositor-only path)
+
+---
+
+## Glassmorphism
+
+Glassmorphism creates depth by layering translucent, blurred panels over content. It's the signature of modern immersive UI — Apple's Liquid Glass, Linear's sidebar, Vercel's cards.
+
+### The Formula
+
+```css
+.glass {
+  background: rgba(255, 255, 255, 0.08);       /* translucent fill */
+  backdrop-filter: blur(20px) saturate(180%);   /* frosted glass */
+  border: 1px solid rgba(255, 255, 255, 0.12);  /* subtle edge */
+  border-radius: 8px;                            /* soft corners */
+}
+```
+
+### Two Approaches
+
+| Approach | When to Use |
+|----------|------------|
+| **CSS `backdrop-filter`** | Navbars, cards, modals, sidebars — lightweight, no JS |
+| **liquidGL library** | Hero panels, featured cards — real-time WebGL refraction |
+
+### Layering Rule
+
+Glass panels must sit ABOVE content, which sits ABOVE the shader background:
+```
+0: WebGL canvas
+1: Vignette
+5: Content
+10: Glass panels
+20: Navigation
+```
+
+### Anti-Patterns
+- Glass on glass (recursive blur = performance death)
+- Glass over busy animated content (unreadable)
+- Glass without sufficient contrast behind it
+- More than 3-4 glass panels on screen simultaneously
+
+---
+
+## Symmetrical Elevation
+
+Symmetry creates calm, professional, mathematically harmonious layouts. The best sites feel "designed by a mathematician."
+
+### Golden Ratio (1.618)
+
+Use for proportional splits, typography scale, and spacing:
+
+```css
+.split {
+  display: grid;
+  grid-template-columns: 1.618fr 1fr; /* 61.8% / 32.2% */
+}
+```
+
+### Radial Symmetry
+
+Center focal points and use radial gradients to draw the eye:
+
+```css
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(
+    ellipse at 50% 40%,
+    rgba(224, 58, 58, 0.06) 0%,
+    transparent 60%
+  );
+}
+```
+
+### Bilateral Symmetry
+
+Mirror layouts create balance. Center everything with `text-align: center` and `max-width` constraints.
+
+### Mathematical Spacing
+
+Every measurement derives from a base unit (4px):
+```
+4, 8, 12, 16, 24, 32, 48, 64, 96, 128px
+```
+
+Never use arbitrary values like `13px` or `37px`. Snap to the grid.
+
+### Visual Weight Balance
+
+A page feels "right" when visual weight is distributed:
+- Heavy element (image, video, large type) balanced by whitespace
+- Dark elements balanced by light elements
+- Busy areas balanced by calm areas
+- Left-aligned content balanced by right-aligned content (or centered)

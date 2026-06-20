@@ -2,7 +2,7 @@
 
 ## Context
 
-WebGL1, GLSL ES 1.0. One fragment shader (exported as `FS` string in `webgl.ts`) containing all 14 presets.
+WebGL1, GLSL ES 1.0. One fragment shader (exported as `FS` string in `webgl.ts`) containing all 23 presets (alphabetical order, modes 0–22).
 
 ## Available Helpers
 
