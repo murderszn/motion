@@ -13,6 +13,15 @@ description: >
 Create Apple-style "Liquid Glass" refraction effects on any DOM element using the
 [liquidGL](https://github.com/naughtyduk/liquidGL) library.
 
+## When to Use liquidGL vs CSS-Only
+
+| Approach | Use When | Tradeoff |
+|----------|----------|----------|
+| **CSS `backdrop-filter`** | Cards, navbars, modals, simple frosted panels | Lightweight, no JS dependency, works everywhere |
+| **liquidGL** | Hero panels, featured cards, any element where real-time refraction creates a "wow" moment | Heavier (html2canvas snapshot + WebGL), but visually stunning |
+
+**Rule of thumb:** If the panel is decorative and static, use CSS. If it's the centerpiece of the page and benefits from seeing the background *move through* it, use liquidGL.
+
 ## Prerequisites
 
 Include both scripts before initialisation (end of `<body>`):
@@ -107,13 +116,72 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 ```
 
-## Presets for /motion Studio
+## Layering with WebGL Shader Backgrounds
 
-When adding a glassmorphism preset to the /motion shader studio, use the
-`glass` preset (mode 4) in `webgl.ts`. The studio's glass shader provides
-a similar frosted-pane aesthetic with drifting color blobs refracted behind
-frost layers. Combine with liquidGL for DOM-level glass panes overlaid on
-the WebGL canvas.
+For the /motion project, the typical layer stack is:
+
+```
+Layer 0:  WebGL canvas (position:fixed, z-index:0) — shader renders here
+Layer 1:  Vignette overlay (position:fixed, z-index:1)
+Layer 2:  Scrollable content (position:relative, z-index:5)
+Layer 3:  liquidGL glass panes (position:fixed, z-index:10)
+```
+
+**Critical:** The `snapshot` option should target the element containing the shader canvas or the body. liquidGL captures what's *behind* the glass pane — so the shader must be rendered before liquidGL initializes.
+
+```html
+<!-- Shader canvas (Layer 0) -->
+<canvas id="bg" style="position:fixed;inset:0;z-index:0;"></canvas>
+
+<!-- Vignette (Layer 1) -->
+<div id="vignette" style="position:fixed;inset:0;z-index:1;pointer-events:none;"></div>
+
+<!-- Content (Layer 2) -->
+<div id="content" style="position:relative;z-index:5;">
+  <p>Scrollable page content</p>
+</div>
+
+<!-- Glass pane (Layer 3) -->
+<div class="glass-card" style="position:fixed;z-index:10;">
+  <h2>Glass Card</h2>
+  <p>This refracts the shader behind it</p>
+</div>
+
+<script>
+// Initialize liquidGL AFTER the shader canvas is rendering
+liquidGL({
+  target: ".glass-card",
+  snapshot: "#bg",    // or "body" to capture everything
+  refraction: 0.015,
+  frost: 2,
+});
+</script>
+```
+
+## /motion Design System Integration
+
+When building glassmorphism in the /motion project, use these design tokens:
+
+### Colors
+- **Glass background:** `rgba(255, 255, 255, 0.08)` (light glass) or `rgba(8, 8, 10, 0.6)` (dark glass)
+- **Glass border:** `1px solid rgba(255, 255, 255, 0.12)`
+- **Glass shadow:** `0 8px 32px rgba(0, 0, 0, 0.25)`
+- **Accent glass:** `rgba(224, 58, 58, 0.08)` background with `rgba(224, 58, 58, 0.2)` border
+
+### Typography
+- Headings inside glass: `Inter`, weight 600, `#f4f4f6`
+- Body inside glass: `Inter`, weight 400, `#b8b8c0`
+- Labels inside glass: `JetBrains Mono`, weight 500, 0.16em letter-spacing, lowercase
+
+### Spacing
+- Glass panel padding: `24px` (comfortable) or `32px` (generous)
+- Gap between glass elements: `16px` or `24px`
+- Glass margin from viewport edge: `2rem` minimum
+
+### Border Radius
+- Tool UI glass: `4px` max
+- Marketing/hero glass: `8px` to `12px`
+- Never exceed `12px` for glass panels
 
 ## Common Patterns
 
@@ -130,6 +198,29 @@ the WebGL canvas.
 ### Exclude content from lens
 Add `z-index: 3` (higher than target) or `data-liquid-ignore` on parent.
 
+### Frosted privacy panel
+```js
+liquidGL({
+  target: ".private-panel",
+  frost: 8,           // heavy blur
+  refraction: 0.005,  // subtle distortion
+  shadow: false,
+  specular: false,
+});
+```
+
+### Interactive tilt card
+```js
+liquidGL({
+  target: ".featured-card",
+  tilt: true,
+  tiltFactor: 8,
+  bevelDepth: 0.12,
+  bevelWidth: 0.2,
+  specular: true,
+});
+```
+
 ## Browser Support
 
 Chrome, Edge, Firefox, Safari (desktop + mobile). Safari may lag on large
@@ -141,3 +232,5 @@ older devices.
 - `references/parameters.md` — full parameter table
 - `references/presets.md` — ready-made configs
 - `references/demo-template.html` — minimal working example
+- `assets/liquidGL.js` — bundled library
+- `assets/html2canvas.min.js` — bundled dependency

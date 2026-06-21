@@ -247,35 +247,11 @@ footer a { color: var(--accent); text-decoration: none; }
     </div>
   </div>
 
-  <!-- 7. Motion Blur -->
-  <div class="card">
-    <canvas id="c-mblur"></canvas>
-    <div class="card-body">
-      <h3><span>07</span> Velocity-Based Motion Blur</h3>
-      <p>Post-process motion blur using per-pixel velocity vectors. Samples along the direction of travel and averages for smooth streaks.</p>
-      <div class="controls">
-        <div class="ctrl">
-          <label>exposure <span class="v" id="v-mblur-exp">0.50</span></label>
-          <input type="range" id="mblur-exp" min="0" max="1" step="0.05" value="0.5">
-        </div>
-        <div class="ctrl">
-          <label>samples <span class="v" id="v-mblur-samp">8</span></label>
-          <input type="range" id="mblur-samp" min="2" max="16" step="2" value="8">
-        </div>
-        <div class="ctrl">
-          <label>speed <span class="v" id="v-mblur-speed">0.60</span></label>
-          <input type="range" id="mblur-speed" min="0.1" max="1.5" step="0.1" value="0.6">
-        </div>
-      </div>
-      <div class="ref">GPU Gems 3 · Chapter 27 · Motion Blur Post-Processing</div>
-    </div>
-  </div>
-
-  <!-- 8. Separable Gaussian Blur -->
+  <!-- 7. Separable Gaussian Blur -->
   <div class="card">
     <canvas id="c-gauss"></canvas>
     <div class="card-body">
-      <h3><span>08</span> Separable Gaussian Blur</h3>
+      <h3><span>07</span> Separable Gaussian Blur</h3>
       <p>NVIDIA's bilinear optimization: sample between texel centers to halve texture fetches. Uses GPU's hardware bilinear unit for free blending.</p>
       <div class="controls">
         <div class="ctrl">
@@ -292,6 +268,222 @@ footer a { color: var(--accent); text-decoration: none; }
         </div>
       </div>
       <div class="ref">GPU Gems 2 & 3 · Separable Bilinear Sampling Optimization</div>
+    </div>
+  </div>
+
+  <!-- 8. Volumetric Light Scattering -->
+  <div class="card">
+    <canvas id="c-godrays"></canvas>
+    <div class="card-body">
+      <h3><span>08</span> Volumetric Light Scattering</h3>
+      <p>Screen-space radial blur simulating light shafts (god rays). Samples along a ray from the pixel towards the light source, accumulating occlusion and intensity.</p>
+      <div class="controls">
+        <div class="ctrl">
+          <label>decay <span class="v" id="v-godrays-decay">0.96</span></label>
+          <input type="range" id="godrays-decay" min="0.9" max="0.99" step="0.01" value="0.96">
+        </div>
+        <div class="ctrl">
+          <label>weight <span class="v" id="v-godrays-weight">0.08</span></label>
+          <input type="range" id="godrays-weight" min="0.02" max="0.2" step="0.01" value="0.08">
+        </div>
+        <div class="ctrl">
+          <label>density <span class="v" id="v-godrays-density">1.0</span></label>
+          <input type="range" id="godrays-density" min="0.2" max="2.0" step="0.1" value="1">
+        </div>
+      </div>
+      <div class="ref">GPU Gems 3 · Chapter 13 · Volumetric Light Scattering</div>
+    </div>
+  </div>
+
+  <!-- 9. Fresnel Reflection & Refraction -->
+  <div class="card">
+    <canvas id="c-fresnel"></canvas>
+    <div class="card-body">
+      <h3><span>09</span> Fresnel Reflection & Refraction</h3>
+      <p>Ray-traced procedural sphere calculating specular reflection and index-based refraction. Blends refraction and reflection using Schlick's approximation.</p>
+      <div class="controls">
+        <div class="ctrl">
+          <label>refraction (eta) <span class="v" id="v-fresnel-eta">0.80</span></label>
+          <input type="range" id="fresnel-eta" min="0.4" max="1.6" step="0.05" value="0.8">
+        </div>
+        <div class="ctrl">
+          <label>fresnel exp <span class="v" id="v-fresnel-power">5.0</span></label>
+          <input type="range" id="fresnel-power" min="1.0" max="8.0" step="0.5" value="5">
+        </div>
+        <div class="ctrl">
+          <label>roughness <span class="v" id="v-fresnel-rough">0.10</span></label>
+          <input type="range" id="fresnel-rough" min="0.0" max="1.0" step="0.05" value="0.1">
+        </div>
+      </div>
+      <div class="ref">GPU Gems · Chapter 16 · Real-Time Refraction</div>
+    </div>
+  </div>
+
+  <!-- 10. Water Wave Synthesis -->
+  <div class="card">
+    <canvas id="c-ocean"></canvas>
+    <div class="card-body">
+      <h3><span>10</span> Gerstner Wave Synthesis</h3>
+      <p>Water wave heights synthesized by summing directional sinusoids. Computes normals analytically to render a reflective ocean surface with specular highlights.</p>
+      <div class="controls">
+        <div class="ctrl">
+          <label>steepness <span class="v" id="v-ocean-steep">1.0</span></label>
+          <input type="range" id="ocean-steep" min="0.1" max="3.0" step="0.1" value="1">
+        </div>
+        <div class="ctrl">
+          <label>speed <span class="v" id="v-ocean-speed">1.0</span></label>
+          <input type="range" id="ocean-speed" min="0.2" max="3.0" step="0.2" value="1">
+        </div>
+        <div class="ctrl">
+          <label>frequency <span class="v" id="v-ocean-freq">4.0</span></label>
+          <input type="range" id="ocean-freq" min="1.0" max="10.0" step="0.5" value="4">
+        </div>
+      </div>
+      <div class="ref">GPU Gems · Chapter 1 · Effective Water Simulation</div>
+    </div>
+  </div>
+
+  <!-- 11. Flow Map / Fluid Advection -->
+  <div class="card">
+    <canvas id="c-flow"></canvas>
+    <div class="card-body">
+      <h3><span>11</span> Flow Map & Fluid Advection</h3>
+      <p>Fluid flow advection using a dynamic vector field. Combines dual out-of-phase texture coordinates to loop flow indefinitely without infinite stretching.</p>
+      <div class="controls">
+        <div class="ctrl">
+          <label>flow speed <span class="v" id="v-flow-speed">0.15</span></label>
+          <input type="range" id="flow-speed" min="0.05" max="0.5" step="0.05" value="0.15">
+        </div>
+        <div class="ctrl">
+          <label>cycle length <span class="v" id="v-flow-cycle">1.0</span></label>
+          <input type="range" id="flow-cycle" min="0.2" max="2.0" step="0.1" value="1">
+        </div>
+        <div class="ctrl">
+          <label>scale <span class="v" id="v-flow-scale">4.0</span></label>
+          <input type="range" id="flow-scale" min="1.0" max="10.0" step="0.5" value="4">
+        </div>
+      </div>
+      <div class="ref">GPU Gems 2 · Chapter 18 · Flow Map Rendering</div>
+    </div>
+  </div>
+
+  <!-- 12. Chromatic Dispersion -->
+  <div class="card">
+    <canvas id="c-dispersion"></canvas>
+    <div class="card-body">
+      <h3><span>12</span> Chromatic Dispersion</h3>
+      <p>Spectral split of refracted light inside a faceted glass gem. Evaluates separate refractive indices (eta) for Red, Green, and Blue light rays.</p>
+      <div class="controls">
+        <div class="ctrl">
+          <label>spread <span class="v" id="v-disp-spread">0.05</span></label>
+          <input type="range" id="disp-spread" min="0.01" max="0.15" step="0.01" value="0.05">
+        </div>
+        <div class="ctrl">
+          <label>refraction <span class="v" id="v-disp-eta">0.82</span></label>
+          <input type="range" id="disp-eta" min="0.5" max="1.5" step="0.02" value="0.82">
+        </div>
+        <div class="ctrl">
+          <label>facets <span class="v" id="v-disp-facets">4.0</span></label>
+          <input type="range" id="disp-facets" min="1.0" max="8.0" step="1.0" value="4">
+        </div>
+      </div>
+      <div class="ref">GPU Gems · Chapter 16 & 19 · Refractive Dispersion</div>
+    </div>
+  </div>
+
+  <!-- 13. Subsurface Scattering -->
+  <div class="card">
+    <canvas id="c-sss"></canvas>
+    <div class="card-body">
+      <h3><span>13</span> Subsurface Scattering</h3>
+      <p>Backlit volumetric light scattering approximation. Simulates translucency and internal light transport inside materials like skin, wax, or jade.</p>
+      <div class="controls">
+        <div class="ctrl">
+          <label>glow depth <span class="v" id="v-sss-trans">1.5</span></label>
+          <input type="range" id="sss-trans" min="0.5" max="4.0" step="0.1" value="1.5">
+        </div>
+        <div class="ctrl">
+          <label>roughness <span class="v" id="v-sss-rough">0.20</span></label>
+          <input type="range" id="sss-rough" min="0.05" max="0.8" step="0.05" value="0.2">
+        </div>
+        <div class="ctrl">
+          <label>material <span class="v" id="v-sss-preset">Jade</span></label>
+          <input type="range" id="sss-preset" min="0" max="2" step="1" value="0">
+        </div>
+      </div>
+      <div class="ref">GPU Gems 3 · Chapter 14 · Subsurface Light Transport</div>
+    </div>
+  </div>
+
+  <!-- 14. Parallax Occlusion Mapping -->
+  <div class="card">
+    <canvas id="c-pom"></canvas>
+    <div class="card-body">
+      <h3><span>14</span> Parallax Occlusion Mapping</h3>
+      <p>Procedural height-raymarching inside a fragment shader. Evaluates height offsets and calculates self-shadowing to render realistic 3D crevices on a flat plane.</p>
+      <div class="controls">
+        <div class="ctrl">
+          <label>depth scale <span class="v" id="v-pom-depth">0.05</span></label>
+          <input type="range" id="pom-depth" min="0.01" max="0.15" step="0.01" value="0.05">
+        </div>
+        <div class="ctrl">
+          <label>light angle <span class="v" id="v-pom-light">0.50</span></label>
+          <input type="range" id="pom-light" min="-1.5" max="1.5" step="0.05" value="0.5">
+        </div>
+        <div class="ctrl">
+          <label>tile frequency <span class="v" id="v-pom-scale">6.0</span></label>
+          <input type="range" id="pom-scale" min="2.0" max="12.0" step="0.5" value="6.0">
+        </div>
+      </div>
+      <div class="ref">GPU Gems 3 · Chapter 18 · Parallax Displacement</div>
+    </div>
+  </div>
+
+  <!-- 15. Lens Flare & Starbursts -->
+  <div class="card">
+    <canvas id="c-flare"></canvas>
+    <div class="card-body">
+      <h3><span>15</span> Lens Flare & Starbursts</h3>
+      <p>Dynamic camera lens artifacts including chromatic halos, light ray diffraction, and camera ghosts aligned symmetrically along the light vector.</p>
+      <div class="controls">
+        <div class="ctrl">
+          <label>flare scale <span class="v" id="v-flare-intensity">1.0</span></label>
+          <input type="range" id="flare-intensity" min="0.2" max="2.0" step="0.1" value="1.0">
+        </div>
+        <div class="ctrl">
+          <label>diffraction <span class="v" id="v-flare-burst">8</span></label>
+          <input type="range" id="flare-burst" min="4" max="16" step="2" value="8">
+        </div>
+        <div class="ctrl">
+          <label>ghost scale <span class="v" id="v-flare-ghosts">1.0</span></label>
+          <input type="range" id="flare-ghosts" min="0.2" max="2.0" step="0.1" value="1.0">
+        </div>
+      </div>
+      <div class="ref">GPU Gems 2 · Chapter 27 · Advanced Image Processing</div>
+    </div>
+  </div>
+
+  <!-- 16. Volumetric Fog & Clouds -->
+  <div class="card">
+    <canvas id="c-clouds"></canvas>
+    <div class="card-body">
+      <h3><span>16</span> Volumetric Fog & Clouds</h3>
+      <p>Raymarched 3D-like volume simulating light absorption and scattering through multiple layers of noise. Accumulates optical density based on Beer's Law.</p>
+      <div class="controls">
+        <div class="ctrl">
+          <label>fog density <span class="v" id="v-clouds-density">1.0</span></label>
+          <input type="range" id="clouds-density" min="0.2" max="3.0" step="0.1" value="1.0">
+        </div>
+        <div class="ctrl">
+          <label>absorption <span class="v" id="v-clouds-absorb">1.2</span></label>
+          <input type="range" id="clouds-absorb" min="0.2" max="3.0" step="0.1" value="1.2">
+        </div>
+        <div class="ctrl">
+          <label>wind speed <span class="v" id="v-clouds-speed">0.40</span></label>
+          <input type="range" id="clouds-speed" min="0.1" max="1.5" step="0.05" value="0.4">
+        </div>
+      </div>
+      <div class="ref">GPU Gems 3 · Chapter 30 · Real-Time Volumetric Clouds</div>
     </div>
   </div>
 
@@ -584,54 +776,6 @@ void main(){
   gl_FragColor=vec4(col,1.0);
 }`;
 
-const MBLUR_FS = `
-precision highp float;
-uniform vec2 u_res; uniform float u_time;
-uniform float u_exposure, u_samples, u_speed;
-vec2 fade(vec2 t){ return t*t*t*(t*(t*6.0-15.0)+10.0); }
-vec4 permute(vec4 x){ return mod(((x*34.0)+1.0)*x, 289.0); }
-float cnoise(vec2 P){
-  vec4 Pi=floor(P.xyxy)+vec4(0,0,1,1); vec4 Pf=fract(P.xyxy)-vec4(0,0,1,1);
-  Pi=mod(Pi,289.0); vec4 ix=Pi.xzxz,iy=Pi.yyww,fx=Pf.xzxz,fy=Pf.yyww;
-  vec4 i=permute(permute(ix)+iy);
-  vec4 gx=fract(i*(1.0/41.0))*2.0-1.0; vec4 gy=abs(gx)-0.5;
-  vec4 tx=floor(gx+0.5); gx-=tx;
-  vec2 g00=vec2(gx.x,gy.x),g10=vec2(gx.y,gy.y),g01=vec2(gx.z,gy.z),g11=vec2(gx.w,gy.w);
-  vec4 norm=1.79284291400159-0.85373472095314*vec4(dot(g00,g00),dot(g01,g01),dot(g10,g10),dot(g11,g11));
-  g00*=norm.x;g01*=norm.y;g10*=norm.z;g11*=norm.w;
-  float n00=dot(g00,vec2(fx.x,fy.x)),n10=dot(g10,vec2(fx.y,fy.y));
-  float n01=dot(g01,vec2(fx.z,fy.z)),n11=dot(g11,vec2(fx.w,fy.w));
-  vec2 fade_xy=fade(Pf.xy); vec2 n_x=mix(vec2(n00,n01),vec2(n10,n11),fade_xy.x);
-  return 2.3*mix(n_x.x,n_x.y,fade_xy.y);
-}
-vec3 scene(vec2 p){
-  float t=u_time*u_speed;
-  vec3 c=vec3(0.0);
-  c+=vec3(0.9,0.2,0.1)*smoothstep(0.12,0.0,length(p-vec2(0.3+0.2*sin(t),0.5)));
-  c+=vec3(0.1,0.5,0.9)*smoothstep(0.1,0.0,length(p-vec2(0.7,0.4+0.15*cos(t*1.3))));
-  c+=vec3(0.2,0.8,0.3)*smoothstep(0.08,0.0,length(p-vec2(0.5,0.6)));
-  c+=vec3(0.8,0.6,0.1)*smoothstep(0.06,0.0,length(p-vec2(0.4,0.3)));
-  c+=cnoise(p*6.0+vec2(t*0.2))*0.08;
-  return c;
-}
-void main(){
-  vec2 uv=gl_FragCoord.xy/u_res; uv.x*=u_res.x/u_res.y;
-  float t=u_time*u_speed;
-  vec2 vel=vec2(cos(t*2.0+length(uv-0.5)*3.0)*0.015,
-                sin(t*1.7+length(uv-0.5)*2.0)*0.01)*u_exposure;
-  vec3 col=vec3(0.0);
-  for(int i=0;i<16;i++){
-    float fi=float(i);
-    if(fi>=u_samples) break;
-    float w=1.0-abs(fi/(u_samples-1.0)-0.5)*2.0;
-    vec2 off=vel*(fi/(u_samples-1.0)-0.5);
-    col+=scene(uv+off)*w;
-  }
-  col/=u_samples*0.6;
-  col+=vec3(0.01,0.005,0.02);
-  gl_FragColor=vec4(col,1.0);
-}`;
-
 const GAUSS_FS = `
 precision highp float;
 uniform vec2 u_res; uniform float u_time;
@@ -693,6 +837,491 @@ void main(){
   col/=tw;
   col+=vec3(0.01,0.005,0.02);
   gl_FragColor=vec4(col,1.0);
+}`;
+
+const GODRAYS_FS = `
+precision highp float;
+uniform vec2 u_res; uniform float u_time;
+uniform float u_decay, u_weight, u_density;
+
+float occlude(vec2 uv) {
+  vec2 lightPos = vec2(0.5, 0.6);
+  float sun = smoothstep(0.12, 0.0, length(uv - lightPos));
+  float m = 0.3 + 0.12 * sin(uv.x * 8.0 + u_time * 0.5) * cos(uv.x * 3.5);
+  float mountain = step(m, uv.y);
+  return sun * mountain;
+}
+
+void main() {
+  vec2 uv = gl_FragCoord.xy / u_res;
+  vec2 textCoord = uv;
+  vec2 lightPos = vec2(0.5, 0.6);
+  vec2 deltaTextCoord = textCoord - lightPos;
+  deltaTextCoord *= (1.0 / 32.0) * u_density;
+  float illuminationDecay = 1.0;
+  vec3 color = vec3(0.0);
+  
+  for (int i = 0; i < 32; i++) {
+    textCoord -= deltaTextCoord;
+    float sample_val = occlude(textCoord);
+    color += vec3(sample_val) * illuminationDecay * u_weight;
+    illuminationDecay *= u_decay;
+  }
+  
+  float m = 0.3 + 0.12 * sin(uv.x * 8.0 + u_time * 0.5) * cos(uv.x * 3.5);
+  vec3 sky = mix(vec3(0.02, 0.04, 0.1), vec3(0.9, 0.5, 0.2), smoothstep(0.0, 0.7, uv.y));
+  vec3 bg = mix(vec3(0.05, 0.04, 0.08), sky + color * vec3(0.95, 0.8, 0.4), step(m, uv.y));
+  gl_FragColor = vec4(bg, 1.0);
+}`;
+
+const FRESNEL_FS = `
+precision highp float;
+uniform vec2 u_res; uniform float u_time;
+uniform float u_eta, u_fresnel, u_rough;
+
+vec3 envMap(vec3 r, float roughness) {
+  float a = u_time * 0.1;
+  mat2 rot = mat2(cos(a), -sin(a), sin(a), cos(a));
+  vec2 rxz = rot * r.xz;
+  vec3 rotatedR = vec3(rxz.x, r.y, rxz.y);
+  
+  vec3 sky = mix(vec3(0.05, 0.08, 0.18), vec3(0.9, 0.45, 0.25), rotatedR.y * 0.5 + 0.5);
+  float sun = pow(max(dot(rotatedR, normalize(vec3(1.0, 2.0, -1.0))), 0.0), 32.0);
+  float blur = mix(1.0, 0.05, roughness);
+  return sky + vec3(sun * 0.8 * blur);
+}
+
+void main() {
+  vec2 uv = (gl_FragCoord.xy - u_res * 0.5) / u_res.y;
+  float r = 0.4;
+  float d2 = dot(uv, uv);
+  vec3 bgDir = normalize(vec3(uv, 1.0));
+  vec3 col = envMap(bgDir, 0.0);
+  
+  if (d2 < r * r) {
+    float z = sqrt(r * r - d2);
+    vec3 N = normalize(vec3(uv, z));
+    vec3 I = vec3(0.0, 0.0, 1.0);
+    
+    float cosTheta = dot(-I, N);
+    float r0 = 0.02;
+    float fres = r0 + (1.0 - r0) * pow(max(1.0 - cosTheta, 0.0), u_fresnel);
+    
+    vec3 R = reflect(I, N);
+    vec3 T = refract(I, N, u_eta);
+    
+    vec3 reflCol = envMap(R, u_rough);
+    vec3 refrCol = vec3(0.0);
+    
+    if (length(T) > 0.01) {
+      refrCol = envMap(T, u_rough * 2.0);
+    } else {
+      refrCol = reflCol;
+    }
+    
+    col = mix(refrCol, reflCol, fres);
+    col += vec3(0.05, 0.1, 0.15) * (1.0 - cosTheta);
+  }
+  
+  gl_FragColor = vec4(col, 1.0);
+}`;
+
+const OCEAN_FS = `
+precision highp float;
+uniform vec2 u_res; uniform float u_time;
+uniform float u_steepness, u_speed, u_freq;
+
+void main() {
+  vec2 uv = gl_FragCoord.xy / u_res;
+  
+  float horizon = 0.75;
+  if (uv.y > horizon) {
+    vec3 sky = mix(vec3(0.02, 0.05, 0.12), vec3(0.3, 0.45, 0.6), (uv.y - horizon) / (1.0 - horizon));
+    gl_FragColor = vec4(sky, 1.0);
+    return;
+  }
+  
+  float depth = (horizon - uv.y) / horizon;
+  vec2 p = vec2(uv.x - 0.5, 1.0) / (depth + 0.08) * u_freq;
+  
+  float h = 0.0;
+  vec2 grad = vec2(0.0);
+  float t = u_time * u_speed;
+  
+  vec2 d1 = normalize(vec2(1.0, 0.4));
+  float ph1 = dot(p, d1) * 1.5 + t * 1.2;
+  h += 0.12 * sin(ph1);
+  grad += d1 * 0.12 * 1.5 * cos(ph1);
+  
+  vec2 d2 = normalize(vec2(-0.7, 0.7));
+  float ph2 = dot(p, d2) * 2.8 - t * 1.8;
+  h += 0.07 * sin(ph2);
+  grad += d2 * 0.07 * 2.8 * cos(ph2);
+  
+  vec2 d3 = normalize(vec2(0.1, 0.9));
+  float ph3 = dot(p, d3) * 4.5 + t * 2.5;
+  h += 0.03 * sin(ph3);
+  grad += d3 * 0.03 * 4.5 * cos(ph3);
+  
+  h = pow(h * 0.5 + 0.5, u_steepness);
+  
+  vec3 N = normalize(vec3(-grad.x * u_steepness, 1.0, -grad.y * u_steepness));
+  
+  vec3 L = normalize(vec3(0.6, 0.7, -0.5));
+  vec3 V = normalize(vec3(0.0, 0.8, 1.0));
+  vec3 H = normalize(L + V);
+  
+  float diff = max(dot(N, L), 0.0);
+  float spec = pow(max(dot(N, H), 0.0), 128.0);
+  
+  vec3 waterCol = mix(vec3(0.01, 0.05, 0.15), vec3(0.04, 0.28, 0.38), h);
+  vec3 skyRefl = mix(vec3(0.02, 0.05, 0.15), vec3(0.3, 0.45, 0.6), N.y * 0.5 + 0.5);
+  
+  float cosTheta = dot(V, N);
+  float fres = 0.02 + 0.98 * pow(1.0 - cosTheta, 5.0);
+  
+  vec3 col = mix(waterCol, skyRefl, fres);
+  col += vec3(spec * 0.7) * depth;
+  
+  gl_FragColor = vec4(col, 1.0);
+}`;
+
+const FLOW_FS = `
+precision highp float;
+uniform vec2 u_res; uniform float u_time;
+uniform float u_speed, u_cycle, u_scale;
+
+vec2 fade(vec2 t){ return t*t*t*(t*(t*6.0-15.0)+10.0); }
+vec4 permute(vec4 x){ return mod(((x*34.0)+1.0)*x, 289.0); }
+float cnoise(vec2 P){
+  vec4 Pi=floor(P.xyxy)+vec4(0,0,1,1); vec4 Pf=fract(P.xyxy)-vec4(0,0,1,1);
+  Pi=mod(Pi,289.0); vec4 ix=Pi.xzxz,iy=Pi.yyww,fx=Pf.xzxz,fy=Pf.yyww;
+  vec4 i=permute(permute(ix)+iy);
+  vec4 gx=fract(i*(1.0/41.0))*2.0-1.0; vec4 gy=abs(gx)-0.5;
+  vec4 tx=floor(gx+0.5); gx-=tx;
+  vec2 g00=vec2(gx.x,gy.x),g10=vec2(gx.y,gy.y),g01=vec2(gx.z,gy.z),g11=vec2(gx.w,gy.w);
+  vec4 norm=1.79284291400159-0.85373472095314*vec4(dot(g00,g00),dot(g01,g01),dot(g10,g10),dot(g11,g11));
+  g00*=norm.x;g01*=norm.y;g10*=norm.z;g11*=norm.w;
+  float n00=dot(g00,vec2(fx.x,fy.x)),n10=dot(g10,vec2(fx.y,fy.y));
+  float n01=dot(g01,vec2(fx.z,fy.z)),n11=dot(g11,vec2(fx.w,fy.w));
+  vec2 fade_xy=fade(Pf.xy); vec2 n_x=mix(vec2(n00,n01),vec2(n10,n11),fade_xy.x);
+  return 2.3*mix(n_x.x,n_x.y,fade_xy.y);
+}
+
+void main() {
+  vec2 uv = gl_FragCoord.xy / u_res;
+  uv.x *= u_res.x / u_res.y;
+  
+  vec2 flowDir = vec2(cnoise(uv * 1.5 + vec2(u_time * 0.05)), cnoise(uv * 1.5 + vec2(100.0 - u_time * 0.03)));
+  flowDir = normalize(flowDir);
+  
+  float t = u_time * u_speed;
+  float progress1 = fract(t);
+  float progress2 = fract(t + 0.5);
+  
+  vec2 uv1 = uv * u_scale - flowDir * progress1 * u_cycle;
+  vec2 uv2 = uv * u_scale - flowDir * progress2 * u_cycle;
+  
+  float n1 = cnoise(uv1);
+  float n2 = cnoise(uv2);
+  
+  float w = abs(progress1 - 0.5) / 0.5;
+  float finalNoise = mix(n1, n2, w);
+  
+  vec3 col = mix(vec3(0.02, 0.01, 0.08), vec3(0.1, 0.6, 0.95), finalNoise * 0.5 + 0.5);
+  col += vec3(0.0, 0.3, 0.4) * pow(max(finalNoise, 0.0), 3.0);
+  gl_FragColor = vec4(col, 1.0);
+}`;
+
+const DISPERSION_FS = `
+precision highp float;
+uniform vec2 u_res; uniform float u_time;
+uniform float u_disp, u_eta, u_facets;
+
+vec3 envMapDisp(vec3 r) {
+  float a = u_time * 0.15;
+  mat2 rot = mat2(cos(a), -sin(a), sin(a), cos(a));
+  vec2 rxz = rot * r.xz;
+  vec3 rotatedR = vec3(rxz.x, r.y, rxz.y);
+  
+  vec3 sky = mix(vec3(0.04, 0.05, 0.12), vec3(0.85, 0.45, 0.2), rotatedR.y * 0.5 + 0.5);
+  float sun = pow(max(dot(rotatedR, normalize(vec3(1.0, 1.8, -1.2))), 0.0), 24.0);
+  return sky + vec3(sun * 0.7);
+}
+
+void main() {
+  vec2 uv = (gl_FragCoord.xy - u_res * 0.5) / u_res.y;
+  float rSphere = 0.42;
+  float d2 = dot(uv, uv);
+  vec3 bgDir = normalize(vec3(uv, 1.0));
+  vec3 col = envMapDisp(bgDir);
+  
+  if (d2 < rSphere * rSphere) {
+    float z = sqrt(rSphere * rSphere - d2);
+    vec3 N = normalize(vec3(uv, z));
+    
+    if (u_facets > 1.05) {
+      vec3 N_fac = floor(N * u_facets) / u_facets;
+      N = normalize(mix(N, N_fac, 0.7));
+    }
+    
+    vec3 I = vec3(0.0, 0.0, 1.0);
+    float cosTheta = dot(-I, N);
+    
+    float etaR = u_eta;
+    float etaG = u_eta + u_disp * 0.5;
+    float etaB = u_eta + u_disp;
+    
+    vec3 TR = refract(I, N, etaR);
+    vec3 TG = refract(I, N, etaG);
+    vec3 TB = refract(I, N, etaB);
+    
+    float r0 = 0.04;
+    float fres = r0 + (1.0 - r0) * pow(max(1.0 - cosTheta, 0.0), 5.0);
+    
+    vec3 refl = envMapDisp(reflect(I, N));
+    
+    vec3 refr = vec3(0.0);
+    refr.r = envMapDisp(length(TR) > 0.01 ? TR : reflect(I, N)).r;
+    refr.g = envMapDisp(length(TG) > 0.01 ? TG : reflect(I, N)).g;
+    refr.b = envMapDisp(length(TB) > 0.01 ? TB : reflect(I, N)).b;
+    
+    col = mix(refr, refl, fres);
+    col += vec3(0.08, 0.04, 0.12) * (1.0 - cosTheta);
+  }
+  
+  gl_FragColor = vec4(col, 1.0);
+}`;
+
+const SSS_FS = `
+precision highp float;
+uniform vec2 u_res; uniform float u_time;
+uniform float u_trans, u_rough, u_preset;
+
+void main() {
+  vec2 uv = (gl_FragCoord.xy - u_res * 0.5) / u_res.y;
+  float r = 0.44;
+  float d2 = dot(uv, uv);
+  vec3 col = vec3(0.03, 0.04, 0.06);
+  
+  if (d2 < r * r) {
+    float z = sqrt(r * r - d2);
+    vec3 N = normalize(vec3(uv, z));
+    vec3 V = vec3(0.0, 0.0, 1.0);
+    
+    float a = u_time * 0.6;
+    vec3 L = normalize(vec3(sin(a), 0.3, cos(a)));
+    vec3 H = normalize(L + V);
+    
+    float NdotL = dot(N, L);
+    float NdotV = max(dot(N, V), 0.0);
+    
+    float wrap = 0.4;
+    float SSS_diffuse = max((NdotL + wrap) / (1.0 + wrap), 0.0);
+    
+    float thickness = sqrt(1.0 - d2 / (r*r));
+    
+    float SSS_back = max(dot(-V, L - N * 0.2), 0.0);
+    float scatterIntensity = pow(SSS_back, 4.0) * (1.0 - thickness) * u_trans;
+    
+    float spec = pow(max(dot(N, H), 0.0), mix(256.0, 8.0, u_rough));
+    
+    vec3 matBase = vec3(0.0);
+    vec3 matScatter = vec3(0.0);
+    if (u_preset < 0.5) {
+      matBase = vec3(0.05, 0.24, 0.12);
+      matScatter = vec3(0.2, 0.85, 0.4);
+    } else if (u_preset < 1.5) {
+      matBase = vec3(0.35, 0.22, 0.18);
+      matScatter = vec3(0.85, 0.15, 0.05);
+    } else {
+      matBase = vec3(0.3, 0.15, 0.02);
+      matScatter = vec3(0.9, 0.5, 0.05);
+    }
+    
+    col = matBase * SSS_diffuse + matScatter * scatterIntensity;
+    col += vec3(spec * (1.0 - u_rough) * 0.4);
+    col = mix(col * 0.15, col, smoothstep(0.0, 0.15, NdotV));
+  }
+  
+  gl_FragColor = vec4(col, 1.0);
+}`;
+
+const POM_FS = `
+precision highp float;
+uniform vec2 u_res; uniform float u_time;
+uniform float u_depth, u_lightX, u_scale;
+
+float getHeight(vec2 uv) {
+  vec2 st = fract(uv);
+  vec2 grid = smoothstep(0.04, 0.08, st) * smoothstep(0.96, 0.92, st);
+  float h = grid.x * grid.y;
+  float n = sin(uv.x * 20.0) * cos(uv.y * 20.0) * 0.15;
+  return h * 0.85 + n * 0.15;
+}
+
+void main() {
+  vec2 uv = gl_FragCoord.xy / u_res;
+  uv = (uv - 0.5) * vec2(u_res.x/u_res.y, 1.0);
+  
+  vec3 V = normalize(vec3(uv, 1.0));
+  
+  float numLayers = 16.0;
+  float layerDepth = 1.0 / numLayers;
+  float currentLayerDepth = 0.0;
+  
+  vec2 p = uv * u_scale;
+  vec2 deltaTexCoords = V.xy * u_depth / numLayers;
+  
+  vec2 currentTexCoords = p;
+  float currentDepthMapValue = getHeight(currentTexCoords);
+  
+  for (int i = 0; i < 16; i++) {
+    if (currentLayerDepth >= currentDepthMapValue) break;
+    currentTexCoords -= deltaTexCoords;
+    currentDepthMapValue = getHeight(currentTexCoords);
+    currentLayerDepth += layerDepth;
+  }
+  
+  vec2 prevTexCoords = currentTexCoords + deltaTexCoords;
+  float afterDepth  = currentDepthMapValue - currentLayerDepth;
+  float beforeDepth = getHeight(prevTexCoords) - currentLayerDepth + layerDepth;
+  float weight = afterDepth / (afterDepth - beforeDepth);
+  vec2 finalCoords = prevTexCoords * weight + currentTexCoords * (1.0 - weight);
+  
+  vec3 L = normalize(vec3(u_lightX, 1.0, 0.5));
+  float h = getHeight(finalCoords);
+  
+  vec2 eps = vec2(0.01, 0.0);
+  float hX = getHeight(finalCoords + eps.xy) - getHeight(finalCoords - eps.xy);
+  float hY = getHeight(finalCoords + eps.yx) - getHeight(finalCoords - eps.yx);
+  vec3 N = normalize(vec3(-hX * 10.0, -hY * 10.0, 1.0));
+  
+  float diff = max(dot(N, L), 0.0);
+  
+  float shadow = 1.0;
+  vec2 lightStep = L.xy * u_depth * 0.15;
+  vec2 shadowCoords = finalCoords;
+  float shadowLayerDepth = currentLayerDepth;
+  for(int i=0; i<6; i++) {
+    shadowCoords += lightStep;
+    shadowLayerDepth -= layerDepth * 2.0;
+    if (getHeight(shadowCoords) > shadowLayerDepth) {
+      shadow = 0.3;
+      break;
+    }
+  }
+  
+  vec3 stone = mix(vec3(0.08, 0.07, 0.09), vec3(0.5, 0.46, 0.42), h);
+  vec3 col = stone * (diff * shadow + vec3(0.05, 0.07, 0.08));
+  
+  gl_FragColor = vec4(col, 1.0);
+}`;
+
+const FLARE_FS = `
+precision highp float;
+uniform vec2 u_res; uniform float u_time;
+uniform float u_flare, u_burst, u_ghosts;
+
+void main() {
+  vec2 uv = (gl_FragCoord.xy - u_res * 0.5) / u_res.y;
+  
+  float t = u_time * 0.5;
+  vec2 lightPos = vec2(sin(t) * 0.5, cos(t * 0.7) * 0.3);
+  
+  vec3 col = vec3(0.01, 0.015, 0.025);
+  
+  vec2 toLight = uv - lightPos;
+  float distToLight = length(toLight);
+  
+  float core = smoothstep(0.06, 0.0, distToLight);
+  col += vec3(core * 1.5);
+  
+  float angle = atan(toLight.y, toLight.x);
+  float burst = sin(angle * u_burst + u_time) * 0.5 + 0.5;
+  burst *= smoothstep(0.4, 0.0, distToLight);
+  col += vec3(burst * u_flare * 0.25);
+  
+  float halo = smoothstep(0.02, 0.0, abs(distToLight - 0.22));
+  col += vec3(halo * u_flare * 0.08) * vec3(0.8, 0.4, 0.9);
+  
+  vec2 ray = uv - vec2(0.0);
+  vec2 lightRay = lightPos - vec2(0.0);
+  
+  for (int i = 1; i <= 6; i++) {
+    float fi = float(i);
+    vec2 ghostCenter = lightPos * (-fi * 0.3 * u_ghosts);
+    float dGhost = length(uv - ghostCenter);
+    float w = smoothstep(0.08, 0.0, dGhost) * (1.0 - fi * 0.15);
+    
+    vec3 tint = mix(vec3(0.2, 0.8, 0.3), vec3(0.9, 0.2, 0.1), fi/6.0);
+    col += vec3(w * u_flare * 0.3) * tint;
+  }
+  
+  gl_FragColor = vec4(col, 1.0);
+}`;
+
+const CLOUDS_FS = `
+precision highp float;
+uniform vec2 u_res; uniform float u_time;
+uniform float u_density, u_absorption, u_speed;
+
+vec2 fade(vec2 t){ return t*t*t*(t*(t*6.0-15.0)+10.0); }
+vec4 permute(vec4 x){ return mod(((x*34.0)+1.0)*x, 289.0); }
+float cnoise(vec2 P){
+  vec4 Pi=floor(P.xyxy)+vec4(0,0,1,1); vec4 Pf=fract(P.xyxy)-vec4(0,0,1,1);
+  Pi=mod(Pi,289.0); vec4 ix=Pi.xzxz,iy=Pi.yyww,fx=Pf.xzxz,fy=Pf.yyww;
+  vec4 i=permute(permute(ix)+iy);
+  vec4 gx=fract(i*(1.0/41.0))*2.0-1.0; vec4 gy=abs(gx)-0.5;
+  vec4 tx=floor(gx+0.5); gx-=tx;
+  vec2 g00=vec2(gx.x,gy.x),g10=vec2(gx.y,gy.y),g01=vec2(gx.z,gy.z),g11=vec2(gx.w,gy.w);
+  vec4 norm=1.79284291400159-0.85373472095314*vec4(dot(g00,g00),dot(g01,g01),dot(g10,g10),dot(g11,g11));
+  g00*=norm.x;g01*=norm.y;g10*=norm.z;g11*=norm.w;
+  float n00=dot(g00,vec2(fx.x,fy.x)),n10=dot(g10,vec2(fx.y,fy.y));
+  float n01=dot(g01,vec2(fx.z,fy.z)),n11=dot(g11,vec2(fx.w,fy.w));
+  vec2 fade_xy=fade(Pf.xy); vec2 n_x=mix(vec2(n00,n01),vec2(n10,n11),fade_xy.x);
+  return 2.3*mix(n_x.x,n_x.y,fade_xy.y);
+}
+
+float fbm(vec2 p) {
+  float v = 0.0, a = 0.5;
+  mat2 r = mat2(0.8,0.6,-0.6,0.8);
+  for(int i=0; i<4; i++) {
+    v += a * cnoise(p); p = r*p*2.0 + vec2(1.5); a *= 0.5;
+  }
+  return v;
+}
+
+void main() {
+  vec2 uv = gl_FragCoord.xy / u_res;
+  vec3 rd = normalize(vec3(uv - 0.5, 1.0));
+  vec3 L = normalize(vec3(0.5, 0.8, -0.6));
+  
+  float t = u_time * u_speed;
+  float T = 1.0;
+  vec3 col = vec3(0.0);
+  
+  for (int i = 0; i < 12; i++) {
+    float zDepth = float(i) * 0.1 + 0.5;
+    vec3 p = rd * zDepth;
+    
+    vec2 nCoord = p.xy * 2.0 + vec2(t * 0.15, zDepth * 0.2);
+    float density = fbm(nCoord) * 0.5 + 0.5;
+    density = smoothstep(0.3, 0.8, density) * u_density;
+    
+    if (density > 0.01) {
+      float shadow = exp(-density * u_absorption);
+      vec3 lightCol = mix(vec3(0.9, 0.8, 0.75), vec3(0.3, 0.45, 0.6), zDepth);
+      col += lightCol * density * T * shadow * 0.2;
+      T *= exp(-density * 0.15);
+    }
+    if (T < 0.01) break;
+  }
+  
+  vec3 sky = mix(vec3(0.01, 0.03, 0.08), vec3(0.12, 0.25, 0.45), uv.y);
+  vec3 finalCol = sky * T + col;
+  
+  gl_FragColor = vec4(finalCol, 1.0);
 }`;
 
 // ── Wiring ─────────────────────────────────────────────────
@@ -853,26 +1482,6 @@ const t0 = performance.now();
   })();
 })();
 
-// ── Motion Blur ────────────────────────────────────────────
-(function(){
-  const ctx = wire('c-mblur', MBLUR_FS, ['u_res','u_time','u_exposure','u_samples','u_speed']);
-  if (!ctx) return;
-  let exposure=0.5, samples=8, speed=0.6;
-  bindSlider('mblur-exp', v => exposure=v);
-  bindSlider('mblur-samp', v => samples=v);
-  bindSlider('mblur-speed', v => speed=v);
-  (function loop(){
-    const t=(performance.now()-t0)*0.001;
-    ctx.gl.uniform2f(ctx.U.u_res, ctx.canvas.width, ctx.canvas.height);
-    ctx.gl.uniform1f(ctx.U.u_time, t);
-    ctx.gl.uniform1f(ctx.U.u_exposure, exposure);
-    ctx.gl.uniform1f(ctx.U.u_samples, samples);
-    ctx.gl.uniform1f(ctx.U.u_speed, speed);
-    ctx.gl.drawArrays(ctx.gl.TRIANGLE_STRIP, 0, 4);
-    requestAnimationFrame(loop);
-  })();
-})();
-
 // ── Gaussian Blur ──────────────────────────────────────────
 (function(){
   const ctx = wire('c-gauss', GAUSS_FS, ['u_res','u_time','u_radius','u_sigma','u_bilinear']);
@@ -888,6 +1497,190 @@ const t0 = performance.now();
     ctx.gl.uniform1f(ctx.U.u_radius, radius);
     ctx.gl.uniform1f(ctx.U.u_sigma, sigma);
     ctx.gl.uniform1f(ctx.U.u_bilinear, bil);
+    ctx.gl.drawArrays(ctx.gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(loop);
+  })();
+})();
+
+// ── Volumetric Light Scattering (God Rays) ──────────────────
+(function(){
+  const ctx = wire('c-godrays', GODRAYS_FS, ['u_res','u_time','u_decay','u_weight','u_density']);
+  if (!ctx) return;
+  let decay=0.96, weight=0.08, density=1.0;
+  bindSlider('godrays-decay', v => decay=v);
+  bindSlider('godrays-weight', v => weight=v);
+  bindSlider('godrays-density', v => density=v);
+  (function loop(){
+    const t=(performance.now()-t0)*0.001;
+    ctx.gl.uniform2f(ctx.U.u_res, ctx.canvas.width, ctx.canvas.height);
+    ctx.gl.uniform1f(ctx.U.u_time, t);
+    ctx.gl.uniform1f(ctx.U.u_decay, decay);
+    ctx.gl.uniform1f(ctx.U.u_weight, weight);
+    ctx.gl.uniform1f(ctx.U.u_density, density);
+    ctx.gl.drawArrays(ctx.gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(loop);
+  })();
+})();
+
+// ── Fresnel Reflection & Refraction ─────────────────────────
+(function(){
+  const ctx = wire('c-fresnel', FRESNEL_FS, ['u_res','u_time','u_eta','u_fresnel','u_rough']);
+  if (!ctx) return;
+  let eta=0.8, power=5.0, rough=0.1;
+  bindSlider('fresnel-eta', v => eta=v);
+  bindSlider('fresnel-power', v => power=v);
+  bindSlider('fresnel-rough', v => rough=v);
+  (function loop(){
+    const t=(performance.now()-t0)*0.001;
+    ctx.gl.uniform2f(ctx.U.u_res, ctx.canvas.width, ctx.canvas.height);
+    ctx.gl.uniform1f(ctx.U.u_time, t);
+    ctx.gl.uniform1f(ctx.U.u_eta, eta);
+    ctx.gl.uniform1f(ctx.U.u_fresnel, power);
+    ctx.gl.uniform1f(ctx.U.u_rough, rough);
+    ctx.gl.drawArrays(ctx.gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(loop);
+  })();
+})();
+
+// ── Gerstner Wave Synthesis ─────────────────────────────────
+(function(){
+  const ctx = wire('c-ocean', OCEAN_FS, ['u_res','u_time','u_steepness','u_speed','u_freq']);
+  if (!ctx) return;
+  let steep=1.0, speed=1.0, freq=4.0;
+  bindSlider('ocean-steep', v => steep=v);
+  bindSlider('ocean-speed', v => speed=v);
+  bindSlider('ocean-freq', v => freq=v);
+  (function loop(){
+    const t=(performance.now()-t0)*0.001;
+    ctx.gl.uniform2f(ctx.U.u_res, ctx.canvas.width, ctx.canvas.height);
+    ctx.gl.uniform1f(ctx.U.u_time, t);
+    ctx.gl.uniform1f(ctx.U.u_steepness, steep);
+    ctx.gl.uniform1f(ctx.U.u_speed, speed);
+    ctx.gl.uniform1f(ctx.U.u_freq, freq);
+    ctx.gl.drawArrays(ctx.gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(loop);
+  })();
+})();
+
+// ── Flow Map & Fluid Advection ──────────────────────────────
+(function(){
+  const ctx = wire('c-flow', FLOW_FS, ['u_res','u_time','u_speed','u_cycle','u_scale']);
+  if (!ctx) return;
+  let speed=0.15, cycle=1.0, scale=4.0;
+  bindSlider('flow-speed', v => speed=v);
+  bindSlider('flow-cycle', v => cycle=v);
+  bindSlider('flow-scale', v => scale=v);
+  (function loop(){
+    const t=(performance.now()-t0)*0.001;
+    ctx.gl.uniform2f(ctx.U.u_res, ctx.canvas.width, ctx.canvas.height);
+    ctx.gl.uniform1f(ctx.U.u_time, t);
+    ctx.gl.uniform1f(ctx.U.u_speed, speed);
+    ctx.gl.uniform1f(ctx.U.u_cycle, cycle);
+    ctx.gl.uniform1f(ctx.U.u_scale, scale);
+    ctx.gl.drawArrays(ctx.gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(loop);
+  })();
+})();
+
+// ── Chromatic Dispersion ────────────────────────────────────
+(function(){
+  const ctx = wire('c-dispersion', DISPERSION_FS, ['u_res','u_time','u_disp','u_eta','u_facets']);
+  if (!ctx) return;
+  let disp=0.05, eta=0.82, facets=4.0;
+  bindSlider('disp-spread', v => disp=v);
+  bindSlider('disp-eta', v => eta=v);
+  bindSlider('disp-facets', v => facets=v);
+  (function loop(){
+    const t=(performance.now()-t0)*0.001;
+    ctx.gl.uniform2f(ctx.U.u_res, ctx.canvas.width, ctx.canvas.height);
+    ctx.gl.uniform1f(ctx.U.u_time, t);
+    ctx.gl.uniform1f(ctx.U.u_disp, disp);
+    ctx.gl.uniform1f(ctx.U.u_eta, eta);
+    ctx.gl.uniform1f(ctx.U.u_facets, facets);
+    ctx.gl.drawArrays(ctx.gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(loop);
+  })();
+})();
+
+// ── Subsurface Scattering ───────────────────────────────────
+(function(){
+  const ctx = wire('c-sss', SSS_FS, ['u_res','u_time','u_trans','u_rough','u_preset']);
+  if (!ctx) return;
+  let trans=1.5, rough=0.2, preset=0.0;
+  bindSlider('sss-trans', v => trans=v);
+  bindSlider('sss-rough', v => rough=v);
+  bindSlider('sss-preset', v => {
+    preset=v;
+    const labels=['Jade','Wax/Flesh','Amber'];
+    document.getElementById('v-sss-preset').textContent = labels[v];
+  });
+  (function loop(){
+    const t=(performance.now()-t0)*0.001;
+    ctx.gl.uniform2f(ctx.U.u_res, ctx.canvas.width, ctx.canvas.height);
+    ctx.gl.uniform1f(ctx.U.u_time, t);
+    ctx.gl.uniform1f(ctx.U.u_trans, trans);
+    ctx.gl.uniform1f(ctx.U.u_rough, rough);
+    ctx.gl.uniform1f(ctx.U.u_preset, preset);
+    ctx.gl.drawArrays(ctx.gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(loop);
+  })();
+})();
+
+// ── Parallax Occlusion Mapping ──────────────────────────────
+(function(){
+  const ctx = wire('c-pom', POM_FS, ['u_res','u_time','u_depth','u_lightX','u_scale']);
+  if (!ctx) return;
+  let depth=0.05, light=0.5, scale=6.0;
+  bindSlider('pom-depth', v => depth=v);
+  bindSlider('pom-light', v => light=v);
+  bindSlider('pom-scale', v => scale=v);
+  (function loop(){
+    const t=(performance.now()-t0)*0.001;
+    ctx.gl.uniform2f(ctx.U.u_res, ctx.canvas.width, ctx.canvas.height);
+    ctx.gl.uniform1f(ctx.U.u_time, t);
+    ctx.gl.uniform1f(ctx.U.u_depth, depth);
+    ctx.gl.uniform1f(ctx.U.u_lightX, light);
+    ctx.gl.uniform1f(ctx.U.u_scale, scale);
+    ctx.gl.drawArrays(ctx.gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(loop);
+  })();
+})();
+
+// ── Lens Flare & Starbursts ─────────────────────────────────
+(function(){
+  const ctx = wire('c-flare', FLARE_FS, ['u_res','u_time','u_flare','u_burst','u_ghosts']);
+  if (!ctx) return;
+  let flare=1.0, burst=8.0, ghosts=1.0;
+  bindSlider('flare-intensity', v => flare=v);
+  bindSlider('flare-burst', v => burst=v);
+  bindSlider('flare-ghosts', v => ghosts=v);
+  (function loop(){
+    const t=(performance.now()-t0)*0.001;
+    ctx.gl.uniform2f(ctx.U.u_res, ctx.canvas.width, ctx.canvas.height);
+    ctx.gl.uniform1f(ctx.U.u_time, t);
+    ctx.gl.uniform1f(ctx.U.u_flare, flare);
+    ctx.gl.uniform1f(ctx.U.u_burst, burst);
+    ctx.gl.uniform1f(ctx.U.u_ghosts, ghosts);
+    ctx.gl.drawArrays(ctx.gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(loop);
+  })();
+})();
+
+// ── Volumetric Fog & Clouds ─────────────────────────────────
+(function(){
+  const ctx = wire('c-clouds', CLOUDS_FS, ['u_res','u_time','u_density','u_absorption','u_speed']);
+  if (!ctx) return;
+  let density=1.0, absorption=1.2, speed=0.4;
+  bindSlider('clouds-density', v => density=v);
+  bindSlider('clouds-absorb', v => absorption=v);
+  bindSlider('clouds-speed', v => speed=v);
+  (function loop(){
+    const t=(performance.now()-t0)*0.001;
+    ctx.gl.uniform2f(ctx.U.u_res, ctx.canvas.width, ctx.canvas.height);
+    ctx.gl.uniform1f(ctx.U.u_time, t);
+    ctx.gl.uniform1f(ctx.U.u_density, density);
+    ctx.gl.uniform1f(ctx.U.u_absorption, absorption);
+    ctx.gl.uniform1f(ctx.U.u_speed, speed);
     ctx.gl.drawArrays(ctx.gl.TRIANGLE_STRIP, 0, 4);
     requestAnimationFrame(loop);
   })();

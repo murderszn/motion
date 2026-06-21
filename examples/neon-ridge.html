@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lumen Splash Page — ridged</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    #bg-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+      will-change: transform;
+      display: block;
+    }
+    #text-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .text-elem {
+      position: absolute;
+      pointer-events: auto;
+      user-select: none;
+      line-height: 1.2;
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;700;900&family=Outfit:wght@200;400;700;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <canvas id="bg-canvas"></canvas>
+  <div id="text-overlay">
+    
+  </div>
+
+  <script>
+    // WebGL setup
+    const canvas = document.getElementById('bg-canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (!gl) {
+      document.body.innerHTML = '<p style="padding:40px;color:#fff;font-family:sans-serif">WebGL not supported.</p>';
+    }
+
+    // Shaders
+    const VS = `attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }`;
+    const FS = `
+precision highp float;
+
+uniform vec2  u_res;
+uniform float u_phase;
+uniform float u_seed;
+uniform int   u_mode;
+uniform float u_speed, u_scale, u_density, u_distort, u_detail, u_grain;
+uniform vec3  u_c0, u_c1, u_c2, u_c3;
+uniform sampler2D u_texture;
+uniform float u_mix, u_pixel, u_invert;
+
+#define TAU 6.28318530718
+
+float hash21(vec2 p){
+    p = fract(p * vec2(234.34, 435.345));
+    p += dot(p, p + 34.23);
+    return fract(p.x * p.y);
+}
+
+float vnoise(vec2 p){
+    vec2 i = floor(p), f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    float a = hash21(i);
+    float b = hash21(i + vec2(1.0, 0.0));
+    float c = hash21(i + vec2(0.0, 1.0));
+    float d = hash21(i + vec2(1.0, 1.0));
+    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+}
+
+vec2 fade(vec2 t) { return t*t*t*(t*(t*6.0-15.0)+10.0); }
+vec4 permute(vec4 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
+float cnoise(vec2 P) {
+    vec4 Pi = floor(P.xyxy) + vec4(0.0, 0.0, 1.0, 1.0);
+    vec4 Pf = fract(P.xyxy) - vec4(0.0, 0.0, 1.0, 1.0);
+    Pi = mod(Pi, 289.0);
+    vec4 ix = Pi.xzxz; vec4 iy = Pi.yyww;
+    vec4 fx = Pf.xzxz; vec4 fy = Pf.yyww;
+    vec4 i = permute(permute(ix) + iy);
+    vec4 gx = fract(i * (1.0 / 41.0)) * 2.0 - 1.0;
+    vec4 gy = abs(gx) - 0.5;
+    vec4 tx = floor(gx + 0.5);
+    gx = gx - tx;
+    vec2 g00 = vec2(gx.x,gy.x);
+    vec2 g10 = vec2(gx.y,gy.y);
+    vec2 g01 = vec2(gx.z,gy.z);
+    vec2 g11 = vec2(gx.w,gy.w);
+    vec4 norm = 1.79284291400159 - 0.85373472095314 * vec4(dot(g00, g00), dot(g01, g01), dot(g10, g10), dot(g11, g11));
+    g00 *= norm.x; g01 *= norm.y; g10 *= norm.z; g11 *= norm.w;
+    float n00 = dot(g00, vec2(fx.x, fy.x));
+    float n10 = dot(g10, vec2(fx.y, fy.y));
+    float n01 = dot(g01, vec2(fx.z, fy.z));
+    float n11 = dot(g11, vec2(fx.w, fy.w));
+    vec2 fade_xy = fade(Pf.xy);
+    vec2 n_x = mix(vec2(n00, n01), vec2(n10, n11), fade_xy.x);
+    return 2.3 * mix(n_x.x, n_x.y, fade_xy.y);
+}
+
+float fbm(vec2 p){
+    float v = 0.0, a = 0.5;
+    mat2 r = mat2(0.80, 0.60, -0.60, 0.80);
+    for (int i = 0; i < 5; i++){
+        v += a * vnoise(p);
+        p  = r * p * 2.1 + vec2(1.7, 9.2);
+        a *= 0.5;
+    }
+    return v;
+}
+
+vec2 loopOff(){
+    return vec2(cos(u_phase), sin(u_phase)) * (0.10 + 0.55 * u_speed);
+}
+
+vec3 grad4(float t){
+    t = clamp(t, 0.0, 1.0);
+    vec3 c = mix(u_c0, u_c1, smoothstep(0.00, 0.35, t));
+    c = mix(c, u_c2, smoothstep(0.35, 0.70, t));
+    c = mix(c, u_c3, smoothstep(0.70, 1.00, t));
+    return c;
+}
+
+float metaf(vec2 p, float ar){
+    float s  = u_seed;
+    float rA = 0.08 + 0.20 * u_speed;
+    vec2 b1 = vec2((0.28 + 0.06 * sin(s))       * ar, 0.62 + 0.05 * cos(s * 1.3))
+            + rA        * vec2(cos(u_phase + s),             sin(u_phase + s));
+    vec2 b2 = vec2((0.72 + 0.05 * cos(s * 2.1)) * ar, 0.40 + 0.06 * sin(s * 0.7))
+            + rA * 0.85 * vec2(cos(-2.0 * u_phase + s * 1.7), sin(-2.0 * u_phase + s * 1.7));
+    vec2 b3 = vec2((0.50 + 0.07 * sin(s * 1.6)) * ar, 0.24 + 0.05 * cos(s * 2.4))
+            + rA * 0.70 * vec2(cos(u_phase + s * 2.3 + 2.0),  sin(u_phase + s * 2.3 + 2.0));
+    return 0.30 / (length(p - b1) + 0.07)
+         + 0.22 / (length(p - b2) + 0.07)
+         + 0.16 / (length(p - b3) + 0.07);
+}
+
+void main(){
+    vec2 uv = gl_FragCoord.xy / u_res;
+    uv.y = 1.0 - uv.y;
+    float ar = u_res.x / u_res.y;
+    vec2 sOff = vec2(fract(u_seed * 0.193), fract(u_seed * 0.317)) * 47.0;
+
+    vec3 col = vec3(0.0);
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    /* ─── 17 · ridged ─── */
+    if (u_mode == 17){
+        vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(2.0, 6.0, u_scale) + sOff;
+        float t = u_phase * mix(0.2, 0.8, u_speed);
+        mat2 rot = mat2(0.8, 0.6, -0.6, 0.8);
+        float v = 0.0, a = 0.5, w = 1.0;
+        vec2 q2 = p + loopOff();
+        float offset = mix(0.5, 1.2, u_distort);
+        for (int i = 0; i < 8; i++){
+            float fi = float(i);
+            if (fi >= mix(3.0, 8.0, u_density)) break;
+            float n = cnoise(q2) * w;
+            n = abs(n);
+            n = offset - n;
+            n = n * n;
+            v += n * a;
+            q2 = rot * q2 * 2.1 + vec2(1.7, 9.2);
+            a *= mix(0.35, 0.65, u_detail);
+            w = clamp(0.0, 1.0, n * 2.0);
+        }
+        col = grad4(clamp(v * 1.2, 0.0, 1.0));
+        float ridge = pow(clamp(v, 0.0, 1.0), 2.0);
+        col += u_c3 * ridge * mix(0.1, 0.4, u_detail);
+    }
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    /* texture overlay */
+    if (u_mix > 0.001){
+        vec2 tuv = uv;
+        float pix = 1.0 - u_pixel;
+        float blocks = mix(8.0, 200.0, pix * pix);
+        tuv = floor(tuv * blocks) / blocks;
+        vec4 tex = texture2D(u_texture, tuv);
+        col = mix(col, tex.rgb, clamp(u_mix, 0.0, 1.0));
+    }
+
+    /* film grain + vignette */
+    col += (hash21(gl_FragCoord.xy + vec2(u_phase * 91.3)) - 0.5) * u_grain * 0.22;
+    vec2 v = uv * 2.0 - 1.0;
+    col *= 1.0 - dot(v, v) * 0.16;
+
+    if (u_invert > 0.5) {
+        col = 1.0 - col;
+    }
+
+    gl_FragColor = vec4(col, 1.0);
+}`;
+
+    function compileShader(type, src) {
+      const s = gl.createShader(type);
+      gl.shaderSource(s, src);
+      gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+        console.error(gl.getShaderInfoLog(s));
+        gl.deleteShader(s);
+        return null;
+      }
+      return s;
+    }
+
+    const vs = compileShader(gl.VERTEX_SHADER, VS);
+    const fs = compileShader(gl.FRAGMENT_SHADER, FS);
+    if (!vs || !fs) {
+      console.error('Shader compilation failed.');
+    }
+
+    const prog = gl.createProgram();
+    gl.attachShader(prog, vs);
+    gl.attachShader(prog, fs);
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+      console.error('Program linking failed: ' + gl.getProgramInfoLog(prog));
+    }
+    gl.useProgram(prog);
+
+    // Quad geometry
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+    const aLoc = gl.getAttribLocation(prog, 'a');
+    gl.enableVertexAttribArray(aLoc);
+    gl.vertexAttribPointer(aLoc, 2, gl.FLOAT, false, 0, 0);
+
+    // Uniforms cache
+    const U = {};
+    const uniforms = [
+      'u_res', 'u_phase', 'u_seed', 'u_mode',
+      'u_speed', 'u_scale', 'u_density', 'u_distort', 'u_detail', 'u_grain',
+      'u_c0', 'u_c1', 'u_c2', 'u_c3', 'u_texture', 'u_mix', 'u_pixel', 'u_invert'
+    ];
+    uniforms.forEach(n => { U[n] = gl.getUniformLocation(prog, n); });
+
+    // Embedded Parameters
+    const P = {
+  "mode": 17,
+  "seed": 745,
+  "sizeIdx": 1,
+  "loop": 4,
+  "colors": [
+    "#e0e1e0",
+    "#3f6212",
+    "#a3e635",
+    "#f7fee7"
+  ],
+  "speed": 0,
+  "scale": 1,
+  "density": 0.39,
+  "distort": 0.54,
+  "detail": 0.57,
+  "grain": 0.4388265428333871,
+  "mix": 0,
+  "pixel": 0,
+  "invert": 0
+};
+
+    // Helper: Hex to RGB
+    function hex2rgb(h) {
+      return [
+        parseInt(h.slice(1, 3), 16) / 255,
+        parseInt(h.slice(3, 5), 16) / 255,
+        parseInt(h.slice(5, 7), 16) / 255,
+      ];
+    }
+
+    // Optional texture loading
+    let texLoaded = false;
+    let texObj = null;
+    const base64Tex = "";
+    if (base64Tex) {
+      const img = new Image();
+      img.onload = () => {
+        texObj = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, texObj);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+        texLoaded = true;
+      };
+      img.src = base64Tex;
+    }
+
+    // Resize
+    function resize() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(window.innerWidth * dpr);
+      canvas.height = Math.round(window.innerHeight * dpr);
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      
+      const overlay = document.getElementById('text-overlay');
+      const h = overlay.offsetHeight || window.innerHeight;
+      document.querySelectorAll('.text-elem').forEach(el => {
+        const fs = parseFloat(el.dataset.fontSize);
+        el.style.fontSize = (fs * h) + 'px';
+      });
+    }
+    window.addEventListener('resize', resize);
+    resize(); // Call synchronously to initialize sizing immediately
+
+    // Loop
+    const t0 = performance.now();
+    function render(now) {
+      const time = (now - t0) / 1000;
+      const phase = (time / P.loop * Math.PI * 2) % (Math.PI * 2);
+
+      gl.uniform2f(U.u_res, canvas.width, canvas.height);
+      gl.uniform1f(U.u_phase, phase);
+      gl.uniform1f(U.u_seed, (P.seed % 10000) * 0.6180339887 % 12.566);
+      gl.uniform1i(U.u_mode, P.mode);
+      gl.uniform1f(U.u_speed, P.speed);
+      gl.uniform1f(U.u_scale, P.scale);
+      gl.uniform1f(U.u_density, P.density);
+      gl.uniform1f(U.u_distort, P.distort);
+      gl.uniform1f(U.u_detail, P.detail);
+      gl.uniform1f(U.u_grain, P.grain);
+      gl.uniform1f(U.u_mix, P.mix);
+      gl.uniform1f(U.u_pixel, P.pixel);
+      gl.uniform1f(U.u_invert, P.invert || 0);
+      gl.uniform3fv(U.u_c0, hex2rgb(P.colors[0]));
+      gl.uniform3fv(U.u_c1, hex2rgb(P.colors[1]));
+      gl.uniform3fv(U.u_c2, hex2rgb(P.colors[2]));
+      gl.uniform3fv(U.u_c3, hex2rgb(P.colors[3]));
+
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, texLoaded ? texObj : null);
+      gl.uniform1i(U.u_texture, 0);
+
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      requestAnimationFrame(render);
+    }
+    requestAnimationFrame(render);
+  </script>
+</body>
+</html>
