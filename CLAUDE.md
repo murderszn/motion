@@ -90,6 +90,47 @@ When building a page, load these skills in order:
 
 Examples of standalone pages: `index.html`, `splash.html`, `examples/*.html`
 
+## Building a Beautiful Site (Chromaverse + Motion Shaders)
+
+This is the canonical recipe for generating a premium website on this project.
+Compose three layers — **a Chromaverse theme for the surface, a /motion shader for
+the movement, glassmorphism to bridge them** — governed by design theory.
+
+**Mental model:** Chromaverse = *what colors* · motion shaders = *what moves* ·
+glassmorphism = *how content floats above the motion*.
+
+### The 5-step build
+
+1. **Pick the Chromaverse theme** — browse `chromaverse/index.html`, choose a palette
+   that matches the brand mood (e.g. `kyoto-moss` calm, `vaporwave` retro, `swiss`
+   editorial). Lift its CSS custom properties as the page's token foundation:
+   `--bg`, `--bg-alt`, `--ink`, `--text`, `--text-muted`, `--border`, and the
+   `--accent` / `--accent-bright` / `--accent-pale` ladder, plus the shared scale
+   (`--sp-1…--sp-10`, `--r-sm/md/lg`, `--ease-out`). Ship both `[data-theme="dark"]`
+   and light blocks. The theme owns ALL color — never invent ad-hoc hex values.
+2. **Choose the motion shader** — pick one /motion preset for the fullscreen WebGL
+   background (`aurora`, `flow`, `plasma`, `marble`, `glass`, …). One preset, slow
+   and ambient — the background supports content, it does not compete with it.
+3. **Tint the shader to the theme** — feed the Chromaverse palette colors into the
+   shader's palette uniforms so motion and surface share one color story. Respect the
+   seamless-loop invariant (`u_phase`, `loopOff()`) — see Critical Rules above.
+4. **Layer glassmorphism** — float content in frosted panels over the shader
+   (`backdrop-filter: blur(20px) saturate(180%)`), or use liquidGL for true
+   refraction. Glass tints come from the theme's surface tokens, not white.
+5. **Apply design theory** — golden-ratio / 4px-grid layout, radial or bilateral
+   symmetry, generous negative space, one accent used sparingly, type pairing from
+   the theme, 150–200ms `transform`/`opacity` motion only.
+
+### Skill load order for this build
+
+1. `motion-web-design` — design DNA, glassmorphism, symmetry, shader integration
+2. `liquidgl-glassmorphism` — if using real-time refraction glass
+3. `shader-development` — if writing/tuning custom GLSL
+4. `motion-shaders` — for /motion's shader helpers (`fbm`, `hash21`, `loopOff`, …)
+
+Then read a representative theme file under `chromaverse/` to copy its exact token
+block. See `AGENTS.md` §3 for the layered z-index stack and copy-paste patterns.
+
 ## Agent Skills
 
 Preloaded guides:

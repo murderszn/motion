@@ -46,6 +46,36 @@ The WebGL context is configured for WebGL 1.0. The compiler will fail if these c
 
 When an agent is asked to build a web page (landing page, splash, portfolio, etc.), follow these guidelines:
 
+### The Flagship Recipe: Chromaverse Theme + Motion Shader + Glass
+
+For a **beautiful, premium** page, compose three layers. This is the preferred
+default — do not start from a blank palette when Chromaverse already provides one.
+
+- **Surface = a Chromaverse theme** (`chromaverse/*.html`) — supplies the entire
+  color system and type. Browse `chromaverse/index.html`, pick a palette by mood,
+  then **read that theme file and copy its `:root` + `[data-theme="dark"]` token
+  block verbatim** as the page's foundation. Tokens include the `--accent` ladder
+  (`--accent`, `--accent-light`, `--accent-bright`, `--accent-pale`), surface tokens
+  (`--bg`, `--bg-alt`, `--bg-deep`, `--ink`, `--text`, `--text-muted`, `--border`),
+  the 4px spacing scale (`--sp-1`…`--sp-10`), radii (`--r-sm/md/lg`), shadows, and
+  `--ease-out`. **The theme owns all color** — never hard-code hex outside it.
+- **Movement = a /motion shader** — one preset as the fullscreen WebGL background
+  (`aurora`, `flow`, `plasma`, `marble`, `glass`, …). Slow and ambient. **Tint its
+  palette uniforms with the Chromaverse theme's accent/surface colors** so motion
+  and surface tell one color story. Obey the seamless-loop invariant (§2A).
+- **Bridge = glassmorphism** — float content in frosted panels over the shader
+  (CSS `backdrop-filter`, or liquidGL for true refraction). Glass tints derive from
+  the theme's surface tokens, never plain white.
+- **Governance = design theory** — golden ratio / 4px grid, radial or bilateral
+  symmetry, generous negative space, one accent used sparingly, theme type pairing,
+  150–200ms `transform`/`opacity` motion only.
+
+**Build order:** pick theme → copy token block → mount shader bg → tint shader to
+theme → layer glass panels → apply symmetry & spacing → verify both light/dark.
+
+This recipe is mirrored in `CLAUDE.md` ("Building a Beautiful Site"). The patterns
+below (shader background, glassmorphism, symmetry, z-index) are the building blocks.
+
 ### Required Skills to Load
 Before building any page, load these skills in order:
 1. **motion-web-design** — Design DNA, glassmorphism patterns, symmetrical layout, shader integration

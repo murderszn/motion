@@ -1,4 +1,4 @@
-![motion splash](media/header.png?v=2)
+![motion splash](media/motion-header.png)
 
 # /motion local — generative shader studio
 
@@ -37,6 +37,47 @@ PNG and GIF work everywhere.
 
 ---
 
+## Chromaverse — color & design-system studio
+
+![Chromaverse](media/chromaverse.png)
+
+**Chromaverse** is /motion's companion **design-system studio** — *the ultimate
+color palette & design system studio*. Where the shader studio generates *motion*,
+Chromaverse generates *surfaces*: production-ready color systems and themed pages you
+can ship as-is or hand to an AI agent as a styling foundation.
+
+**Live:** [motion-e93d3.web.app/chromaverse/index.html](https://motion-e93d3.web.app/chromaverse/index.html)
+
+### What it gives you
+
+- **65+ hand-crafted color palettes** — each a complete, named identity
+  (`vaporwave`, `kyoto-moss`, `bordeaux`, `cyberpunk`, `nordic`, `terracotta`, …)
+- **Light + dark surface tokens per theme** (~130 total) — every palette ships both
+  modes with matched `--bg`, `--ink`, `--text`, `--border`, `--accent` ladders
+- **Custom font pairings** — display + body + mono chosen per theme
+- **A shared token contract** — 4px spacing scale (`--sp-1`…`--sp-10`), radii
+  (`--r-sm/md/lg`), shadows, and an `--ease-out` curve, identical across every theme
+- **Self-contained theme references** — each theme is a single standalone HTML file
+  in `chromaverse/` (`amber-woods.html`, `swiss.html`, `arcade-neon.html`, …)
+- **A gallery + builder** — `chromaverse/index.html` browses all themes;
+  `gen_themes.py` regenerates them from a single template
+
+### How it fits with the shader studio
+
+Chromaverse and the shader presets are designed to compose:
+
+| Layer | Source | Role |
+|-------|--------|------|
+| Motion | `/motion` shader presets | Animated WebGL background (the *movement*) |
+| Surface | Chromaverse theme tokens | Colors, type, spacing, radii (the *system*) |
+| Glass | glassmorphism / liquidGL | Frosted panels bridging motion and content |
+
+Pick a Chromaverse theme for the palette, drive a /motion preset (tinted to that
+palette) as the background, and layer glassmorphism panels on top. See
+[CLAUDE.md](CLAUDE.md) and [AGENTS.md](AGENTS.md) for the full agent build recipe.
+
+---
+
 ## What's in this repo
 
 | Path | What it is |
@@ -45,6 +86,7 @@ PNG and GIF work everywhere.
 | `src/index.ts` | Splash page script |
 | `studio.html` | Studio HTML shell (script tag points to `src/studio/main.ts`) |
 | `index.html` | Splash page HTML shell |
+| `chromaverse/` | Chromaverse design-system studio — 65+ themed pages, gallery (`index.html`), and `gen_themes.py` generator |
 | `vite.config.ts` | Vite multi-page config + `/terminal` WebSocket proxy + `/api` proxy |
 | `tsconfig.json` | TypeScript config (strict, ES2020, bundler resolution) |
 | `server/server.mjs` | Node.js PTY + WebSocket server (terminal panel backend) |
