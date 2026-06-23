@@ -1,306 +1,242 @@
-![motion splash](media/motion-header.png)
+![motion header](media/motion-header.png)
 
-# /motion local — generative shader studio
+# /motion — generative shader studio + chromaverse design system
 
-A browser-based **generative graphics studio** for creating looping motion graphics
-(images, videos, GIFs, and standalone HTML pages) with WebGL shaders.
+A browser-based **generative graphics studio** for creating seamless-loop motion
+graphics with WebGL shaders, plus **Chromaverse** — a 65+ theme design-system
+gallery. Built with TypeScript + Vite.
 
-Built with **TypeScript + Vite** — strict types, hot module reload, and a clean
-multi-module architecture under `src/`.
+**[Live Demo →](https://motion-e93d3.web.app)**
 
 ---
 
-## Quick start
+## ✨ Features
+
+- **23 shader presets** — aurora, flow, marble, plasma, glass, truchet,
+  kaleidoscope, rorschach, and more
+- **Seamless loops** — every animation loops perfectly (phase-driven, not
+  time-driven)
+- **Seed-based determinism** — same seed + preset = same result, always
+- **Export** — PNG, WebM video, GIF, and self-contained HTML splash pages
+- **65+ Chromaverse themes** — complete color systems with light/dark modes,
+  font pairings, and design tokens
+- **Text tool** — place, drag, style text with effects (neon glow, frosted
+  glass, drop shadow, outline)
+- **Live shader editor** — edit GLSL in real-time with error highlighting
+- **13 UI themes** — dark, synthwave, dracula, arctic frost, and more
+- **Shareable URLs** — encode your entire studio state in a link
+- **Terminal panel** — built-in PTY shell via WebSocket
+
+---
+
+## Quick Start
 
 ```sh
 git clone https://github.com/murderszn/motion.git
 cd motion
 npm install
-
-# Dev server (Vite HMR) — open http://localhost:5173
-npm run dev
-
-# PTY terminal backend (for the built-in shell panel)
-npm run server
-
-# Workshop Signup API backend (requires MONGO_URI in .env) — http://localhost:3001
-npm run api
+npm run dev          # → http://localhost:5173
 ```
 
-> **Note on Servers**: Run the dev server, terminal backend, and signup API in separate terminal sessions.
->
-> 1. **Live Terminal Panel**: The PTY backend (`npm run server`) communicates with the studio interface via a WebSocket proxy `/terminal` configured in Vite.
-> 2. **Workshop Signup API**: The Express API backend (`npm run api`) handles database persistence for workshops. You must set up a `.env` file in the root containing your `MONGO_URI` connection string before running it. Vite proxies `/api` requests to this backend.
+Open `studio.html` in browser for the shader studio, `index.html` for the
+splash page.
 
-**Browser:** Chrome/Edge recommended. Safari has spotty WebM (video export) support —
-PNG and GIF work everywhere.
+### Optional servers
+
+```sh
+npm run server       # PTY terminal backend (WebSocket on port 3000)
+npm run api          # Workshop signup API (requires MONGO_URI in .env)
+```
+
+> Run each server in its own terminal. See [.env.example](.env.example) for
+> configuration.
+
+**Browser:** Chrome / Edge recommended. Safari has limited WebM support — PNG
+and GIF export work everywhere.
 
 ---
 
-## Chromaverse — color & design-system studio
+## Chromaverse
 
 ![Chromaverse](media/chromaverse.png)
 
-**Chromaverse** is /motion's companion **design-system studio** — *the ultimate
-color palette & design system studio*. Where the shader studio generates *motion*,
-Chromaverse generates *surfaces*: production-ready color systems and themed pages you
-can ship as-is or hand to an AI agent as a styling foundation.
+**Chromaverse** is /motion's companion **design-system studio** — 65+ hand-crafted
+color palettes, each a complete identity with light + dark modes, matched surface
+tokens, and custom font pairings.
 
-**Live:** [motion-e93d3.web.app/chromaverse/index.html](https://motion-e93d3.web.app/chromaverse/index.html)
+**[Browse themes →](https://motion-e93d3.web.app/chromaverse/index.html)**
 
-### What it gives you
+### What's included
 
-- **65+ hand-crafted color palettes** — each a complete, named identity
-  (`vaporwave`, `kyoto-moss`, `bordeaux`, `cyberpunk`, `nordic`, `terracotta`, …)
-- **Light + dark surface tokens per theme** (~130 total) — every palette ships both
-  modes with matched `--bg`, `--ink`, `--text`, `--border`, `--accent` ladders
-- **Custom font pairings** — display + body + mono chosen per theme
-- **A shared token contract** — 4px spacing scale (`--sp-1`…`--sp-10`), radii
-  (`--r-sm/md/lg`), shadows, and an `--ease-out` curve, identical across every theme
-- **Self-contained theme references** — each theme is a single standalone HTML file
-  in `chromaverse/` (`amber-woods.html`, `swiss.html`, `arcade-neon.html`, …)
-- **A gallery + builder** — `chromaverse/index.html` browses all themes;
-  `gen_themes.py` regenerates them from a single template
+- **65+ named palettes** — `vaporwave`, `kyoto-moss`, `bordeaux`, `cyberpunk`,
+  `nordic`, `terracotta`, `sakura`, and many more
+- **Light + dark modes** per theme (~130 total surface sets)
+- **Shared token contract** — 4px spacing scale, radii, shadows, easing
+- **Self-contained HTML** — each theme is a standalone file, deploy anywhere
+- **Generator scripts** — `gen_themes.py` rebuilds all themes from a template
 
-### How it fits with the shader studio
-
-Chromaverse and the shader presets are designed to compose:
+### Composing motion + surface + glass
 
 | Layer | Source | Role |
 |-------|--------|------|
-| Motion | `/motion` shader presets | Animated WebGL background (the *movement*) |
-| Surface | Chromaverse theme tokens | Colors, type, spacing, radii (the *system*) |
-| Glass | glassmorphism / liquidGL | Frosted panels bridging motion and content |
-
-Pick a Chromaverse theme for the palette, drive a /motion preset (tinted to that
-palette) as the background, and layer glassmorphism panels on top. See
-[CLAUDE.md](CLAUDE.md) and [AGENTS.md](AGENTS.md) for the full agent build recipe.
+| Motion | shader presets | Animated WebGL background |
+| Surface | Chromaverse tokens | Colors, type, spacing, radii |
+| Glass | glassmorphism / CSS | Frosted panels bridging layers |
 
 ---
 
-## What's in this repo
-
-| Path | What it is |
-|------|------------|
-| `src/studio/` | TypeScript source for the studio — 21 typed modules |
-| `src/index.ts` | Splash page script |
-| `studio.html` | Studio HTML shell (script tag points to `src/studio/main.ts`) |
-| `index.html` | Splash page HTML shell |
-| `chromaverse/` | Chromaverse design-system studio — 65+ themed pages, gallery (`index.html`), and `gen_themes.py` generator |
-| `vite.config.ts` | Vite multi-page config + `/terminal` WebSocket proxy + `/api` proxy |
-| `tsconfig.json` | TypeScript config (strict, ES2020, bundler resolution) |
-| `server/server.mjs` | Node.js PTY + WebSocket server (terminal panel backend) |
-| `server/api.mjs` | Express + MongoDB signup API backend for workshops |
-| `brain/` | The studio's documentation vault — 59 Obsidian notes on architecture, presets, design, and development |
-| `references/` | Compiled research reference (shaders, WebGL, Three.js, generative patterns) |
-| `CLAUDE.md` | Project context for Claude Code agents |
-| `DEVELOPER_AGENT_GUIDE.md` | Integration guide for developers and AI agents |
-| `.agents/skills/motion-studio/` | AI agent skill files for the studio |
-
-### Source module map
+## Project Structure
 
 ```
 src/
-├── index.ts                      # Splash page (roster, timer, WebGL bg, parallax)
+├── index.ts                      # Splash page script
 └── studio/
-    ├── types.ts                  # Shared interfaces (Params, TextElem, Preset, …)
-    ├── state.ts                  # Constants + mutable P params object
-    ├── webgl.ts                  # Context init, full GLSL shader, draw(), compileNewFS()
-    ├── render.ts                 # RAF loop, phase, pause, FPS callback
+    ├── types.ts                  # Shared interfaces
+    ├── state.ts                  # Constants (presets, palettes, sliders, themes)
+    ├── webgl.ts                  # WebGL context, GLSL shader, draw(), hot-swap
+    ├── render.ts                 # RAF loop, phase tracking, FPS
     └── ui/
-        ├── main.ts               # Bootstrap — wires all modules
+        ├── main.ts               # Bootstrap
         ├── presets.ts            # Preset button grid
         ├── seed.ts               # Seed input + dice
         ├── palette.ts            # Color swatches + randomizer
         ├── sliders.ts            # Dynamic slider controls
         ├── sizes.ts              # Canvas size buttons
-        ├── text.ts               # Text tool (click-to-place), drag, canvas bake for export
+        ├── text.ts               # Text tool (click-to-place, drag, effects)
         ├── export.ts             # PNG / WebM / GIF export
-        ├── export_embed.ts       # Self-contained HTML splash page exporter
-        ├── url_api.ts            # URL query params, shareable link, JSON clipboard ops
-        ├── terminal.ts           # xterm.js + WebSocket PTY, resize handle
-        ├── sidebar.ts            # Panel/term toggles, theme switcher, responsive chrome
+        ├── export_embed.ts       # Self-contained HTML exporter
+        ├── url_api.ts            # URL params, shareable link, JSON clipboard
+        ├── terminal.ts           # xterm.js + WebSocket PTY
+        ├── sidebar.ts            # Panel toggles, theme switcher
         ├── statusbar.ts          # FPS + status bar
-        ├── shader_editor.ts      # Live GLSL editor + problems panel + hotkeys legend
-        ├── command_palette.ts    # VS Code-style command palette (Cmd+Shift+P)
+        ├── shader_editor.ts      # Live GLSL editor + problems panel
+        ├── command_palette.ts    # VS Code-style command palette
         └── keyboard.ts           # Keyboard shortcuts
+
+chromaverse/
+├── index.html                    # Theme gallery
+├── gen_themes.py                 # Theme generator
+├── theme_template.html           # Template for generation
+└── *.html                        # 65+ individual theme pages
+
+server/
+├── server.mjs                    # Node.js PTY + WebSocket server
+└── api.mjs                       # Express + MongoDB signup API
+
+examples/                          # Standalone example pages
+docs/                              # Design language, changelog, research
 ```
 
 ---
 
-## How to use the studio
+## How to Use the Studio
 
-The layout: canvas preview in the center, control panels on the left and right,
-status bar at the bottom.
+1. **Pick a preset** — 23 generative shader modes
+2. **Set a seed** — 4-digit number for deterministic output (⚄ for random)
+3. **Choose colors** — 4-stop gradient, 11 curated palettes, or custom
+4. **Tune sliders** — speed, scale, density, distortion, detail, grain
+5. **Pick canvas size** — 1:1, 16:9, 9:16, 4:5
+6. **Set loop duration** — 2–10 seconds of seamless animation
+7. **Add text** — press `T`, click to place, drag to move, style with effects
+8. **Export** — PNG / WebM / GIF / self-contained HTML
 
-1. **Pick a preset** — 23 generative shader modes (alphabetical):
-   - `aurora` — wavy glowing curtains of light across a dark night sky
-   - `contour waves` — glowing isoline patterns from noise-modulated sine bands
-   - `curl noise` — divergence-free swirling fluid motion
-   - `electric` — branching, flickering lightning filaments
-   - `flow` — domain-warped liquid noise gradients
-   - `golden` — phyllotaxis / sunflower spiral pattern
-   - `glass` — glassmorphism: drifting frosted panes refracting a colour backdrop
-   - `grain` — soft grainy gradient washes
-   - `halftone` — animated dot-grid over a flow field
-   - `kaleidoscope` — mirrored radial symmetry slices
-   - `lines` — rotated parallel bands with wave distortion
-   - `marble` — domain-warped sine wave with fBM veining
-   - `orbs` — soft metaballs drifting on orbits
-   - `plasma` — classic multi-frequency sine wave plasma
-   - `reeded` — vertical reeded-glass rods refracting drifting color blobs
-   - `rings` — concentric glowing rings modulated by noise
-   - `rorschach` — bilateral inkblot symmetry from mirrored noise
-   - `ridged` — sharp mountain ridges from inverted multi-fractal noise
-   - `sd rosette` — signed-distance petal symmetry with edge glow
-   - `truchet` — tile arc maze with hash-based orientation
-   - `triangle lattice` — rotating hexagonal triangle grid
-   - `turbulence` — flame-like fBM patterns with absolute noise
-   - `waves` — flowing contour bands
+### Keyboard Shortcuts
 
-2. **Set a seed** — a 4-digit number that deterministically positions everything.
-   Same seed + preset + settings always reproduces the same graphic. Dice (⚄) for random.
-
-3. **Choose colors** — a 4-stop gradient (dark → mid → bright → highlight).
-   Edit swatches directly or shuffle (⟳) through 11 curated palettes.
-
-4. **Tune the sliders** — `speed`, `scale`, `density`, `distortion`, `detail`, `grain`
-   (all 0–1; each preset interprets them in its own way).
-
-5. **Pick a canvas size** — `1:1` (1080²), `16:9` (1920×1080), `9:16` (Reels/TikTok),
-   `4:5` (Instagram feed).
-
-6. **Set loop duration** — 2–10 s. All animation runs on a circular phase, so every
-   loop is **seamless** (the last frame flows perfectly into the first).
-
-7. **Add text** — press `T` or click the text tool button to arm it, then click
-   on the canvas to place a text box at that position. Press `Escape` to deactivate.
-   Drag placed text to reposition. Edit content, font, size, color, and effects
-   in the text panel. Available effects: drop shadow, neon glow, outline, solid box,
-   frosted glass.
-
-8. **Export** —
-   - `image` → PNG of the current frame at full canvas resolution
-   - `video` → WebM, records exactly one loop at 60 fps
-   - `gif` → renders one loop frame-by-frame at 30 fps, downscaled to ≤640 px
-   - `html splash page` → self-contained HTML file with embedded WebGL shader,
-     parameters, textures (base64), and text overlays. Deploy anywhere — no
-     dependencies, runs fully offline.
-
-   Exports are named `lumen-{preset}-{seed}.{ext}` (e.g. `lumen-reeded-9015.png`).
-
-9. **Share & collaborate** —
-   - **Copy JSON** → copies the full studio state (params + texts) to clipboard
-   - **Paste JSON** → restores state from a JSON payload in clipboard
-   - **Copy shareable link** → generates a URL with all settings as query parameters
-
-10. **URL API** — launch the studio in any state via query parameters:
-    `studio.html?preset=waves&seed=4012&speed=0.8&palette=#000,#f0f,#0ff,#fff`
-
-11. **Project save/load** — save your workspace as a `.lumen` file (JSON) and
-    reload it later with all params, texts, and shader state preserved.
-
-12. **13 UI themes** — switch between dark, dim, contrast, light, neon midnight,
-    moss forest, arctic frost, synthwave dream, dracula noir, cherry blossom,
-    warm espresso, claude cream, and colorblind friendly.
-
-**Keyboard shortcuts:** `space` pause/play · `r` randomize · `s` save PNG · `t` text tool
-`f` fullscreen · `g` generator tab · `escape` deactivate text tool
-`Cmd+Shift+P` / `F1` command palette · `Ctrl+`` toggle terminal · `Cmd+B` toggle panel
-
-The bottom panel has a **hotkeys** tab with the full shortcut reference.
+| Key | Action |
+|-----|--------|
+| `Space` | Pause / play |
+| `R` | Randomize |
+| `S` | Save PNG |
+| `T` | Text tool |
+| `F` | Fullscreen |
+| `Escape` | Deactivate text tool |
+| `Cmd+Shift+P` / `F1` | Command palette |
+| `` Ctrl+` `` | Toggle terminal |
+| `Cmd+B` | Toggle panel |
 
 ---
 
-## Documentation Vault (`brain/`)
+## Shader Presets
 
-The repository includes a comprehensive documentation vault located in the [`brain/`](file:///Users/jahflyx/motion/brain) directory. It is structured as an **Obsidian** knowledge base containing 59 notes on the system design, concepts, presets, and development guidelines:
-- **Architecture**: In-depth explanations of the [UI System](file:///Users/jahflyx/motion/brain/Architecture/UI%20System.md), [Shader Architecture](file:///Users/jahflyx/motion/brain/Architecture/Shader%20Architecture.md), and [Plugin System](file:///Users/jahflyx/motion/brain/Architecture/Plugin%20System.md).
-- **Concepts**: Core mathematics and systems, including [Seed-Based Determinism](file:///Users/jahflyx/motion/brain/Concepts/Seed-Based%20Determinism.md) and the [Seamless Loop Invariant](file:///Users/jahflyx/motion/brain/Concepts/Seamless%20Loop%20Invariant.md).
-- **Design**: Guidelines for aesthetic rendering, [Color Theory for Shaders](file:///Users/jahflyx/motion/brain/Design/Color%20Theory%20for%20Shaders.md), [WebGL Techniques](file:///Users/jahflyx/motion/brain/Design/WebGL%20Techniques.md), [Modern Web Design](file:///Users/jahflyx/motion/brain/Design/Modern%20Web%20Design.md), and the [Fractal & Pattern Vocabulary](file:///Users/jahflyx/motion/brain/Design/Fractal%20%26%20Pattern%20Vocabulary.md).
-- **Presets**: One note per preset with slider outcome tables, technique breakdowns, and best palettes.
-- **Development**: Practical guides for adding features (e.g., [Adding a Preset](file:///Users/jahflyx/motion/brain/Development/Adding%20a%20Preset.md), [Adding a Slider](file:///Users/jahflyx/motion/brain/Development/Adding%20a%20Slider.md), [Adding a Palette](file:///Users/jahflyx/motion/brain/Development/Adding%20a%20Palette.md)).
-- **References**: [Shader Development Guide](file:///Users/jahflyx/motion/brain/References/Shader_Development.md), [Three.js Reference](file:///Users/jahflyx/motion/brain/References/ThreeJS_Reference.md), [WebGL Reference](file:///Users/jahflyx/motion/brain/References/WebGL_Reference.md), [Resources](file:///Users/jahflyx/motion/brain/References/Resources.md), and [Glossary](file:///Users/jahflyx/motion/brain/References/Glossary.md).
-
-## Research Reference (`references/`)
-
-Additional research compiled from The Book of Shaders, Inigo Quilez, Three.js docs, and ShaderToy:
-- [`references/shader-web-research.md`](references/shader-web-research.md) — comprehensive 15-section reference covering GLSL fundamentals, noise algorithms, fBM variants, SDF primitives, fractals, organic patterns, post-processing, Three.js integration, and modern web design with WebGL.
-
-## Agent Configuration
-
-- [`CLAUDE.md`](CLAUDE.md) — project context for Claude Code (architecture, rules, how to add presets/sliders)
-- [`AGENTS.md`](AGENTS.md) — project-scoped agent guidelines (shader invariants, GLSL constraints, skill references)
-- `.agents/skills/` — preloaded agent skills for the studio, shader development, and web design
-
----
-
-## Workshop Signup API (`server/api.mjs`)
-
-The project features a lightweight Node.js Express signup API connected to MongoDB Atlas. It supports visitor/attendee registration for events or workshops:
-- **Endpoints**:
-  - `GET /api/health` — Checks API server status and connection.
-  - `POST /api/signup` — Registers a user for an event (requires `name`, `email`, and `event` in JSON body). Returns a generated unique cryptographically secure 24-byte hex key.
-- **Configuration**:
-  - Set up a `.env` file based on [.env.example](file:///Users/jahflyx/motion/.env.example) with `MONGO_URI`.
-  - The studio frontend accesses this API via Vite's configured `/api` proxy.
+| Preset | Description |
+|--------|-------------|
+| `aurora` | Wavy glowing curtains of light |
+| `contour waves` | Glowing isoline patterns from noise |
+| `curl noise` | Divergence-free swirling fluid motion |
+| `electric` | Branching, flickering lightning filaments |
+| `flow` | Domain-warped liquid noise gradients |
+| `glass` | Drifting frosted panes refracting color |
+| `golden` | Phyllotaxis / sunflower spiral |
+| `grain` | Soft grainy gradient washes |
+| `halftone` | Animated dot-grid over a flow field |
+| `kaleidoscope` | Mirrored radial symmetry slices |
+| `lines` | Rotated parallel bands with wave distortion |
+| `marble` | Domain-warped sine wave with fBM veining |
+| `orbs` | Soft metaballs drifting on orbits |
+| `plasma` | Classic multi-frequency sine wave plasma |
+| `reeded` | Vertical reeded-glass rods refracting blobs |
+| `ridged` | Sharp mountain ridges from inverted noise |
+| `rings` | Concentric glowing rings modulated by noise |
+| `rorschach` | Bilateral inkblot symmetry |
+| `sd rosette` | Signed-distance petal symmetry with edge glow |
+| `triangle lattice` | Rotating hexagonal triangle grid |
+| `truchet` | Tile arc maze with hash-based orientation |
+| `turbulence` | Flame-like fBM patterns |
+| `waves` | Flowing contour bands |
 
 ---
 
-## Architecture notes
+## Architecture Notes
 
-### TypeScript modules
+### The Seamless-Loop Invariant
 
-The studio was originally a single-file HTML app (one giant IIFE in `studio.html`).
-It's now a proper TypeScript project with:
+Animation is driven by `u_phase ∈ [0, 2π)`, not raw time. Every animated term
+must return to its starting state when `u_phase` wraps:
 
-- **Strict types** for all shader params, UI state, text elements, themes
-- **Module boundaries** — WebGL, render loop, each UI widget, and export are separate files
-- **Custom events** for cross-module communication (no circular imports):
-  - `lumen:log` → terminal panel
-  - `lumen:selectTab` → sidebar tab switch
-  - `lumen:saveProject` → project save
+- Periodic terms use **integer multiples** of `u_phase`
+  (`sin(x + 2.0*u_phase)` ✓ · `sin(x + 1.5*u_phase)` ✗)
+- Noise fields drift along a **circular path** via `loopOff()`
+  instead of a linear offset
 
 ### WebGL
 
-WebGL1 context with `preserveDrawingBuffer: true` (required for PNG/GIF capture).
-One fullscreen triangle strip, one fragment shader containing all 23 presets
-branched on `u_mode`. `draw(phase)` pushes all uniforms from `P` and renders
-one frame. The live shader editor calls `compileNewFS()` to hot-swap the program.
+WebGL 1.0 context with `preserveDrawingBuffer: true` (required for export).
+One fullscreen triangle strip, one fragment shader with all presets branched on
+`u_mode`. GLSL ES 1.0 constraints: constant loop bounds, explicit float types,
+precision declarations required.
 
-### The seamless-loop invariant
+### Adding Things
 
-Animation is driven by `u_phase` ∈ [0, 2π), **not** raw time. Every animated term
-must return to its starting state when `u_phase` wraps:
-
-- Periodic terms must use **integer multiples** of `u_phase`
-  (`sin(x + 2.0*u_phase)` ✓ · `sin(x + 1.5*u_phase)` ✗)
-- Noise fields drift along a **circular path** via `loopOff()`
-  (`vec2(cos(u_phase), sin(u_phase)) * radius`) instead of a linear offset
-
-This is what makes video/GIF exports loop perfectly. Any new animation that
-violates it will produce a visible seam.
-
-### Adding things
-
-- **Preset:** append to `PRESETS` in `state.ts`, add `else if (u_mode == N)` in `webgl.ts` (currently 23 presets, modes 0–22, alphabetical)
-- **Palette:** append a 4-hex array to `PALETTES` in `state.ts` (currently 11 palettes)
-- **Slider:** append to `SLIDERS` in `state.ts`, add `u_<id>` uniform to `webgl.ts`
-- **Canvas size:** append `{label, w, h}` to `SIZES` in `state.ts`
-- **Theme:** append to `THEMES` in `state.ts` (currently 13 themes)
-
-### Gotchas
-
-- GLSL ES 1.0 (WebGL1): no dynamic loop bounds, no implicit int↔float, declare precision
-- A shader compile error throws at load — the Problems tab in the studio shows the line
-- `index.html` is a separate splash page with its own self-contained wave-field shader
+| What | Where |
+|------|-------|
+| Preset | `PRESETS` in `state.ts` + `else if` in `webgl.ts` |
+| Palette | `PALETTES` array in `state.ts` |
+| Slider | `SLIDERS` in `state.ts` + `u_<id>` uniform in `webgl.ts` |
+| Canvas size | `SIZES` in `state.ts` |
+| Theme | `THEMES` in `state.ts` |
 
 ---
 
+## Contributing
+
+1. Fork the repo
+2. Create a feature branch (`git checkout -b feature/my-preset`)
+3. Follow the seamless-loop invariant for any shader changes
+4. Respect WebGL 1.0 / GLSL ES 1.0 syntax constraints
+5. Submit a pull request
+
 ---
+
+## License
+
+[MIT](LICENSE) © murderszn
+
+---
+
+## Credits
+
+Inspired by [Inigo Quilez](https://iquilezles.org/), [The Book of Shaders](https://thebookofshaders.com/),
+Casey Reas / Processing Foundation, Tyler Hobbs, Matt DesLauriers,
+Dave Whyte (bees & bombs), Ryoji Ikeda / teamLab, FIELD.IO, and Universal Everything.
 
 **Community:** [Join the Discord](https://discord.gg/F9Vy9ByYbB)
-
-*Inspired by Inigo Quilez, Book of Shaders, Casey Reas / Processing Foundation,
-Tyler Hobbs, Matt DesLauriers, Dave Whyte (beesandbombs), Ryoji Ikeda / teamLab,
-FIELD.IO, and Universal Everything.*

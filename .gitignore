@@ -1,31 +1,60 @@
-# Local Claude Code settings / memory
-.claude/
-.agents/
-.opencode/
+# ──────────────────────────────────────────────────
+#  /motion — .gitignore (public release)
+# ──────────────────────────────────────────────────
 
-# OS noise
+# ─── OS noise ───
 .DS_Store
+Thumbs.db
 
-# Studio exports (generated locally)
+# ─── Dependencies ───
+node_modules/
+
+# ─── Build output ───
+dist/
+
+# ─── Environment / secrets ───
+.env
+.env.local
+.env.*.local
+
+# ─── AI agent / coding tool configs (personal) ───
+.agents/
+.claude/
+.codex/
+.opencode/
+.mimocode/
+
+# ─── Editor / IDE settings ───
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ─── Firebase (project-specific) ───
+.firebase/
+.firebaserc
+
+# ─── Personal documentation vault ───
+brain/
+
+# ─── Deployment scripts (project-specific) ───
+scripts/
+
+# ─── Studio exports (generated locally) ───
 lumen-*.png
 lumen-*.webm
 lumen-*.gif
 
-# Firebase
-.firebase/
-
-# Dependencies
-node_modules/
-
-# Vite build output
-dist/
-
-# Local editor / notes
-.obsidian/
-brain-graph.html
-
-# Large binaries
+# ─── Large binaries / copyrighted ───
 *.pdf
+*.webm
 
-# Environment variables
-.env
+# ─── Python bytecode ───
+__pycache__/
+*.pyc
+*.pyo
+
+# ─── Agent context files (personal) ───
+CLAUDE.md
+AGENTS.md

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Motion Web Design"
-  short_description: "Modern web design intelligence — WebGL, dark mode, animation, typography, images/icons"
-  default_prompt: "Review this HTML page for modern web design quality"
