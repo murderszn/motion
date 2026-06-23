@@ -14,7 +14,8 @@ This guide provides instructions, architectural rules, and guidelines for AI age
 ### Standalone Pages & Examples
 *   **Splash Pages**: `index.html` (main landing), `splash.html` (alternate splash)
 *   **Example Pages**: `examples/` — self-contained HTML pages with embedded shaders
-*   **Workshops**: `workshops.html`, `developer-training.html`
+*   **Chromaverse**: `chromaverse/index.html` — theme gallery and builder
+*   **Tour**: `developer-training.html` — 2026 workshop tour (includes agent/CLI education)
 
 ### Shared Resources
 *   **Documentation Vault**: Structured Obsidian references are in [brain/](file:///Users/jahflyx/motion/brain/).

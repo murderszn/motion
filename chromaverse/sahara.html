@@ -1,0 +1,2095 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sahara Dust — Theme Reference</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --accent: #C27D38;
+            --accent-light: #D97706;
+            --accent-bright: #2D3B2E;
+            --accent-pale: #FDF6EC;
+
+            --r-sm: 4px;
+            --r-md: 8px;
+            --r-lg: 14px;
+
+            --sp-1: 4px;
+            --sp-2: 8px;
+            --sp-3: 12px;
+            --sp-4: 16px;
+            --sp-5: 24px;
+            --sp-6: 32px;
+            --sp-7: 48px;
+            --sp-8: 64px;
+            --sp-9: 96px;
+            --sp-10: 128px;
+
+            --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        [data-theme="dark"] {
+            --accent-dim: rgba(217, 119, 6, 0.1);
+            --accent-border: rgba(217, 119, 6, 0.35);
+
+            --black: #17120E;
+            --ink: #241C16;
+            --ink-soft: #0F0C09;
+            --ink-mid: #A8988C;
+            --ink-muted: #5C4F44;
+
+            --bg: #17120E;
+            --bg-alt: #241C16;
+            --bg-deep: #0F0C09;
+            --text: #FAF6F2;
+            --text-mid: #E3D8CE;
+            --text-muted: #A8988C;
+            --border: rgba(217, 119, 6, 0.22);
+            --nav-bg: rgba(23, 18, 14, 0.9);
+
+            --shadow-sm: 0 4px 20px rgba(217, 119, 6, 0.15);
+            --shadow-md: 0 12px 32px rgba(217, 119, 6, 0.22);
+            --shadow-lg: 0 20px 48px rgba(15, 12, 9, 0.85);
+
+            --body-gradient: linear-gradient(180deg, rgba(217, 119, 6, 0.15) 0%, transparent 45%), radial-gradient(circle at 50% 30%, #241C16 0%, var(--bg) 70%);
+
+            --section-shell-bg: var(--bg-alt);
+            --section-shell-bg-alt: var(--bg);
+        }
+
+        [data-theme="light"] {
+            --accent-dim: rgba(217, 119, 6, 0.06);
+            --accent-border: rgba(217, 119, 6, 0.25);
+
+            --black: #2E1E12;
+            --ink: #FFFFFF;
+            --ink-soft: #F5ECE2;
+            --ink-mid: #7A6352;
+            --ink-muted: #D6C7B7;
+
+            --bg: #FDF8F2;
+            --bg-alt: #FFFFFF;
+            --bg-deep: #F5ECE2;
+            --text: #2E1E12;
+            --text-mid: #4A3525;
+            --text-muted: #7A6352;
+            --border: rgba(217, 119, 6, 0.15);
+            --nav-bg: rgba(253, 248, 242, 0.9);
+
+            --shadow-sm: 0 2px 8px rgba(217, 119, 6, 0.08);
+            --shadow-md: 0 12px 32px rgba(217, 119, 6, 0.12);
+            --shadow-lg: 0 20px 48px rgba(217, 119, 6, 0.06);
+
+            --body-gradient: linear-gradient(180deg, rgba(217, 119, 6, 0.06) 0%, transparent 40%), radial-gradient(circle at 50% 20%, #F5ECE2 0%, var(--bg) 70%);
+
+            --section-shell-bg: var(--bg-alt);
+            --section-shell-bg-alt: var(--bg);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            height: 100%;
+        }
+
+        body {
+            font-family: "Cinzel", serif;
+            background: var(--body-gradient);
+            color: var(--text);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            transition: background 0.25s var(--ease-out), color 0.25s var(--ease-out);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            pointer-events: none;
+            opacity: 0.025;
+            mix-blend-mode: overlay;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 140px 140px;
+        }
+
+        [data-theme="dark"] body::before {
+            opacity: 0.05;
+        }
+
+        a {
+            color: var(--accent-bright);
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: var(--accent-pale);
+        }
+
+        .page-wrap {
+            max-width: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Layout */
+        .theme-page {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .theme-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-alt);
+            flex-shrink: 0;
+            transition: background-color 0.25s, border-color 0.25s;
+            padding: 0 clamp(24px, 5vw, 64px);
+        }
+
+        /* Aligns header and page content to the same 1240px rail */
+        .theme-header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 0;
+        }
+
+        .theme-header-brand {
+            font-size: 1.1rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -0.015em;
+            color: var(--text);
+        }
+
+        .theme-header-brand span {
+            color: var(--accent-bright);
+        }
+
+        .theme-content {
+            flex: 1;
+            padding: 0;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Color roles grid — inline on page */
+        .color-roles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: var(--sp-4);
+            margin-top: var(--sp-5);
+        }
+
+        .color-role-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: var(--sp-4);
+            background: var(--bg-deep);
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+            transition: border-color 0.15s;
+        }
+
+        .color-role-card:hover {
+            border-color: var(--accent-border);
+        }
+
+        .color-role-dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            border: 2px solid var(--border);
+            margin-top: 2px;
+        }
+
+        .color-role-name {
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .color-role-hex {
+            font-family: "JetBrains Mono", monospace;
+            font-size: 0.72rem;
+            color: var(--accent);
+            margin-bottom: 4px;
+        }
+
+        .color-role-use {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Typography pairing card */
+        .typography-pairing-card {
+            display: flex;
+            gap: var(--sp-5);
+            padding: var(--sp-5);
+            background: var(--bg-deep);
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+            margin-bottom: var(--sp-6);
+            align-items: flex-start;
+        }
+
+        .typography-pairing-icon {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--accent);
+            line-height: 1;
+            flex-shrink: 0;
+            width: 56px;
+            text-align: center;
+        }
+
+        .typography-pairing-body {
+            flex: 1;
+        }
+
+        .typography-pairing-fonts {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .typography-pairing-desc {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        @media (max-width: 640px) {
+            body { overflow: auto; height: auto; }
+            .color-roles-grid { grid-template-columns: 1fr 1fr; }
+            .typography-pairing-card { flex-direction: column; }
+        }
+
+        .page-header {
+            border-bottom: 3px solid var(--accent);
+            padding-bottom: var(--sp-6);
+            margin-bottom: clamp(64px, 8vw, 96px);
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: end;
+            gap: var(--sp-5);
+        }
+
+        .page-header-brand {
+            font-size: clamp(2.2rem, 4.5vw, 3.8rem);
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.035em;
+            line-height: 0.95;
+            color: var(--text);
+        }
+
+        .page-header-brand span,
+        .section-title span,
+        .display-type span,
+        .footer-brand span {
+            color: var(--accent-bright);
+        }
+
+        .page-header-meta {
+            font-family: "Outfit", sans-serif;
+            font-size: 0.85rem;
+            font-weight: 400;
+            letter-spacing: 0.13em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            text-align: right;
+            line-height: 1.8;
+        }
+
+        .mode-toggle {
+            display: inline-flex;
+            border: 1px solid var(--border);
+            border-radius: var(--r-sm);
+            overflow: hidden;
+            margin-top: var(--sp-3);
+        }
+
+        .mode-toggle button {
+            font-family: "Outfit", sans-serif;
+            font-size: 0.76rem;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            padding: 8px 14px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .mode-toggle button:hover {
+            color: var(--text);
+        }
+
+        .mode-toggle button.active {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .mode-toggle button + button {
+            border-left: 1px solid var(--border);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: var(--r-sm);
+            border: 1px solid var(--border);
+            background: var(--bg-deep);
+            color: var(--text-mid);
+            /* Use neutral system font so it stays consistent across all theme fonts */
+            font-family: system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+            font-size: 12px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.15s var(--ease-out);
+        }
+
+        .back-link svg {
+            transition: transform 0.15s var(--ease-out);
+        }
+
+        .back-link:hover {
+            color: var(--text);
+            border-color: var(--accent);
+            background: var(--accent-dim);
+        }
+
+        .section-shell {
+            position: relative;
+            isolation: isolate;
+            width: 100%;
+            margin: 0;
+            padding: clamp(48px, 7vw, 80px) 0;
+            box-sizing: border-box;
+        }
+
+        .section-shell::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 100vw;
+            transform: translateX(-50%);
+            background: var(--section-shell-bg);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        section.section-shell:nth-of-type(even)::before {
+            background: var(--section-shell-bg-alt);
+        }
+
+        .section-inner {
+            position: relative;
+            z-index: 1;
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 0 clamp(24px, 5vw, 64px);
+            box-sizing: border-box;
+        }
+
+        .hero-panel {
+            margin-bottom: 0;
+        }
+
+        .hero-copy {
+            padding: var(--sp-7);
+            background: var(--bg-deep);
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+            box-shadow: var(--shadow-sm);
+        }
+
+        section.section-shell:nth-of-type(even) :is(
+            .hero-copy,
+            .color-role-card,
+            .typography-pairing-card,
+            .accessibility-card,
+            .harmony-card,
+            .spacing-scale-container,
+            .layout-visualization,
+            .section-header-preview,
+            .swatch,
+            .card,
+            .metric,
+            .principle-card
+        ) {
+            background: var(--bg-alt);
+        }
+
+        .eyebrow {
+            font-family: "Outfit", sans-serif;
+            font-size: 0.88rem;
+            font-weight: 600;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--accent-light);
+            margin-bottom: var(--sp-3);
+        }
+
+        .hero-title {
+            max-width: 760px;
+            font-size: clamp(2.5rem, 5.5vw, 5rem);
+            font-weight: 900;
+            line-height: 0.98;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            margin-bottom: var(--sp-5);
+            color: var(--text);
+        }
+
+        .hero-title span {
+            color: var(--accent-bright);
+        }
+
+        .hero-lede {
+            max-width: 720px;
+            font-size: 1.08rem;
+            color: var(--text-mid);
+            line-height: 1.8;
+        }
+
+        .hero-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--sp-2);
+            margin-top: var(--sp-5);
+        }
+
+        .palette-group {
+            margin-bottom: var(--sp-6);
+        }
+
+        .palette-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .palette-group-label {
+            font-family: "Outfit", sans-serif;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: var(--sp-4);
+        }
+
+        .swatch-chip.token-bg { background: var(--bg); }
+        .swatch-chip.token-bg-alt { background: var(--bg-alt); }
+        .swatch-chip.token-bg-deep { background: var(--bg-deep); }
+        .swatch-chip.token-text { background: var(--text); }
+        .swatch-chip.token-text-mid { background: var(--text-mid); }
+
+        .section {
+            margin-bottom: 0;
+        }
+
+        .section-label {
+            font-family: "Outfit", sans-serif;
+            font-size: 0.82rem;
+            font-weight: 600;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: var(--sp-2);
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 3.5vw, 3rem);
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: var(--text);
+            margin-bottom: var(--sp-2);
+        }
+
+        .section-desc {
+            max-width: 660px;
+            color: var(--text-mid);
+            font-size: 1.05rem;
+            line-height: 1.75;
+            margin-bottom: var(--sp-6);
+        }
+
+        .section-desc code {
+            font-family: "Outfit", sans-serif, monospace;
+            font-size: 0.82em;
+            color: var(--accent-light);
+        }
+
+        .hero-copy,
+        .swatch,
+        .card,
+        .nav-preview,
+        .code-block,
+        .metric,
+        .principle-card,
+        .section-header-preview {
+            transition: background 0.25s var(--ease-out), border-color 0.25s var(--ease-out), color 0.25s var(--ease-out);
+        }
+
+        .section-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--sp-3);
+            margin-bottom: var(--sp-5);
+        }
+
+        .rule {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: clamp(64px, 8vw, 96px) 0;
+            width: 100%;
+        }
+
+        .color-grid {
+            display: grid;
+            gap: var(--sp-4);
+            align-items: stretch;
+        }
+
+        .accent-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+
+        .surface-grid {
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        }
+
+        .swatch {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            min-width: 0;
+            margin: 0;
+            padding: 0;
+            border-radius: var(--r-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            background: var(--bg-deep);
+            cursor: pointer;
+            font: inherit;
+            color: inherit;
+            text-align: left;
+            appearance: none;
+            -webkit-appearance: none;
+            transition: transform 0.15s var(--ease-out), border-color 0.15s;
+        }
+
+        .swatch::-moz-focus-inner {
+            border: 0;
+            padding: 0;
+        }
+
+        .swatch:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent-border);
+        }
+
+        .swatch.copied {
+            border-color: var(--accent-bright);
+        }
+
+        .swatch-chip {
+            flex-shrink: 0;
+            height: 92px;
+            width: 100%;
+            display: block;
+        }
+
+        .swatch-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: var(--sp-3) var(--sp-4);
+        }
+
+        .swatch-name,
+        .card-title,
+        .metric-label,
+        .principle-name {
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text);
+        }
+
+        .swatch-name {
+            min-height: 2.4em;
+            line-height: 1.2;
+        }
+
+        .swatch-hex,
+        .caption {
+            font-family: "Outfit", sans-serif;
+            font-size: 0.8rem;
+            font-weight: 300;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .swatch-use {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            line-height: 1.45;
+        }
+
+        .code-block {
+            position: relative;
+            background: var(--ink);
+            border: 1px solid var(--border);
+            border-radius: var(--r-md);
+            overflow: hidden;
+        }
+
+        .code-block pre {
+            padding: var(--sp-5);
+            overflow-x: auto;
+            font-family: "Outfit", sans-serif, monospace;
+            font-size: 0.78rem;
+            line-height: 1.7;
+            color: var(--text-mid);
+        }
+
+        .code-block .comment {
+            color: var(--ink-muted);
+        }
+
+        .code-block .prop {
+            color: var(--accent-pale);
+        }
+
+        .code-block .val {
+            color: var(--text);
+        }
+
+        .type-row {
+            padding: var(--sp-5) 0;
+            border-bottom: 1px solid var(--border);
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: var(--sp-5);
+            align-items: center;
+        }
+
+        .type-row:last-child {
+            border-bottom: none;
+        }
+
+        .type-meta {
+            font-family: "Outfit", sans-serif;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .type-meta strong {
+            display: block;
+            color: var(--text-mid);
+            margin-bottom: 4px;
+        }
+
+        .display-type {
+            font-size: clamp(3rem, 5vw, 5.5rem);
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            line-height: 1;
+            color: var(--text);
+        }
+
+        .h1-type {
+            font-size: clamp(2rem, 3.2vw, 3.1rem);
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            line-height: 1.1;
+        }
+
+        .h2-type {
+            font-size: clamp(1.3rem, 2vw, 1.7rem);
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .body-type {
+            max-width: 620px;
+            font-size: 0.95rem;
+            line-height: 1.75;
+            color: var(--text-mid);
+        }
+
+        .btn-row,
+        .tag-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--sp-3);
+            align-items: center;
+            margin-bottom: var(--sp-6);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 48px;
+            padding: 0 var(--sp-6);
+            border-radius: var(--r-sm);
+            border: 2px solid transparent;
+            font-size: 0.84rem;
+            font-weight: 800;
+            letter-spacing: 0.11em;
+            text-transform: uppercase;
+            transition: all 0.2s var(--ease-out);
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-light);
+            border-color: var(--accent-light);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border-color: var(--text);
+            color: var(--text);
+        }
+
+        .btn-outline:hover {
+            background: var(--text);
+            color: var(--bg);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            border-color: var(--accent-border);
+            color: var(--accent-light);
+        }
+
+        .btn-ghost:hover {
+            background: var(--accent-dim);
+            border-color: var(--accent);
+        }
+
+        .btn-sm {
+            min-height: 36px;
+            padding: 0 var(--sp-4);
+            font-size: 0.76rem;
+        }
+
+        .tag {
+            font-family: "Outfit", sans-serif;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            padding: 5px 12px;
+            border-radius: 999px;
+            border: 1px solid;
+        }
+
+        .tag-gold {
+            color: var(--accent-bright);
+            border-color: var(--accent-border);
+            background: var(--accent-dim);
+        }
+
+        [data-theme="light"] .tag-gold {
+            color: color-mix(in srgb, var(--accent) 70%, var(--black));
+        }
+
+        .tag-ink {
+            color: var(--text);
+            border-color: var(--border);
+            background: transparent;
+        }
+
+        .tag-filled {
+            color: white;
+            border-color: var(--accent);
+            background: var(--accent);
+        }
+
+        .nav-preview {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--sp-4);
+            padding: var(--sp-4) var(--sp-6);
+            border: 1px solid var(--border);
+            background: var(--nav-bg);
+            backdrop-filter: blur(12px);
+            border-radius: var(--r-md);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: var(--sp-6);
+        }
+
+        .nav-brand {
+            font-size: 1.45rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: var(--text);
+        }
+
+        .nav-brand span {
+            color: var(--accent-bright);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: var(--sp-5);
+            list-style: none;
+        }
+
+        .nav-links a {
+            font-family: "Outfit", sans-serif;
+            font-size: 0.78rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--text-mid);
+        }
+
+
+
+        .section-header-preview {
+            padding: var(--sp-7) var(--sp-6);
+            background: var(--bg-deep);
+            border-radius: var(--r-lg);
+            border: 1px solid var(--border);
+            margin-bottom: var(--sp-6);
+        }
+
+        .section-header-preview h3 {
+            font-size: clamp(2rem, 3.2vw, 3.2rem);
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            line-height: 1.1;
+            margin-bottom: var(--sp-3);
+        }
+
+        .divider-gold {
+            width: 48px;
+            height: 3px;
+            background: linear-gradient(to right, var(--accent), var(--accent-light));
+            margin: var(--sp-4) 0;
+        }
+
+        .card-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: var(--sp-4);
+        }
+
+        .card {
+            background: var(--bg-deep);
+            border: 1px solid var(--border);
+            border-radius: var(--r-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.2s var(--ease-out);
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+        }
+
+        .card-top {
+            min-height: 150px;
+            padding: var(--sp-4);
+            background: var(--bg-deep);
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: var(--sp-3);
+        }
+
+        section.section-shell:nth-of-type(odd) .card-top {
+            background: var(--ink);
+        }
+
+        .card-badge {
+            font-family: "Outfit", sans-serif;
+            font-size: 0.76rem;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: white;
+            background: var(--accent);
+            padding: 4px 10px;
+            border-radius: var(--r-sm);
+        }
+
+        .card-number {
+            font-size: 2.6rem;
+            font-weight: 900;
+            line-height: 1;
+            color: var(--accent-pale); opacity: 0.45;
+        }
+
+        .card-body {
+            padding: var(--sp-4) var(--sp-5);
+        }
+
+        .card-desc {
+            margin-top: var(--sp-2);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .metrics-grid,
+        .principles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: var(--sp-5);
+        }
+
+        .metric {
+            padding: var(--sp-5);
+            background: var(--bg-deep);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--accent);
+            border-radius: 0 var(--r-md) var(--r-md) 0;
+        }
+
+        .metric-value {
+            font-size: clamp(2.5rem, 4.5vw, 4rem);
+            font-weight: 900;
+            line-height: 1;
+            color: var(--accent-bright);
+            margin-bottom: var(--sp-2);
+        }
+
+        .principle-card {
+            padding: var(--sp-5);
+            background: var(--bg-deep);
+            border-left: 4px solid var(--accent);
+            border-radius: 0 var(--r-md) var(--r-md) 0;
+        }
+
+        .principle-number {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--accent-pale);
+            line-height: 1;
+            margin-bottom: var(--sp-2);
+        }
+
+        .principle-desc {
+            margin-top: var(--sp-2);
+            color: var(--text-mid);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 12px 20px;
+            background: var(--bg-alt);
+            border: 1px solid var(--accent-border);
+            border-radius: var(--r-md);
+            font-family: "Outfit", sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text);
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.2s, transform 0.2s;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .footer {
+            position: relative;
+            z-index: 1;
+            max-width: 1240px;
+            margin: clamp(48px, 6vw, 80px) auto 0;
+            padding: var(--sp-8) clamp(24px, 5vw, 64px) var(--sp-7);
+            border-top: 2px solid var(--accent);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--sp-6);
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .footer-col {
+            display: flex;
+            flex-direction: column;
+            gap: var(--sp-3);
+        }
+
+        .footer-brand {
+            font-size: 1.25rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text);
+        }
+
+        .footer-brand span {
+            color: var(--accent-bright);
+        }
+
+        .footer-desc {
+            font-size: 0.88rem;
+            color: var(--text-mid);
+            line-height: 1.5;
+            max-width: 260px;
+        }
+
+        .footer-title {
+            font-family: "Outfit", sans-serif;
+            font-size: 0.76rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--text);
+            margin-bottom: var(--sp-2);
+        }
+
+        .footer-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .footer-links a {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.15s;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-bright);
+        }
+
+        .footer-bottom {
+            grid-column: 1 / -1;
+            border-top: 1px solid var(--border);
+            padding-top: var(--sp-4);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: var(--sp-3);
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: var(--sp-4);
+        }
+
+        @media (max-width: 840px) {
+
+            .page-header {
+                grid-template-columns: 1fr;
+            }
+
+            .page-header-meta {
+                text-align: left;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .type-row {
+                grid-template-columns: 1fr;
+            }
+
+            .accent-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        /* Section 05 & 06 Theory Styles */
+        .theory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--sp-5);
+            margin-top: var(--sp-4);
+        }
+        
+        .accessibility-card {
+            background: var(--bg-deep);
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+            padding: var(--sp-5);
+            display: flex;
+            flex-direction: column;
+            gap: var(--sp-3);
+        }
+        
+        .acc-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: var(--sp-3);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .acc-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        
+        .acc-color-preview {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+        
+        .acc-meta {
+            flex: 1;
+            margin-left: var(--sp-3);
+        }
+        
+        .acc-pair {
+            font-size: 0.86rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+        
+        .acc-ratio {
+            font-family: "Outfit", sans-serif;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        
+        .badge-pass {
+            background: var(--accent-dim);
+            border: 1px solid var(--accent-border);
+            color: var(--accent-bright);
+            font-family: "Outfit", sans-serif;
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .harmony-card {
+            background: var(--bg-deep);
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+            padding: var(--sp-5);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .harmony-visual {
+            display: flex;
+            height: 48px;
+            border-radius: var(--r-md);
+            overflow: hidden;
+            border: 1px solid var(--border);
+            margin: var(--sp-4) 0;
+        }
+        
+        .harmony-visual span {
+            flex: 1;
+            height: 100%;
+            transition: transform 0.2s;
+        }
+        
+        .harmony-visual span:hover {
+            transform: scaleY(1.1);
+        }
+        
+        .harmony-desc {
+            font-size: 0.88rem;
+            color: var(--text-mid);
+            line-height: 1.5;
+        }
+
+        .spacing-scale-container {
+            display: flex;
+            flex-direction: column;
+            gap: var(--sp-3);
+            background: var(--bg-deep);
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+            padding: var(--sp-5);
+            margin-top: var(--sp-4);
+        }
+        
+        .spacing-scale-item {
+            display: flex;
+            align-items: center;
+            gap: var(--sp-4);
+        }
+        
+        .spacing-box {
+            height: 24px;
+            border-radius: 4px;
+            background: var(--accent);
+            border: 1px solid var(--accent-border);
+            min-width: 4px;
+            transition: width 0.3s var(--ease-out);
+        }
+        
+        .spacing-label {
+            font-family: "Outfit", sans-serif;
+            font-size: 0.76rem;
+            font-weight: 600;
+            color: var(--text-mid);
+            width: 120px;
+            flex-shrink: 0;
+        }
+        
+        .spacing-value {
+            font-family: "Outfit", sans-serif;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+        
+        .layout-visualization {
+            background: var(--bg-deep);
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+            padding: var(--sp-5);
+            display: flex;
+            flex-direction: column;
+            gap: var(--sp-3);
+        }
+        
+        .grid-sim {
+            display: flex;
+            height: 64px;
+            border: 1px solid var(--border);
+            border-radius: var(--r-md);
+            overflow: hidden;
+            background: var(--bg-deep);
+            position: relative;
+        }
+        
+        .grid-sim-gutter {
+            width: var(--sp-6);
+            background: var(--accent-dim);
+            border-right: 1px dashed var(--accent-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: "Outfit", sans-serif;
+            font-size: 0.62rem;
+            color: var(--accent-bright);
+            writing-mode: vertical-rl;
+            text-transform: uppercase;
+        }
+        
+        .grid-sim-gutter.right {
+            border-right: none;
+            border-left: 1px dashed var(--accent-border);
+        }
+        
+        .grid-sim-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: "Outfit", sans-serif;
+            font-size: 0.76rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+        }
+    </style>
+</head>
+
+
+<body>
+<div class="theme-page">
+
+    <header class="theme-header">
+        <div class="theme-header-inner">
+            <span class="theme-header-brand">Sahara <span>Dust</span></span>
+            <div style="display: flex; align-items: center; gap: var(--sp-4);">
+                <div class="mode-toggle" role="group" aria-label="Color mode" style="margin-top:0;">
+                    <button type="button" class="active" data-mode="dark">Dark</button>
+                    <button type="button" data-mode="light">Light</button>
+                </div>
+                <a href="index.html#theme-sahara" class="back-link">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+                        <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                    </svg>
+                    Back to Studio
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="theme-content">
+
+        <section class="hero-panel section-shell" aria-labelledby="theme-hero">
+            <div class="section-inner">
+                <div class="hero-copy">
+                    <div class="eyebrow">Warm terracotta · Sahara sands · Desert oasis</div>
+                    <h1 id="theme-hero" class="hero-title">Terracotta dust on <span>golden sands</span></h1>
+                    <p class="hero-lede">
+                        A warm desert-inspired theme wrapping sand storm colors with golden sun highlights and high-contrast editorial typography. Gives a peaceful, organic, high-end travel portfolio feel.
+                    </p>
+                    <div class="hero-tags">
+                        <span class="tag tag-gold">Lifestyle & Organic</span>
+                        <span class="tag tag-ink">Creative & Portfolios</span>
+                        <span class="tag tag-filled">Minimal & Brutalist</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Color Roles — inline, was sidebar -->
+        <section class="section section-shell" id="color-roles">
+            <div class="section-inner">
+            <div class="section-label">00 — Color Identity</div>
+                        <h2 class="section-title">Accent <span>roles</span></h2>
+                        <p class="section-desc">Each accent has a specific role in the design language. Click any swatch below to copy its hex value.</p>
+                        <div class="color-roles-grid">
+                            <div class="color-role-card">
+                                <div class="color-role-dot" style="background: #C27D38;"></div>
+                                <div>
+                                    <div class="color-role-name">Dune Sand</div>
+                                    <div class="color-role-hex">#C27D38</div>
+                                    <div class="color-role-use">Primary links, kickers</div>
+                                </div>
+                            </div>
+                            <div class="color-role-card">
+                                <div class="color-role-dot" style="background: #D97706;"></div>
+                                <div>
+                                    <div class="color-role-name">Sun Gold</div>
+                                    <div class="color-role-hex">#D97706</div>
+                                    <div class="color-role-use">Borders, alerts</div>
+                                </div>
+                            </div>
+                            <div class="color-role-card">
+                                <div class="color-role-dot" style="background: #2D3B2E;"></div>
+                                <div>
+                                    <div class="color-role-name">Palm Shade</div>
+                                    <div class="color-role-hex">#2D3B2E</div>
+                                    <div class="color-role-use">Fills, text-muted</div>
+                                </div>
+                            </div>
+                            <div class="color-role-card">
+                                <div class="color-role-dot" style="background: #FDF6EC;"></div>
+                                <div>
+                                    <div class="color-role-name">Warm Silk</div>
+                                    <div class="color-role-hex">#FDF6EC</div>
+                                    <div class="color-role-use">Warm backdrops</div>
+                                </div>
+                            </div>
+                        </div>
+            </div>
+        </section>
+
+        <section class="section section-shell" id="palette">
+            <div class="section-inner">
+            <div class="section-label">01 — Foundation</div>
+                        <h2 class="section-title">Color <span>palette</span></h2>
+                        <p class="section-desc">
+                            Click any swatch to copy its hex value. Accent colors are shared across modes; surface tokens
+                            update when you switch between light and dark.
+                        </p>
+
+                        <div class="palette-group">
+                            <div class="palette-group-label">Accent — shared</div>
+                            <div class="color-grid accent-grid">
+                                <button type="button" class="swatch" data-hex="#C27D38" aria-label="Copy Dune Sand #C27D38">
+                                    <div class="swatch-chip" style="background:#C27D38;"></div>
+                                    <div class="swatch-info">
+                                        <div class="swatch-name">Dune Sand</div>
+                                        <div class="swatch-hex">#C27D38</div>
+                                        <div class="swatch-use">Primary links, kickers</div>
+                                    </div>
+                                </button>
+                                <button type="button" class="swatch" data-hex="#D97706" aria-label="Copy Sun Gold #D97706">
+                                    <div class="swatch-chip" style="background:#D97706;"></div>
+                                    <div class="swatch-info">
+                                        <div class="swatch-name">Sun Gold</div>
+                                        <div class="swatch-hex">#D97706</div>
+                                        <div class="swatch-use">Borders, alerts</div>
+                                    </div>
+                                </button>
+                                <button type="button" class="swatch" data-hex="#2D3B2E" aria-label="Copy Palm Shade #2D3B2E">
+                                    <div class="swatch-chip" style="background:#2D3B2E;"></div>
+                                    <div class="swatch-info">
+                                        <div class="swatch-name">Palm Shade</div>
+                                        <div class="swatch-hex">#2D3B2E</div>
+                                        <div class="swatch-use">Fills, text-muted</div>
+                                    </div>
+                                </button>
+                                <button type="button" class="swatch" data-hex="#FDF6EC" aria-label="Copy Warm Silk #FDF6EC">
+                                    <div class="swatch-chip" style="background:#FDF6EC;"></div>
+                                    <div class="swatch-info">
+                                        <div class="swatch-name">Warm Silk</div>
+                                        <div class="swatch-hex">#FDF6EC</div>
+                                        <div class="swatch-use">Warm backdrops</div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="palette-group">
+                            <div class="palette-group-label">Surfaces — <span id="surface-mode-label">dark mode</span></div>
+                            <div class="color-grid surface-grid" id="surface-grid">
+                                <button type="button" class="swatch surface-swatch" data-token="bg" aria-label="Copy background">
+                                    <div class="swatch-chip token-bg"></div>
+                                    <div class="swatch-info">
+                                        <div class="swatch-name">Background</div>
+                                        <div class="swatch-hex" data-token-hex="bg"></div>
+                                        <div class="swatch-use">Page background</div>
+                                    </div>
+                                </button>
+                                <button type="button" class="swatch surface-swatch" data-token="bg-alt" aria-label="Copy background alt">
+                                    <div class="swatch-chip token-bg-alt"></div>
+                                    <div class="swatch-info">
+                                        <div class="swatch-name">Surface</div>
+                                        <div class="swatch-hex" data-token-hex="bg-alt"></div>
+                                        <div class="swatch-use">Cards, panels, fills</div>
+                                    </div>
+                                </button>
+                                <button type="button" class="swatch surface-swatch" data-token="bg-deep" aria-label="Copy background deep">
+                                    <div class="swatch-chip token-bg-deep"></div>
+                                    <div class="swatch-info">
+                                        <div class="swatch-name">Surface Deep</div>
+                                        <div class="swatch-hex" data-token-hex="bg-deep"></div>
+                                        <div class="swatch-use">Card headers, wells</div>
+                                    </div>
+                                </button>
+                                <button type="button" class="swatch surface-swatch" data-token="text" aria-label="Copy text">
+                                    <div class="swatch-chip token-text"></div>
+                                    <div class="swatch-info">
+                                        <div class="swatch-name">Text</div>
+                                        <div class="swatch-hex" data-token-hex="text"></div>
+                                        <div class="swatch-use">Headlines, primary copy</div>
+                                    </div>
+                                </button>
+                                <button type="button" class="swatch surface-swatch" data-token="text-mid" aria-label="Copy text mid">
+                                    <div class="swatch-chip token-text-mid"></div>
+                                    <div class="swatch-info">
+                                        <div class="swatch-name">Text Mid</div>
+                                        <div class="swatch-hex" data-token-hex="text-mid"></div>
+                                        <div class="swatch-use">Body copy, descriptions</div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+            </div>
+        </section>
+
+        <section class="section section-shell" id="tokens">
+            <div class="section-inner">
+            <div class="section-label">02 — Tokens</div>
+                        <h2 class="section-title">CSS <span>variables</span></h2>
+                        <p class="section-desc">
+                            Drop this block into your project's global stylesheet. Includes shared accents plus light and dark
+                            surface tokens — toggle <code data-theme-ref>data-theme</code> on <code>&lt;html&gt;</code> to switch.
+                        </p>
+                        <div class="section-toolbar">
+                            <button type="button" class="btn btn-ghost btn-sm" id="copy-tokens">Copy CSS variables</button>
+                            <button type="button" class="btn btn-ghost btn-sm" id="copy-json">Copy JSON</button>
+                        </div>
+                        <div class="code-block">
+                            <pre id="token-block"></pre>
+                        </div>
+            </div>
+        </section>
+
+        <section class="section section-shell" id="typography">
+            <div class="section-inner">
+            <div class="section-label">03 — Typography</div>
+                        <h2 class="section-title">Type <span>scale</span></h2>
+                        <div class="typography-pairing-card">
+                            <div class="typography-pairing-icon">Aa</div>
+                            <div class="typography-pairing-body">
+                                <div class="typography-pairing-fonts">Cinzel + Outfit</div>
+                                <div class="typography-pairing-desc">Cinzel renders display weights with classic roman symmetry. Outfit handles body copy with modern rounded precision.</div>
+                            </div>
+                        </div>
+                        <div class="type-row">
+                            <div class="type-meta"><strong>Display</strong>Cinzel Display</div>
+                            <div class="display-type">Sahara <span>Dust</span></div>
+                        </div>
+                        <div class="type-row">
+                            <div class="type-meta"><strong>Heading 1</strong>Cinzel H1</div>
+                            <div class="h1-type">Section title</div>
+                        </div>
+                        <div class="type-row">
+                            <div class="type-meta"><strong>Heading 2</strong>Cinzel H2</div>
+                            <div class="h2-type">Subsection label</div>
+                        </div>
+                        <div class="type-row">
+                            <div class="type-meta"><strong>Body</strong>Cinzel Regular</div>
+                            <div class="body-type">
+                                Use the text token for primary copy and text-mid for supporting paragraphs. Keep line height
+                                around 1.7–1.8 for readability in both light and dark modes.
+                            </div>
+                        </div>
+                        <div class="type-row">
+                            <div class="type-meta"><strong>Label</strong>Outfit Medium</div>
+                            <div class="eyebrow" style="margin:0">Eyebrow · Metadata · Captions</div>
+                        </div>
+            </div>
+        </section>
+
+        <section class="section section-shell" id="components">
+            <div class="section-inner">
+            <div class="section-label">04 — Components</div>
+                        <h2 class="section-title">UI <span>patterns</span></h2>
+                        <p class="section-desc">
+                            Common building blocks using the palette. Uppercase labels and heavy weight are part of the theme voice.
+                        </p>
+
+                        <p class="caption" style="margin-bottom:12px">Buttons</p>
+                        <div class="btn-row">
+                            <button type="button" class="btn btn-primary">Primary action</button>
+                            <button type="button" class="btn btn-outline">Secondary</button>
+                            <button type="button" class="btn btn-ghost">Ghost</button>
+                        </div>
+
+                        <p class="caption" style="margin-bottom:12px">Tags</p>
+                        <div class="tag-row">
+                            <span class="tag tag-gold">Accent</span>
+                            <span class="tag tag-ink">Neutral</span>
+                            <span class="tag tag-filled">Filled</span>
+                        </div>
+
+                        <p class="caption" style="margin-bottom:12px">Navigation</p>
+                        <nav class="nav-preview" aria-label="Component preview">
+                            <div class="nav-brand">Sahara <span>Dust</span></div>
+                            <ul class="nav-links">
+                                <li><a href="#">Work</a></li>
+                                <li><a href="#">About</a></li>
+                                <li><a href="#">Contact</a></li>
+                            </ul>
+                        </nav>
+
+                        <p class="caption" style="margin-bottom:12px">Section header</p>
+                        <div class="section-header-preview">
+                            <h3>Feature <span style="color:var(--accent-bright)">spotlight</span></h3>
+                            <div class="divider-gold"></div>
+                            <p class="body-type" style="margin:0">Supporting copy sits in text-mid with a short accent rule underneath the headline.</p>
+                        </div>
+
+                        <p class="caption" style="margin-bottom:12px">Cards</p>
+                        <div class="card-row">
+                            <article class="card">
+                                <div class="card-top">
+                                    <span class="card-badge">New</span>
+                                    <span class="card-number">01</span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="card-title">Card title</div>
+                                    <p class="card-desc">Elevated panel with ember shadow fill and crimson badge accent.</p>
+                                </div>
+                            </article>
+                            <article class="card">
+                                <div class="card-top">
+                                    <span class="card-badge">Draft</span>
+                                    <span class="card-number">02</span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="card-title">Card title</div>
+                                    <p class="card-desc">Hover lifts the card slightly — keep motion on transform only.</p>
+                                </div>
+                            </article>
+                            <article class="card">
+                                <div class="card-top">
+                                    <span class="card-badge">Live</span>
+                                    <span class="card-number">03</span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="card-title">Card title</div>
+                                    <p class="card-desc">Forge background on the card header creates depth without extra imagery.</p>
+                                </div>
+                            </article>
+                        </div>
+            </div>
+        </section>
+
+        <section class="section section-shell" id="theory">
+            <div class="section-inner">
+            <div class="section-label">05 — Contrast &amp; Harmony</div>
+                        <h2 class="section-title">Design <span>theory</span></h2>
+                        <p class="section-desc">
+                            Mathematical color relationships and accessibility validation. Checks compliance against W3C WCAG 2.1 contrast ratios.
+                        </p>
+            
+                        <p class="caption" style="margin:24px 0 12px">Theme Metrics</p>
+                        <div class="metrics-grid" style="margin-bottom: 24px;">
+                            <div class="metric">
+                                <div class="metric-value">8</div>
+                                <div class="metric-label">Core colors</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">4.5:1</div>
+                                <div class="metric-label">Min contrast target</div>
+                            </div>
+                        </div>
+
+                        <div class="theory-grid">
+                            <div class="accessibility-card">
+                                <p class="caption" style="margin:0 0 8px">WCAG Contrast Validation</p>
+                                <div class="acc-row">
+                                    <div class="acc-color-preview" style="background: var(--text); color: var(--bg); border: 1px solid var(--border);">Aa</div>
+                                    <div class="acc-meta">
+                                        <div class="acc-pair">Primary Text on Bg</div>
+                                        <div class="acc-ratio">Target: &ge; 7:1 (AAA)</div>
+                                    </div>
+                                    <span class="badge-pass">Pass AAA</span>
+                                </div>
+                                <div class="acc-row">
+                                    <div class="acc-color-preview" style="background: var(--text-mid); color: var(--bg); border: 1px solid var(--border);">Aa</div>
+                                    <div class="acc-meta">
+                                        <div class="acc-pair">Body Copy on Bg</div>
+                                        <div class="acc-ratio">Target: &ge; 4.5:1 (AA)</div>
+                                    </div>
+                                    <span class="badge-pass">Pass AA</span>
+                                </div>
+                                <div class="acc-row">
+                                    <div class="acc-color-preview" style="background: var(--accent); color: #ffffff;">Aa</div>
+                                    <div class="acc-meta">
+                                        <div class="acc-pair">White Copy on Accent</div>
+                                        <div class="acc-ratio">Target: &ge; 3:1 (UI Component)</div>
+                                    </div>
+                                    <span class="badge-pass">Pass AA</span>
+                                </div>
+                            </div>
+                
+                            <div class="harmony-card">
+                                <div>
+                                    <p class="caption" style="margin:0 0 8px">Accent Color Spectrum</p>
+                                    <p class="harmony-desc" style="margin-bottom:8px">Visual segments detailing color pairing distribution across accents.</p>
+                                    <div class="harmony-visual">
+                                        <span style="background: var(--accent);" title="Primary Accent"></span>
+                                        <span style="background: var(--accent-light);" title="Secondary Accent"></span>
+                                        <span style="background: var(--accent-bright);" title="Active Accent"></span>
+                                        <span style="background: var(--accent-pale);" title="Muted Accent"></span>
+                                    </div>
+                                </div>
+                                <div class="harmony-desc" style="margin-top:8px">
+                                    Generates high-contrast analogous and monochromatic relationships to ensure active components are highly visible.
+                                </div>
+                            </div>
+                        </div>
+            </div>
+        </section>
+
+        <section class="section section-shell" id="geometry">
+            <div class="section-inner">
+            <div class="section-label">06 — Spacing &amp; Geometry</div>
+                        <h2 class="section-title">Layout <span>System</span></h2>
+                        <p class="section-desc">
+                            Proportional spacing scale guidelines. Built on a modular unit grid to govern container padding, margins, and layout gutters.
+                        </p>
+            
+                        <div class="theory-grid">
+                            <div class="spacing-scale-container">
+                                <p class="caption" style="margin:0 0 8px">Proportional Spacing Scale</p>
+                                <div class="spacing-scale-item">
+                                    <span class="spacing-label">--sp-1</span>
+                                    <div class="spacing-box" style="width: 4px;"></div>
+                                    <span class="spacing-value">4px</span>
+                                </div>
+                                <div class="spacing-scale-item">
+                                    <span class="spacing-label">--sp-2</span>
+                                    <div class="spacing-box" style="width: 8px;"></div>
+                                    <span class="spacing-value">8px</span>
+                                </div>
+                                <div class="spacing-scale-item">
+                                    <span class="spacing-label">--sp-3</span>
+                                    <div class="spacing-box" style="width: 12px;"></div>
+                                    <span class="spacing-value">12px</span>
+                                </div>
+                                <div class="spacing-scale-item">
+                                    <span class="spacing-label">--sp-4</span>
+                                    <div class="spacing-box" style="width: 16px;"></div>
+                                    <span class="spacing-value">16px</span>
+                                </div>
+                                <div class="spacing-scale-item">
+                                    <span class="spacing-label">--sp-5</span>
+                                    <div class="spacing-box" style="width: 24px;"></div>
+                                    <span class="spacing-value">24px</span>
+                                </div>
+                                <div class="spacing-scale-item">
+                                    <span class="spacing-label">--sp-6</span>
+                                    <div class="spacing-box" style="width: 32px;"></div>
+                                    <span class="spacing-value">32px</span>
+                                </div>
+                            </div>
+                
+                            <div class="layout-visualization">
+                                <div>
+                                    <p class="caption" style="margin:0 0 8px">Layout Symmetrical Grid</p>
+                                    <p class="harmony-desc" style="margin-bottom:8px">Visual representation of wide-margin gutters and core content boundaries.</p>
+                                    <div class="grid-sim">
+                                        <div class="grid-sim-gutter">Gutter</div>
+                                        <div class="grid-sim-content">Max Content Width (1240px)</div>
+                                        <div class="grid-sim-gutter right">Gutter</div>
+                                    </div>
+                                </div>
+                                <div class="harmony-desc" style="margin-top:8px">
+                                    Leverages a symmetrical layout grid to structure blocks. Wide margins ensure high-fidelity reading focus across viewport transitions.
+                                </div>
+                            </div>
+                        </div>
+            </div>
+        </section>
+
+        <section class="section section-shell" id="principles">
+            <div class="section-inner">
+            <div class="section-label">07 — Guidelines</div>
+                        <h2 class="section-title">Design <span>principles</span></h2>
+                        <p class="section-desc">
+                            Core behavioral guidelines to preserve the design language's integrity when scaling templates.
+                        </p>
+                        <div class="principles-grid" style="margin-top:24px">
+                <div class="principle-card">
+                    <div class="principle-number">01</div>
+                    <div class="principle-name">Sands-of-time symmetry</div>
+                    <p class="principle-desc">Align elements to strict grid parameters to evoke the calm structure of natural dunes.</p>
+                </div>
+                <div class="principle-card">
+                    <div class="principle-number">02</div>
+                    <div class="principle-name">Oasis cooling wells</div>
+                    <p class="principle-desc">Keep card panels and buttons slightly tinted with warm wood sand hues to anchor layout components.</p>
+                </div>
+                <div class="principle-card">
+                    <div class="principle-number">03</div>
+                    <div class="principle-name">Sun-drenched type</div>
+                    <p class="principle-desc">Highlight editorial serifs with warm gold-amber to frame key headlines.</p>
+                </div>
+            </div>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <div class="footer-col">
+                <div class="footer-brand">Sahara <span>Dust</span></div>
+                <p class="footer-desc">A premium responsive theme built on high-fidelity design tokens and guidelines.</p>
+            </div>
+            
+            <div class="footer-col">
+                <div class="footer-title">Workspace</div>
+                <ul class="footer-links">
+                    <li><a href="index.html#theme-sahara">Chromaverse Studio</a></li>
+                    <li><a href="index.html">All 65 Themes</a></li>
+                    <li><a href="https://github.com" target="_blank" rel="noopener">GitHub Project</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-col">
+                <div class="footer-title">Navigation</div>
+                <ul class="footer-links">
+                    <li><a href="#palette">Color Palette</a></li>
+                    <li><a href="#tokens">CSS Tokens</a></li>
+                    <li><a href="#typography">Typography</a></li>
+                    <li><a href="#components">UI Components</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-col">
+                <div class="footer-title">Guidelines</div>
+                <ul class="footer-links">
+                    <li><a href="#theory">Design Theory</a></li>
+                    <li><a href="#geometry">Layout &amp; Spacing</a></li>
+                    <li><a href="#principles">Design Principles</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-bottom">
+                <span>&copy; 2026 Chromaverse Engine. Symmetrical Japanese precision.</span>
+                <span><a href="index.html#theme-sahara" style="color: var(--accent-bright); text-decoration: none; font-weight: 700;">← Back to Studio</a></span>
+            </div>
+        </footer>
+    </div> <!-- close theme-content -->
+</div> <!-- close theme-page -->
+
+    <script>
+        const root = document.documentElement;
+        const modeButtons = document.querySelectorAll(".mode-toggle button");
+
+        const safeStorage = {
+            getItem(key) { try { return localStorage.getItem(key); } catch(e) { return null; } },
+            setItem(key, value) { try { localStorage.setItem(key, value); } catch(e) {} }
+        };
+
+        function setTheme(mode) {
+            root.dataset.theme = mode;
+            safeStorage.setItem("chromaverse-theme-mode", mode);
+            modeButtons.forEach((btn) => {
+                const active = btn.dataset.mode === mode;
+                btn.classList.toggle("active", active);
+                btn.setAttribute("aria-pressed", String(active));
+            });
+            document.querySelectorAll("[data-token-hex]").forEach((el) => {
+                el.textContent = getTokenValue(el.dataset.tokenHex).toUpperCase();
+            });
+            const surfaceLabel = document.getElementById("surface-mode-label");
+            if (surfaceLabel) surfaceLabel.textContent = mode === "dark" ? "dark mode" : "light mode";
+        }
+
+        function getTokenValue(token) {
+            return getComputedStyle(root).getPropertyValue(`--${token}`).trim();
+        }
+
+        function rgbToHex(rgb) {
+            const result = rgb.match(/\d+/g);
+            if (!result) return rgb;
+            return "#" + result.slice(0, 3).map(x => parseInt(x).toString(16).padStart(2, "0")).join("").toUpperCase();
+        }
+
+        const tokenBlock = document.getElementById("token-block");
+
+        function renderTokenBlock() {
+            const props = [
+                "--accent", "--accent-light", "--accent-bright", "--accent-pale",
+                "--bg", "--bg-alt", "--bg-deep",
+                "--text", "--text-mid", "--text-muted",
+                "--border", "--shadow-sm", "--shadow-md"
+            ];
+            let css = ":root {\n";
+            props.forEach(p => {
+                const val = getComputedStyle(root).getPropertyValue(p).trim();
+                css += `  ${p}: ${val};\n`;
+            });
+            css += "}";
+            if (tokenBlock) tokenBlock.textContent = css;
+        }
+
+        function showToast(msg) {
+            let t = document.getElementById("copy-toast");
+            if (!t) {
+                t = document.createElement("div");
+                t.id = "copy-toast";
+                t.style.cssText = "position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:700;letter-spacing:0.05em;z-index:9999;pointer-events:none;opacity:0;transition:opacity 0.2s;";
+                document.body.appendChild(t);
+            }
+            t.textContent = msg;
+            t.style.opacity = "1";
+            clearTimeout(t._timer);
+            t._timer = setTimeout(() => { t.style.opacity = "0"; }, 1800);
+        }
+
+        function copyText(text, msg) {
+            navigator.clipboard.writeText(text).then(() => showToast(msg)).catch(() => showToast("Copy failed"));
+        }
+
+        document.querySelectorAll(".swatch[data-hex]").forEach(swatch => {
+            swatch.addEventListener("click", () => {
+                const hex = swatch.dataset.hex;
+                copyText(hex, `Copied ${hex}`);
+                swatch.classList.add("copied");
+                setTimeout(() => swatch.classList.remove("copied"), 600);
+            });
+        });
+
+        document.querySelectorAll(".surface-swatch").forEach(swatch => {
+            swatch.addEventListener("click", () => {
+                const token = swatch.dataset.token;
+                const raw = getTokenValue(token);
+                const hex = raw.startsWith("#") ? raw.toUpperCase() : rgbToHex(raw);
+                copyText(hex, `Copied ${hex}`);
+                swatch.classList.add("copied");
+                setTimeout(() => swatch.classList.remove("copied"), 600);
+            });
+        });
+
+        modeButtons.forEach(btn => btn.addEventListener("click", () => setTheme(btn.dataset.mode)));
+
+        const THEME_JSON = {
+    "accent_names": [
+        "Dune Sand",
+        "Sun Gold",
+        "Palm Shade",
+        "Warm Silk"
+    ],
+    "accent_uses": [
+        "Primary links, kickers",
+        "Borders, alerts",
+        "Fills, text-muted",
+        "Warm backdrops"
+    ],
+    "accents": [
+        "#C27D38",
+        "#D97706",
+        "#2D3B2E",
+        "#FDF6EC"
+    ],
+    "dark": {
+        "accent_border": "rgba(217, 119, 6, 0.35)",
+        "accent_dim": "rgba(217, 119, 6, 0.1)",
+        "bg": "#17120E",
+        "bg_alt": "#241C16",
+        "bg_deep": "#0F0C09",
+        "black": "#17120E",
+        "body_gradient": "linear-gradient(180deg, rgba(217, 119, 6, 0.15) 0%, transparent 45%), radial-gradient(circle at 50% 30%, #241C16 0%, var(--bg) 70%)",
+        "border": "rgba(217, 119, 6, 0.22)",
+        "ink": "#241C16",
+        "ink_mid": "#A8988C",
+        "ink_muted": "#5C4F44",
+        "ink_soft": "#0F0C09",
+        "nav_bg": "rgba(23, 18, 14, 0.9)",
+        "shadow_lg": "0 20px 48px rgba(15, 12, 9, 0.85)",
+        "shadow_md": "0 12px 32px rgba(217, 119, 6, 0.22)",
+        "shadow_sm": "0 4px 20px rgba(217, 119, 6, 0.15)",
+        "text": "#FAF6F2",
+        "text_mid": "#E3D8CE",
+        "text_muted": "#A8988C"
+    },
+    "eyebrow": "Warm terracotta \u00b7 Sahara sands \u00b7 Desert oasis",
+    "font_import": "<link href=\"https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Outfit:wght@300;400;500;600&display=swap\" rel=\"stylesheet\" />",
+    "font_primary": "\"Cinzel\", serif",
+    "font_secondary": "\"Outfit\", sans-serif",
+    "id": "52",
+    "lede": "A warm desert-inspired theme wrapping sand storm colors with golden sun highlights and high-contrast editorial typography. Gives a peaceful, organic, high-end travel portfolio feel.",
+    "light": {
+        "accent_border": "rgba(217, 119, 6, 0.25)",
+        "accent_dim": "rgba(217, 119, 6, 0.06)",
+        "bg": "#FDF8F2",
+        "bg_alt": "#FFFFFF",
+        "bg_deep": "#F5ECE2",
+        "black": "#2E1E12",
+        "body_gradient": "linear-gradient(180deg, rgba(217, 119, 6, 0.06) 0%, transparent 40%), radial-gradient(circle at 50% 20%, #F5ECE2 0%, var(--bg) 70%)",
+        "border": "rgba(217, 119, 6, 0.15)",
+        "ink": "#FFFFFF",
+        "ink_mid": "#7A6352",
+        "ink_muted": "#D6C7B7",
+        "ink_soft": "#F5ECE2",
+        "nav_bg": "rgba(253, 248, 242, 0.9)",
+        "shadow_lg": "0 20px 48px rgba(217, 119, 6, 0.06)",
+        "shadow_md": "0 12px 32px rgba(217, 119, 6, 0.12)",
+        "shadow_sm": "0 2px 8px rgba(217, 119, 6, 0.08)",
+        "text": "#2E1E12",
+        "text_mid": "#4A3525",
+        "text_muted": "#7A6352"
+    },
+    "name": "Sahara Dust",
+    "principles": [
+        {
+            "desc": "Align elements to strict grid parameters to evoke the calm structure of natural dunes.",
+            "name": "Sands-of-time symmetry",
+            "number": "01"
+        },
+        {
+            "desc": "Keep card panels and buttons slightly tinted with warm wood sand hues to anchor layout components.",
+            "name": "Oasis cooling wells",
+            "number": "02"
+        },
+        {
+            "desc": "Highlight editorial serifs with warm gold-amber to frame key headlines.",
+            "name": "Sun-drenched type",
+            "number": "03"
+        }
+    ],
+    "slug": "sahara",
+    "tags": [
+        "Lifestyle & Organic",
+        "Creative & Portfolios",
+        "Minimal & Brutalist"
+    ],
+    "title": "Terracotta dust on <span>golden sands</span>",
+    "typography_desc": "Cinzel renders display weights with classic roman symmetry. Outfit handles body copy with modern rounded precision."
+};
+
+        async function animateButton(btn, text, message) {
+            try {
+                await navigator.clipboard.writeText(text);
+                showToast(message);
+                const orig = btn.innerHTML;
+                btn.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg><span>Copied!</span>`;
+                setTimeout(() => { btn.innerHTML = orig; }, 1000);
+            } catch { showToast("Copy failed"); }
+        }
+
+        const btnTokens = document.getElementById("copy-tokens");
+        if (btnTokens) btnTokens.addEventListener("click", () => animateButton(btnTokens, tokenBlock.textContent, "Copied CSS variables"));
+
+        const btnJson = document.getElementById("copy-json");
+        if (btnJson) btnJson.addEventListener("click", () => animateButton(btnJson, JSON.stringify(THEME_JSON, null, 4), "Copied JSON"));
+
+        const saved = safeStorage.getItem("chromaverse-theme-mode");
+        setTheme(saved === "light" ? "light" : "dark");
+        renderTokenBlock();
+    </script>
+</body>
+</html>

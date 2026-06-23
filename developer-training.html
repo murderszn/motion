@@ -41,6 +41,9 @@
             --vignette-linear: linear-gradient(to bottom, rgba(6,4,10,0.4) 0%, transparent 30%, transparent 70%, rgba(6,4,10,0.7) 100%);
             --cta-bg: rgba(224,58,58,0.12);
             --mix-blend: difference;
+            --content-w: 56rem;
+            --code-bg: rgba(255,255,255,0.04);
+            --code-border: rgba(255,255,255,0.1);
         }
 
         :root[data-theme="motion-light"] {
@@ -59,6 +62,8 @@
             --vignette-linear: linear-gradient(to bottom, rgba(244,244,246,0.4) 0%, transparent 30%, transparent 70%, rgba(244,244,246,0.7) 100%);
             --cta-bg: rgba(211,47,47,0.12);
             --mix-blend: normal;
+            --code-bg: rgba(28,28,30,0.04);
+            --code-border: rgba(28,28,30,0.12);
         }
 
         html {
@@ -334,7 +339,7 @@
         }
         .story .section-inner {
             padding: 2rem;
-            max-width: 56rem;
+            max-width: var(--content-w, 56rem);
             margin: 0 auto;
             text-align: center;
             display: flex;
@@ -943,14 +948,88 @@
         }
         .copy-token-btn:hover { background: rgba(255, 255, 255, 0.1); }
 
+        /* ---- EDUCATIONAL CONTENT ---- */
+        .edu-intro { font-size:1.15rem; font-weight:300; color:var(--text-sub); max-width:44rem; margin:0 auto; line-height:1.7; }
+        .context-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:1.25rem; width:100%; margin-top:2.5rem; }
+        .context-card { padding:1.75rem; background:linear-gradient(135deg,rgba(255,255,255,0.07) 0%,rgba(255,255,255,0.02) 100%); border:1px solid rgba(255,255,255,0.14); border-radius:10px; backdrop-filter:blur(16px); text-align:left; transition:all 0.25s; }
+        .context-card:hover { transform:translateY(-2px); border-color:rgba(255,255,255,0.28); }
+        .context-tag { display:inline-block; font-family:'JetBrains Mono',monospace; font-size:0.6rem; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; padding:3px 10px; border-radius:4px; margin-bottom:0.9rem; }
+        .context-tag.always { color:var(--accent); background:rgba(224,58,58,0.12); border:1px solid rgba(224,58,58,0.25); }
+        .context-tag.ondemand { color:#3b82f6; background:rgba(59,130,246,0.12); border:1px solid rgba(59,130,246,0.25); }
+        .context-tag.neutral { color:#10b981; background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.25); }
+        .context-tag.isolated { color:#f59e0b; background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.25); }
+        .context-card h4 { font-size:1rem; font-weight:700; color:var(--text-color); margin-bottom:0.5rem; }
+        .context-card p { font-size:0.82rem; color:var(--text-sub); line-height:1.6; margin:0; }
+        .code-block { width:100%; background:var(--code-bg); border:1px solid var(--code-border); border-radius:8px; overflow:hidden; margin-top:2rem; text-align:left; }
+        .code-head { display:flex; align-items:center; gap:8px; padding:10px 16px; border-bottom:1px solid var(--code-border); background:rgba(255,255,255,0.02); }
+        .code-dot { width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,0.15); }
+        .code-fname { font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:var(--text-dim); letter-spacing:0.06em; }
+        .code-block pre { padding:16px 20px; overflow-x:auto; font-family:'JetBrains Mono',monospace; font-size:0.78rem; line-height:1.8; color:var(--text-sub); }
+        .code-block .c { color:rgba(255,255,255,0.3); }
+        .code-block .k { color:var(--accent); font-weight:600; }
+        .code-block .s { color:#60a5fa; }
+        .code-block .cm { color:rgba(255,255,255,0.35); font-style:italic; }
+        .decision-list { width:100%; max-width:720px; margin-top:2.5rem; display:flex; flex-direction:column; gap:1px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.1); border-radius:10px; overflow:hidden; }
+        .decision-row { display:grid; grid-template-columns:200px 1fr; }
+        .decision-q { padding:1rem 1.25rem; font-family:'JetBrains Mono',monospace; font-size:0.75rem; font-weight:500; color:var(--text-color); background:rgba(255,255,255,0.03); display:flex; align-items:center; border-right:1px solid rgba(255,255,255,0.08); }
+        .decision-a { padding:1rem 1.25rem; font-size:0.85rem; color:var(--text-sub); line-height:1.6; }
+        .decision-a strong { color:var(--accent); font-weight:600; }
+        .table-wrap { width:100%; overflow-x:auto; margin-top:2rem; border:1px solid rgba(255,255,255,0.1); border-radius:10px; }
+        .edu-table { width:100%; border-collapse:collapse; min-width:600px; }
+        .edu-table th, .edu-table td { text-align:left; padding:12px 16px; border-bottom:1px solid rgba(255,255,255,0.08); font-size:0.82rem; }
+        .edu-table th { font-family:'JetBrains Mono',monospace; font-size:0.68rem; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); background:rgba(255,255,255,0.03); }
+        .edu-table td:first-child { font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:var(--text-dim); white-space:nowrap; }
+        .edu-table td b { color:var(--text-color); font-weight:600; }
+        .edu-table .yes { color:#10b981; font-weight:600; }
+        .edu-table .no { color:rgba(255,255,255,0.35); }
+        .concept-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.25rem; width:100%; margin-top:2.5rem; }
+        .concept-item { text-align:center; padding:1.75rem 1.25rem; background:linear-gradient(135deg,rgba(255,255,255,0.07) 0%,rgba(255,255,255,0.02) 100%); border:1px solid rgba(255,255,255,0.14); border-radius:10px; backdrop-filter:blur(16px); }
+        .concept-item h4 { font-size:0.95rem; font-weight:700; color:var(--text-color); margin-bottom:0.6rem; }
+        .concept-item p { font-size:0.82rem; color:var(--text-sub); line-height:1.55; margin:0; }
+        .lab-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:1.25rem; width:100%; margin-top:2.5rem; text-align:left; }
+        .lab-card { background:linear-gradient(135deg,rgba(255,255,255,0.09) 0%,rgba(255,255,255,0.03) 100%); border:1px solid rgba(255,255,255,0.16); box-shadow:inset 0 1px 1px rgba(255,255,255,0.15),0 12px 30px rgba(0,0,0,0.25); border-radius:10px; padding:1.75rem; backdrop-filter:blur(16px); transition:all 0.25s; }
+        .lab-card:hover { transform:translateY(-3px); border-color:rgba(255,255,255,0.35); }
+        .lab-num { font-family:'JetBrains Mono',monospace; font-size:0.65rem; color:var(--accent); letter-spacing:0.1em; margin-bottom:0.75rem; }
+        .lab-card h3 { font-size:1.1rem; font-weight:700; color:var(--text-color); margin-bottom:0.6rem; }
+        .lab-card p { font-size:0.85rem; color:var(--text-sub); line-height:1.6; font-weight:300; margin:0; }
+        .stack-row { display:flex; flex-wrap:wrap; justify-content:center; gap:1rem 2rem; margin-top:3rem; padding-top:2.5rem; border-top:1px solid rgba(255,255,255,0.08); }
+        .stack-chip { font-family:'JetBrains Mono',monospace; font-size:0.82rem; letter-spacing:0.1em; color:rgba(255,255,255,0.8); display:flex; gap:0.6rem; align-items:baseline; }
+        .stack-chip .label { font-size:0.65rem; font-weight:700; letter-spacing:0.15em; text-transform:lowercase; color:var(--accent); }
+        .tech-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1.25rem; width:100%; margin-top:3rem; }
+        .tech-item { display:flex; flex-direction:column; align-items:center; gap:0.75rem; padding:1.5rem 1rem; background:linear-gradient(135deg,rgba(255,255,255,0.07) 0%,rgba(255,255,255,0.02) 100%); border:1px solid rgba(255,255,255,0.14); border-radius:10px; backdrop-filter:blur(16px); transition:all 0.25s; }
+        .tech-item:hover { transform:translateY(-3px); border-color:rgba(255,255,255,0.28); }
+        .tech-item img, .tech-item svg { width:36px; height:36px; object-fit:contain; }
+        .tech-item img { filter:brightness(0) invert(1) opacity(0.85); }
+        .tech-item span { font-family:'JetBrains Mono',monospace; font-size:0.72rem; letter-spacing:0.05em; color:var(--text-sub); text-align:center; }
+        .roi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1.25rem; width:100%; margin-top:3rem; }
+        .roi-item { text-align:center; padding:2rem 1rem; background:linear-gradient(135deg,rgba(255,255,255,0.05) 0%,rgba(255,255,255,0.01) 100%); border:1px solid rgba(255,255,255,0.1); border-radius:10px; }
+        .roi-num { font-weight:700; font-size:clamp(2rem,5vw,3rem); color:var(--accent); line-height:1; margin-bottom:0.6rem; }
+        .roi-label { font-family:'JetBrains Mono',monospace; font-size:0.68rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-sub); }
+        .sub-h { font-size:1.3rem; font-weight:600; color:var(--text-color); margin-top:3rem; margin-bottom:0.5rem; text-align:center; }
+        .sub-p { font-size:0.95rem; color:var(--text-sub); line-height:1.7; max-width:42rem; margin:0 auto; text-align:center; font-weight:300; }
+
         /* ============================================================
            RESPONSIVE
            ============================================================ */
+        @media (max-width: 900px) {
+            .concept-grid { grid-template-columns: repeat(2, 1fr); }
+            .lab-grid { grid-template-columns: 1fr; }
+            .tech-grid { grid-template-columns: repeat(3, 1fr); }
+            .roi-grid { grid-template-columns: repeat(2, 1fr); }
+            .context-grid { grid-template-columns: 1fr; }
+        }
         @media (max-width: 768px) {
             .grid { grid-template-columns: 1fr; margin-top: 2rem; }
             .agenda-grid { grid-template-columns: 1fr; margin-top: 2rem; }
             .speaker-card { padding: 1.6rem !important; gap: 1.5rem; margin-top: 2rem; }
             .corner { display: none; }
+        }
+        @media (max-width: 640px) {
+            .concept-grid { grid-template-columns: 1fr; }
+            .tech-grid { grid-template-columns: repeat(2, 1fr); }
+            .roi-grid { grid-template-columns: 1fr; }
+            .decision-row { grid-template-columns: 1fr; }
+            .decision-q { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.08); }
         }
         @media (max-width: 560px) {
             .nav { flex-direction: column; align-items: center; gap: 0.75rem; }
@@ -981,6 +1060,8 @@
         <div class="nav-links">
             <a href="#format" class="nav-link">format</a>
             <a href="#agenda" class="nav-link">agenda</a>
+            <a href="#context" class="nav-link">context</a>
+            <a href="#cli" class="nav-link">cli</a>
             <a href="#tour" class="nav-link">tour</a>
             <a href="#speaker" class="nav-link">speaker</a>
             <a href="#faq" class="nav-link">faq</a>
@@ -1083,6 +1164,423 @@
         </div>
     </section>
 
+    <!-- ============ 01 · CONTEXT ENGINEERING ============ -->
+    <section class="story" id="context">
+        <div class="section-inner">
+            <p class="meta-pull reveal">01 · context engineering</p>
+            <h2 class="reveal d1">How agents <span class="accent">actually work</span>.</h2>
+            <p class="edu-intro reveal d2">Every mechanism is a way to put the right knowledge in front of Claude at the right time. The core question is <em>when</em> each one enters the context window — because context is finite, and what's loaded shapes every response.</p>
+
+            <div class="context-grid reveal d3">
+                <div class="context-card">
+                    <span class="context-tag always">Persistent</span>
+                    <h4>CLAUDE.md</h4>
+                    <p>Claude Code's memory file. Read automatically at session start and kept in context for the entire conversation. The place for things you'd otherwise repeat in every prompt — commands, conventions, architecture. Everything here costs tokens on every turn, so keep it tight and high-value.</p>
+                </div>
+                <div class="context-card">
+                    <span class="context-tag neutral">Cross-vendor</span>
+                    <h4>AGENTS.md</h4>
+                    <p>A vendor-neutral standard: a plain-markdown instructions file that many different coding agents agree to read. The goal is one file your whole toolchain shares. Claude Code bridges it in with a one-line import: <code style="font-family:'JetBrains Mono',monospace;font-size:0.8em;color:var(--accent);">@AGENTS.md</code></p>
+                </div>
+                <div class="context-card">
+                    <span class="context-tag ondemand">On demand</span>
+                    <h4>Agent Skills</h4>
+                    <p>A folder with a SKILL.md file that packages expertise for a specific task type. The defining feature is progressive disclosure: only a name and one-line description sit in context. The full instructions load only when Claude judges the skill relevant. Cheap to have many.</p>
+                </div>
+                <div class="context-card">
+                    <span class="context-tag isolated">Isolated</span>
+                    <h4>Subagents</h4>
+                    <p>A separate Claude with its own context window and tools. It does the job and reports back a summary without polluting your main thread. Use for big, isolatable jobs — heavy search, log parsing, or work needing its own tools. A skill can be configured to run-in-subagent.</p>
+                </div>
+            </div>
+
+            <h3 class="sub-h reveal d4">How they differ</h3>
+            <div class="table-wrap reveal d5">
+                <table class="edu-table">
+                    <thead><tr><th></th><th>CLAUDE.md</th><th>AGENTS.md</th><th>Skills</th><th>Subagents</th></tr></thead>
+                    <tbody>
+                        <tr><td>in context?</td><td><b>Always</b></td><td><b>Always</b> (via import)</td><td><b>On demand</b></td><td><b>Separate</b> window</td></tr>
+                        <tr><td>triggered by</td><td>Session start</td><td>Session start</td><td>Model relevance</td><td>Explicit delegation</td></tr>
+                        <tr><td>best for</td><td>Project facts &amp; rules</td><td>Cross-tool rules</td><td>Specialized workflows</td><td>Big isolatable jobs</td></tr>
+                        <tr><td>token cost</td><td>Every turn</td><td>Every turn</td><td>Near-zero until used</td><td>Own budget</td></tr>
+                        <tr><td>bundles files?</td><td class="no">no</td><td class="no">no</td><td class="yes">yes</td><td class="yes">yes</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 class="sub-h reveal d4">The anatomy of a skill</h3>
+            <div class="code-block reveal d5">
+                <div class="code-head"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-fname">.claude/skills/my-skill/SKILL.md</span></div>
+<pre><span class="c">---</span>
+<span class="k">name:</span> <span class="s">my-skill</span>
+<span class="k">description:</span> <span class="s">Fill, flatten, and extract fields from PDF</span>
+  <span class="s">forms. Use when the user mentions PDFs, form fields,</span>
+  <span class="s">or acroform data.</span>
+<span class="k">run-in-subagent:</span> <span class="s">false</span>
+<span class="c">---</span>
+
+<span class="k"># PDF Forms</span>
+
+Step-by-step instructions here. Reference bundled
+files like reference.md — they load only when needed.
+
+<span class="cm">## Brand tokens</span>
+<span class="cm">- Navy: #020434</span>
+<span class="cm">- Magenta: #e60f65</span>
+<span class="cm">- Font: Inter (body), Inter Tight (headings)</span></pre>
+            </div>
+            <p class="sub-p reveal d6">The <code style="font-family:'JetBrains Mono',monospace;font-size:0.85em;color:var(--accent);">description</code> is the most important line — it's the only thing Claude sees at rest. Write it in terms of <em>when to use this</em>, not just what it is.</p>
+        </div>
+    </section>
+
+    <!-- ============ 02 · THE AGENTIC LOOP ============ -->
+    <section class="story" id="loop">
+        <div class="section-inner">
+            <p class="meta-pull reveal">02 · the agentic loop</p>
+            <h2 class="reveal d1">Plan, execute, <span class="accent">verify</span>.</h2>
+            <p class="edu-intro reveal d2">A coding agent is a loop: the model reads your context, plans a change, edits files, runs tools to check its work, and iterates until the task is done. Understanding this loop is the key to using agents effectively.</p>
+
+            <div class="concept-grid reveal d3">
+                <div class="concept-item"><h4>1. Context Load</h4><p>CLAUDE.md, AGENTS.md, and relevant skills are loaded. The agent reads the codebase structure and understands the project.</p></div>
+                <div class="concept-item"><h4>2. Plan</h4><p>The agent outlines what it will change and why. Good plans reference existing patterns in the codebase, not invent new ones.</p></div>
+                <div class="concept-item"><h4>3. Execute</h4><p>File edits, terminal commands, API calls. The agent uses tool calls to modify the codebase — reads, writes, compiles, tests.</p></div>
+                <div class="concept-item"><h4>4. Verify</h4><p>Run tests, check types, lint. The agent reads the output and decides if the change is correct or needs another iteration.</p></div>
+                <div class="concept-item"><h4>5. Iterate</h4><p>If verification fails, the agent adjusts and re-runs. This loop continues until the task is complete or the agent asks for help.</p></div>
+                <div class="concept-item"><h4>6. Report</h4><p>The agent summarizes what it did, what changed, and any decisions it made. For subagents, this summary is all you get back.</p></div>
+            </div>
+
+            <h3 class="sub-h reveal d4">Why this matters</h3>
+            <p class="sub-p reveal d5">Most failed agent interactions come from poor context, not poor models. If the agent can't see your conventions, your test runner, or your architecture — it will guess. Context engineering is the skill that makes everything else work.</p>
+
+            <div class="code-block reveal d6">
+                <div class="code-head"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-fname">CLAUDE.md — keep it lean</span></div>
+<pre><span class="k"># Project: Acme API</span>
+
+See <span class="s">@docs/architecture.md</span> for the system overview.
+Coding standards live in <span class="s">@docs/conventions.md</span>.
+
+<span class="c">## Commands</span>
+<span class="k">- build:</span> <span class="s">npm run build</span>
+<span class="k">- test:</span>  <span class="s">npm test -- --watch=false</span>
+<span class="k">- lint:</span>  <span class="s">npm run lint</span>
+
+<span class="c">## Conventions</span>
+<span class="k">- language:</span> TypeScript
+<span class="k">- style:</span> Functional, no classes
+<span class="k">- tests:</span> Vitest, co-located with source
+<span class="k">- imports:</span> Absolute from @/</pre>
+            </div>
+
+            <div class="decision-list reveal d6">
+                <div class="decision-row">
+                    <div class="decision-q">Always true for this repo?</div>
+                    <div class="decision-a">Commands, conventions, architecture that apply to every task → <strong>CLAUDE.md</strong>.</div>
+                </div>
+                <div class="decision-row">
+                    <div class="decision-q">Shared across tools?</div>
+                    <div class="decision-a">One file for Cursor, Codex, and Claude → <strong>AGENTS.md</strong>, imported from CLAUDE.md.</div>
+                </div>
+                <div class="decision-row">
+                    <div class="decision-q">Repeatable specialized task?</div>
+                    <div class="decision-a">A workflow that only matters sometimes, possibly with scripts → package a <strong>Skill</strong>.</div>
+                </div>
+                <div class="decision-row">
+                    <div class="decision-q">Big isolatable job?</div>
+                    <div class="decision-a">Heavy search, log parsing, or work needing its own tools → delegate to a <strong>Subagent</strong>.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ 03 · CLI OPERATIONS ============ -->
+    <section class="story" id="cli">
+        <div class="section-inner">
+            <p class="meta-pull reveal">03 · cli operations</p>
+            <h2 class="reveal d1">The tools you'll <span class="accent">use daily</span>.</h2>
+            <p class="edu-intro reveal d2">Every tool below is something we run in production. These aren't theoretical demos — they're the exact commands that ship code, query data, and deploy services.</p>
+
+            <!-- GitHub CLI -->
+            <div class="code-block reveal d3">
+                <div class="code-head"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-fname">github cli — gh</span></div>
+<pre><span class="c"># clone — gh injects your auth automatically</span>
+gh repo clone owner/repo
+gh repo clone owner/repo -- --depth 1   <span class="cm"># shallow clone</span>
+
+<span class="c"># create a repo</span>
+gh repo create my-project --private
+
+<span class="c"># pull requests — interactive or templated</span>
+gh pr create --fill   <span class="cm"># auto-generates title from branch + commits</span>
+gh pr create --draft --title "WIP: new HCP transform"
+
+<span class="c"># review workflow</span>
+gh pr list --state open --author @me
+gh pr checkout 42
+gh pr review 42 --approve
+gh pr merge 42 --squash --delete-branch
+
+<span class="c"># GitHub Actions — CI/CD from the terminal</span>
+gh run list --workflow=ci.yml
+gh run watch
+gh workflow run deploy.yml
+gh workflow run ci.yml --ref feature/new-transform</pre>
+            </div>
+
+            <!-- Databricks CLI -->
+            <div class="code-block reveal d4">
+                <div class="code-head"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-fname">databricks cli — sql, repos, jobs</span></div>
+<pre><span class="c"># authenticate — profile-based for multi-environment</span>
+databricks configure --profile dev
+databricks configure --profile prod
+databricks current-user me
+
+<span class="c"># run SQL queries from the terminal</span>
+databricks sql execute \
+  --warehouse-id abc123 \
+  "SELECT COUNT(*) FROM catalog.schema.table"
+
+databricks sql execute \
+  --warehouse-id abc123 \
+  --file queries/report.sql
+
+<span class="c"># manage repos — sync with GitHub</span>
+databricks repos list
+databricks repos create \
+  --url https://github.com/org/repo.git \
+  --provider github \
+  --path /Repos/team/repo
+
+<span class="c"># jobs — schedule and trigger pipelines</span>
+databricks jobs list
+databricks jobs run-now --job-id 12345
+databricks jobs create --json @jobs/nightly-reporting.json
+
+<span class="c"># warehouses — start/stop to manage costs</span>
+databricks sql warehouse list
+databricks sql warehouse stop --id abc123
+databricks sql warehouse start --id abc123</pre>
+            </div>
+
+            <!-- Supabase CLI -->
+            <div class="code-block reveal d5">
+                <div class="code-head"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-fname">supabase cli — local dev + deploy</span></div>
+<pre><span class="c"># initialize a Supabase project</span>
+supabase init
+
+<span class="c"># start local stack — Postgres, Auth, Storage, Edge Functions</span>
+supabase start
+<span class="cm"># → API URL:  http://localhost:54321</span>
+<span class="cm"># → DB URL:   postgresql://postgres:postgres@localhost:54322/postgres</span>
+<span class="cm"># → anon key: eyJhbGciOi...</span>
+
+<span class="c"># database migrations</span>
+supabase migration new create_users_table
+supabase db push              <span class="cm"># push local to remote</span>
+supabase db diff              <span class="cm"># see what changed</span>
+
+<span class="c"># generate types from your schema</span>
+supabase gen types typescript --local > src/types/database.ts
+
+<span class="c"># deploy edge functions</span>
+supabase functions deploy my-function
+
+<span class="c"># link to a remote project</span>
+supabase link --project-ref abcdefghijkl</pre>
+            </div>
+
+            <!-- MongoDB CLI -->
+            <div class="code-block reveal d5">
+                <div class="code-head"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-fname">mongosh — direct database operations</span></div>
+<pre><span class="c"># connect to Atlas</span>
+mongosh "mongodb+srv://cluster0.abc.mongodb.net/mydb" \
+  --username admin
+
+<span class="c"># or local</span>
+mongosh "mongodb://localhost:27017"
+
+<span class="c"># inspect collections</span>
+use mydb
+show collections
+db.users.countDocuments()
+db.users.find({ status: "active" }).limit(5).pretty()
+
+<span class="c"># aggregation pipeline</span>
+db.orders.aggregate([
+  { <span class="k">$match</span>: { status: "complete" } },
+  { <span class="k">$group</span>: { _id: "$customerId", total: { <span class="k">$sum</span>: "$amount" } } },
+  { <span class="k">$sort</span>: { total: -1 } },
+  { <span class="k">$limit</span>: 10 }
+])
+
+<span class="c"># create indexes</span>
+db.users.createIndex({ email: 1 }, { unique: true })
+db.orders.createIndex({ createdAt: -1 })</pre>
+            </div>
+
+            <!-- Google Cloud CLI -->
+            <div class="code-block reveal d6">
+                <div class="code-head"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-fname">gcloud + firebase — deploy and manage</span></div>
+<pre><span class="c"># authenticate and set project</span>
+gcloud auth login
+gcloud config set project my-project-id
+
+<span class="c"># Cloud Run — deploy a container</span>
+gcloud run deploy my-service \
+  --source . \
+  --region us-central1 \
+  --allow-unauthenticated
+
+<span class="c"># Cloud Build — trigger a pipeline</span>
+gcloud builds submit --config cloudbuild.yaml .
+
+<span class="c"># Firebase — deploy hosting + functions</span>
+firebase deploy
+firebase deploy --only hosting
+firebase deploy --only functions
+
+<span class="c"># manage secrets</span>
+gcloud secrets create my-secret --data-file=./key.json
+gcloud secrets versions access latest --secret=my-secret
+
+<span class="c"># logs and debugging</span>
+gcloud logging read "resource.type=cloud_run_revision" --limit 50
+gcloud run services describe my-service --region us-central1</pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ 04 · FULL STACK WORKFLOW ============ -->
+    <section class="story" id="workflow">
+        <div class="section-inner">
+            <p class="meta-pull reveal">04 · full stack workflow</p>
+            <h2 class="reveal d1">Wiring it <span class="accent">all together</span>.</h2>
+            <p class="edu-intro reveal d2">The real power is in the composition: an agent that reads your codebase, writes code, runs your CLI tools, deploys to the cloud, and verifies the result — all from one prompt.</p>
+
+            <div class="lab-grid reveal d3">
+                <div class="lab-card">
+                    <div class="lab-num">Step 01</div>
+                    <h3>Context Setup</h3>
+                    <p>Write CLAUDE.md with your project's commands, conventions, and architecture. Import AGENTS.md for cross-tool compatibility. Add skills for repeated workflows.</p>
+                </div>
+                <div class="lab-card">
+                    <div class="lab-num">Step 02</div>
+                    <h3>Agent-Assisted Development</h3>
+                    <p>Describe the feature in natural language. The agent plans, writes code, runs tests, and iterates. You review at each checkpoint — the human owns every claim.</p>
+                </div>
+                <div class="lab-card">
+                    <div class="lab-num">Step 03</div>
+                    <h3>CLI-Driven Operations</h3>
+                    <p>Use gh to create PRs, databricks CLI to run queries, supabase CLI for migrations, gcloud to deploy. The agent can invoke these tools directly.</p>
+                </div>
+                <div class="lab-card">
+                    <div class="lab-num">Step 04</div>
+                    <h3>Deploy & Verify</h3>
+                    <p>Push to GitHub, CI runs automatically, Cloud Run deploys, Supabase migrations apply. The agent verifies the deployment and reports back.</p>
+                </div>
+            </div>
+
+            <div class="stack-row reveal d4">
+                <div class="stack-chip"><span class="label">ai</span> Claude / Anthropic</div>
+                <div class="stack-chip"><span class="label">protocol</span> MCP</div>
+                <div class="stack-chip"><span class="label">vcs</span> GitHub + gh</div>
+                <div class="stack-chip"><span class="label">data</span> Databricks CLI</div>
+                <div class="stack-chip"><span class="label">backend</span> Supabase CLI</div>
+                <div class="stack-chip"><span class="label">db</span> MongoDB / mongosh</div>
+                <div class="stack-chip"><span class="label">cloud</span> gcloud + Firebase</div>
+            </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ 05 · 3D GRAPHICS & SHADERS ============ -->
+    <section class="story" id="shaders">
+        <div class="section-inner">
+            <p class="meta-pull reveal">05 · 3d graphics & shaders</p>
+            <h2 class="reveal d1">Shaping pixels <span class="accent">with the GPU</span>.</h2>
+            <p class="edu-intro reveal d2">Modern visual interfaces aren't static images—they are live-rendered pipelines. Harnessing WebGL, fragment shaders, and Three.js opens up high-performance procedural graphics and hardware post-processing filters directly in the browser.</p>
+
+            <div class="context-grid reveal d3">
+                <div class="context-card">
+                    <span class="context-tag always">Procedural</span>
+                    <h4>Textureless Perlin Noise</h4>
+                    <p>Generating organic textures (clouds, liquids, flow fields) on-the-fly without loading image assets. Uses mathematical lattices and quintic Hermite interpolation curves to map coordinates to smooth random values directly on the GPU.</p>
+                </div>
+                <div class="context-card">
+                    <span class="context-tag neutral">Pure Shader</span>
+                    <h4>Signed Distance Fields (SDFs)</h4>
+                    <p>Defining geometries mathematically inside the fragment shader. Instead of standard polygons, shapes are calculated using vector distance functions, providing infinite rendering resolution independent of scale.</p>
+                </div>
+                <div class="context-card">
+                    <span class="context-tag ondemand">Post-Process</span>
+                    <h4>Depth of Field & CoC</h4>
+                    <p>Simulating camera lens optics by separating the color scene and linear view-space depth maps. The fragment shader computes a per-pixel Circle of Confusion (CoC) based on focal distance, applying variable-width Gaussian blurs.</p>
+                </div>
+                <div class="context-card">
+                    <span class="context-tag isolated">Optimization</span>
+                    <h4>Separable Blur Convolutions</h4>
+                    <p>Reducing GPU performance bottlenecks. A 2D Gaussian blur is split into consecutive 1D horizontal and vertical blur passes, scaling down texture fetches from N² samples to 2N samples for high framerates.</p>
+                </div>
+            </div>
+
+            <h3 class="sub-h reveal d4">Circle of Confusion Shader Math</h3>
+            <div class="code-block reveal d5">
+                <div class="code-head"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-fname">postprocess.glsl — depth-based lens blur</span></div>
+<pre><span class="c">// Renders depth map and calculates lens blur coefficient</span>
+<span class="k">uniform</span> sampler2D u_depthTexture;
+<span class="k">uniform</span> <span class="k">float</span> u_focusDistance;
+<span class="k">uniform</span> <span class="k">float</span> u_apertureSize;
+
+<span class="k">void</span> <span class="function">main</span>() {
+    <span class="k">float</span> depth = texture2D(u_depthTexture, vUv).r;
+    
+    <span class="cm">// Circle of Confusion (CoC) calculation (NVIDIA GPU Gems 3, Ch 28)</span>
+    <span class="k">float</span> coc = abs(depth - u_focusDistance) * u_apertureSize;
+    
+    <span class="cm">// Clamp blur radius and apply variable-width kernel offsets...</span>
+    gl_FragColor = vec4(applyBlur(vUv, coc), 1.0);
+}</pre>
+            </div>
+            <p class="sub-p reveal d6">By combining depth pass buffers with shader mathematical filters, agents can build premium responsive graphic effects like glassmorphism overlays and camera lens focuses.</p>
+        </div>
+    </section>
+
+    <!-- ============ TECH STACK ============ -->
+    <section class="story" id="stack">
+        <div class="section-inner">
+            <p class="meta-pull reveal">the full stack</p>
+            <h2 class="reveal d1">Tools that <span class="accent">ship</span>.</h2>
+            <p class="reveal d2">Every tool below is used in production across our projects — not theoretical demos.</p>
+            <div class="tech-grid reveal d3">
+                <div class="tech-item"><img src="https://cdn.simpleicons.org/anthropic" alt="Anthropic" onerror="this.style.display='none'" /><span>Claude / Anthropic</span></div>
+                <div class="tech-item"><img src="https://cdn.simpleicons.org/databricks" alt="Databricks" onerror="this.style.display='none'" /><span>Databricks</span></div>
+                <div class="tech-item"><img src="https://cdn.simpleicons.org/github" alt="GitHub" onerror="this.style.display='none'" /><span>GitHub</span></div>
+                <div class="tech-item"><img src="https://cdn.simpleicons.org/supabase" alt="Supabase" onerror="this.style.display='none'" /><span>Supabase</span></div>
+                <div class="tech-item"><img src="https://cdn.simpleicons.org/mongodb" alt="MongoDB" onerror="this.style.display='none'" /><span>MongoDB</span></div>
+                <div class="tech-item"><img src="https://cdn.simpleicons.org/googlecloud" alt="Google Cloud" onerror="this.style.display='none'" /><span>Google Cloud</span></div>
+                <div class="tech-item"><img src="https://cdn.simpleicons.org/docker" alt="Docker" onerror="this.style.display='none'" /><span>Docker</span></div>
+                <div class="tech-item"><img src="https://cdn.simpleicons.org/snowflake" alt="Snowflake" onerror="this.style.display='none'" /><span>Snowflake</span></div>
+                <div class="tech-item"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-label="ChatGPT" style="width:36px;height:36px;fill:currentColor;opacity:0.85;"><path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.056 6.056 0 0 0-.747-7.073zM13.26 22.43a4.476 4.476 0 0 1-2.876-1.04l.141-.081 4.779-2.758a.795.795 0 0 0 .392-.681v-6.737l2.02 1.168a.071.071 0 0 1 .038.052v5.583a4.504 4.504 0 0 1-4.494 4.494zM3.6 18.304a4.47 4.47 0 0 1-.535-3.014l.142.085 4.783 2.759a.771.771 0 0 0 .78 0l5.843-3.369v2.332a.08.08 0 0 1-.032.067L9.57 19.945a4.5 4.5 0 0 1-5.97-1.641zm-1.18-10.64a4.471 4.471 0 0 1 2.34-1.965V11.6a.766.766 0 0 0 .388.676l5.815 3.355-2.02 1.168a.076.076 0 0 1-.071 0L4.073 14.56A4.504 4.504 0 0 1 2.42 7.664zm16.554 3.862-5.837-3.367 2.019-1.168a.075.075 0 0 1 .072 0l4.773 2.754a4.5 4.5 0 0 1-.696 8.115V12.44a.773.773 0 0 0-.331-.914zm2.009-3.025-.141-.085-4.774-2.782a.776.776 0 0 0-.785 0L9.409 8.982V6.65a.071.071 0 0 1 .028-.067l4.853-2.798a4.5 4.5 0 0 1 6.687 4.663zm-12.64 4.135-2.02-1.164a.08.08 0 0 1-.038-.057V6.993a4.5 4.5 0 0 1 7.375-3.453l-.142.08-4.778 2.758a.795.795 0 0 0-.393.681zm1.097-2.365 2.602-1.5 2.602 1.5v2.999l-2.602 1.5-2.602-1.5z"/></svg><span>ChatGPT / OpenAI</span></div>
+                <div class="tech-item"><img src="https://cdn.simpleicons.org/googlegemini" alt="Gemini" onerror="this.style.display='none'" /><span>Gemini</span></div>
+                <div class="tech-item"><img src="https://cdn.simpleicons.org/modelcontextprotocol" alt="MCP" onerror="this.style.display='none'" /><span>MCP</span></div>
+                <div class="tech-item"><img src="https://cdn.simpleicons.org/jira" alt="Jira" onerror="this.style.display='none'" /><span>Jira</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ OUTCOMES ============ -->
+    <section class="story" id="outcomes">
+        <div class="section-inner">
+            <p class="meta-pull reveal">what you leave with</p>
+            <h2 class="reveal d1">Concrete <span class="accent">outcomes</span>.</h2>
+            <div class="roi-grid reveal d2">
+                <div class="roi-item"><div class="roi-num">4</div><div class="roi-label">Curriculum modules</div></div>
+                <div class="roi-item"><div class="roi-num">12+</div><div class="roi-label">Hands-on labs</div></div>
+                <div class="roi-item"><div class="roi-num">100%</div><div class="roi-label">Real CLI commands</div></div>
+                <div class="roi-item"><div class="roi-num">∞</div><div class="roi-label">Post-workshop access</div></div>
+            </div>
+        </div>
+    </section>
+
     <!-- ============ TOUR / LOCATIONS ============ -->
     <section class="story" id="tour">
         <div class="section-inner">
@@ -1150,6 +1648,18 @@
                         <svg class="ico q-icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     </summary>
                     <div class="faq-a">Yes — teams of four or more can grab a block of seats. Reach out at <code>jjohnso75@gmail.com</code> and we'll hold a table for you.</div>
+                </details>
+                <details class="faq-item">
+                    <summary>Is this a sales pitch for specific tools?
+                        <svg class="ico q-icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    </summary>
+                    <div class="faq-a">No. We teach tools we actually use in production and justify each choice with real project experience. You'll leave understanding why each tool was selected, not just how to use it.</div>
+                </details>
+                <details class="faq-item">
+                    <summary>Do I keep the materials?
+                        <svg class="ico q-icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    </summary>
+                    <div class="faq-a">Yes. Every workshop includes a private repo with all lab materials, config files, CLI references, and reference implementations you can keep and iterate on.</div>
                 </details>
                 <details class="faq-item">
                     <summary>Will I leave with something usable?

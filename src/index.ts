@@ -133,12 +133,12 @@ precision highp float;
 uniform float u_time;
 uniform vec2  u_res;
 #define TAU 6.28318530718
-const float SEED = 3.30;
-const float SPEED = 0.20, SCALE = 0.18, DENSITY = 0.08, DISTORT = 0.86, DETAIL = 0.32, GRAIN = 0.16;
-const vec3 C0 = vec3(0.00784, 0.02353, 0.09020);
-const vec3 C1 = vec3(0.11765, 0.22745, 0.54118);
-const vec3 C2 = vec3(0.37647, 0.64706, 0.98039);
-const vec3 C3 = vec3(0.93725, 0.96471, 1.00000);
+const float SEED = 3286.0;
+const float SPEED = 0.31, SCALE = 0.92, DENSITY = 0.00, DISTORT = 0.52, DETAIL = 0.49, GRAIN = 0.68;
+const vec3 C0 = vec3(0.0, 0.0, 0.0);
+const vec3 C1 = vec3(0.0, 1.0, 1.0);
+const vec3 C2 = vec3(1.0, 1.0, 0.0);
+const vec3 C3 = vec3(1.0, 0.0, 1.0);
 float hash21(vec2 p){ p = fract(p * vec2(234.34, 435.345)); p += dot(p, p + 34.23); return fract(p.x * p.y); }
 float vnoise(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f);
   float a=hash21(i), b=hash21(i+vec2(1.0,0.0)), c=hash21(i+vec2(0.0,1.0)), d=hash21(i+vec2(1.0,1.0));
@@ -166,7 +166,7 @@ void main(){
     float band = exp(-dist * dist * (8.0 + 34.0 * DENSITY));
     float inten = max(band * (0.25 + 0.95 * streak), 0.0);
     light += inten / fi;
-    tint += grad4(clamp(0.15 + (1.0 - uv.y) * 0.95, 0.0, 1.0)) * inten / fi;
+    tint += grad4(clamp(0.1 + (1.0 - uv.y) * 1.35 + wave * 0.25, 0.0, 1.0)) * inten / fi;
   }
   vec3 col = mix(base, tint * (1.3 + 1.0 * DISTORT), light * 0.7);
   col += C3 * pow(clamp(light, 0.0, 1.0), 3.0) * 0.15;

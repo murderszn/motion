@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>/motion local — generative shader studio</title>
-  <meta name="description" content="/motion local is a browser-based generative graphics studio for creating looping motion graphics with WebGL shaders. 15 shader presets, seamless loops, export as PNG, WebM, GIF, or standalone HTML.">
+  <meta name="description" content="/motion local: WebGL shader studio with JSON configs. Chromaverse: 65 thematic CSS palettes with exportable theme JSON. Together they form a taste profile for agent-driven, well-designed websites.">
   <meta name="keywords" content="webgl, shader, generative art, motion graphics, glsl, animation, loop, export, creative coding, procedural graphics">
   <meta name="author" content="murderszn">
   <meta name="robots" content="index, follow">
@@ -873,6 +873,148 @@
       transform: scale(1.15);
     }
 
+    /* ── offerings / taste profile ── */
+    .offerings-section {
+      width: 100%;
+      max-width: 1000px;
+      margin-top: 5rem;
+      text-align: center;
+      pointer-events: auto;
+    }
+    .offerings-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: #e03a3a;
+      margin-bottom: 1rem;
+    }
+    .offerings-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      margin-top: 2rem;
+      text-align: left;
+    }
+    .offering-card {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 8px;
+      padding: 1.75rem;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+    }
+    .offering-card:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.24);
+      transform: translateY(-2px);
+    }
+    .offering-card.motion { border-top: 2px solid rgba(224, 58, 58, 0.65); }
+    .offering-card.chroma { border-top: 2px solid rgba(139, 92, 246, 0.65); }
+    .offering-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.55);
+    }
+    .offering-name {
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 1.35rem;
+      letter-spacing: -0.03em;
+      color: #ffffff;
+      line-height: 1.1;
+    }
+    .offering-name .slash { color: #e03a3a; }
+    .offering-card.chroma .offering-name .slash { color: #a78bfa; }
+    .offering-desc {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      line-height: 1.65;
+      color: rgba(255, 255, 255, 0.78);
+      flex: 1;
+    }
+    .offering-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+    }
+    .offering-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.58rem;
+      letter-spacing: 0.06em;
+      padding: 3px 9px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.7);
+    }
+    .offering-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-top: 0.25rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #ffffff;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .offering-link:hover { color: #e03a3a; }
+    .offering-card.chroma .offering-link:hover { color: #c4b5fd; }
+    .taste-profile-band {
+      margin-top: 1.75rem;
+      padding: 1.6rem 1.75rem;
+      background: linear-gradient(135deg, rgba(224, 58, 58, 0.1) 0%, rgba(139, 92, 246, 0.08) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 8px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      text-align: left;
+    }
+    .taste-profile-band h4 {
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 1rem;
+      color: #ffffff;
+      margin-bottom: 0.55rem;
+      letter-spacing: -0.02em;
+    }
+    .taste-profile-band p {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.76rem;
+      line-height: 1.65;
+      color: rgba(255, 255, 255, 0.78);
+      margin: 0;
+    }
+    .taste-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    .taste-chip {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.04em;
+      padding: 4px 10px;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.85);
+    }
+    @media (max-width: 768px) {
+      .offerings-grid { grid-template-columns: 1fr; }
+    }
+
     /* ── platforms grid ── */
     .platforms-section {
       width: 100%;
@@ -1422,11 +1564,10 @@
       <span class="slash">/</span>motion local
     </a>
     <div class="navbar-links">
-      <a href="#playground" class="nav-link">playground</a>
+      <a href="#offerings" class="nav-link">offerings</a>
       <a href="#how-it-works" class="nav-link">how it works</a>
       <a href="#faq" class="nav-link">faq</a>
-      <a href="workshops.html" class="nav-link">workshops</a>
-      <a href="developer-training.html" class="nav-link">tour</a>
+      <a href="chromaverse/index.html" class="nav-link">chromaverse</a>
       <a href="studio.html" class="nav-link">docs</a>
     </div>
   </nav>
@@ -1434,7 +1575,7 @@
   <div id="content" style="margin-top: 4rem; padding: 4.5rem 1.5rem 2.5rem 1.5rem;">
     <div class="hero-container" style="min-height: calc(100vh - 13rem);">
       <div class="title"><span class="slash">/</span>motion</div>
-      <div class="subtitle">A generative graphics studio for shader design. Run the app locally, configure WebGL shaders, customize colors, and loop visuals. Open it to any coding assistant of your choice (like Cursor or Claude) to write configuration files and output standalone HTML splash pages.</div>
+      <div class="subtitle">Two studios, one taste profile. <strong>/motion</strong> shapes atmosphere with WebGL shaders and JSON configs. <strong>Chromaverse</strong> defines structure with thematic CSS tokens and exportable theme JSON. Feed both to your coding agent and generate beautiful, well-designed websites.</div>
 
       <div class="terminal-block" onclick="copyText('git clone https://github.com/murderszn/motion.git && cd motion && npm install && npm run dev', this.querySelector('.copy-btn'))" style="cursor: pointer;" title="Click to copy install command">
         <div class="terminal-content">
@@ -1457,6 +1598,50 @@
         </a>
       </div>
 
+    </div>
+
+    <!-- ── Two Offerings / Taste Profile ── -->
+    <div class="offerings-section reveal" id="offerings">
+      <div class="offerings-title">two offerings</div>
+      <h3 style="font-family:'Inter',sans-serif;font-weight:600;font-size:clamp(1.4rem,4vw,2rem);color:#ffffff;text-shadow:0 2px 14px rgba(0,0,0,0.5);margin-top:-0.3rem;margin-bottom:0.8rem;letter-spacing:-0.03em;">Motion for atmosphere. Chromaverse for structure.</h3>
+      <p style="font-family:'Inter',sans-serif;font-size:0.82rem;color:rgba(255,255,255,0.85);max-width:720px;text-shadow:0 1px 8px rgba(0,0,0,0.5);margin:0 auto 0.5rem auto;line-height:1.6;">Each studio exports machine-readable JSON your agent can read, remix, and deploy. Together they become a taste profile — a complete visual language for generating cohesive sites without guessing your aesthetic.</p>
+
+      <div class="offerings-grid">
+        <div class="offering-card motion">
+          <span class="offering-badge">shaders · motion · atmosphere</span>
+          <div class="offering-name"><span class="slash">/</span>motion</div>
+          <p class="offering-desc">A local WebGL shader studio. Configure looping presets, tune parameters in real time, and export <code style="font-family:'JetBrains Mono',monospace;font-size:0.9em;color:#f87171;">motion.config.json</code> — seeded, reproducible motion graphics for backgrounds, hero sections, and splash pages.</p>
+          <div class="offering-tags">
+            <span class="offering-tag">15 shader presets</span>
+            <span class="offering-tag">JSON schema</span>
+            <span class="offering-tag">standalone HTML export</span>
+          </div>
+          <a href="#playground" class="offering-link">Try the shader playground →</a>
+        </div>
+        <div class="offering-card chroma">
+          <span class="offering-badge">themes · css · design tokens</span>
+          <div class="offering-name"><span class="slash">/</span>chromaverse</div>
+          <p class="offering-desc">A theme gallery and builder with 65 curated palettes. Copy CSS variables, export light/dark surface tokens, and save <code style="font-family:'JetBrains Mono',monospace;font-size:0.9em;color:#c4b5fd;">theme.json</code> — typography, accents, and component patterns your agent can apply across any layout.</p>
+          <div class="offering-tags">
+            <span class="offering-tag">65 themes</span>
+            <span class="offering-tag">CSS variables</span>
+            <span class="offering-tag">theme builder</span>
+          </div>
+          <a href="chromaverse/index.html" class="offering-link">Enter Chromaverse →</a>
+        </div>
+      </div>
+
+      <div class="taste-profile-band">
+        <h4>Together = your taste profile</h4>
+        <p>Point Cursor, Claude, or any coding agent at both configs. Shaders set mood and motion. Theme tokens set color, type, spacing, and UI hierarchy. The agent assembles production-ready pages that look intentional — not generic.</p>
+        <div class="taste-chips">
+          <span class="taste-chip">motion.config.json</span>
+          <span class="taste-chip">+</span>
+          <span class="taste-chip">chromaverse theme.json</span>
+          <span class="taste-chip">→</span>
+          <span class="taste-chip">agent-generated site</span>
+        </div>
+      </div>
     </div>
 
     <!-- ── Interactive Config Builder ── -->
