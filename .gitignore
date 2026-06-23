@@ -31,9 +31,11 @@ dist/
 *.swo
 *~
 
-# ─── Firebase (project-specific) ───
+# ─── Firebase / hosting (project-specific) ───
 .firebase/
 .firebaserc
+firebase.json
+sitemap.xml
 
 # ─── Personal documentation vault ───
 brain/
