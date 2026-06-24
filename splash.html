@@ -42,8 +42,6 @@
       transition: transform 0.2s ease-out;
     }
 
-    /* ── scrim removed for clean background pass-through ── */
-
     /* ── vignette ── */
     #vignette {
       position: fixed; inset: 0; z-index: 1;
@@ -98,34 +96,6 @@
       opacity: 0;
       animation: fadeUp 1.4s 2.3s cubic-bezier(0.16,1,0.3,1) both;
     }
-
-    /* ── corners ── */
-    .corner {
-      position: fixed; z-index: 20;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.52rem; font-weight: 300;
-      letter-spacing: 0.18em; color: rgba(255,255,255,0.7);
-      text-shadow: 0 1px 6px rgba(0,0,0,0.4);
-      pointer-events: none;
-    }
-    .corner-tl { top: 1.6rem; left: 1.8rem; text-transform: lowercase; }
-    .corner-br { bottom: 1.6rem; right: 1.8rem; }
-
-    /* ── status bar (top right) ── */
-    .status {
-      position: fixed; top: 1.6rem; right: 1.8rem; z-index: 20;
-      display: flex; align-items: center; gap: 8px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.48rem; letter-spacing: 0.12em;
-      color: rgba(255,255,255,0.78);
-      text-shadow: 0 1px 6px rgba(0,0,0,0.4);
-    }
-    .status .dot {
-      width: 4px; height: 4px; border-radius: 50%;
-      background: #e03a3a;
-      animation: blink 2.5s ease-in-out infinite;
-    }
-    @keyframes blink { 0%,100% { opacity: 0.25; } 50% { opacity: 1; } }
 
     /* ── title ── */
     .title {
@@ -238,15 +208,6 @@
       stroke-linejoin: round;
     }
 
-    /* ── divider ── */
-    .divider {
-      width: 32px; height: 1px;
-      background: rgba(255,255,255,0.25);
-      margin-top: 2rem;
-      opacity: 0;
-      animation: fadeUp 1.4s 1.4s cubic-bezier(0.16,1,0.3,1) both;
-    }
-
     /* ── actions row ── */
     .actions {
       margin-top: 2.6rem;
@@ -295,39 +256,6 @@
       color: #0f172a;
     }
 
-    /* ── github bar ── */
-    .github-bar {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.52rem;
-      letter-spacing: 0.08em;
-      color: rgba(255, 255, 255, 0.6);
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 4px;
-      padding: 6px 16px;
-      transition: all 0.3s ease;
-      pointer-events: auto;
-      text-decoration: none;
-    }
-    .github-bar:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.2);
-      transform: translateY(-1px);
-    }
-    .github-bar a {
-      color: rgba(255, 255, 255, 0.9);
-      text-decoration: none;
-      font-weight: 500;
-      transition: color 0.3s;
-    }
-    .github-bar a:hover { color: #ffffff; }
-    .github-bar svg { width: 12px; height: 12px; fill: currentColor; }
-    .github-bar .sep { color: rgba(255, 255, 255, 0.3); }
-
     /* ── socials (minimal) ── */
     .socials {
       display: flex;
@@ -347,18 +275,6 @@
     .socials a svg {
       width: 14px; height: 14px;
       fill: currentColor;
-    }
-
-    /* ── bottom sig ── */
-    .bottom-sig {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.42rem;
-      letter-spacing: 0.3em;
-      text-transform: lowercase;
-      color: rgba(255, 255, 255, 0.7);
-      text-shadow: 0 1px 6px rgba(0,0,0,0.4);
-      pointer-events: none;
-      text-align: center;
     }
 
     /* ── steps section ── */
@@ -421,31 +337,8 @@
     .step-desc {
       font-size: 0.65rem;
       line-height: 1.6;
-      color: rgba(255, 255, 255, 0.7);
-      margin-bottom: 8px;
-    }
-    .step-desc {
-      font-size: 0.65rem;
-      line-height: 1.6;
       color: rgba(255, 255, 255, 0.75);
       margin-bottom: 8px;
-    }
-    .step-img-wrapper {
-      width: 100%;
-      aspect-ratio: 1.6;
-      border-radius: 4px;
-      overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      background: rgba(0, 0, 0, 0.3);
-    }
-    .step-img-wrapper img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.5s ease;
-    }
-    .step-card:hover .step-img-wrapper img {
-      transform: scale(1.05);
     }
 
     @media (max-width: 768px) {
@@ -458,7 +351,6 @@
     @media (max-width: 640px) {
       .title { letter-spacing: -0.04em; }
       .actions { flex-direction: column; align-items: center; }
-      .corner, .status { display: none; }
       .terminal-block { font-size: 0.55rem; }
     }
 
@@ -509,16 +401,6 @@
       color: #e03a3a;
     }
 
-    .navbar-actions {
-      display: flex;
-      align-items: center;
-    }
-
-    .btn-nav-install {
-      padding: 0.45rem 1.1rem !important;
-      font-size: 0.78rem !important;
-    }
-
     @media (max-width: 768px) {
       .navbar-links {
         display: none;
@@ -526,43 +408,6 @@
       .navbar {
         padding: 0 1.5rem;
       }
-    }
-
-    /* ── brand logos grid ── */
-    .brand-logos {
-      margin-top: 4.5rem;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: center;
-      gap: 2.5rem 3.5rem;
-      width: 100%;
-      max-width: 800px;
-      opacity: 0;
-      animation: fadeUp 1.4s 1.9s cubic-bezier(0.16,1,0.3,1) both;
-    }
-
-    .brand-logo-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-family: 'Inter', sans-serif;
-      font-weight: 500;
-      font-size: 0.78rem;
-      letter-spacing: -0.01em;
-      color: rgba(255, 255, 255, 0.55);
-      transition: color 0.3s ease;
-      user-select: none;
-    }
-
-    .brand-logo-item:hover {
-      color: rgba(255, 255, 255, 0.9);
-    }
-
-    .brand-logo-item svg {
-      width: 18px;
-      height: 18px;
-      fill: currentColor;
     }
 
     /* ── agent console playground ── */
@@ -684,100 +529,6 @@
       height: 8px;
       border-radius: 50%;
       background: rgba(255, 255, 255, 0.2);
-    }
-
-    .agent-chat {
-      flex-grow: 1;
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      height: 330px;
-      overflow-y: auto;
-      font-size: 0.75rem;
-      line-height: 1.45;
-      color: #ffffff;
-    }
-
-    .chat-bubble {
-      max-width: 85%;
-      padding: 10px 14px;
-      border-radius: 4px;
-      position: relative;
-    }
-
-    .chat-bubble.user {
-      align-self: flex-end;
-      background: #e03a3a;
-      color: #ffffff;
-      border-bottom-right-radius: 2px;
-    }
-
-    .chat-bubble.agent {
-      align-self: flex-start;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #ffffff;
-      border-bottom-left-radius: 2px;
-    }
-
-    .chat-bubble {
-      max-width: 85%;
-      padding: 10px 14px;
-      border-radius: 4px;
-      position: relative;
-    }
-
-    .chat-bubble.user {
-      align-self: flex-end;
-      background: #1a1a2e;
-      color: #ffffff;
-      border-bottom-right-radius: 2px;
-    }
-
-    .chat-bubble.agent {
-      align-self: flex-start;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: #ffffff;
-      border-bottom-left-radius: 2px;
-    }
-
-    .chat-bubble .sender {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.58rem;
-      opacity: 0.45;
-      margin-bottom: 3px;
-      display: block;
-    }
-
-    .chat-bubble.user .sender {
-      color: rgba(255, 255, 255, 0.55);
-    }
-
-    .agent-terminal {
-      background: rgba(12, 14, 28, 0.75);
-      border-radius: 6px;
-      padding: 10px 12px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.65rem;
-      color: #a9b2c3;
-      margin-top: 6px;
-      border-left: 2px solid #e03a3a;
-      box-shadow: inset 0 2px 6px rgba(0,0,0,0.15);
-    }
-
-    .terminal-line {
-      margin-bottom: 3px;
-      white-space: pre-wrap;
-    }
-
-    .terminal-line.success {
-      color: #27ae60;
-    }
-
-    .terminal-line.info {
-      color: #3b82f6;
     }
 
     /* Right Pane */
@@ -914,8 +665,6 @@
       border-color: rgba(255, 255, 255, 0.24);
       transform: translateY(-2px);
     }
-    .offering-card.motion { }
-    .offering-card.chroma { }
     .offering-badge {
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.62rem;
@@ -1102,13 +851,6 @@
       font-family: 'Inter', sans-serif;
       font-size: 0.72rem;
       line-height: 1.55;
-      color: rgba(255, 255, 255, 0.7);
-    }
-
-    .platform-desc {
-      font-family: 'Inter', sans-serif;
-      font-size: 0.72rem;
-      line-height: 1.55;
       color: rgba(255, 255, 255, 0.75);
     }
 
@@ -1167,23 +909,6 @@
       justify-content: space-between;
       align-items: center;
       user-select: none;
-    }
-
-    .faq-question .icon {
-      font-size: 0.9rem;
-      color: rgba(255, 255, 255, 0.5);
-      transition: transform 0.3s ease;
-    }
-
-    .faq-answer {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s cubic-bezier(0.16, 1, 0.3, 1), padding 0.3s ease;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.72rem;
-      line-height: 1.6;
-      color: rgba(255, 255, 255, 0.7);
-      padding: 0 22px;
     }
 
     .faq-question .icon {
@@ -1293,20 +1018,6 @@
       font-family: 'Inter', sans-serif;
       font-size: 0.65rem;
       line-height: 1.45;
-      color: rgba(255, 255, 255, 0.65);
-    }
-
-    .rundown-card .name {
-      font-family: 'Inter', sans-serif;
-      font-weight: 500;
-      font-size: 0.78rem;
-      color: #ffffff;
-    }
-
-    .rundown-card .desc {
-      font-family: 'Inter', sans-serif;
-      font-size: 0.65rem;
-      line-height: 1.45;
       color: rgba(255, 255, 255, 0.7);
     }
 
@@ -1345,65 +1056,10 @@
       margin-top: -0.5rem;
     }
 
-    .cta-banner p {
-      font-family: 'Inter', sans-serif;
-      font-size: 0.85rem;
-      color: rgba(255, 255, 255, 0.75);
-      max-width: 500px;
-      margin-top: -0.5rem;
-    }
-
     /* inner terminal inherits the default light styling so it matches the site */
     .cta-banner .terminal-block {
       margin-top: 0;
       max-width: 480px;
-    }
-
-    .newsletter-form {
-      display: flex;
-      gap: 8px;
-      width: 100%;
-      max-width: 380px;
-      margin-top: 0.5rem;
-    }
-
-    .newsletter-input {
-      flex-grow: 1;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 4px;
-      padding: 0.55rem 1.1rem;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.75rem;
-      color: #ffffff;
-      outline: none;
-      transition: all 0.2s ease;
-    }
-
-    .newsletter-input:focus {
-      border-color: rgba(255, 255, 255, 0.25);
-      background: rgba(255, 255, 255, 0.08);
-    }
-
-    .newsletter-btn {
-      background: #ffffff;
-      color: #1a1a2e;
-      border: none;
-      border-radius: 4px;
-      padding: 0.55rem 1.3rem;
-      font-family: 'Inter', sans-serif;
-      font-weight: 500;
-      font-size: 0.75rem;
-      cursor: pointer;
-      transition: background 0.2s ease;
-    }
-
-    .newsletter-btn:hover {
-      background: rgba(255, 255, 255, 0.9);
-    }
-
-    .newsletter-btn:hover {
-      background: rgba(255, 255, 255, 0.9);
     }
 
     /* Footer Directory */
@@ -1445,10 +1101,6 @@
       text-decoration: none;
       transition: color 0.2s ease;
     }
-    .footer-col a:hover {
-      color: #ffffff;
-    }
-
     .footer-col a:hover {
       color: #ffffff;
     }
@@ -1511,8 +1163,7 @@
     .step-card,
     .platform-card,
     .faq-item,
-    .rundown-card,
-    .github-bar {
+    .rundown-card {
       background: rgba(255, 255, 255, 0.13) !important;
       -webkit-backdrop-filter: blur(26px) saturate(180%);
       backdrop-filter: blur(26px) saturate(180%);
@@ -1546,18 +1197,12 @@
     .reveal.d3 { transition-delay: 0.5s; }
     .reveal.d4 { transition-delay: 0.7s; }
     .reveal.d5 { transition-delay: 0.9s; }
-
-    @keyframes bob {
-      0%, 100% { transform: translateY(0); }
-      50%      { transform: translateY(8px); }
-    }
   </style>
 </head>
 <body>
   <canvas id="bg-canvas"></canvas>
   <div id="vignette"></div>
   <div id="grain"></div>
-  <!-- scrim removed -->
 
   <nav class="navbar">
     <a href="index.html" class="navbar-logo">
@@ -2395,24 +2040,6 @@ void main(){
     window.addEventListener('DOMContentLoaded', () => {
       updateJsonConfigView();
     });
-
-    // Fetch live GitHub stats
-    fetch('https://api.github.com/repos/vitejs/vite')
-      .then(r => r.ok ? r.json() : Promise.reject())
-      .then(data => {
-        document.getElementById('star-count').textContent = data.stargazers_count.toLocaleString();
-        document.getElementById('fork-count').textContent = data.forks_count.toLocaleString();
-      })
-      .catch(() => {
-        // Fallback to simple organization link pill if repo stats fetch fails
-        const githubBar = document.querySelector('.github-bar');
-        if (githubBar) {
-          githubBar.innerHTML = `
-            <svg viewBox="0 0 16 16" style="width: 12px; height: 12px; fill: currentColor; margin-right: 4px;"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-            <a href="https://github.com/murderszn/motion" target="_blank" rel="noopener">github.com/murderszn/motion</a>
-          `;
-        }
-      });
   </script>
 
   <!-- ═══════════════════════════════════════════════════════

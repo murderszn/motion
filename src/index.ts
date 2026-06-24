@@ -13,39 +13,12 @@
   });
 
   /* --------------------------------------------------
-     THEME SYSTEM
+     THEME — restore saved preference (no toggle UI on this page)
   -------------------------------------------------- */
-  const themeToggle = document.getElementById('theme-toggle');
   const themes = ['motion-dark', 'motion-dim', 'motion-contrast', 'motion-light'];
-  const themeNames: Record<string, string> = {
-    'motion-dark': 'motion dark',
-    'motion-dim': 'motion dim',
-    'motion-contrast': 'motion contrast',
-    'motion-light': 'motion light',
-  };
-
-  function applyTheme(themeKey: string) {
-    themes.forEach(t => document.documentElement.removeAttribute('data-theme'));
-    if (themeKey !== 'motion-dark') {
-      document.documentElement.setAttribute('data-theme', themeKey);
-    }
-    if (themeToggle) {
-      themeToggle.textContent = '◆ ' + (themeNames[themeKey] || 'motion dark');
-    }
-  }
-
   const savedTheme = localStorage.getItem('motion-theme') ?? 'motion-dark';
-  applyTheme(savedTheme);
-
-  if (themeToggle) {
-    themeToggle.addEventListener('click', () => {
-      const curTheme = localStorage.getItem('motion-theme') ?? 'motion-dark';
-      const curIdx = themes.indexOf(curTheme);
-      const nextIdx = (curIdx + 1) % themes.length;
-      const nextTheme = themes[nextIdx];
-      localStorage.setItem('motion-theme', nextTheme);
-      applyTheme(nextTheme);
-    });
+  if (themes.includes(savedTheme) && savedTheme !== 'motion-dark') {
+    document.documentElement.setAttribute('data-theme', savedTheme);
   }
 
   /* --------------------------------------------------

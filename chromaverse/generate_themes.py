@@ -4114,75 +4114,9 @@ index_template = f"""<!DOCTYPE html>
             overflow: hidden;
             scroll-snap-align: start;
             scroll-snap-stop: always;
-            padding: 0 0 20px 0;
+            padding: 0;
             box-sizing: border-box;
             background: var(--bg);
-        }}
-
-        /* Symmetrical Border Frames */
-        .studio-frame {{
-            position: absolute;
-            z-index: 100;
-            background: var(--bg-alt);
-            color: var(--text-muted);
-            font-family: "JetBrains Mono", monospace;
-            font-size: 0.68rem;
-            letter-spacing: 0.1em;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-sizing: border-box;
-            border-color: var(--border);
-            text-transform: uppercase;
-        }}
-        
-        .bottom-frame {{
-            bottom: 0; left: 0; width: 100%; height: 20px;
-            border-top: 1px solid var(--border);
-            justify-content: space-between;
-            padding: 0 var(--sp-5);
-        }}
-
-        #frame-swatches-strip {{
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }}
-
-        .swatch-dot {{
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            display: inline-block;
-            border: 1px solid var(--border);
-            cursor: pointer;
-            transition: transform 0.15s var(--ease-out);
-        }}
-
-        .swatch-dot:hover {{
-            transform: scale(1.3);
-        }}
-
-        .frame-btn {{
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            font-family: "JetBrains Mono", monospace;
-            font-size: 0.68rem;
-            letter-spacing: 0.05em;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            height: 100%;
-            padding: 0 var(--sp-2);
-            transition: color 0.15s, background 0.15s;
-            text-transform: uppercase;
-        }}
-
-        .frame-btn:hover {{
-            color: #ffffff;
-            background: var(--border);
         }}
 
         .header-search-container {{
@@ -4224,9 +4158,6 @@ index_template = f"""<!DOCTYPE html>
         @media (max-width: 860px) {{
             .studio-workspace {{
                 padding: 0;
-            }}
-            .studio-frame {{
-                display: none !important;
             }}
         }}
 
@@ -4991,10 +4922,6 @@ index_template = f"""<!DOCTYPE html>
             padding-bottom: 0;
         }}
 
-        .studio-workspace.builder-mode .bottom-frame {{
-            display: none;
-        }}
-
         .main-content.builder-mode {{
             overflow: hidden;
         }}
@@ -5021,11 +4948,21 @@ index_template = f"""<!DOCTYPE html>
             padding: 0 var(--sp-1);
         }}
 
-        .builder-toolbar-left,
-        .builder-toolbar-right {{
+        .builder-toolbar-left {{
             display: flex;
             align-items: center;
             gap: var(--sp-3);
+            flex-shrink: 0;
+        }}
+
+        .builder-toolbar-right {{
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: var(--sp-3);
+            flex: 1;
+            min-width: 0;
+            flex-wrap: wrap;
         }}
 
         .builder-toolbar-title {{
@@ -5189,6 +5126,12 @@ index_template = f"""<!DOCTYPE html>
             border: 1px solid var(--border);
             border-radius: var(--r-md);
             padding: 2px;
+        }}
+
+        .builder-toolbar-right .builder-toggle-group {{
+            flex-shrink: 0;
+            height: 36px;
+            align-items: center;
         }}
 
         .builder-toggle-group.compact button {{
@@ -5703,12 +5646,12 @@ index_template = f"""<!DOCTYPE html>
             <div class="builder-toolbar">
                 <div class="builder-toolbar-left">
                     <span class="builder-toolbar-title">Theme Builder Studio</span>
+                </div>
+                <div class="builder-toolbar-right">
                     <div class="builder-toggle-group compact" id="builder-mode-toggle" role="group" aria-label="Preview mode">
                         <button type="button" class="active" data-mode="dark">Dark</button>
                         <button type="button" data-mode="light">Light</button>
                     </div>
-                </div>
-                <div class="builder-toolbar-right">
                     <button type="button" id="builder-randomize-btn" class="builder-tool-btn" title="Randomize all builder presets">
                         <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 9c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1zm0 4c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1zm6-4c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1zm0 4c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1z"/></svg>
                         <span>Randomize</span>
@@ -5886,23 +5829,7 @@ index_template = f"""<!DOCTYPE html>
             </div>
 
     </main>
-    
-    <!-- Symmetrical border frames -->
-    <div class="studio-frame bottom-frame">
-        <div class="frame-left" id="active-theme-status">SELECTED: NONE · HOVER CARD TO INSPECT</div>
-        <div class="frame-center" id="frame-swatches-strip">
-            <span class="swatch-dot" style="background: var(--border);"></span>
-            <span class="swatch-dot" style="background: var(--border);"></span>
-            <span class="swatch-dot" style="background: var(--border);"></span>
-            <span class="swatch-dot" style="background: var(--border);"></span>
-            <span class="swatch-dot" style="background: var(--border);"></span>
-        </div>
-        <button class="frame-btn" onclick="randomizeTheme()">
-            <svg viewBox="0 0 24 24" width="12" height="12"><path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 9c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1zm0 4c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1zm6-4c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1zm0 4c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1z" fill="currentColor"/></svg>
-            RANDOM THEME
-        </button>
-    </div>
-    
+
     </section>
 </div>
 
@@ -6274,7 +6201,7 @@ index_template = f"""<!DOCTYPE html>
             filterGrid();
         }});
 
-                // JS extensions for banner, scroll snap, frame hover and randomizer
+                // JS extensions for banner and scroll snap
         function enterStudio() {{
             document.getElementById("studio-section").scrollIntoView({{ behavior: "smooth" }});
         }}
@@ -6282,80 +6209,6 @@ index_template = f"""<!DOCTYPE html>
         function goToBanner() {{
             document.getElementById("banner-section").scrollIntoView({{ behavior: "smooth" }});
         }}
-        
-        function copyColorText(colorHex) {{
-            navigator.clipboard.writeText(colorHex).then(() => {{
-                const statusEl = document.getElementById("active-theme-status");
-                const originalText = statusEl.textContent;
-                statusEl.textContent = `COPIED ${{colorHex}}!`;
-                statusEl.style.color = "var(--accent)";
-                setTimeout(() => {{
-                    statusEl.textContent = originalText;
-                    statusEl.style.color = "";
-                }}, 1000);
-            }});
-        }}
-        
-        function randomizeTheme() {{
-            const builderContainer = document.getElementById("builder-container");
-            if (builderContainer && builderContainer.style.display === "flex") {{
-                if (typeof randomizeBuilderPresets === "function") {{
-                    randomizeBuilderPresets();
-                }}
-                return;
-            }}
-
-            const visibleCards = Array.from(cards).filter(c => c.style.display !== "none");
-            if (visibleCards.length === 0) return;
-            
-            const randomCard = visibleCards[Math.floor(Math.random() * visibleCards.length)];
-            randomCard.scrollIntoView({{ behavior: "smooth", block: "nearest" }});
-            
-            randomCard.style.outline = "2px dashed var(--accent)";
-            randomCard.style.outlineOffset = "4px";
-            setTimeout(() => {{
-                randomCard.style.outline = "";
-                randomCard.style.outlineOffset = "";
-            }}, 1500);
-            
-            const enterEvent = new Event("mouseenter");
-            randomCard.dispatchEvent(enterEvent);
-        }}
-        
-        // Card hover listener
-        cards.forEach(card => {{
-            card.addEventListener("mouseenter", () => {{
-                const id = card.dataset.id;
-                const name = card.dataset.name;
-                const colors = card.dataset.colors.split(",");
-                
-                const statusEl = document.getElementById("active-theme-status");
-                statusEl.textContent = `INSPECTING: ${{name}} (ID ${{id}}) · CLICK TO USE`;
-                
-                const dots = document.querySelectorAll(".swatch-dot");
-                if (dots.length >= 5) {{
-                    dots[0].style.backgroundColor = colors[0];
-                    dots[0].setAttribute("title", `Copy Accent 1: ${{colors[0]}}`);
-                    dots[0].onclick = () => copyColorText(colors[0]);
-                    
-                    dots[1].style.backgroundColor = colors[1];
-                    dots[1].setAttribute("title", `Copy Accent 2: ${{colors[1]}}`);
-                    dots[1].onclick = () => copyColorText(colors[1]);
-                    
-                    dots[2].style.backgroundColor = colors[2];
-                    dots[2].setAttribute("title", `Copy Accent 3: ${{colors[2]}}`);
-                    dots[2].onclick = () => copyColorText(colors[2]);
-                    
-                    dots[3].style.backgroundColor = colors[4]; // dark_bg
-                    dots[3].setAttribute("title", `Copy Dark Surface: ${{colors[4]}}`);
-                    dots[3].onclick = () => copyColorText(colors[4]);
-                    
-                    dots[4].style.backgroundColor = colors[5]; // light_bg
-                    dots[4].setAttribute("title", `Copy Light Surface: ${{colors[5]}}`);
-                    dots[4].onclick = () => copyColorText(colors[5]);
-                }}
-            }});
-        }});
         
         // Color filter dots handler
         const filterDots = document.querySelectorAll(".color-filter-dot");

@@ -11,6 +11,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "avocado": "vite --open /examples/avocado-farm.html",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "api": "node server/api.mjs",

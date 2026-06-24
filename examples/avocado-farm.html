@@ -1,0 +1,2362 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grove & Gold — Fresh Avocados, Coming Summer 2026</title>
+  <script>
+    (function () {
+      var saved = localStorage.getItem('grove-theme');
+      if (saved === 'light' || saved === 'dark') {
+        document.documentElement.dataset.theme = saved;
+      }
+    })();
+  </script>
+  <script>
+    (function () {
+      var isFile = location.protocol === 'file:';
+      if (isFile) {
+        document.documentElement.dataset.fileProtocol = '1';
+        document.documentElement.dataset.noWebgl = '1';
+        return;
+      }
+      var pre1 = document.createElement('link');
+      pre1.rel = 'preconnect';
+      pre1.href = 'https://fonts.googleapis.com';
+      document.head.appendChild(pre1);
+      var pre2 = document.createElement('link');
+      pre2.rel = 'preconnect';
+      pre2.href = 'https://fonts.gstatic.com';
+      pre2.crossOrigin = '';
+      document.head.appendChild(pre2);
+      var fonts = document.createElement('link');
+      fonts.rel = 'stylesheet';
+      fonts.href = 'https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,700;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap';
+      document.head.appendChild(fonts);
+    })();
+  </script>
+  <style>
+    :root {
+      --accent: #84CC16; /* pistachio cream */
+      --accent-light: #D9F99D;
+      --accent-bright: #A3E635;
+      --accent-pale: #65A30D;
+
+      --r-sm: 4px;
+      --r-md: 8px;
+      --r-lg: 14px;
+
+      --sp-1: 4px;
+      --sp-2: 8px;
+      --sp-3: 12px;
+      --sp-4: 16px;
+      --sp-5: 24px;
+      --sp-6: 32px;
+      --sp-7: 48px;
+      --sp-8: 64px;
+      --sp-9: 96px;
+      --sp-10: 128px;
+
+      --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+      --focus-ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent-bright);
+    }
+
+    [data-theme="dark"] {
+      --accent-dim: rgba(132, 204, 22, 0.14);
+      --accent-border: rgba(132, 204, 22, 0.35);
+
+      --black: #0B1305;
+      --ink: #121E0B;
+      --ink-soft: #2D4421;
+      --ink-mid: #4A6C38;
+      --ink-muted: #75A45E;
+
+      --bg: #12190E;
+      --bg-alt: #212B1C;
+      --bg-deep: #2D4421;
+      --text: #ECFDF5;
+      --text-mid: #C8E6A0;
+      --text-muted: #75A45E;
+      --border: rgba(255, 255, 255, 0.1);
+      --panel-bg: rgba(14, 20, 10, 0.55);
+
+      --shadow-sm: 0 8px 32px rgba(0, 0, 0, 0.25);
+      --shadow-md: 0 16px 48px rgba(0, 0, 0, 0.35);
+      --shadow-lg: 0 25px 80px rgba(11, 19, 5, 0.85);
+
+      --section-shell-bg: transparent;
+      --section-shell-bg-alt: var(--bg-alt);
+    }
+
+    [data-theme="light"] {
+      --accent-dim: rgba(132, 204, 22, 0.08);
+      --accent-border: rgba(132, 204, 22, 0.25);
+
+      --black: #1A2E05;
+      --ink: #F7FEE7;
+      --ink-soft: #ECFDF5;
+      --ink-mid: #4D7C0F;
+      --ink-muted: #65A30D;
+
+      --bg: #F7FEE7;
+      --bg-alt: #FFFFFF;
+      --bg-deep: #ECFDF5;
+      --text: #1A2E05;
+      --text-mid: #3F6212;
+      --text-muted: #4A6C38;
+      --border: rgba(26, 46, 5, 0.12);
+      --panel-bg: rgba(255, 255, 255, 0.72);
+
+      --shadow-sm: 0 8px 32px rgba(26, 46, 5, 0.08);
+      --shadow-md: 0 16px 48px rgba(26, 46, 5, 0.12);
+      --shadow-lg: 0 25px 80px rgba(26, 46, 5, 0.12);
+
+      --section-shell-bg: transparent;
+      --section-shell-bg-alt: var(--bg-alt);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: "Newsreader", serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0.05;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 140px 140px;
+    }
+
+    /* ═══ WEBGL CANVAS ═══ */
+    #bg-canvas {
+      position: fixed;
+      width: 0;
+      height: 0;
+      opacity: 0;
+      pointer-events: none;
+      visibility: hidden;
+    }
+
+    #bg-display {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      display: block;
+      pointer-events: none;
+    }
+
+    #bg-fallback {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 30% 40%, rgba(84, 133, 62, 0.45), transparent),
+        radial-gradient(ellipse 70% 50% at 70% 60%, rgba(163, 204, 22, 0.2), transparent),
+        linear-gradient(160deg, #0b1305 0%, #1a2e14 45%, #12190e 100%);
+    }
+
+    [data-no-webgl] #bg-fallback { display: block; }
+    [data-no-webgl] #bg-display { display: none; }
+
+    #file-gate {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      align-items: center;
+      justify-content: center;
+      padding: var(--sp-6);
+      background:
+        radial-gradient(ellipse 70% 50% at 50% 40%, rgba(84, 133, 62, 0.35), transparent),
+        linear-gradient(160deg, #0b1305 0%, #12190e 100%);
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    [data-file-protocol] #file-gate { display: flex; }
+
+    [data-file-protocol] #content,
+    [data-file-protocol] #bg-canvas,
+    [data-file-protocol] #bg-display,
+    [data-file-protocol] #bg-fallback,
+    [data-file-protocol] #vignette {
+      display: none !important;
+    }
+
+    .file-gate-card {
+      max-width: 520px;
+      width: 100%;
+      padding: var(--sp-8) var(--sp-6);
+      border-radius: var(--r-lg);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      text-align: center;
+    }
+
+    .file-gate-card h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text);
+      margin-bottom: var(--sp-4);
+    }
+
+    .file-gate-card p {
+      font-size: 0.95rem;
+      color: var(--text-mid);
+      line-height: 1.7;
+      margin-bottom: var(--sp-5);
+    }
+
+    .file-gate-steps {
+      text-align: left;
+      font-size: 0.88rem;
+      color: var(--text-mid);
+      line-height: 1.8;
+      margin: 0 auto var(--sp-6);
+      max-width: 360px;
+      padding-left: var(--sp-5);
+    }
+
+    .file-gate-steps code {
+      font-family: ui-monospace, monospace;
+      font-size: 0.82rem;
+      color: var(--accent-bright);
+      background: rgba(132, 204, 22, 0.12);
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+
+    .file-gate-url {
+      display: block;
+      font-family: ui-monospace, monospace;
+      font-size: 0.8rem;
+      color: var(--accent-bright);
+      word-break: break-all;
+      margin-top: var(--sp-3);
+    }
+
+    /* ═══ VIGNETTE ═══ */
+    #vignette {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background: radial-gradient(ellipse at center, transparent 30%, rgba(11,19,5,0.75) 100%);
+    }
+
+    [data-theme="light"] #vignette {
+      background: radial-gradient(ellipse at center, transparent 35%, rgba(247,254,231,0.65) 100%);
+    }
+
+    /* ═══ SCROLL CONTENT ═══ */
+    #content {
+      position: relative;
+      z-index: 5;
+    }
+
+    .page {
+      display: grid;
+      grid-template-columns: 1fr min(72rem, 92vw) 1fr;
+    }
+
+    .page > section,
+    .page > footer { grid-column: 2; }
+
+    .page > .nav { grid-column: 1 / -1; }
+
+    /* ═══ PANELS ═══ */
+    .panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      transition: border-color 0.2s var(--ease-out), transform 0.2s var(--ease-out);
+    }
+
+    .panel:hover { border-color: rgba(255, 255, 255, 0.16); }
+
+    [data-theme="light"] .panel:hover { border-color: rgba(26, 46, 5, 0.2); }
+
+    /* ═══ GLASS — hero only ═══ */
+    .glass {
+      position: relative;
+      overflow: hidden;
+      background: rgba(8, 8, 10, 0.45);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: var(--shadow-sm);
+    }
+
+    [data-theme="light"] .glass {
+      background: rgba(255, 255, 255, 0.55);
+      border-color: rgba(26, 46, 5, 0.1);
+    }
+
+    .glass > * { position: relative; z-index: 1; }
+
+    .glass-hero {
+      --gx: 50%;
+      --gy: 40%;
+    }
+
+    .glass-hero .glass-glare {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      z-index: 0;
+      background: radial-gradient(
+        500px circle at var(--gx) var(--gy),
+        rgba(255, 255, 255, 0.12) 0%,
+        transparent 55%
+      );
+    }
+
+    /* ═══ NAVIGATION ═══ */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(8, 8, 10, 0.55);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      transition: background 0.25s;
+    }
+
+    [data-theme="light"] .nav {
+      background: rgba(255, 255, 255, 0.72);
+      border-bottom-color: rgba(26, 46, 5, 0.1);
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 clamp(24px, 5vw, 64px);
+      height: 64px;
+    }
+
+    .nav-brand {
+      font-size: 1.2rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--text);
+    }
+
+    .nav-brand span {
+      color: var(--accent-bright);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: var(--sp-5);
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: lowercase;
+      color: var(--text-mid);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+    }
+
+    .theme-toggle {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--r-sm);
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-mid);
+      cursor: pointer;
+      font-size: 1rem;
+      display: grid;
+      place-items: center;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .theme-toggle:hover { border-color: var(--accent-border); color: var(--text); }
+
+    .nav-cta {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: lowercase;
+      padding: 8px 20px;
+      border-radius: var(--r-sm);
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: white;
+      text-decoration: none;
+      transition: transform 0.2s var(--ease-out), background 0.2s;
+      cursor: pointer;
+    }
+
+    .nav-cta:hover { background: var(--accent-bright); }
+
+    .nav-cta:active,
+    .btn:active { transform: scale(0.98); }
+
+    a:focus-visible,
+    button:focus-visible,
+    input:focus-visible {
+      outline: none;
+      box-shadow: var(--focus-ring);
+    }
+
+    /* ═══ HERO ═══ */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--sp-10) 0;
+    }
+
+    .hero-inner {
+      width: 100%;
+      max-width: 720px;
+      padding: var(--sp-8) var(--sp-7);
+      border-radius: var(--r-lg);
+      text-align: center;
+    }
+
+    .hero-eyebrow {
+      font-family: "Newsreader", serif;
+      font-size: 1rem;
+      font-weight: 400;
+      font-style: italic;
+      letter-spacing: 0.06em;
+      color: var(--text-mid);
+      margin-bottom: var(--sp-4);
+    }
+
+    .hero-title {
+      font-size: clamp(3rem, 8vw, 7rem);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+      line-height: 0.92;
+      color: var(--text);
+      margin-bottom: var(--sp-5);
+    }
+
+    .hero-title .accent { color: var(--accent-bright); }
+
+    /* ═══ KINETIC TYPOGRAPHY ═══ */
+    .line-mask {
+      display: block;
+      overflow: hidden;
+      padding: 0.04em 0;
+    }
+
+    .line-mask > span {
+      display: inline-block;
+      transform: translateY(110%);
+    }
+
+    .mask-reveal.is-ready .line-mask > span {
+      animation: maskRise 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .mask-reveal.is-ready .line-mask:nth-child(1) > span { animation-delay: 0.1s; }
+    .mask-reveal.is-ready .line-mask:nth-child(2) > span { animation-delay: 0.18s; }
+    .mask-reveal.is-ready .line-mask:nth-child(3) > span { animation-delay: 0.26s; }
+
+    @keyframes maskRise {
+      to { transform: translateY(0); }
+    }
+
+    .blur-in {
+      opacity: 0;
+      filter: blur(10px);
+    }
+
+    .blur-in.is-ready {
+      animation: blurIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.05s forwards;
+    }
+
+    @keyframes blurIn {
+      to { opacity: 1; filter: blur(0); }
+    }
+
+    .reveal-scroll .line-mask > span {
+      transform: translateY(110%);
+    }
+
+    .reveal-scroll.is-visible .line-mask > span {
+      animation: maskRise 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .reveal-scroll.is-visible .line-mask:nth-child(2) > span { animation-delay: 0.08s; }
+    .reveal-scroll.is-visible .line-mask:nth-child(3) > span { animation-delay: 0.16s; }
+
+    .hero-sub {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--text-mid);
+      line-height: 1.75;
+      max-width: 52ch;
+      margin: 0 auto var(--sp-7);
+      text-align: left;
+    }
+
+    .hero-cta-row {
+      display: flex;
+      gap: var(--sp-4);
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 0.84rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: lowercase;
+      padding: 14px 36px;
+      border-radius: var(--r-sm);
+      border: 2px solid transparent;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s var(--ease-out);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-bright);
+      border-color: var(--accent-bright);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border-color: var(--text);
+      color: var(--text);
+    }
+
+    .btn-outline:hover {
+      background: var(--text);
+      color: var(--bg);
+    }
+
+    .scroll-hint {
+      margin-top: var(--sp-9);
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: lowercase;
+      color: var(--text-muted);
+      opacity: 0.6;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; transform: translateY(0); }
+      50% { opacity: 0.7; transform: translateY(4px); }
+    }
+
+    /* ═══ SECTION SHELL ═══ */
+    .section-shell {
+      position: relative;
+      width: 100%;
+      padding: clamp(80px, 10vw, 140px) 0;
+      background: var(--section-shell-bg);
+    }
+
+    .section-shell.section-alt {
+      background: var(--section-shell-bg-alt);
+    }
+
+    .section-inner { width: 100%; }
+
+    .section-label {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: lowercase;
+      color: var(--text-muted);
+      margin-bottom: var(--sp-2);
+    }
+
+    .section-title {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text);
+      margin-bottom: var(--sp-3);
+      line-height: 1.1;
+    }
+
+    .section-title span { color: var(--accent-bright); }
+
+    .section-desc {
+      max-width: 640px;
+      color: var(--text-mid);
+      font-size: 1.05rem;
+      line-height: 1.75;
+      margin-bottom: var(--sp-7);
+    }
+
+    /* ═══ PRODUCT CARDS ═══ */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: var(--sp-5);
+    }
+
+    .product-card {
+      overflow: hidden;
+    }
+
+    .product-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .product-card .product-img {
+      border-radius: var(--r-md) var(--r-md) 0 0;
+      overflow: hidden;
+    }
+
+
+
+    .product-img {
+      height: 220px;
+      overflow: hidden;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .product-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .product-body {
+      padding: var(--sp-5);
+    }
+
+    .product-tag {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: lowercase;
+      color: var(--accent-bright);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      padding: 3px 10px;
+      border-radius: 999px;
+      display: inline-block;
+      margin-bottom: var(--sp-3);
+    }
+
+    .product-name {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      color: var(--text);
+      margin-bottom: var(--sp-2);
+    }
+
+    .product-desc {
+      font-size: 0.92rem;
+      color: var(--text-mid);
+      line-height: 1.65;
+      margin-bottom: var(--sp-4);
+    }
+
+    .product-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border);
+      padding-top: var(--sp-4);
+    }
+
+    .product-price {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .product-unit {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 0.75rem;
+      font-weight: 400;
+      color: var(--text-muted);
+      margin-left: 2px;
+    }
+
+    .product-btn {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: lowercase;
+      padding: 8px 18px;
+      border: 1px solid var(--accent-border);
+      border-radius: var(--r-sm);
+      background: transparent;
+      color: var(--accent-light);
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.15s var(--ease-out);
+    }
+
+    .product-btn:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    /* ═══ ABOUT / STORY ═══ */
+    .story-grid,
+    .visit-grid {
+      display: grid;
+      grid-template-columns: 1.618fr 1fr;
+      gap: var(--sp-8);
+      align-items: center;
+    }
+
+    .story-visual {
+      aspect-ratio: 4/5;
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .story-visual img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .story-visual::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 30% 70%, rgba(132,204,22,0.15), transparent 60%);
+      pointer-events: none;
+    }
+
+    .story-copy .eyebrow {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: lowercase;
+      color: var(--text-muted);
+      margin-bottom: var(--sp-3);
+    }
+
+    .story-copy h2 {
+      font-size: clamp(2rem, 3.5vw, 3rem);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      color: var(--text);
+      margin-bottom: var(--sp-4);
+      line-height: 1.05;
+    }
+
+    .story-copy h2 span { color: var(--accent-bright); }
+
+    .story-copy p {
+      font-size: 1.05rem;
+      color: var(--text-mid);
+      line-height: 1.8;
+      margin-bottom: var(--sp-4);
+    }
+
+    .story-copy p strong { color: var(--text); }
+
+    /* ═══ STATS BAR ═══ */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--sp-4);
+      margin-top: var(--sp-7);
+    }
+
+    .stat {
+      text-align: center;
+      padding: var(--sp-6) var(--sp-4);
+      border-radius: var(--r-md);
+    }
+
+    .stat-number {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 900;
+      color: var(--accent-bright);
+      line-height: 1;
+      margin-bottom: var(--sp-2);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ═══ INFOGRAPHIC — GROVE TO TABLE ═══ */
+    .infographic {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: var(--sp-2);
+      flex-wrap: wrap;
+      margin-top: var(--sp-6);
+    }
+
+    .numbers-chapter {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-8);
+    }
+
+    .harvest-caption {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: lowercase;
+      color: var(--text-muted);
+      margin-bottom: var(--sp-4);
+    }
+
+    .harvest-peak-note {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 0.82rem;
+      color: var(--text-mid);
+      margin-top: var(--sp-4);
+      padding-left: var(--sp-3);
+      border-left: 2px solid var(--accent);
+    }
+
+    .info-step {
+      flex: 1;
+      min-width: 200px;
+      max-width: 280px;
+      text-align: center;
+      padding: var(--sp-5) var(--sp-4);
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.5s var(--ease-out), transform 0.5s var(--ease-out);
+    }
+
+    .info-step.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .info-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto var(--sp-4);
+      display: grid;
+      place-items: center;
+      font-size: 2.4rem;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      border-radius: var(--r-lg);
+      transform: scale(0);
+      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .info-step.is-visible .info-icon {
+      transform: scale(1);
+    }
+
+    .info-num {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: clamp(2.2rem, 4vw, 3.2rem);
+      font-weight: 900;
+      color: var(--accent-bright);
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+      margin-bottom: var(--sp-2);
+    }
+
+    .info-label {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: lowercase;
+      color: var(--text-mid);
+      line-height: 1.4;
+    }
+
+    .info-connector {
+      display: none;
+      align-self: center;
+      margin-top: -40px;
+      width: 48px;
+      height: 24px;
+    }
+
+    .info-connector path {
+      fill: none;
+      stroke: var(--accent-border);
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-dasharray: 60;
+      stroke-dashoffset: 60;
+      transition: stroke-dashoffset 0.5s var(--ease-out);
+    }
+
+    .info-connector.is-visible path {
+      stroke-dashoffset: 0;
+    }
+
+    @media (min-width: 900px) {
+      .info-connector { display: block; }
+    }
+
+    /* ═══ HARVEST CHART ═══ */
+    .harvest-chart {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--sp-4);
+      align-items: end;
+      height: 280px;
+      margin-top: var(--sp-6);
+      padding: var(--sp-6) var(--sp-5) var(--sp-4);
+      border-radius: var(--r-md);
+    }
+
+    .harvest-bar-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
+      justify-content: flex-end;
+      gap: var(--sp-3);
+    }
+
+    .harvest-bar {
+      width: 100%;
+      max-width: 72px;
+      background: linear-gradient(to top, var(--accent-pale), var(--accent-bright));
+      border-radius: var(--r-sm) var(--r-sm) 0 0;
+      transform-origin: bottom;
+      transform: scaleY(0);
+      transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .harvest-chart.is-visible .harvest-bar {
+      transform: scaleY(1);
+    }
+
+    .harvest-chart.is-visible .harvest-bar-wrap:nth-child(1) .harvest-bar { transition-delay: 0.1s; }
+    .harvest-chart.is-visible .harvest-bar-wrap:nth-child(2) .harvest-bar { transition-delay: 0.25s; }
+    .harvest-chart.is-visible .harvest-bar-wrap:nth-child(3) .harvest-bar { transition-delay: 0.4s; }
+    .harvest-chart.is-visible .harvest-bar-wrap:nth-child(4) .harvest-bar { transition-delay: 0.55s; }
+
+    .harvest-value {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--accent-bright);
+      font-variant-numeric: tabular-nums;
+      opacity: 0;
+      transition: opacity 0.4s var(--ease-out) 0.5s;
+    }
+
+    .harvest-chart.is-visible .harvest-value { opacity: 1; }
+
+    .harvest-month {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: lowercase;
+      color: var(--text-muted);
+    }
+
+    /* ═══ RECIPES ═══ */
+    .recipes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--sp-5);
+    }
+
+    .recipe-card {
+      border-radius: var(--r-md);
+      transition: box-shadow 0.2s var(--ease-out), transform 0.2s var(--ease-out);
+    }
+
+    .recipe-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .recipe-card .recipe-img {
+      border-radius: var(--r-md) var(--r-md) 0 0;
+      overflow: hidden;
+    }
+
+
+
+    .recipe-img {
+      height: 160px;
+      overflow: hidden;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .recipe-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .recipe-body { padding: var(--sp-5); }
+
+    .recipe-time {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent-light);
+      margin-bottom: var(--sp-2);
+    }
+
+    .recipe-name {
+      font-size: 1.25rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      color: var(--text);
+      margin-bottom: var(--sp-2);
+    }
+
+    .recipe-desc {
+      font-size: 0.9rem;
+      color: var(--text-mid);
+      line-height: 1.65;
+    }
+
+    /* ═══ PRACTICES ═══ */
+    .practices-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: var(--sp-4);
+    }
+
+    .practice-card {
+      padding: var(--sp-5);
+      border-radius: var(--r-md);
+    }
+
+    .practice-icon {
+      font-size: 2rem;
+      margin-bottom: var(--sp-3);
+    }
+
+    .practice-name {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 0.88rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text);
+      margin-bottom: var(--sp-2);
+    }
+
+    .practice-desc {
+      font-size: 0.88rem;
+      color: var(--text-mid);
+      line-height: 1.6;
+    }
+
+    /* ═══ TESTIMONIALS ═══ */
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: var(--sp-5);
+    }
+
+    .testimonial {
+      padding: var(--sp-6);
+      border-radius: var(--r-md);
+      position: relative;
+    }
+
+    .testimonial::before {
+      content: '\201C';
+      position: absolute;
+      top: var(--sp-3);
+      left: var(--sp-4);
+      font-size: 4rem;
+      line-height: 1;
+      color: var(--accent);
+      opacity: 0.25;
+      font-family: Georgia, serif;
+    }
+
+    .testimonial-text {
+      font-size: 1.05rem;
+      font-style: italic;
+      color: var(--text-mid);
+      line-height: 1.75;
+      margin-bottom: var(--sp-4);
+      position: relative;
+      z-index: 1;
+    }
+
+    .testimonial-author {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent-bright);
+    }
+
+    /* ═══ FAQ ═══ */
+    .faq-list {
+      max-width: 720px;
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-3);
+    }
+
+    .faq-item {
+      border-radius: var(--r-md);
+    }
+
+    .faq-q {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--sp-4);
+      padding: var(--sp-4) var(--sp-5);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 0.92rem;
+      font-weight: 700;
+      text-align: left;
+      color: var(--text);
+      transition: color 0.15s;
+    }
+
+    .faq-q:hover { color: var(--accent-bright); }
+
+    .faq-q::after {
+      content: '+';
+      font-size: 1.4rem;
+      font-weight: 400;
+      color: var(--accent);
+      flex-shrink: 0;
+      transition: transform 0.2s var(--ease-out);
+    }
+
+    .faq-item.is-open .faq-q::after { transform: rotate(45deg); }
+
+    .faq-a {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.25s var(--ease-out);
+    }
+
+    .faq-a-inner {
+      padding: 0 var(--sp-5) var(--sp-5);
+      font-size: 0.92rem;
+      color: var(--text-mid);
+      line-height: 1.7;
+    }
+
+    .faq-item.is-open .faq-a { max-height: 200px; }
+
+    /* ═══ VISIT ═══ */
+    .visit-map {
+      aspect-ratio: 4/3;
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .visit-map img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .visit-map-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      padding: var(--sp-5);
+      background: linear-gradient(to top, rgba(11, 19, 5, 0.75), transparent 55%);
+    }
+
+    .visit-map::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 60% 40%, rgba(132,204,22,0.12), transparent 55%);
+    }
+
+    .visit-location {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: lowercase;
+      color: var(--accent-light);
+      position: relative;
+      z-index: 1;
+    }
+
+    .visit-details {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-5);
+    }
+
+    .visit-detail {
+      display: flex;
+      gap: var(--sp-4);
+      align-items: flex-start;
+    }
+
+    .visit-detail-icon {
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+      display: grid;
+      place-items: center;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      border-radius: var(--r-sm);
+      font-size: 1.2rem;
+    }
+
+    .visit-detail h4 {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 0.82rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text);
+      margin-bottom: var(--sp-1);
+    }
+
+    .visit-detail p {
+      font-size: 0.92rem;
+      color: var(--text-mid);
+      line-height: 1.6;
+    }
+
+    .stat-label {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: lowercase;
+      color: var(--text-muted);
+    }
+
+    /* ═══ NEWSLETTER ═══ */
+    .newsletter {
+      text-align: center;
+      padding: var(--sp-10) clamp(24px, 5vw, 64px);
+    }
+
+    .newsletter-panel {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: var(--sp-8) var(--sp-6);
+      border-radius: var(--r-lg);
+      border-color: var(--accent-border);
+    }
+
+    .newsletter h2 {
+      font-size: clamp(1.8rem, 3vw, 2.5rem);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--text);
+      margin-bottom: var(--sp-3);
+    }
+
+    .newsletter h2 span { color: var(--accent-bright); }
+
+    .newsletter p {
+      font-size: 1rem;
+      color: var(--text-mid);
+      max-width: 500px;
+      margin: 0 auto var(--sp-6);
+      line-height: 1.7;
+    }
+
+    .newsletter-form {
+      display: flex;
+      gap: var(--sp-3);
+      justify-content: center;
+      flex-wrap: wrap;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    .newsletter-input {
+      flex: 1;
+      min-width: 240px;
+      padding: 14px 20px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      background: var(--ink);
+      color: var(--text);
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .newsletter-input::placeholder {
+      color: var(--ink-muted);
+    }
+
+    .newsletter-input:focus {
+      border-color: var(--accent);
+    }
+
+    /* ═══ FOOTER ═══ */
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 2px solid var(--accent);
+      padding: var(--sp-8) clamp(24px, 5vw, 64px) var(--sp-6);
+      max-width: 1240px;
+      margin: 0 auto;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: var(--sp-7);
+      margin-bottom: var(--sp-6);
+    }
+
+    .footer-brand {
+      font-size: 1.3rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text);
+      margin-bottom: var(--sp-3);
+    }
+
+    .footer-brand span { color: var(--accent-bright); }
+
+    .footer-desc {
+      font-size: 0.92rem;
+      color: var(--text-mid);
+      line-height: 1.6;
+      max-width: 300px;
+    }
+
+    .footer-title {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 0.76rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text);
+      margin-bottom: var(--sp-3);
+    }
+
+    .footer-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .footer-links a {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .footer-links a:hover { color: var(--accent-bright); }
+
+    .footer-bottom {
+      border-top: 1px solid var(--border);
+      padding-top: var(--sp-4);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 0.75rem;
+      color: var(--ink-muted);
+      flex-wrap: wrap;
+      gap: var(--sp-3);
+    }
+
+    /* ═══ DIVIDER ═══ */
+    .accent-divider {
+      width: 48px;
+      height: 3px;
+      background: linear-gradient(to right, var(--accent), var(--accent-light));
+      margin: var(--sp-5) 0;
+    }
+
+    /* ═══ RESPONSIVE ═══ */
+    @media (max-width: 840px) {
+      .story-grid,
+      .visit-grid { grid-template-columns: 1fr; }
+      .stats-bar { grid-template-columns: 1fr 1fr; }
+      .harvest-chart { grid-template-columns: repeat(2, 1fr); height: auto; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+      .nav-links { display: none; }
+    }
+
+    @media (max-width: 480px) {
+      .stats-bar { grid-template-columns: 1fr; }
+      .harvest-chart { grid-template-columns: 1fr 1fr; }
+      .footer-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .scroll-hint { animation: none; }
+      .line-mask > span,
+      .blur-in,
+      .info-step,
+      .info-icon,
+      .harvest-bar,
+      .harvest-value {
+        animation: none !important;
+        transition: none !important;
+        transform: none !important;
+        opacity: 1 !important;
+        filter: none !important;
+      }
+
+      .info-connector path { stroke-dashoffset: 0 !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- WebGL Background -->
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+  <canvas id="bg-display" aria-hidden="true"></canvas>
+  <div id="bg-fallback" aria-hidden="true"></div>
+  <div id="vignette"></div>
+  <div id="file-gate" role="alertdialog" aria-labelledby="file-gate-title">
+    <div class="file-gate-card">
+      <h1 id="file-gate-title">Can't open from disk</h1>
+      <p>Chrome blocks this page when opened as a file (<code>file://</code>). That causes the security error you're seeing. Serve it over HTTP instead.</p>
+      <ol class="file-gate-steps">
+        <li>Open Terminal in the <code>motion</code> project folder</li>
+        <li>Run <code>npm run avocado</code></li>
+        <li>Your browser opens the page automatically</li>
+      </ol>
+      <p>Or run <code>npm run dev</code> and visit:
+        <span class="file-gate-url">http://localhost:5173/examples/avocado-farm.html</span>
+      </p>
+    </div>
+  </div>
+
+  <div id="content" class="page">
+
+    <!-- Navigation -->
+    <nav class="nav">
+      <div class="nav-inner">
+        <div class="nav-brand">Grove <span>&</span> Gold</div>
+        <ul class="nav-links">
+          <li><a href="#products">products</a></li>
+          <li><a href="#numbers">our process</a></li>
+          <li><a href="#story">story</a></li>
+          <li><a href="#recipes">recipes</a></li>
+          <li><a href="#visit">visit</a></li>
+        </ul>
+        <div class="nav-actions">
+          <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle light and dark theme">☀</button>
+          <a href="#newsletter" class="nav-cta">pre-order</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero" id="hero">
+      <div class="hero-inner glass glass-hero">
+        <div class="glass-glare" aria-hidden="true"></div>
+        <div class="hero-eyebrow blur-in">Coming summer 2026 — pre-orders open</div>
+        <h1 class="hero-title mask-reveal" aria-label="Avocados Grown with Gold">
+          <span class="line-mask"><span aria-hidden="true">Avocados</span></span>
+          <span class="line-mask"><span aria-hidden="true">Grown with <span class="accent">Gold</span></span></span>
+        </h1>
+        <p class="hero-sub blur-in">Small-batch, hand-picked Hass and Reed avocados from sun-drenched California groves. Richer flavor. Creamier texture. Harvested at peak ripeness and shipped within hours.</p>
+        <div class="hero-cta-row">
+          <a href="#newsletter" class="btn btn-primary">Reserve your July crate</a>
+          <a href="#story" class="btn btn-outline">our groves</a>
+        </div>
+        <div class="scroll-hint">scroll to explore</div>
+      </div>
+    </section>
+
+    <!-- Products -->
+    <section class="section-shell" id="products">
+      <div class="section-inner">
+        <div class="section-label">summer 2026</div>
+        <h2 class="section-title">Fresh from the <span>grove</span></h2>
+        <div class="accent-divider"></div>
+        <p class="section-desc">Each variety is grown in mineral-rich soil, dry-farmed without irrigation, and hand-harvested when the oil content peaks. Nothing but sun, earth, and time.</p>
+
+        <div class="products-grid">
+
+          <div class="product-card panel">
+            <div class="product-img"><img src="https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=640&q=80" alt="Hass avocados" loading="lazy"></div>
+            <div class="product-body">
+              <span class="product-tag">Flagship</span>
+              <div class="product-name">Hass Supreme</div>
+              <p class="product-desc">The classic. Extra-large Hass with a thick, pebbly skin and deep green flesh that turns golden near the pit. Nutty, buttery, perfect for everything.</p>
+              <div class="product-meta">
+                <div class="product-price">$3.50 <span class="product-unit">each</span></div>
+                <a href="#newsletter" class="product-btn">pre-order</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card panel">
+            <div class="product-img"><img src="https://images.unsplash.com/photo-1608030258794-021d431b85bf?w=640&q=80" alt="Green Reed avocado" loading="lazy"></div>
+            <div class="product-body">
+              <span class="product-tag">Rare</span>
+              <div class="product-name">Reed Avocado</div>
+              <p class="product-desc">Round, green-skinned, and impossibly creamy. The Reed is the connoisseur's choice — stays firm on the tree, ripens off the vine. Summer only.</p>
+              <div class="product-meta">
+                <div class="product-price">$5.00 <span class="product-unit">each</span></div>
+                <a href="#newsletter" class="product-btn">pre-order</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card panel">
+            <div class="product-img"><img src="https://images.unsplash.com/photo-1559183877-2226b710fc9c?w=640&q=80" alt="Sliced avocado" loading="lazy"></div>
+            <div class="product-body">
+              <span class="product-tag">New</span>
+              <div class="product-name">Fuerte Classic</div>
+              <p class="product-desc">Pear-shaped, thin-skinned, and zesty. The Fuerte has a lighter, almost herbal flavor with bright citrus notes. A California heirloom variety.</p>
+              <div class="product-meta">
+                <div class="product-price">$4.00 <span class="product-unit">each</span></div>
+                <a href="#newsletter" class="product-btn">pre-order</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card panel">
+            <div class="product-img"><img src="https://images.unsplash.com/photo-1628771065518-78d1d247f893?w=640&q=80" alt="Avocado spread in jar" loading="lazy"></div>
+            <div class="product-body">
+              <span class="product-tag">Best Seller</span>
+              <div class="product-name">Smashed Avocado</div>
+              <p class="product-desc">Ready-to-eat glass jars of hand-smashed avocado with sea salt, lime, and a hint of jalapeño. Perfect on toast, straight from the fridge.</p>
+              <div class="product-meta">
+                <div class="product-price">$9.99 <span class="product-unit">jar</span></div>
+                <a href="#newsletter" class="product-btn">pre-order</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card panel">
+            <div class="product-img"><img src="https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=640&q=80" alt="Avocado oil bottle" loading="lazy"></div>
+            <div class="product-body">
+              <span class="product-tag">Pantry</span>
+              <div class="product-name">Cold-Press Oil</div>
+              <p class="product-desc">First-press, unfiltered avocado oil from our overripe harvest. High smoke point, rich in oleic acid. Drizzle it on everything.</p>
+              <div class="product-meta">
+                <div class="product-price">$14.99 <span class="product-unit">bottle</span></div>
+                <a href="#newsletter" class="product-btn">pre-order</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-card panel">
+            <div class="product-img"><img src="https://images.unsplash.com/photo-1594282413336-7e0b88a0b6d8?w=640&q=80" alt="Wooden crate of avocados" loading="lazy"></div>
+            <div class="product-body">
+              <span class="product-tag">Bundle</span>
+              <div class="product-name">Grove Box — 12ct</div>
+              <p class="product-desc">A curated mix of our Hass and Reed avocados, packed in a reusable wooden crate. Enough for a week of perfect guac, toast, and smoothies.</p>
+              <div class="product-meta">
+                <div class="product-price">$39.99 <span class="product-unit">box</span></div>
+                <a href="#newsletter" class="product-btn">pre-order</a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- By the Numbers -->
+    <section class="section-shell section-alt" id="numbers">
+      <div class="section-inner">
+        <div class="section-label">by the numbers</div>
+        <h2 class="section-title">From grove to <span>table</span></h2>
+        <div class="accent-divider"></div>
+        <p class="section-desc">Every avocado follows the same path — hand-picked at peak oil content, sorted by density, and on a truck within hours. No warehouses. No ripening rooms.</p>
+
+        <div class="numbers-chapter">
+          <div class="stats-bar" data-animate-stats>
+            <div class="stat panel">
+              <div class="stat-number" data-count="12" data-suffix="">0</div>
+              <div class="stat-label">acres of groves</div>
+            </div>
+            <div class="stat panel">
+              <div class="stat-number" data-count="3" data-suffix="">0</div>
+              <div class="stat-label">avocado varieties</div>
+            </div>
+            <div class="stat panel">
+              <div class="stat-number" data-count="48" data-suffix="h">0</div>
+              <div class="stat-label">field to door</div>
+            </div>
+            <div class="stat panel">
+              <div class="stat-number" data-count="0" data-suffix="">0</div>
+              <div class="stat-label">chemicals used</div>
+            </div>
+          </div>
+
+          <div class="infographic" id="infographic" data-animate-infographic>
+            <div class="info-step panel" data-delay="0">
+              <div class="info-icon">🌳</div>
+              <div class="info-num" data-count="6" data-suffix=" AM">0</div>
+              <div class="info-label">hand-picked at dawn</div>
+            </div>
+            <svg class="info-connector" viewBox="0 0 48 24" aria-hidden="true"><path d="M4 12 H44" /></svg>
+            <div class="info-step panel" data-delay="1">
+              <div class="info-icon">📦</div>
+              <div class="info-num" data-count="4" data-suffix=" hrs">0</div>
+              <div class="info-label">packed same-day</div>
+            </div>
+            <svg class="info-connector" viewBox="0 0 48 24" aria-hidden="true"><path d="M4 12 H44" /></svg>
+            <div class="info-step panel" data-delay="2">
+              <div class="info-icon">🚚</div>
+              <div class="info-num" data-count="48" data-suffix=" hrs">0</div>
+              <div class="info-label">delivered coast to coast</div>
+            </div>
+          </div>
+
+          <div>
+            <div class="harvest-caption">2026 season · crates shipped</div>
+            <div class="harvest-chart panel" data-animate-chart>
+              <div class="harvest-bar-wrap">
+                <div class="harvest-value">2.4k</div>
+                <div class="harvest-bar" style="height: 55%;"></div>
+                <div class="harvest-month">june</div>
+              </div>
+              <div class="harvest-bar-wrap">
+                <div class="harvest-value">4.8k</div>
+                <div class="harvest-bar" style="height: 100%;"></div>
+                <div class="harvest-month">july</div>
+              </div>
+              <div class="harvest-bar-wrap">
+                <div class="harvest-value">3.6k</div>
+                <div class="harvest-bar" style="height: 75%;"></div>
+                <div class="harvest-month">august</div>
+              </div>
+              <div class="harvest-bar-wrap">
+                <div class="harvest-value">1.2k</div>
+                <div class="harvest-bar" style="height: 25%;"></div>
+                <div class="harvest-month">sept</div>
+              </div>
+            </div>
+            <p class="harvest-peak-note">July is our peak — Hass and Reed overlap for three weeks. Pre-order now to reserve a Grove Box.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Story -->
+    <section class="section-shell" id="story">
+      <div class="section-inner">
+        <div class="story-grid">
+          <div class="story-visual panel">
+            <img src="https://images.unsplash.com/photo-1592419044706-39796d40bc1f?w=800&q=80" alt="Avocado grove in golden light" loading="lazy">
+          </div>
+          <div class="story-copy">
+            <div class="eyebrow">our story</div>
+            <h2 class="reveal-scroll" aria-label="Three generations of sun and soil">
+              <span class="line-mask"><span aria-hidden="true">Three generations of</span></span>
+              <span class="line-mask"><span aria-hidden="true"><span style="color:var(--accent-bright)">sun & soil</span></span></span>
+            </h2>
+            <div class="accent-divider"></div>
+            <p>My grandfather planted the first Reed avocado tree in 1962. My mother dry-farmed Hass in clay-rich soil that nobody else wanted. I took over in 2019 and committed to one thing: <strong>growing the best avocado you've ever tasted</strong>, without a single shortcut.</p>
+            <p>We don't irrigate. We don't spray. We let the trees fight for water deep in the earth, which concentrates the oils and flavor. Every fruit is hand-picked, sorted by oil density, and packed the same day it leaves the branch.</p>
+            <p><strong>Summer 2026 is our biggest harvest yet.</strong> Pre-order now and be first in line when the crates arrive in July.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recipes -->
+    <section class="section-shell section-alt" id="recipes">
+      <div class="section-inner">
+        <div class="section-label">from our kitchen</div>
+        <h2 class="section-title">Recipes worth the <span>wait</span></h2>
+        <div class="accent-divider"></div>
+        <p class="section-desc">When your avocados arrive perfectly ripe, these are the first three things we make. Simple, fast, and built to let the fruit speak for itself.</p>
+
+        <div class="recipes-grid">
+          <article class="recipe-card panel">
+            <div class="recipe-img"><img src="https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=480&q=80" alt="Guacamole" loading="lazy"></div>
+            <div class="recipe-body">
+              <div class="recipe-time">10 min · Serves 2</div>
+              <h3 class="recipe-name">Perfect Guacamole</h3>
+              <p class="recipe-desc">Two ripe Hass, flaky sea salt, lime juice, and a pinch of cumin. Mash by hand — never a blender. Finish with diced red onion and cilantro from the garden.</p>
+            </div>
+          </article>
+          <article class="recipe-card panel">
+            <div class="recipe-img"><img src="https://images.unsplash.com/photo-1541519227359-08fa5d50c44d?w=480&q=80" alt="Avocado toast" loading="lazy"></div>
+            <div class="recipe-body">
+              <div class="recipe-time">5 min · Serves 1</div>
+              <h3 class="recipe-name">Grove Gold Toast</h3>
+              <p class="recipe-desc">Thick sourdough, smashed Reed avocado, chili flakes, and a drizzle of our cold-press oil. The Reed's round shape makes the perfect dome on every slice.</p>
+            </div>
+          </article>
+          <article class="recipe-card panel">
+            <div class="recipe-img"><img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=480&q=80" alt="Citrus avocado salad" loading="lazy"></div>
+            <div class="recipe-body">
+              <div class="recipe-time">15 min · Serves 4</div>
+              <h3 class="recipe-name">Citrus Avocado Salad</h3>
+              <p class="recipe-desc">Fuerte slices, blood orange segments, arugula, and pistachios. The Fuerte's herbal notes pair beautifully with bright citrus and a light vinaigrette.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sustainability -->
+    <section class="section-shell" id="practices">
+      <div class="section-inner">
+        <div class="section-label">how we grow</div>
+        <h2 class="section-title">Growing without <span>shortcuts</span></h2>
+        <div class="accent-divider"></div>
+        <p class="section-desc">We dry-farm on clay-rich hillsides that most growers abandoned decades ago. The trees work harder, the fruit tastes better, and the land stays healthier.</p>
+
+        <div class="practices-grid">
+          <div class="practice-card panel">
+            <div class="practice-icon">💧</div>
+            <div class="practice-name">Dry-Farmed</div>
+            <p class="practice-desc">No irrigation. Trees send roots 40 feet deep into mineral-rich clay, concentrating oils and flavor in every fruit.</p>
+          </div>
+          <div class="practice-card panel">
+            <div class="practice-icon">🐝</div>
+            <div class="practice-name">Pollinator-Friendly</div>
+            <p class="practice-desc">Wildflower corridors between rows attract native bees. We never spray — the ecosystem does the pest control.</p>
+          </div>
+          <div class="practice-card panel">
+            <div class="practice-icon">♻️</div>
+            <div class="practice-name">Zero Waste</div>
+            <p class="practice-desc">Overripe fruit becomes cold-press oil. Skins and pits feed our compost. Wooden crates are returnable and reusable.</p>
+          </div>
+          <div class="practice-card panel">
+            <div class="practice-icon">🌡️</div>
+            <div class="practice-name">Oil-Density Sorting</div>
+            <p class="practice-desc">Every avocado is tested for oil content before packing. Only fruit above 20% oil makes it into a Grove Box.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="section-shell section-alt" id="testimonials">
+      <div class="section-inner">
+        <div class="section-label">what people say</div>
+        <h2 class="section-title">Tasted to <span>believe</span></h2>
+        <div class="accent-divider"></div>
+
+        <div class="testimonials-grid">
+          <blockquote class="testimonial panel">
+            <p class="testimonial-text">I've bought avocados from farmers markets across California for twenty years. Grove & Gold is the first crate where every single fruit was perfect — creamy, nutty, no brown spots.</p>
+            <cite class="testimonial-author">— Elena M., San Francisco</cite>
+          </blockquote>
+          <blockquote class="testimonial panel">
+            <p class="testimonial-text">The Reed avocados changed how I think about guacamole. They're so rich you barely need anything else. My restaurant switched our entire avocado order to Grove & Gold.</p>
+            <cite class="testimonial-author">— Chef David R., Los Angeles</cite>
+          </blockquote>
+          <blockquote class="testimonial panel">
+            <p class="testimonial-text">48 hours from tree to my door in Portland. They arrived firm enough to ripen on the counter over five days — exactly the window they promised. Unreal logistics.</p>
+            <cite class="testimonial-author">— Marcus T., Portland</cite>
+          </blockquote>
+        </div>
+      </div>
+    </section>
+
+    <!-- Visit -->
+    <section class="section-shell" id="visit">
+      <div class="section-inner">
+        <div class="visit-grid">
+          <div class="visit-map panel">
+            <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&q=80" alt="Rolling green hills of Fallbrook" loading="lazy">
+            <div class="visit-map-overlay">
+              <div class="visit-location">Fallbrook, California</div>
+            </div>
+          </div>
+          <div class="visit-details">
+            <div class="section-label">visit the grove</div>
+            <h2 class="section-title">Walk the rows <span>with us</span></h2>
+            <div class="accent-divider"></div>
+            <p class="section-desc" style="margin-bottom: 0;">We open the groves for guided tours every Saturday during harvest season. Taste fruit straight from the branch, meet the family, and see dry-farming up close.</p>
+
+            <div class="visit-detail">
+              <div class="visit-detail-icon">📅</div>
+              <div>
+                <h4>Tour Schedule</h4>
+                <p>Saturdays, June–September · 9am and 11am · $25 per person, includes a 6-pack to take home</p>
+              </div>
+            </div>
+            <div class="visit-detail">
+              <div class="visit-detail-icon">🗺️</div>
+              <div>
+                <h4>Location</h4>
+                <p>4120 Grove Road, Fallbrook CA 92028 · 45 min north of San Diego, 90 min south of LA</p>
+              </div>
+            </div>
+            <div class="visit-detail">
+              <div class="visit-detail-icon">👨‍🌾</div>
+              <div>
+                <h4>Private Events</h4>
+                <p>Host a farm dinner among the trees. We seat up to 40 guests with a seasonal menu built around the day's harvest.</p>
+              </div>
+            </div>
+            <a href="#newsletter" class="btn btn-primary" style="align-self: flex-start; margin-top: var(--sp-2);">book a tour</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section-shell section-alt" id="faq">
+      <div class="section-inner">
+        <div class="section-label">questions</div>
+        <h2 class="section-title">Frequently <span>asked</span></h2>
+        <div class="accent-divider"></div>
+
+        <div class="faq-list">
+          <div class="faq-item panel">
+            <button class="faq-q" type="button">When does the 2026 harvest ship?</button>
+            <div class="faq-a"><div class="faq-a-inner">Pre-orders open now. First crates ship the week of July 7, 2026, with Reed avocados leading the season in late June for early pre-order customers.</div></div>
+          </div>
+          <div class="faq-item panel">
+            <button class="faq-q" type="button">How do you ship avocados without bruising?</button>
+            <div class="faq-a"><div class="faq-a-inner">We pick at 60% maturity — firm enough to travel, ripe enough to develop full flavor on your counter in 3–5 days. Each fruit is nestled in molded pulp trays inside breathable wooden crates.</div></div>
+          </div>
+          <div class="faq-item panel">
+            <button class="faq-q" type="button">What makes dry-farmed avocados different?</button>
+            <div class="faq-a"><div class="faq-a-inner">Without irrigation, trees stress slightly — which concentrates oil content and deepens flavor. Our Hass averages 22% oil versus the industry standard of 18%. You taste the difference in the first bite.</div></div>
+          </div>
+          <div class="faq-item panel">
+            <button class="faq-q" type="button">Can I visit the farm before ordering?</button>
+            <div class="faq-a"><div class="faq-a-inner">Absolutely. Saturday tours run June through September. Many of our best customers toured first, tasted fruit off the tree, and pre-ordered on the spot. Book through our newsletter or email hello@groveandgold.com.</div></div>
+          </div>
+          <div class="faq-item panel">
+            <button class="faq-q" type="button">Do you ship outside California?</button>
+            <div class="faq-a"><div class="faq-a-inner">Yes — we ship to all 48 contiguous states via overnight cold-chain freight. West Coast deliveries arrive in 24 hours; East Coast in 48. Shipping is included on Grove Box orders over $50.</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Newsletter -->
+    <section class="newsletter" id="newsletter">
+      <div class="newsletter-panel panel">
+        <h2>Reserve your <span>July crate</span></h2>
+        <p>Pre-orders open for summer 2026. Get harvest updates, recipes, and first access when crates ship the week of July 7.</p>
+        <form class="newsletter-form" onsubmit="event.preventDefault(); this.querySelector('button').textContent='you\'re in'; this.querySelector('input').disabled=true;">
+          <input type="email" class="newsletter-input" placeholder="your@email.com" required aria-label="Email address">
+          <button type="submit" class="btn btn-primary">join the grove</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand">Grove <span>&</span> Gold</div>
+          <p class="footer-desc">Small-batch avocados from sun-drenched California groves. Grown with patience. Harvested with care.</p>
+        </div>
+        <div>
+          <div class="footer-title">Shop</div>
+          <ul class="footer-links">
+            <li><a href="#products">All Products</a></li>
+            <li><a href="#recipes">Recipes</a></li>
+            <li><a href="#numbers">By the Numbers</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="footer-title">Grove</div>
+          <ul class="footer-links">
+            <li><a href="#story">Our Story</a></li>
+            <li><a href="#visit">Visit the Farm</a></li>
+            <li><a href="#practices">Sustainability</a></li>
+            <li><a href="#faq">FAQ</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="footer-title">Connect</div>
+          <ul class="footer-links">
+            <li><a href="#">Instagram</a></li>
+            <li><a href="#">Newsletter</a></li>
+            <li><a href="#">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>&copy; 2026 Grove & Gold. All rights reserved.</span>
+        <span>Grown in California</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- WebGL Shader Background (aurora preset — green palette) -->
+  <script>
+  (function(){
+    if (document.documentElement.dataset.noWebgl) return;
+
+    var canvas = document.getElementById('bg-canvas');
+    var display = document.getElementById('bg-display');
+    var displayCtx = display && display.getContext('2d', { alpha: false });
+    var gl = canvas.getContext('webgl', {
+      alpha: false,
+      antialias: false,
+      depth: false,
+      stencil: false,
+      preserveDrawingBuffer: true,
+      powerPreference: 'high-performance'
+    }) || canvas.getContext('experimental-webgl', { preserveDrawingBuffer: true });
+
+    if (!gl || !displayCtx) {
+      document.documentElement.dataset.noWebgl = '1';
+      return;
+    }
+
+    var VS = 'attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }';
+    var FS = [
+      'precision highp float;',
+      'uniform vec2 u_res;',
+      'uniform float u_phase;',
+      'uniform float u_seed;',
+      'uniform float u_speed, u_scale, u_density, u_distort, u_detail, u_grain;',
+      'uniform vec3 u_c0, u_c1, u_c2, u_c3;',
+      '',
+      '#define TAU 6.28318530718',
+      '',
+      'float hash21(vec2 p){',
+      '    p = fract(p * vec2(234.34, 435.345));',
+      '    p += dot(p, p + 34.23);',
+      '    return fract(p.x * p.y);',
+      '}',
+      '',
+      'float vnoise(vec2 p){',
+      '    vec2 i = floor(p), f = fract(p);',
+      '    f = f * f * (3.0 - 2.0 * f);',
+      '    float a = hash21(i);',
+      '    float b = hash21(i + vec2(1.0, 0.0));',
+      '    float c = hash21(i + vec2(0.0, 1.0));',
+      '    float d = hash21(i + vec2(1.0, 1.0));',
+      '    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);',
+      '}',
+      '',
+      'float fbm(vec2 p){',
+      '    float v = 0.0, a = 0.5;',
+      '    mat2 r = mat2(0.80, 0.60, -0.60, 0.80);',
+      '    for (int i = 0; i < 5; i++){',
+      '        v += a * vnoise(p);',
+      '        p = r * p * 2.1 + vec2(1.7, 9.2);',
+      '        a *= 0.5;',
+      '    }',
+      '    return v;',
+      '}',
+      '',
+      'vec2 loopOff(){',
+      '    return vec2(cos(u_phase), sin(u_phase)) * (0.10 + 0.55 * u_speed);',
+      '}',
+      '',
+      'vec3 grad4(float t){',
+      '    t = clamp(t, 0.0, 1.0);',
+      '    vec3 c = mix(u_c0, u_c1, smoothstep(0.00, 0.35, t));',
+      '    c = mix(c, u_c2, smoothstep(0.35, 0.70, t));',
+      '    c = mix(c, u_c3, smoothstep(0.70, 1.00, t));',
+      '    return c;',
+      '}',
+      '',
+      'void main(){',
+      '    vec2 uv = gl_FragCoord.xy / u_res;',
+      '    uv.y = 1.0 - uv.y;',
+      '    float ar = u_res.x / u_res.y;',
+      '    vec2 sOff = vec2(fract(u_seed * 0.193), fract(u_seed * 0.317)) * 47.0;',
+      '    vec3 col = vec3(0.0);',
+      '',
+      '    /* aurora */',
+      '    vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(2.0, 5.0, u_scale) + sOff;',
+      '    float t = u_phase * mix(0.15, 0.6, u_speed);',
+      '    float q1 = fbm(p + loopOff());',
+      '    vec2 d1 = vec2(q1, fbm(p + vec2(5.2, 1.3) + t * 0.1 + loopOff()));',
+      '    float q2 = fbm(p + d1 * mix(0.3, 1.8, u_distort));',
+      '    vec2 d2 = vec2(q2, fbm(p + vec2(1.7, 4.6) + t * 0.12 + loopOff()));',
+      '    float f = fbm(p + d2 * mix(0.4, 2.0, u_distort));',
+      '    float ridge = 1.0 - smoothstep(0.0, mix(0.3, 0.8, u_density), f);',
+      '    float wave = 0.5 + 0.5 * sin(uv.x * 4.0 + f * 6.0 + t);',
+      '    col = grad4(clamp(f + ridge * 0.4, 0.0, 1.0));',
+      '    col += u_c3 * ridge * mix(0.15, 0.5, u_detail) * wave;',
+      '    col *= mix(0.5, 1.2, 1.0 - uv.y * 0.5);',
+      '',
+      '    /* film grain */',
+      '    col += (hash21(gl_FragCoord.xy + vec2(u_phase * 91.3)) - 0.5) * u_grain * 0.18;',
+      '    vec2 vig = uv * 2.0 - 1.0;',
+      '    col *= 1.0 - dot(vig, vig) * 0.18;',
+      '',
+      '    gl_FragColor = vec4(col, 1.0);',
+      '}'
+    ].join('\n');
+
+    function compileShader(type, src) {
+      var s = gl.createShader(type);
+      gl.shaderSource(s, src);
+      gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+        console.error(gl.getShaderInfoLog(s));
+        gl.deleteShader(s);
+        return null;
+      }
+      return s;
+    }
+
+    var vs = compileShader(gl.VERTEX_SHADER, VS);
+    var fs = compileShader(gl.FRAGMENT_SHADER, FS);
+    if (!vs || !fs) { return; }
+
+    var prog = gl.createProgram();
+    gl.attachShader(prog, vs);
+    gl.attachShader(prog, fs);
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+      console.error('Link: ' + gl.getProgramInfoLog(prog));
+      return;
+    }
+    gl.useProgram(prog);
+
+    var buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
+    var aLoc = gl.getAttribLocation(prog, 'a');
+    gl.enableVertexAttribArray(aLoc);
+    gl.vertexAttribPointer(aLoc, 2, gl.FLOAT, false, 0, 0);
+
+    var U = {};
+    ['u_res','u_phase','u_seed','u_speed','u_scale','u_density','u_distort','u_detail','u_grain','u_c0','u_c1','u_c2','u_c3'].forEach(function(n){
+      U[n] = gl.getUniformLocation(prog, n);
+    });
+
+    // Green-tinted aurora palette matching Pistachio Cream
+    var palette = [
+      [0.043, 0.075, 0.035],  // #0B1305 — deep forest
+      [0.176, 0.267, 0.129],  // #2D4421 — olive
+      [0.329, 0.522, 0.243],  // #54853E — sage
+      [0.639, 0.800, 0.086]   // #A3CC16 — lime gold
+    ];
+
+    var dpr = 1;
+    var bufW = 0;
+    var bufH = 0;
+    var resizing = false;
+    var resizeTimer;
+
+    function resize() {
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      var cssW = Math.max(1, window.innerWidth);
+      var cssH = Math.max(1, window.innerHeight);
+      var nextW = Math.round(cssW * dpr);
+      var nextH = Math.round(cssH * dpr);
+      if (nextW === bufW && nextH === bufH) return;
+
+      resizing = true;
+      bufW = nextW;
+      bufH = nextH;
+      canvas.width = nextW;
+      canvas.height = nextH;
+      display.style.width = cssW + 'px';
+      display.style.height = cssH + 'px';
+      display.width = nextW;
+      display.height = nextH;
+      gl.viewport(0, 0, nextW, nextH);
+      resizing = false;
+    }
+
+    function onResize() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(resize, 100);
+    }
+
+    window.addEventListener('resize', onResize, { passive: true });
+    resize();
+
+    var t0 = performance.now();
+    var LOOP = 12;
+    var rafId = 0;
+
+    function render(now) {
+      if (resizing || bufW < 1 || bufH < 1) {
+        rafId = requestAnimationFrame(render);
+        return;
+      }
+
+      var time = (now - t0) / 1000;
+      var phase = (time / LOOP * Math.PI * 2) % (Math.PI * 2);
+
+      gl.viewport(0, 0, bufW, bufH);
+      gl.uniform2f(U.u_res, bufW, bufH);
+      gl.uniform1f(U.u_phase, phase);
+      gl.uniform1f(U.u_seed, 1234 * 0.6180339887 % 12.566);
+      gl.uniform1f(U.u_speed, 0.28);
+      gl.uniform1f(U.u_scale, 0.55);
+      gl.uniform1f(U.u_density, 0.40);
+      gl.uniform1f(U.u_distort, 0.40);
+      gl.uniform1f(U.u_detail, 0.50);
+      gl.uniform1f(U.u_grain, 0.25);
+      gl.uniform3fv(U.u_c0, palette[0]);
+      gl.uniform3fv(U.u_c1, palette[1]);
+      gl.uniform3fv(U.u_c2, palette[2]);
+      gl.uniform3fv(U.u_c3, palette[3]);
+
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      displayCtx.drawImage(canvas, 0, 0, bufW, bufH);
+      rafId = requestAnimationFrame(render);
+    }
+
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) {
+        cancelAnimationFrame(rafId);
+      } else {
+        t0 = performance.now();
+        rafId = requestAnimationFrame(render);
+      }
+    });
+
+    rafId = requestAnimationFrame(render);
+  })();
+  </script>
+
+  <!-- Kinetic typography + data animation -->
+  <script>
+  (function () {
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var freezeT = new URLSearchParams(location.search).get('t');
+
+    function easeOutCubic(t) {
+      return 1 - Math.pow(1 - t, 3);
+    }
+
+    function animateCounter(el, target, suffix, duration, delay) {
+      if (reduced) {
+        el.textContent = target + (suffix || '');
+        return;
+      }
+      var start = null;
+      function tick(now) {
+        if (!start) start = now;
+        var elapsed = now - start - (delay || 0);
+        if (elapsed < 0) { requestAnimationFrame(tick); return; }
+        var p = Math.min(elapsed / duration, 1);
+        var val = Math.round(easeOutCubic(p) * target);
+        el.textContent = new Intl.NumberFormat('en-US').format(val) + (suffix || '');
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    function initHero() {
+      document.querySelectorAll('.mask-reveal, .blur-in').forEach(function (el) {
+        el.classList.add('is-ready');
+      });
+      if (freezeT !== null) {
+        document.querySelectorAll('.mask-reveal .line-mask > span, .blur-in').forEach(function (el) {
+          el.style.animationDelay = (-parseFloat(freezeT)) + 's';
+          el.style.animationPlayState = 'paused';
+        });
+      }
+    }
+
+    function initScrollReveals() {
+      var targets = document.querySelectorAll('.reveal-scroll, [data-animate-stats], [data-animate-infographic], [data-animate-chart]');
+      if (!targets.length) return;
+
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          var el = entry.target;
+
+          if (el.classList.contains('reveal-scroll')) {
+            el.classList.add('is-visible');
+          }
+
+          if (el.hasAttribute('data-animate-stats') && !el.dataset.done) {
+            el.dataset.done = '1';
+            var nums = el.querySelectorAll('[data-count]');
+            nums.forEach(function (num, i) {
+              animateCounter(num, parseInt(num.dataset.count, 10), num.dataset.suffix || '', 1200, i * 200);
+            });
+          }
+
+          if (el.hasAttribute('data-animate-chart')) {
+            el.classList.add('is-visible');
+          }
+
+          if (el.hasAttribute('data-animate-infographic') && !el.dataset.done) {
+            el.dataset.done = '1';
+            var steps = el.querySelectorAll('.info-step');
+            var connectors = el.querySelectorAll('.info-connector');
+            steps.forEach(function (step, i) {
+              setTimeout(function () {
+                step.classList.add('is-visible');
+                var num = step.querySelector('[data-count]');
+                if (num) {
+                  animateCounter(num, parseInt(num.dataset.count, 10), num.dataset.suffix || '', 900, 200);
+                }
+                if (connectors[i]) {
+                  setTimeout(function () { connectors[i].classList.add('is-visible'); }, 400);
+                }
+              }, i * 500);
+            });
+          }
+
+          observer.unobserve(el);
+        });
+      }, { threshold: 0.25 });
+
+      targets.forEach(function (el) { observer.observe(el); });
+    }
+
+    function initFaq() {
+      document.querySelectorAll('.faq-q').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var item = btn.closest('.faq-item');
+          var wasOpen = item.classList.contains('is-open');
+          document.querySelectorAll('.faq-item.is-open').forEach(function (open) {
+            open.classList.remove('is-open');
+          });
+          if (!wasOpen) item.classList.add('is-open');
+        });
+      });
+    }
+
+    if (reduced) {
+      document.querySelectorAll('.mask-reveal .line-mask > span, .blur-in, .info-step, .harvest-bar, .harvest-value').forEach(function (el) {
+        el.style.transform = 'none';
+        el.style.opacity = '1';
+        el.style.filter = 'none';
+      });
+      document.querySelectorAll('[data-count]').forEach(function (el) {
+        el.textContent = el.dataset.count + (el.dataset.suffix || '');
+      });
+      document.querySelectorAll('.info-step, .harvest-chart').forEach(function (el) {
+        el.classList.add('is-visible');
+      });
+    }
+
+    function initGlassGlare() {
+      var hero = document.querySelector('.glass-hero');
+      if (!hero || reduced) return;
+      hero.addEventListener('mousemove', function (e) {
+        var r = hero.getBoundingClientRect();
+        hero.style.setProperty('--gx', ((e.clientX - r.left) / r.width * 100) + '%');
+        hero.style.setProperty('--gy', ((e.clientY - r.top) / r.height * 100) + '%');
+      });
+      hero.addEventListener('mouseleave', function () {
+        hero.style.setProperty('--gx', '50%');
+        hero.style.setProperty('--gy', '40%');
+      });
+    }
+
+    function initThemeToggle() {
+      var btn = document.getElementById('theme-toggle');
+      var root = document.documentElement;
+      if (!btn) return;
+
+      function syncIcon() {
+        var theme = root.dataset.theme === 'light' ? 'light' : 'dark';
+        btn.textContent = theme === 'dark' ? '\u2600' : '\u263E';
+        btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+      }
+
+      syncIcon();
+
+      btn.addEventListener('click', function () {
+        var next = root.dataset.theme === 'light' ? 'dark' : 'light';
+        root.dataset.theme = next;
+        try { localStorage.setItem('grove-theme', next); } catch (e) {}
+        syncIcon();
+      });
+    }
+
+    initThemeToggle();
+
+    document.fonts.ready.then(function () {
+      initHero();
+      initScrollReveals();
+      initFaq();
+      initGlassGlare();
+      window.__ready = true;
+    });
+  })();
+  </script>
+
+</body>
+</html>
