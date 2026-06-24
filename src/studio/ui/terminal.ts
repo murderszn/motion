@@ -39,9 +39,51 @@ let termRetries = 0;
 let termFitAddon: FitAddonInstance | null = null;
 let resizeListener: Disposable | null = null;
 let dataListener:   Disposable | null = null;
+let lastCols = 0;
+let lastRows = 0;
+let fitRaf = 0;
+let fitDelayTimer: ReturnType<typeof setTimeout> | null = null;
+
+function termVisible(): boolean {
+  const bottom = $('bottom');
+  return !bottom.classList.contains('hidden')
+    && !document.body.classList.contains('term-closed')
+    && ($('term-xterm') as HTMLElement).style.display !== 'none';
+}
+
+function syncPtySize(): void {
+  if (!term || !ws || ws.readyState !== WebSocket.OPEN) return;
+  const { cols, rows } = term;
+  if (cols === lastCols && rows === lastRows) return;
+  lastCols = cols;
+  lastRows = rows;
+  ws.send(JSON.stringify({ type: 'resize', cols, rows }));
+}
 
 export function fitTerminal(): void {
-  if (termFitAddon) { try { termFitAddon.fit(); } catch { /* ignore */ } }
+  if (!termFitAddon || !term || !termVisible()) return;
+  const container = $('term-xterm');
+  if (container.clientWidth < 1 || container.clientHeight < 1) return;
+  try {
+    termFitAddon.fit();
+    syncPtySize();
+  } catch { /* ignore */ }
+}
+
+/** Debounced fit — waits for layout + CSS grid transitions before syncing PTY size. */
+export function scheduleFitTerminal(): void {
+  if (fitRaf) cancelAnimationFrame(fitRaf);
+  fitRaf = requestAnimationFrame(() => {
+    fitRaf = requestAnimationFrame(() => {
+      fitRaf = 0;
+      fitTerminal();
+    });
+  });
+  if (fitDelayTimer) clearTimeout(fitDelayTimer);
+  fitDelayTimer = setTimeout(() => {
+    fitDelayTimer = null;
+    fitTerminal();
+  }, 300);
 }
 
 export function logToTerminal(msg: string, cls?: string): void {
@@ -91,8 +133,24 @@ export function initTerminal(themeKey: string, termRef: XTerm | null = null): vo
       const vars = THEMES[window.currentThemeKey]?.variables;
       if (vars) applyTermTheme(vars);
     }
-    fitTerminal();
-    window.addEventListener('resize', fitTerminal);
+    scheduleFitTerminal();
+    window.addEventListener('resize', scheduleFitTerminal);
+
+    const ro = new ResizeObserver(() => scheduleFitTerminal());
+    ro.observe($('bottom'));
+    ro.observe($('term-xterm'));
+
+    new MutationObserver(() => scheduleFitTerminal()).observe(document.body, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+
+    document.body.addEventListener('transitionend', e => {
+      if (e.target === document.body
+        && (e.propertyName === 'grid-template-rows' || e.propertyName === 'grid-template-columns')) {
+        scheduleFitTerminal();
+      }
+    });
 
     let wsRetries = 0;
     function connect(): void {
@@ -102,12 +160,14 @@ export function initTerminal(themeKey: string, termRef: XTerm | null = null): vo
         ws = new WebSocket(`ws://${location.host}/terminal`);
         ws.onopen = () => {
           wsRetries = 0;
-          fitTerminal();
+          lastCols = 0;
+          lastRows = 0;
+          scheduleFitTerminal();
           term!.focus();
           window.termReady = true;
-          const { cols, rows } = term!;
-          ws!.send(JSON.stringify({ type: 'resize', cols, rows }));
           resizeListener = term!.onResize(({ cols, rows }) => {
+            lastCols = cols;
+            lastRows = rows;
             if (ws && ws.readyState === WebSocket.OPEN)
               ws.send(JSON.stringify({ type: 'resize', cols, rows }));
           });
@@ -127,7 +187,7 @@ export function initTerminal(themeKey: string, termRef: XTerm | null = null): vo
 
     new MutationObserver(() => {
       if (!$('bottom').classList.contains('hidden')) {
-        fitTerminal();
+        scheduleFitTerminal();
         if (!ws || ws.readyState !== WebSocket.OPEN) connect();
       }
     }).observe($('bottom'), { attributes: true, attributeFilter: ['class'] });
@@ -176,6 +236,7 @@ export function initResizeDragHandle(): void {
     document.body.classList.remove('dragging-term');
     document.removeEventListener('mousemove', onMove);
     document.removeEventListener('mouseup', onUp);
+    scheduleFitTerminal();
   }
   handle.addEventListener('mousedown', e => {
     e.preventDefault();

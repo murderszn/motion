@@ -27,7 +27,7 @@
     --left-w:    48px;
     --right-w:   290px;
     --text-w:    0px;
-    --bottom-h:  180px;
+    --bottom-h:  320px;
 }
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
@@ -490,6 +490,8 @@ input[type=range]::-moz-range-thumb {
     display: flex;
     flex-direction: column;
     position: relative;
+    min-height: 0;
+    overflow: hidden;
 }
 #bottom.hidden { display: none; }
 
@@ -564,10 +566,16 @@ input[type=range]::-moz-range-thumb {
 
 #term-xterm {
     flex: 1;
+    min-height: 0;
+    min-width: 0;
     overflow: hidden;
     padding: 4px 0 4px 4px;
+    position: relative;
 }
-#term-xterm .xterm { height: 100%; }
+#term-xterm .xterm {
+    width: 100%;
+    height: 100%;
+}
 #term-xterm .xterm-viewport { scrollbar-width: thin; }
 
 /* maximized terminal — stage collapses, terminal fills remaining height */
@@ -737,7 +745,7 @@ footer .right { margin-left: auto; display: flex; gap: 10px; min-width: 0; flex:
 @media (max-width: 700px) {
     body {
         --left-w: 40px;
-        --bottom-h: 150px;
+        --bottom-h: 240px;
     }
     body.text-open { --text-w: min(240px, calc(100vw - var(--left-w))); }
     header {

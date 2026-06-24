@@ -4,7 +4,7 @@
 // ─────────────────────────────────────────────────────────
 
 import { THEMES } from '../state';
-import { fitTerminal, updateTermTheme, logToTerminal } from './terminal';
+import { scheduleFitTerminal, updateTermTheme, logToTerminal } from './terminal';
 import { renderTextOverlay, toggleTextTool, textToolActive } from './text';
 
 const $ = (id: string) => document.getElementById(id)!;
@@ -48,6 +48,7 @@ export function selectLeftTab(tab: 'generator' | 'text'): void {
     document.body.classList.add('text-open');
   }
   setTimeout(renderTextOverlay, 10);
+  scheduleFitTerminal();
 }
 
 // ── Toggles ──────────────────────────────────────────────
@@ -62,12 +63,14 @@ export function togglePanel(): void {
   }
   $('togPanel').classList.toggle('active', open);
   $('sRight').textContent = open ? '☰ panel' : '☰';
+  scheduleFitTerminal();
 }
 
 export function toggleLeft(): void {
   document.body.classList.toggle('left-closed');
   const open = !document.body.classList.contains('left-closed');
   $('sLeft').textContent = open ? '◀' : '▶';
+  scheduleFitTerminal();
 }
 
 export function toggleTerm(): void {
@@ -76,11 +79,12 @@ export function toggleTerm(): void {
   $('togTerm').classList.toggle('active', open);
   $('sTerm').textContent = open ? '▤ term' : '▤';
   $('bottom').classList.toggle('hidden', !open);
+  if (open) scheduleFitTerminal();
 }
 
 export function toggleMaximize(): void {
   document.body.classList.toggle('term-maximized');
-  setTimeout(fitTerminal, 0);
+  scheduleFitTerminal();
 }
 
 // ── Theme ────────────────────────────────────────────────

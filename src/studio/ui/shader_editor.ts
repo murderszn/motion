@@ -3,7 +3,7 @@
 // ─────────────────────────────────────────────────────────
 
 import { FS, compileNewFS } from '../webgl';
-import { fitTerminal } from './terminal';
+import { scheduleFitTerminal } from './terminal';
 import { toggleMaximize } from './sidebar';
 
 const $ = (id: string) => document.getElementById(id)!;
@@ -47,7 +47,7 @@ function selectTab(tab: 'term' | 'shader' | 'problems' | 'hotkeys'): void {
   if (tab === 'term') {
     tabTerm.classList.add('active');
     (termXterm as HTMLElement).style.display = 'block';
-    fitTerminal();
+    scheduleFitTerminal();
   } else if (tab === 'shader') {
     tabShader.classList.add('active');
     (termEditor as HTMLElement).style.display = 'flex';
