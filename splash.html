@@ -764,96 +764,6 @@
       .offerings-grid { grid-template-columns: 1fr; }
     }
 
-    /* ── platforms grid ── */
-    .platforms-section {
-      width: 100%;
-      max-width: 1000px;
-      margin-top: 7rem;
-      text-align: center;
-      opacity: 0;
-      animation: fadeUp 1.4s 2.1s cubic-bezier(0.16,1,0.3,1) both;
-      pointer-events: auto;
-    }
-
-    .platforms-title {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.85rem;
-      font-weight: 800;
-      letter-spacing: 0.28em;
-      text-transform: uppercase;
-      color: #e03a3a;
-      margin-bottom: 1rem;
-    }
-
-    .platforms-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.5rem;
-      margin-top: 0;
-    }
-
-    @media (max-width: 768px) {
-      .platforms-grid {
-        grid-template-columns: 1fr;
-        gap: 1.2rem;
-      }
-    }
-
-    .platform-card {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 4px;
-      padding: 24px;
-      text-align: left;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      transition: border-color 0.2s ease, background 0.2s ease;
-    }
-
-    .platform-card:hover {
-      border-color: rgba(255, 255, 255, 0.2);
-      background: rgba(255, 255, 255, 0.12);
-    }
-
-    .platform-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 6px;
-      background: rgba(255, 255, 255, 0.06);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #e03a3a;
-      margin-bottom: 4px;
-    }
-
-    .platform-icon svg {
-      width: 16px;
-      height: 16px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
-    .platform-heading {
-      font-family: 'Inter', sans-serif;
-      font-weight: 600;
-      font-size: 0.95rem;
-      color: #ffffff;
-    }
-
-    .platform-desc {
-      font-family: 'Inter', sans-serif;
-      font-size: 0.72rem;
-      line-height: 1.55;
-      color: rgba(255, 255, 255, 0.75);
-    }
-
     /* ── faq section ── */
     .faq-section {
       width: 100%;
@@ -940,85 +850,6 @@
     .faq-item.active .faq-answer {
       max-height: 220px;
       padding-bottom: 18px;
-    }
-
-    /* ── technical rundown & footer grid ── */
-    .rundown-section {
-      width: 100%;
-      max-width: 1000px;
-      margin-top: 7rem;
-      text-align: center;
-      opacity: 0;
-      animation: fadeUp 1.4s 2.3s cubic-bezier(0.16,1,0.3,1) both;
-      pointer-events: auto;
-    }
-
-    .rundown-title {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.85rem;
-      font-weight: 800;
-      letter-spacing: 0.28em;
-      text-transform: uppercase;
-      color: #e03a3a;
-      margin-bottom: 1rem;
-    }
-
-    .rundown-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1.2rem;
-      margin-top: 1.7rem;
-    }
-
-    @media (max-width: 768px) {
-      .rundown-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-    @media (max-width: 480px) {
-      .rundown-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .rundown-card {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 4px;
-      padding: 18px;
-      text-align: left;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      transition: border-color 0.2s ease, background 0.2s ease;
-      text-decoration: none;
-    }
-
-    .rundown-card:hover {
-      border-color: rgba(255, 255, 255, 0.2);
-      background: rgba(255, 255, 255, 0.12);
-    }
-
-    .rundown-card .category {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.55rem;
-      color: rgba(255, 255, 255, 0.5);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .rundown-card .name {
-      font-family: 'Inter', sans-serif;
-      font-weight: 500;
-      font-size: 0.78rem;
-      color: #ffffff;
-    }
-
-    .rundown-card .desc {
-      font-family: 'Inter', sans-serif;
-      font-size: 0.65rem;
-      line-height: 1.45;
-      color: rgba(255, 255, 255, 0.7);
     }
 
     /* ── bottom cta banner ── */
@@ -1161,9 +992,7 @@
     .terminal-block,
     .playground-container,
     .step-card,
-    .platform-card,
-    .faq-item,
-    .rundown-card {
+    .faq-item {
       background: rgba(255, 255, 255, 0.13) !important;
       -webkit-backdrop-filter: blur(26px) saturate(180%);
       backdrop-filter: blur(26px) saturate(180%);
@@ -1172,9 +1001,7 @@
     }
     .terminal-block:hover,
     .step-card:hover,
-    .platform-card:hover,
-    .faq-item:hover,
-    .rundown-card:hover {
+    .faq-item:hover {
       background: rgba(255, 255, 255, 0.2) !important;
     }
 
@@ -1197,12 +1024,53 @@
     .reveal.d3 { transition-delay: 0.5s; }
     .reveal.d4 { transition-delay: 0.7s; }
     .reveal.d5 { transition-delay: 0.9s; }
+
+    /* ── background tint — bare swatch, bottom-left ── */
+    #tint-fab {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 1.5rem;
+      z-index: 100;
+      width: 1.5rem;
+      height: 1.5rem;
+      display: block;
+      cursor: pointer;
+      pointer-events: auto;
+      border-radius: 4px;
+      overflow: hidden;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+    #tint-fab:hover { transform: scale(1.08); opacity: 0.92; }
+    #tint-swatch {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: 4px;
+      background: #e03a3a;
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14);
+      pointer-events: none;
+    }
+    #tint-picker {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+      border: none;
+      padding: 0;
+    }
   </style>
 </head>
 <body>
   <canvas id="bg-canvas"></canvas>
   <div id="vignette"></div>
   <div id="grain"></div>
+
+  <label id="tint-fab" for="tint-picker" title="Background tint">
+    <span id="tint-swatch" aria-hidden="true"></span>
+    <input type="color" id="tint-picker" value="#e03a3a" aria-label="Background tint color">
+  </label>
 
   <nav class="navbar">
     <a href="index.html" class="navbar-logo">
@@ -1218,7 +1086,7 @@
   <div id="content" style="margin-top: 4rem; padding: 4.5rem 1.5rem 2.5rem 1.5rem;">
     <div class="hero-container" style="min-height: calc(100vh - 13rem);">
       <div class="title"><span class="slash">/</span>motion</div>
-      <div class="subtitle">Two studios, one taste profile. <strong>/motion</strong> shapes atmosphere with WebGL shaders and JSON configs. <strong>Chromaverse</strong> defines structure with thematic CSS tokens and exportable theme JSON. Feed both to your coding agent and generate beautiful, well-designed websites.</div>
+      <div class="subtitle">One downloadable generative studio. Shape looping WebGL shaders, export reproducible configs, and sharpen your aesthetic with <strong>Chromaverse</strong> — a featured theme gallery for better tastemaking and agent-ready design tokens.</div>
 
       <div class="terminal-block" onclick="copyText('git clone https://github.com/murderszn/motion.git && cd motion && npm install && npm run dev', this.querySelector('.copy-btn'))" style="cursor: pointer;" title="Click to copy install command">
         <div class="terminal-content">
@@ -1421,37 +1289,6 @@
       </div>
     </div>
 
-    <!-- ── Platforms Grid Section ── -->
-    <div class="platforms-section reveal" id="platforms">
-      <div class="platforms-title">meets you where you code</div>
-      <h3 style="font-family:'Inter',sans-serif;font-weight:600;font-size: clamp(1.4rem, 4vw, 2rem);color:#ffffff;text-shadow:0 2px 14px rgba(0,0,0,0.5);margin-top:-0.3rem;margin-bottom:0.8rem;letter-spacing:-0.03em;">Integrate seamlessly with your workflow</h3>
-      <p style="font-family:'Inter',sans-serif;font-size:0.82rem;color:rgba(255,255,255,0.85);max-width:650px;text-shadow:0 1px 8px rgba(0,0,0,0.5);margin:0 auto 2.5rem auto;line-height:1.5;">`/motion` runs anywhere you need visual assets: local CLI workspaces, integrated dev environments, or direct exports.</p>
-      
-      <div class="platforms-grid">
-        <div class="platform-card">
-          <div class="platform-icon">
-            <svg viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
-          </div>
-          <div class="platform-heading">Terminal PTY Server</div>
-          <div class="platform-desc">Boot up the local Node pipeline. It spins up a high-performance WebGL state container and connects via WebSockets to feed your AI coding workspace.</div>
-        </div>
-        <div class="platform-card">
-          <div class="platform-icon">
-            <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-          </div>
-          <div class="platform-heading">IDE Configuration</div>
-          <div class="platform-desc">Edit configurations directly inside Cursor or any other editor. Hot-reload shaders instantly as your JSON configs or custom noise values update in the background.</div>
-        </div>
-        <div class="platform-card">
-          <div class="platform-icon">
-            <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-          </div>
-          <div class="platform-heading">Static HTML Baker</div>
-          <div class="platform-desc">Compile WebGL canvas instances into self-contained HTML pages. Overlays text, styles, and scripts automatically—ideal for single-file deployment.</div>
-        </div>
-      </div>
-    </div>
-
     <!-- ── FAQ Section ── -->
     <div class="faq-section reveal" id="faq">
       <div class="faq-title">frequently asked questions</div>
@@ -1506,35 +1343,6 @@
       </div>
     </div>
 
-    <!-- ── Technical Rundown ── -->
-    <div class="rundown-section reveal">
-      <div class="rundown-title">get the technical rundown</div>
-      <h3 style="font-family:'Inter',sans-serif;font-weight:600;font-size: clamp(1.4rem, 4vw, 2rem);color:#ffffff;text-shadow:0 2px 14px rgba(0,0,0,0.5);margin-top:-0.3rem;margin-bottom:0.8rem;letter-spacing:-0.03em;">Deep dive into shader studio resources</h3>
-      
-      <div class="rundown-grid">
-        <a href="https://github.com/murderszn/motion#readme" target="_blank" class="rundown-card">
-          <span class="category">developer docs</span>
-          <span class="name">Core API Reference</span>
-          <span class="desc">Explore websocket control messages, JSON state schemas, and command payloads.</span>
-        </a>
-        <a href="https://github.com/murderszn/motion" target="_blank" class="rundown-card">
-          <span class="category">developer docs</span>
-          <span class="name">Shader Math Guides</span>
-          <span class="desc">Learn how to configure FBM noise loops, time-invariant coordinate scales, and metaballs.</span>
-        </a>
-        <a href="https://github.com/murderszn/motion" target="_blank" class="rundown-card">
-          <span class="category">presets schema</span>
-          <span class="name">JSON Presets Spec</span>
-          <span class="desc">Understand the JSON preset formatting for colors, seed configurations, and distortion multipliers.</span>
-        </a>
-        <a href="https://github.com/murderszn/motion" target="_blank" class="rundown-card">
-          <span class="category">community showcase</span>
-          <span class="name">Preset Showcases</span>
-          <span class="desc">Browse user-generated WebGL shaders, visualizer loops, and interactive web elements.</span>
-        </a>
-      </div>
-    </div>
-
     <!-- ── Bottom CTA ── -->
     <div class="cta-banner reveal" id="install">
       <h2>Create what's exciting.<br>Maintain what's essential.</h2>
@@ -1558,8 +1366,8 @@
           <h4>Products</h4>
           <a href="#playground">Presets Studio</a>
           <a href="#playground">Visualizer Screen</a>
-          <a href="#platforms">CLI Server</a>
-          <a href="#platforms">HTML Baker</a>
+          <a href="studio.html">Open Studio</a>
+          <a href="https://github.com/murderszn/motion" target="_blank" rel="noopener">GitHub</a>
         </div>
         <div class="footer-col">
           <h4>Solutions</h4>
@@ -2042,98 +1850,7 @@ void main(){
     });
   </script>
 
-  <!-- ═══════════════════════════════════════════════════════
-       PAGE BACKGROUND — red FBM wave shader (matches the studio app)
-       (independent of the config-builder live preview above)
-       ═══════════════════════════════════════════════════════ -->
-  <script>
-  window.addEventListener('load', () => {
-    const canvas = document.getElementById('bg-canvas');
-    if (!canvas) return;
-
-    const VS = 'attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }';
-
-    const WAVE_FS = `
-precision highp float;
-uniform float u_time;
-uniform vec2  u_res;
-float hash21(vec2 p){ p = fract(p * vec2(234.34, 435.345)); p += dot(p, p + 34.23); return fract(p.x * p.y); }
-float vnoise(vec2 p){ vec2 i = floor(p); vec2 f = fract(p); f = f*f*(3.0-2.0*f);
-  float a=hash21(i), b=hash21(i+vec2(1.0,0.0)), c=hash21(i+vec2(0.0,1.0)), d=hash21(i+vec2(1.0,1.0));
-  return mix(mix(a,b,f.x), mix(c,d,f.x), f.y); }
-float fbm(vec2 p){ float v=0.0; float a=0.5; mat2 r=mat2(0.80,0.60,-0.60,0.80);
-  for(int i=0;i<5;i++){ v+=a*vnoise(p); p=r*p*2.1+vec2(1.7,9.2); a*=0.5; } return v; }
-vec3 pal(float t){ t=clamp(t,0.0,1.0);
-  if(t<0.30) return mix(vec3(0.063,0.047,0.086), vec3(0.498,0.024,0.086), t/0.30);
-  if(t<0.62) return mix(vec3(0.498,0.024,0.086), vec3(0.875,0.230,0.230), (t-0.30)/0.32);
-             return mix(vec3(0.875,0.230,0.230), vec3(1.000,0.957,0.957), (t-0.62)/0.38); }
-void main(){
-  vec2 uv = gl_FragCoord.xy / u_res; uv.y = 1.0 - uv.y;
-  float ar = u_res.x / u_res.y;
-  float t  = u_time * 0.22;
-  vec2 p = vec2(uv.x * ar, uv.y);
-  vec2 q = vec2(fbm(p*1.5 + vec2(t*0.30, t*0.05)), fbm(p*1.5 + vec2(5.2,1.3) - vec2(t*0.18, 0.0)));
-  float f = fbm(p*1.4 + q*2.6 + vec2(t*0.22, 0.0));
-  float swell = uv.y*1.4 + sin(uv.x*ar*1.4 + t*1.1 + q.x*3.0)*0.30 + sin(uv.x*ar*3.1 - t*1.6 + q.y*2.0)*0.14 + f*1.5;
-  float band = 0.5 + 0.5*sin(swell*6.2831*0.85 - t*0.6);
-  vec3 col = pal(band*0.96);
-  float crest = pow(band,6.0)*0.55;
-  col += vec3(1.0,0.96,0.96)*crest;
-  col *= 0.82 + 0.30*smoothstep(0.0,0.7,uv.y);
-  col += (hash21(gl_FragCoord.xy) - 0.5)*0.02;
-  vec2 vig = uv*2.0 - 1.0; col *= 1.0 - dot(vig,vig)*0.22;
-  gl_FragColor = vec4(col, 1.0);
-}`;
-
-    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-    if (!gl) return;
-
-    function mk(type, src) {
-      const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
-      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) { console.error(gl.getShaderInfoLog(s)); return null; }
-      return s;
-    }
-    const vs = mk(gl.VERTEX_SHADER, VS), fs = mk(gl.FRAGMENT_SHADER, WAVE_FS);
-    if (!vs || !fs) return;
-    const prog = gl.createProgram(); gl.attachShader(prog, vs); gl.attachShader(prog, fs); gl.linkProgram(prog);
-    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
-    gl.useProgram(prog);
-
-    const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
-    const aLoc = gl.getAttribLocation(prog, 'a');
-    gl.enableVertexAttribArray(aLoc); gl.vertexAttribPointer(aLoc, 2, gl.FLOAT, false, 0, 0);
-    const uTime = gl.getUniformLocation(prog, 'u_time'), uRes = gl.getUniformLocation(prog, 'u_res');
-
-    function resize() {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = Math.round(window.innerWidth * dpr);
-      canvas.height = Math.round(window.innerHeight * dpr);
-      gl.viewport(0, 0, canvas.width, canvas.height);
-    }
-    window.addEventListener('resize', resize); resize();
-
-    const t0 = performance.now();
-    (function frame(now) {
-      gl.uniform1f(uTime, (now - t0) / 1000);
-      gl.uniform2f(uRes, canvas.width, canvas.height);
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-      requestAnimationFrame(frame);
-    })(t0);
-
-    // Throttled Parallax
-    let parallaxTask = null;
-    document.addEventListener('mousemove', (e) => {
-      if (parallaxTask) cancelAnimationFrame(parallaxTask);
-      parallaxTask = requestAnimationFrame(() => {
-        const x = (e.clientX / window.innerWidth  - 0.5) * 6;
-        const y = (e.clientY / window.innerHeight - 0.5) * 6;
-        canvas.style.transform = `translate(${x}px, ${y}px) scale(1.03)`;
-      });
-    });
-    document.addEventListener('mouseleave', () => { canvas.style.transform = 'translate(0,0) scale(1)'; });
-  });
-  </script>
+  <script type="module" src="/src/splash_bg.ts"></script>
 
   <script>
     // Scroll-triggered reveal animations

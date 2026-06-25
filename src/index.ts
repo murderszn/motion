@@ -127,7 +127,7 @@ void main(){
   vec2 uv = gl_FragCoord.xy / u_res; uv.y = 1.0 - uv.y;
   float ar = u_res.x / u_res.y;
   float ph = mod(u_time / 4.0 * TAU, TAU);
-  vec3 base = vec3(0.96, 0.97, 0.99);
+  vec3 base = vec3(0.06, 0.04, 0.08);
   float light = 0.0; vec3 tint = vec3(0.0);
   for(int i=0;i<3;i++){
     float fi = float(i) + 1.0;

@@ -171,9 +171,10 @@
             opacity: 0.25;
             transition: opacity 0.6s ease, background 0.4s;
         }
-        body[data-bg="aurora"] #scrim { opacity: 0.48; }
-        body[data-bg="wave"]   #scrim { opacity: 0.15; }
-        body[data-bg="video"]  #scrim { opacity: 0.20; }
+        body[data-bg="aurora"] #vignette { opacity: 0; }
+        body[data-bg="aurora"] #scrim    { opacity: 0; }
+        body[data-bg="wave"]   #scrim    { opacity: 0.15; }
+        body[data-bg="video"]  #scrim    { opacity: 0.20; }
 
         /* ============================================================
            NAV — fixed wordmark + meta
@@ -693,14 +694,6 @@
         }
         .offering-card.motion { border-top: 2px solid rgba(212, 54, 54, 0.7); }
         .offering-card.chroma { border-top: 2px solid rgba(167, 139, 250, 0.7); }
-        .offering-badge {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.62rem;
-            font-weight: 700;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-            color: var(--text-dim);
-        }
         .offering-name {
             font-weight: 700;
             font-size: 1.35rem;
@@ -873,7 +866,6 @@
             <a href="#offerings" class="nav-link">offerings</a>
             <a href="#playground" class="nav-link">playground</a>
             <a href="#how" class="nav-link">how it works</a>
-            <a href="#quickstart" class="nav-link">install</a>
             <a href="chromaverse/index.html" class="nav-link">chromaverse</a>
             <a href="examples/developer-training.html" class="nav-link">tour</a>
             <a href="studio.html" class="nav-link">docs</a>
@@ -935,7 +927,6 @@
 
             <div class="offerings-grid reveal d3">
                 <div class="offering-card motion">
-                    <span class="offering-badge">shaders · motion · atmosphere</span>
                     <div class="offering-name"><span class="slash">/</span>motion</div>
                     <p class="offering-desc">A local WebGL shader studio. Configure looping presets, tune parameters in real time, and export <code>motion.config.json</code> — seeded, reproducible motion graphics for backgrounds, hero sections, and splash pages.</p>
                     <div class="offering-tags">
@@ -946,7 +937,6 @@
                     <a href="#playground" class="offering-link">Try the shader playground →</a>
                 </div>
                 <div class="offering-card chroma">
-                    <span class="offering-badge">themes · css · design tokens</span>
                     <div class="offering-name"><span class="slash">/</span>chromaverse</div>
                     <p class="offering-desc">A theme gallery and builder with 65 curated palettes. Copy CSS variables, export light/dark surface tokens, and save <code>theme.json</code> — typography, accents, and component patterns your agent can apply across any layout.</p>
                     <div class="offering-tags">
