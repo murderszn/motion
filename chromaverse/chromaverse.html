@@ -315,24 +315,26 @@
         .banner-cta {
             background: rgba(255, 255, 255, 0.05);
             color: #ffffff;
-            border: 2px solid #ffffff;
-            padding: var(--sp-3) var(--sp-6);
-            border-radius: 40px;
-            font-size: 0.95rem;
-            font-weight: 700;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            padding: 0.75rem 1.8rem;
+            border-radius: 4px;
+            font-family: 'Inter', -apple-system, sans-serif;
+            font-size: 0.88rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
             cursor: pointer;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: var(--sp-2);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-            backdrop-filter: blur(10px);
-            transition: transform 0.2s var(--ease-out), box-shadow 0.2s, background 0.2s;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            transition: border-color 0.2s var(--ease-out), background 0.2s var(--ease-out), color 0.2s var(--ease-out);
         }
         
         .banner-cta:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(255, 255, 255, 0.15);
-            background: rgba(255, 255, 255, 0.15);
+            border-color: #ffffff;
+            background: rgba(255, 255, 255, 0.12);
         }
         
         .banner-cta svg {
