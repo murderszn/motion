@@ -238,11 +238,18 @@
         .banner-title {
             font-size: clamp(3rem, 11vw, 7rem);
             font-weight: 800;
-            color: var(--text);
+            color: #f8f9fc;
             letter-spacing: -0.05em;
             line-height: 0.95;
             text-transform: uppercase;
             margin: var(--sp-2) 0;
+            -webkit-text-stroke: 0.035em rgba(228, 234, 244, 0.95);
+            paint-order: stroke fill;
+            text-shadow:
+                -0.02em -0.02em 0 rgba(255, 255, 255, 0.55),
+                0.02em 0.02em 0 rgba(72, 82, 102, 0.6),
+                0 0 0.35em rgba(200, 212, 235, 0.35),
+                0 0.06em 0.2em rgba(0, 0, 0, 0.45);
         }
         
         .banner-title span {
@@ -251,6 +258,8 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             display: inline-block;
+            -webkit-text-stroke: 0.035em rgba(228, 234, 244, 0.95);
+            paint-order: stroke fill;
         }
 
         .banner-subtitle {
@@ -1928,7 +1937,7 @@
             <canvas id="banner-shader-canvas" style="position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none;"></canvas>
             <div class="banner-content">
                 <p class="banner-motion-title"><span class="slash">/</span>motion</p>
-                <h1 class="banner-title" style="color: #ffffff;">CHROMA<span>VERSE</span></h1>
+                <h1 class="banner-title">CHROMA<span>VERSE</span></h1>
                 <p class="banner-subtitle">Curated palettes and exportable design tokens.</p>
                 <div class="banner-actions">
                     <button type="button" class="banner-cta" onclick="enterStudio()">
