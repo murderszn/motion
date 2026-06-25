@@ -14,6 +14,16 @@ All notable changes to lumen·local.
 - **Adding a Slider doc** — now covers both scene and post-process uniform paths
 - **Roadmap** — TS conversion, command palette, live shader editor, text overlays, project save/load marked complete
 
+## [1.0.1] — 2026-06-24
+
+### Added
+- **motion × CHROMAVERSE commercial** (`examples/motion-chromaverse-commercial.html`) — 24s kinetic spot with side-by-side `/motion` shaders and CHROMAVERSE themes stats
+- **MP4 export script** (`examples/export-commercial-mp4.mjs`) — Playwright + ffmpeg pipeline for 9:16, 16:9, and 1:1 social cuts
+- **Social-ready MP4s** in `examples/out/` for TikTok/Reels, Twitter/LinkedIn, and IG feed
+
+### Changed
+- Darker nebula background on the commercial spot for stronger contrast with foreground type
+
 ## [0.2.0] — 2026-06-12
 
 ### Added
