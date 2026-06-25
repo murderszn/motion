@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>/motion × CHROMAVERSE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #020106;
+      --text: #ffffff;
+      --text-sub: rgba(255, 255, 255, 0.94);
+      --text-dim: rgba(255, 255, 255, 0.78);
+      --accent: #e03a3a;
+      --slash: #c0392b;
+      --chroma-slash: #a78bfa;
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      /* Social-video scale — optimized for 9:16 primary, degrades to 1:1 and 16:9 */
+      --type-hero: 18vmin;
+      --type-brand: 13vmin;
+      --type-lockup: 12vmin;
+      --type-headline-lg: 11vmin;
+      --type-headline: 9vmin;
+      --type-stat: 16vmin;
+      --type-body: 5.5vmin;
+      --type-ui: 4.5vmin;
+      --type-ui-sm: 6.2vmin;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      font-family: 'Inter', -apple-system, sans-serif;
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    canvas#bg {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    #vignette {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse at center, transparent 20%, rgba(2, 1, 6, 0.9) 100%),
+        linear-gradient(to bottom, rgba(2, 1, 6, 0.58) 0%, transparent 26%, transparent 74%, rgba(2, 1, 6, 0.72) 100%);
+    }
+
+    #grain {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    #stage {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .scene {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      opacity: 0;
+      width: 100%;
+      padding: 3vmin;
+      max-width: 92vw;
+      max-height: 65vh;
+      margin: 0 auto;
+    }
+
+    .motion-logo {
+      font-family: 'Inter', -apple-system, sans-serif;
+      font-weight: 600;
+      font-size: var(--type-hero);
+      letter-spacing: -0.04em;
+      text-transform: lowercase;
+      line-height: 1.1;
+      color: var(--text);
+      filter:
+        drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35))
+        drop-shadow(0 8px 28px rgba(0, 0, 0, 0.28));
+      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .motion-logo .slash { color: var(--slash); }
+
+    .chroma-brand {
+      font-family: 'Inter', sans-serif;
+      font-weight: 800;
+      font-size: var(--type-brand);
+      letter-spacing: -0.05em;
+      line-height: 0.92;
+      text-transform: uppercase;
+    }
+
+    .chroma-brand .chroma-white {
+      filter:
+        drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35))
+        drop-shadow(0 8px 28px rgba(0, 0, 0, 0.28));
+    }
+
+    .chroma-white {
+      color: #f8f9fc;
+      text-shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
+    }
+
+    .chroma-rainbow {
+      background: linear-gradient(135deg, #FF3366, #FF6633, #FFDD00, #00CC44, #0088FF, #6633FF, #CC00CC);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .chroma-lockup {
+      font-family: 'Inter', sans-serif;
+      font-weight: 800;
+      font-size: var(--type-lockup);
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+      line-height: 1.1;
+    }
+
+    .chroma-lockup .chroma-white {
+      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .anim-part { display: inline-block; }
+
+    .kicker {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: var(--type-ui);
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 2vmin;
+      text-indent: 0.14em;
+    }
+
+    .headline {
+      font-weight: 700;
+      font-size: var(--type-headline);
+      letter-spacing: -0.035em;
+      line-height: 1.08;
+      color: var(--text);
+      filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.3));
+    }
+
+    .headline-lg {
+      font-size: var(--type-headline-lg);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.02;
+    }
+
+    .line-mask {
+      overflow: hidden;
+      padding: 0.1em 0;
+    }
+
+    .line-mask > span {
+      display: inline-block;
+      transform: translateY(110%);
+    }
+
+    .char { display: inline-block; }
+
+    .body {
+      font-size: var(--type-body);
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.35;
+      max-width: 82vw;
+      margin-top: 2vmin;
+      text-shadow: 0 1px 12px rgba(0, 0, 0, 0.35);
+      letter-spacing: 0.01em;
+    }
+
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 500;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 4vmin;
+      justify-items: center;
+      align-items: start;
+      margin-top: 1vmin;
+      width: min(94vw, 88vmin);
+      margin-inline: auto;
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .stat-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: calc(var(--type-stat) * 0.94);
+      line-height: 1;
+      color: var(--text);
+      filter: drop-shadow(0 2px 16px rgba(0, 0, 0, 0.35));
+    }
+
+    .stat-label {
+      font-size: var(--type-ui-sm);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      margin-top: 1vmin;
+      max-width: 100%;
+      line-height: 1.2;
+      text-align: center;
+      text-indent: 0.04em;
+    }
+
+    .stat-label-chroma {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6vmin;
+      text-transform: none;
+      text-indent: 0;
+    }
+
+    .stat-chroma-name {
+      font-size: 6.2vmin;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+      text-transform: uppercase;
+      text-align: center;
+      max-width: 100%;
+    }
+
+    .stat-chroma-type {
+      font-size: 4.1vmin;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      text-align: center;
+      text-indent: 0.04em;
+      line-height: 1.2;
+    }
+
+    .stat-label-motion {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6vmin;
+      text-transform: none;
+      text-indent: 0;
+      margin-top: 1vmin;
+    }
+
+    .stat-motion-logo {
+      font-size: 6.2vmin;
+      font-weight: 600;
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+      text-transform: lowercase;
+      margin-top: 0;
+      max-width: 100%;
+    }
+
+    .stat-motion-type {
+      font-size: 4.1vmin;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      text-align: center;
+      text-indent: 0.04em;
+      line-height: 1.2;
+    }
+
+    .pill-row {
+      display: flex;
+      gap: 1.6vmin;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 2.5vmin;
+      max-width: 88vw;
+    }
+
+    .pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: var(--type-ui);
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 1.2vmin 2.6vmin;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--text-sub);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .recipe {
+      display: flex;
+      align-items: center;
+      gap: 2.2vmin;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 2.5vmin;
+      max-width: 88vw;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9vmin;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+    }
+
+    .cta-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: var(--type-ui);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+      margin-top: 3vmin;
+    }
+
+    .handle {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: var(--type-ui);
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      color: var(--text-dim);
+      margin-top: 2vmin;
+    }
+
+    .lockup-gap { margin-top: 2vmin; }
+
+    .controls {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+    }
+
+    .controls button {
+      background: rgba(224, 58, 58, 0.12);
+      border: 1px solid rgba(224, 58, 58, 0.35);
+      color: var(--text);
+      padding: 0.45rem 1.1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    #timer {
+      position: fixed;
+      top: 1.5rem;
+      right: 1.5rem;
+      z-index: 100;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--accent);
+      opacity: 0.7;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .line-mask > span,
+      .char,
+      .anim-part,
+      .stat,
+      .pill,
+      .recipe span,
+      .cta-text,
+      .kicker,
+      .body {
+        transform: none !important;
+        opacity: 1 !important;
+        animation: none !important;
+      }
+      .scene { opacity: 1 !important; }
+      .scene:not(#s7) { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bg"></canvas>
+  <div id="vignette"></div>
+  <div id="grain"></div>
+
+  <div id="stage">
+    <div class="scene" id="s1" aria-label="/motion generative shader studio">
+      <div class="motion-logo" id="s1-logo"></div>
+      <p class="body" id="s1-body">Your browser is a design studio</p>
+    </div>
+
+    <div class="scene" id="s2" aria-label="Seamless loops seeded and reproducible">
+      <div class="headline headline-lg" id="s2-head">
+        <div class="line-mask"><span>Pixel-perfect loops.</span></div>
+        <div class="line-mask"><span>Every time. Everywhere.</span></div>
+      </div>
+      <div class="pill-row">
+        <span class="pill" id="p1">PNG</span>
+        <span class="pill" id="p2">WebM</span>
+        <span class="pill" id="p3">GIF</span>
+        <span class="pill" id="p4">HTML</span>
+      </div>
+    </div>
+
+    <div class="scene" id="s3" aria-label="23 motion shaders 65 CHROMAVERSE themes">
+      <div class="stats">
+        <div class="stat" id="st1">
+          <div class="stat-num">0</div>
+          <div class="stat-label stat-label-motion">
+            <div class="motion-logo stat-motion-logo" id="st1-motion"></div>
+            <span class="stat-motion-type">shaders</span>
+          </div>
+        </div>
+        <div class="stat" id="st2">
+          <div class="stat-num">0</div>
+          <div class="stat-label stat-label-chroma">
+            <span class="stat-chroma-name">
+              <span class="chroma-white">CHROMA</span><span class="chroma-rainbow">VERSE</span>
+            </span>
+            <span class="stat-chroma-type">themes</span>
+          </div>
+        </div>
+      </div>
+      <p class="body mono" id="s3-body">No cloud · No account · No install</p>
+    </div>
+
+    <div class="scene" id="s4" aria-label="CHROMAVERSE thematic CSS palettes">
+      <div class="kicker" id="s4-kicker">Color system</div>
+      <div class="chroma-brand" id="s4-logo">
+        <span class="chroma-white">CHROMA</span><span class="chroma-rainbow">VERSE</span>
+      </div>
+      <p class="body" id="s4-body">65 designer palettes · export-ready tokens</p>
+    </div>
+
+    <div class="scene" id="s5" aria-label="Two studios one taste profile">
+      <div class="headline" id="s5-head">
+        <div class="line-mask"><span>Two studios.</span></div>
+        <div class="line-mask"><span>One taste profile.</span></div>
+      </div>
+      <p class="body" id="s5-body">AI agents use your taste<br>to build on-brand, every time</p>
+    </div>
+
+    <div class="scene" id="s6" aria-label="CHROMAVERSE theme plus motion shader plus glass">
+      <div class="kicker" id="s6-kicker">The recipe</div>
+      <div class="recipe" id="s6-recipe">
+        <span id="r1">theme</span>
+        <span id="rp1">+</span>
+        <span id="r2">shader</span>
+        <span id="rp2">+</span>
+        <span id="r3">glass</span>
+      </div>
+    </div>
+
+    <div class="scene" id="s7" aria-label="/motion and CHROMAVERSE">
+      <div class="motion-logo" id="s7-motion"></div>
+      <div class="chroma-lockup lockup-gap" id="s7-chroma"></div>
+      <p class="cta-text" id="s7-cta">Open in your browser</p>
+      <p class="handle" id="s7-handle">github.com/murderszn/motion</p>
+    </div>
+  </div>
+
+  <div id="timer">0.0s / 24.0s</div>
+  <div class="controls" id="controls"><button type="button" onclick="restart()">Replay</button></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script>
+    const TAU = 6.28318530718;
+    const DURATION = 24;
+
+    (function initBg() {
+      var canvas = document.getElementById('bg');
+      var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (!gl) { canvas.style.background = '#020106'; return; }
+
+      var VS = 'attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }';
+      var FS = [
+        'precision highp float;',
+        'uniform vec2 u_res;',
+        'uniform float u_phase;',
+        'float hash21(vec2 p){ p=fract(p*vec2(234.34,435.345)); p+=dot(p,p+34.23); return fract(p.x*p.y); }',
+        'float vnoise(vec2 p){ vec2 i=floor(p),f=fract(p); f=f*f*f*(f*(f*6.0-15.0)+10.0); return mix(mix(hash21(i),hash21(i+vec2(1.0,0.0)),f.x),mix(hash21(i+vec2(0.0,1.0)),hash21(i+vec2(1.0,1.0)),f.x),f.y); }',
+        'float fbm(vec2 p){ float v=0.0,a=0.5; mat2 r=mat2(0.8,0.6,-0.6,0.8); for(int i=0;i<7;i++){v+=a*vnoise(p);p=r*p*2.0+vec2(1.7,9.2);a*=0.48;} return v; }',
+        'vec2 loopOff(){ return vec2(cos(u_phase),sin(u_phase))*0.3; }',
+        'void main(){',
+        '  vec2 uv=gl_FragCoord.xy/u_res; uv.y=1.0-uv.y;',
+        '  float ar=u_res.x/u_res.y;',
+        '  vec2 p=(uv-0.5)*vec2(ar,1.0)*2.6;',
+        '  float f1=fbm(p*0.8+loopOff());',
+        '  float f2=fbm(p*1.4-loopOff()*1.3+vec2(3.1,1.7));',
+        '  float f3=fbm(p*0.5+loopOff()*0.6+vec2(7.3,2.1));',
+        '  vec3 deep=vec3(0.003,0.001,0.012);',
+        '  vec3 nebula1=vec3(0.14,0.03,0.22);',
+        '  vec3 nebula2=vec3(0.05,0.06,0.24);',
+        '  vec3 hot=vec3(0.42,0.09,0.28);',
+        '  vec3 col=deep;',
+        '  col=mix(col,nebula1,smoothstep(0.15,0.5,f1)*0.68);',
+        '  col=mix(col,nebula2,smoothstep(0.25,0.6,f2)*0.5);',
+        '  col=mix(col,hot,smoothstep(0.5,0.8,f1*f2)*0.36);',
+        '  col+=vec3(0.04,0.01,0.07)*smoothstep(0.35,0.75,f3)*0.26;',
+        '  vec2 sg=floor(p*200.0);',
+        '  float sv=hash21(sg);',
+        '  float stars=smoothstep(0.997,0.999,sv);',
+        '  float twinkle=0.7+0.3*sin(sv*50.0+u_phase*2.0);',
+        '  vec3 starCol=mix(vec3(0.8,0.85,1.0),vec3(1.0,0.9,0.75),hash21(sg+99.0));',
+        '  col+=starCol*stars*twinkle*0.22;',
+        '  vec2 vig=uv*2.0-1.0;',
+        '  col*=1.0-dot(vig,vig)*0.42;',
+        '  gl_FragColor=vec4(col,1.0);',
+        '}'
+      ].join('\n');
+
+      function compile(type, src) {
+        var s = gl.createShader(type);
+        gl.shaderSource(s, src);
+        gl.compileShader(s);
+        return s;
+      }
+
+      var prog = gl.createProgram();
+      gl.attachShader(prog, compile(gl.VERTEX_SHADER, VS));
+      gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FS));
+      gl.linkProgram(prog);
+      gl.useProgram(prog);
+
+      var buf = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
+      var aLoc = gl.getAttribLocation(prog, 'a');
+      gl.enableVertexAttribArray(aLoc);
+      gl.vertexAttribPointer(aLoc, 2, gl.FLOAT, false, 0, 0);
+
+      var uRes = gl.getUniformLocation(prog, 'u_res');
+      var uPhase = gl.getUniformLocation(prog, 'u_phase');
+
+      function resize() {
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.round(window.innerWidth * dpr);
+        canvas.height = Math.round(window.innerHeight * dpr);
+        gl.viewport(0, 0, canvas.width, canvas.height);
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      var t0 = performance.now();
+      function render(now) {
+        var phase = (((now - t0) / 1000 % DURATION) / DURATION) * TAU;
+        gl.uniform2f(uRes, canvas.width, canvas.height);
+        gl.uniform1f(uPhase, phase);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        requestAnimationFrame(render);
+      }
+      requestAnimationFrame(render);
+    })();
+
+    const params = new URLSearchParams(location.search);
+    const freezeT = params.get('t');
+    const exportMode = params.get('export') === '1';
+    let master;
+
+    if (exportMode) {
+      document.getElementById('timer').style.display = 'none';
+      document.getElementById('controls').style.display = 'none';
+    }
+
+    function splitMotionLogo(el) {
+      el.textContent = '';
+      el.setAttribute('aria-hidden', 'true');
+      const chars = [];
+      const slashWrap = document.createElement('span');
+      slashWrap.className = 'char';
+      slashWrap.innerHTML = '<span class="slash">/</span>';
+      el.appendChild(slashWrap);
+      chars.push(slashWrap);
+      for (const ch of 'motion') {
+        const span = document.createElement('span');
+        span.className = 'char';
+        span.textContent = ch;
+        el.appendChild(span);
+        chars.push(span);
+      }
+      return chars;
+    }
+
+    function buildChromaLockup(el) {
+      el.textContent = '';
+      el.setAttribute('aria-hidden', 'true');
+      const parts = [];
+      const chroma = document.createElement('span');
+      chroma.className = 'chroma-white anim-part';
+      chroma.textContent = 'CHROMA';
+      el.appendChild(chroma);
+      parts.push(chroma);
+      const verse = document.createElement('span');
+      verse.className = 'chroma-rainbow anim-part';
+      verse.textContent = 'VERSE';
+      el.appendChild(verse);
+      parts.push(verse);
+      return parts;
+    }
+
+    function counterTween(tl, selector, target, startTime, dur) {
+      const el = document.querySelector(selector);
+      const proxy = { val: 0 };
+      tl.to(proxy, {
+        val: target,
+        duration: dur,
+        ease: 'power2.out',
+        onUpdate() {
+          el.textContent = String(Math.round(proxy.val));
+        }
+      }, startTime);
+    }
+
+    document.fonts.ready.then(() => {
+      const s1Chars = splitMotionLogo(document.getElementById('s1-logo'));
+      const st1MotionChars = splitMotionLogo(document.getElementById('st1-motion'));
+      const s7MotionChars = splitMotionLogo(document.getElementById('s7-motion'));
+      const s7ChromaParts = buildChromaLockup(document.getElementById('s7-chroma'));
+
+      function setInitialStates() {
+        gsap.set('.scene', { autoAlpha: 0 });
+        gsap.set('.line-mask > span', { y: '110%' });
+        gsap.set('.char, .anim-part', { autoAlpha: 0, y: 20 });
+        gsap.set('.pill, .stat, #s6-recipe span, .cta-text, .handle', { autoAlpha: 0, y: 12 });
+        gsap.set('#s1-body, #s3-body, #s4-body, #s5-body, #s4-kicker, #s6-kicker', { autoAlpha: 0, y: 10 });
+        gsap.set('#s4-logo', { autoAlpha: 0, scale: 0.94 });
+        document.querySelector('#st1 .stat-num').textContent = '0';
+        document.querySelector('#st2 .stat-num').textContent = '0';
+      }
+
+      function build() {
+        setInitialStates();
+
+        const tl = gsap.timeline({
+          defaults: { ease: 'power3.out' },
+          repeat: exportMode ? 0 : -1,
+          repeatDelay: exportMode ? 0 : 1.5
+        });
+
+        // S1 (0.0 – 2.9) — one scene at a time, fade out before next
+        tl.set('#s1', { autoAlpha: 1 }, 0)
+          .to(s1Chars, { autoAlpha: 1, y: 0, duration: 0.65, stagger: 0.06 }, 0.15)
+          .to('#s1-body', { autoAlpha: 1, y: 0, duration: 0.45 }, 0.65)
+          .to('#s1', { autoAlpha: 0, duration: 0.4 }, 2.5);
+
+        // S2 (2.9 – 5.9)
+        tl.set('#s2', { autoAlpha: 1 }, 2.9)
+          .to('#s2 .line-mask > span', { y: 0, duration: 0.55, stagger: 0.12 }, 2.9)
+          .to(['#p1', '#p2', '#p3', '#p4'], { autoAlpha: 1, y: 0, duration: 0.4, stagger: 0.08 }, 3.45)
+          .to('#s2', { autoAlpha: 0, duration: 0.4 }, 5.5);
+
+        // S3 (5.9 – 8.9)
+        tl.set('#s3', { autoAlpha: 1 }, 5.9)
+          .to(['#st1', '#st2'], { autoAlpha: 1, y: 0, duration: 0.5, stagger: 0.12 }, 5.9)
+          .to(st1MotionChars, { autoAlpha: 1, y: 0, duration: 0.42, stagger: 0.04 }, 6.02);
+        counterTween(tl, '#st1 .stat-num', 23, 6.1, 1.2);
+        counterTween(tl, '#st2 .stat-num', 65, 6.1, 1.4);
+        tl.to('#s3-body', { autoAlpha: 1, duration: 0.4 }, 6.5)
+          .to('#s3', { autoAlpha: 0, duration: 0.4 }, 8.5);
+
+        // S4 (8.9 – 11.9)
+        tl.set('#s4', { autoAlpha: 1 }, 8.9)
+          .to('#s4-kicker', { autoAlpha: 1, y: 0, duration: 0.4 }, 8.9)
+          .to('#s4-logo', { autoAlpha: 1, scale: 1, duration: 0.6 }, 9.05)
+          .to('#s4-body', { autoAlpha: 1, duration: 0.45 }, 9.5)
+          .to('#s4', { autoAlpha: 0, duration: 0.4 }, 11.5);
+
+        // S5 (11.9 – 14.9)
+        tl.set('#s5', { autoAlpha: 1 }, 11.9)
+          .to('#s5 .line-mask > span', { y: 0, duration: 0.55, stagger: 0.12 }, 11.9)
+          .to('#s5-body', { autoAlpha: 1, duration: 0.45 }, 12.35)
+          .to('#s5', { autoAlpha: 0, duration: 0.4 }, 14.5);
+
+        // S6 (14.9 – 17.9)
+        tl.set('#s6', { autoAlpha: 1 }, 14.9)
+          .to('#s6-kicker', { autoAlpha: 1, duration: 0.35 }, 14.9)
+          .to('#s6-recipe span', { autoAlpha: 1, y: 0, duration: 0.4, stagger: 0.1 }, 15.15)
+          .to('#s6', { autoAlpha: 0, duration: 0.4 }, 17.5);
+
+        // S7 (17.9 – 24.0) — final hold with 4s stall for brand read
+        tl.set('#s7', { autoAlpha: 1 }, 17.9)
+          .to(s7MotionChars, { autoAlpha: 1, y: 0, duration: 0.55, stagger: 0.05 }, 17.95)
+          .to(s7ChromaParts, { autoAlpha: 1, y: 0, duration: 0.5, stagger: 0.08 }, 18.35)
+          .to('#s7-cta', { autoAlpha: 1, duration: 0.4 }, 18.75)
+          .to('#s7-handle', { autoAlpha: 1, y: 0, duration: 0.35 }, 19.0)
+          .to('#s7', { autoAlpha: 0, duration: 0.4 }, 23.55);
+
+        return tl;
+      }
+
+      master = build();
+
+      const timerEl = document.getElementById('timer');
+      gsap.ticker.add(() => {
+        if (master) {
+          const t = master.time() % DURATION;
+          timerEl.textContent = t.toFixed(1) + 's / 24.0s';
+        }
+      });
+
+      if (freezeT !== null) {
+        master.pause();
+        master.repeat(0);
+        master.seek(parseFloat(freezeT));
+      }
+
+      window.__ready = true;
+    });
+
+    function restart() {
+      if (master) master.restart(true);
+    }
+  </script>
+</body>
+</html>
