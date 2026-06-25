@@ -3785,11 +3785,7 @@ for t in themes:
                         <button type="button" class="btn-copy-json" data-slug="{slug}" title="Copy theme JSON" aria-label="Copy theme JSON">JSON</button>
                     </div>
                     <div class="theme-meta">{desc}</div>
-                    <div class="theme-tags">
-                        <span class="tag">Light + dark</span>
-                        <span class="tag">{f1_name}</span>
-                        <span class="tag">{f2_name}</span>
-                    </div>
+                    <div class="theme-tags"></div>
                 </div>
             </a>"""
     cards_html.append(card_markup)
@@ -5882,6 +5878,7 @@ index_template = f"""<!DOCTYPE html>
             
             const tagsContainer = card.querySelector(".theme-tags");
             if (tagsContainer) {{
+                tagsContainer.innerHTML = "";
                 categories.forEach(cat => {{
                     const pill = document.createElement("span");
                     pill.className = "tag tag-usecase";
