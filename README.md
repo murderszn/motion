@@ -166,7 +166,6 @@ docs/                              # Design language, changelog, research
 | `electric` | Branching, flickering lightning filaments |
 | `flow` | Domain-warped liquid noise gradients |
 | `glass` | Drifting frosted panes refracting color |
-| `golden` | Phyllotaxis / sunflower spiral |
 | `grain` | Soft grainy gradient washes |
 | `halftone` | Animated dot-grid over a flow field |
 | `kaleidoscope` | Mirrored radial symmetry slices |

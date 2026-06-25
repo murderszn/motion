@@ -73,6 +73,7 @@ wss.on('connection', (ws) => {
 });
 
 server.listen(PORT, () => {
-    console.log(`\n  /motion local studio → http://localhost:${PORT}\n`);
-    console.log(`  terminal connected to ${process.env.SHELL || 'bash'} via node-pty\n`);
+    console.log(`\n  PTY server → ws://localhost:${PORT}/terminal`);
+    console.log(`  shell: ${process.env.SHELL || 'bash'} via node-pty`);
+    console.log(`  (use npm run studio for Vite + PTY together)\n`);
 });

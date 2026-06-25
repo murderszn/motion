@@ -16,7 +16,7 @@
     "preview": "vite preview",
     "api": "node server/api.mjs",
     "server": "node server/server.mjs",
-    "studio": "node server/server.mjs"
+    "studio": "node server/studio.mjs"
   },
   "dependencies": {
     "cors": "^2.8.5",

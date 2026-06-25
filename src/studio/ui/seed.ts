@@ -21,11 +21,13 @@ export function initSeed(onUpdate?: (val: string) => void): void {
   setSeed(P.seed, onUpdate);
 
   seedEl.addEventListener('change', () => {
+    window.dispatchEvent(new CustomEvent('lumen:historyBefore'));
     setSeed(parseInt(seedEl.value, 10) || 0, onUpdate);
     window.dispatchEvent(new CustomEvent('lumen:log', { detail: { msg: 'seed: ' + seedEl.value, cls: 'info' } }));
   });
 
   ($('seedDice') as HTMLButtonElement).onclick = () => {
+    window.dispatchEvent(new CustomEvent('lumen:historyBefore'));
     setSeed(Math.floor(Math.random() * 10000), onUpdate);
     window.dispatchEvent(new CustomEvent('lumen:log', { detail: { msg: 'seed → ' + seedEl.value } }));
   };

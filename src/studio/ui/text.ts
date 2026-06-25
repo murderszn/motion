@@ -176,10 +176,13 @@ export function updateText(id: number, props: Partial<TextElem>): void {
   if (!t) return;
   Object.assign(t, props);
   selectText(id);
+  window.dispatchEvent(new CustomEvent('lumen:textChanged'));
 }
 
 export function deleteText(id: number): void {
-  texts = texts.filter(x => x.id !== id);
+  window.dispatchEvent(new CustomEvent('lumen:historyBefore'));
+  const idx = texts.findIndex(x => x.id === id);
+  if (idx !== -1) texts.splice(idx, 1);
   if (selectedText === id)
     selectedText = texts.length ? texts[texts.length - 1].id : null;
   selectText(selectedText);
@@ -196,6 +199,7 @@ export function toggleTextTool(): void {
 }
 
 export function addText(x?: number, y?: number): void {
+  window.dispatchEvent(new CustomEvent('lumen:historyBefore'));
   const t: TextElem = {
     id: nextTextId++,
     x: x ?? 0.5, y: y ?? 0.5,
@@ -221,6 +225,7 @@ export function addText(x?: number, y?: number): void {
 let dragTextId: number | null = null, dragOffX = 0, dragOffY = 0;
 
 function startTextDrag(e: MouseEvent, t: TextElem): void {
+  window.dispatchEvent(new CustomEvent('lumen:historyBefore'));
   dragTextId = t.id;
   const wr = ($('canvas-wrap') as HTMLElement).getBoundingClientRect();
   dragOffX = e.clientX - wr.left - t.x * wr.width;
@@ -249,21 +254,44 @@ function endTextDrag(): void {
 
 export function initTextControls(): void {
   const tbAlignL = $('tbAlignL'), tbAlignC = $('tbAlignC'), tbAlignR = $('tbAlignR');
-  tbAlignL.onclick = () => { if (selectedText !== null) updateText(selectedText, { align: 'left' }); };
-  tbAlignC.onclick = () => { if (selectedText !== null) updateText(selectedText, { align: 'center' }); };
-  tbAlignR.onclick = () => { if (selectedText !== null) updateText(selectedText, { align: 'right' }); };
+  const histClick = (fn: () => void) => () => {
+    window.dispatchEvent(new CustomEvent('lumen:historyBefore'));
+    fn();
+  };
 
-  $('tbBold').onclick = () => {
+  tbAlignL.onclick = histClick(() => { if (selectedText !== null) updateText(selectedText, { align: 'left' }); });
+  tbAlignC.onclick = histClick(() => { if (selectedText !== null) updateText(selectedText, { align: 'center' }); });
+  tbAlignR.onclick = histClick(() => { if (selectedText !== null) updateText(selectedText, { align: 'right' }); });
+
+  $('tbBold').onclick = histClick(() => {
     if (selectedText === null) return;
     const t = texts.find(x => x.id === selectedText);
     if (t) updateText(selectedText, { bold: !t.bold });
-  };
-  $('tbItalic').onclick = () => {
+  });
+  $('tbItalic').onclick = histClick(() => {
     if (selectedText === null) return;
     const t = texts.find(x => x.id === selectedText);
     if (t) updateText(selectedText, { italic: !t.italic });
-  };
+  });
 
+  ['tbSize', 'tbTracking', 'tbOpacity', 'tbColor', 'tbBgColor'].forEach(id => {
+    $(id).addEventListener('pointerdown', () => {
+      window.dispatchEvent(new CustomEvent('lumen:historyBefore'));
+    });
+  });
+  ['tbFont', 'tbEffect'].forEach(id => {
+    $(id).addEventListener('pointerdown', () => {
+      window.dispatchEvent(new CustomEvent('lumen:historyBefore'));
+    });
+  });
+  let contentHistPushed = false;
+  ($('tbContent') as HTMLTextAreaElement).addEventListener('keydown', () => {
+    if (!contentHistPushed) {
+      window.dispatchEvent(new CustomEvent('lumen:historyBefore'));
+      contentHistPushed = true;
+    }
+  });
+  ($('tbContent') as HTMLTextAreaElement).addEventListener('blur', () => { contentHistPushed = false; });
   ($('tbContent') as HTMLTextAreaElement).addEventListener('input', function() {
     if (selectedText !== null) updateText(selectedText, { content: (this as HTMLTextAreaElement).value });
   });

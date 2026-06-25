@@ -7,6 +7,10 @@ import { draw, canvas, gl } from '../webgl';
 import { getPhase, setPhase, isPaused, setExporting } from '../render';
 import { composeExportCanvas, renderTextOnCanvas } from './text';
 import { setStatusMsg } from './statusbar';
+import {
+  showExportProgress, updateExportProgress, updateExportEncoding, hideExportProgress,
+} from './export_progress';
+import type { ExportFormat } from './settings';
 
 const $ = (id: string) => document.getElementById(id)!;
 
@@ -107,6 +111,7 @@ export async function startWebmExport(pauseBtn: HTMLButtonElement): Promise<void
   catch { return; } // save dialog cancelled
 
   setExporting(true);
+  showExportProgress('video', 'recording video…');
 
   exportCv = document.createElement('canvas');
   exportCv.width = canvas.width; exportCv.height = canvas.height;
@@ -131,7 +136,7 @@ export async function startWebmExport(pauseBtn: HTMLButtonElement): Promise<void
   recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 18_000_000 });
   recorder.ondataavailable = e => { if ((e as BlobEvent).data.size) chunks.push((e as BlobEvent).data); };
   recorder.onstop = () => {
-    $('recStatus').classList.remove('on');
+    hideExportProgress();
     if (exportCv && exportCv.parentNode) {
       exportCv.parentNode.removeChild(exportCv);
     }
@@ -145,8 +150,6 @@ export async function startWebmExport(pauseBtn: HTMLButtonElement): Promise<void
 
   setPhase(0);
   pauseBtn.textContent = 'pause';
-  $('recText').textContent = 'recording';
-  $('recStatus').classList.add('on');
 
   const fps = 60;
   const totalFrames = Math.round(P.loop * fps);
@@ -179,8 +182,8 @@ export async function startWebmExport(pauseBtn: HTMLButtonElement): Promise<void
     }
 
     renderTextOnCanvas(ectx, exportCv.width, exportCv.height);
-    $('recText').textContent = `recording frame ${currentFrame + 1}/${totalFrames}`;
-    
+    updateExportProgress(currentFrame + 1, totalFrames, `recording ${activeExportExt}…`);
+
     currentFrame++;
     videoAnimId = requestAnimationFrame(recordFrame);
   }
@@ -197,7 +200,7 @@ export function cancelExport(): void {
   if (recorder) {
     recorder.ondataavailable = null;
     recorder.onstop = () => {
-      $('recStatus').classList.remove('on');
+      hideExportProgress();
       if (exportCv && exportCv.parentNode) {
         exportCv.parentNode.removeChild(exportCv);
       }
@@ -211,6 +214,7 @@ export function cancelExport(): void {
     msg('cancelled');
   }
   gifCancel = true;
+  hideExportProgress();
 }
 
 // ── GIF ──────────────────────────────────────────────────
@@ -239,8 +243,7 @@ export async function exportGIF(): Promise<void> {
   try { saver = await pickSaver(fname('gif'), 'image/gif'); }
   catch { return; } // save dialog cancelled
   setExporting(true); gifCancel = false;
-  $('recText').textContent = 'rendering gif';
-  $('recStatus').classList.add('on');
+  showExportProgress('gif-render', 'rendering gif frames…');
   try {
     const workerUrl = await loadGifLib();
     const maxDim = 640;
@@ -279,12 +282,13 @@ export async function exportGIF(): Promise<void> {
 
       renderTextOnCanvas(tctx, tw, th);
       gif.addFrame(tmp, { copy: true, delay: 1000 / fps });
-      $('recText').textContent = 'rendering gif ' + (i + 1) + '/' + frames;
+      updateExportProgress(i + 1, frames, 'rendering gif frames…');
       await new Promise(r => setTimeout(r, 0));
     }
+    showExportProgress('gif-encode', 'encoding gif…');
     const blob: Blob = await new Promise((res, rej) => {
       gif.on('finished', res);
-      gif.on('progress', (p: number) => { $('recText').textContent = 'encoding gif ' + Math.round(p * 100) + '%'; });
+      gif.on('progress', (p: number) => updateExportEncoding(p));
       try { gif.render(); } catch (e) { rej(e); }
     });
     await saver(blob); msg('gif saved');
@@ -293,13 +297,36 @@ export async function exportGIF(): Promise<void> {
     msg(err === 'cancelled' ? 'cancelled' : 'gif export needs internet (first use)');
   } finally {
     setExporting(false);
-    $('recStatus').classList.remove('on');
+    hideExportProgress();
   }
 }
 
+function setExportFormat(fmt: ExportFormat): void {
+  window.lumenExportFormat = fmt;
+  document.querySelectorAll('.export-fmt').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-fmt') === fmt);
+  });
+  window.dispatchEvent(new CustomEvent('lumen:exportFormatChanged'));
+}
+
 export function initExport(pauseBtn: HTMLButtonElement): void {
-  ($('expPng') as HTMLButtonElement).onclick = exportPNG;
-  ($('expVid') as HTMLButtonElement).onclick = () => startWebmExport(pauseBtn);
-  ($('expGif') as HTMLButtonElement).onclick = () => { exportGIF(); };
-  ($('recCancel') as HTMLButtonElement).onclick = cancelExport;
+  ($('expPng') as HTMLButtonElement).onclick = () => { setExportFormat('png'); exportPNG(); };
+  ($('expVid') as HTMLButtonElement).onclick = () => { setExportFormat('webm'); startWebmExport(pauseBtn); };
+  ($('expGif') as HTMLButtonElement).onclick = () => { setExportFormat('gif'); exportGIF(); };
+  ($('exportCancel') as HTMLButtonElement).onclick = cancelExport;
+
+  document.querySelectorAll('.export-fmt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const fmt = btn.getAttribute('data-fmt') as ExportFormat;
+      if (fmt) setExportFormat(fmt);
+    });
+  });
+
+  window.addEventListener('lumen:applyExportFormat', e => {
+    setExportFormat((e as CustomEvent<ExportFormat>).detail);
+  });
+}
+
+declare global {
+  interface Window { lumenExportFormat?: ExportFormat; }
 }

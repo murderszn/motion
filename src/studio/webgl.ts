@@ -197,26 +197,9 @@ void main(){
         col = mix(col, u_c2, q.y * q.x * 0.25);
     }
 
-    /* ─── 5 · golden (phyllotaxis) ─── */
-    else if (u_mode == 5){
-        vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.5, 5.0, u_scale) + sOff;
-        float t = u_phase * mix(0.3, 1.0, u_speed);
-        float r = length(p) * (1.3 + u_distort * 0.18);
-        float a = atan(p.y, p.x);
-        float n = r * r * mix(0.8, 1.5, u_density);
-        float golden = 2.39996323;
-        float spiral = cos(a - n * golden + t * 0.2);
-        float rings  = cos(n * 3.14159265 - t * 0.1);
-        float f = 0.5 + 0.5 * spiral * rings;
-        vec2 warp = vec2(fbm(p * 0.6 + loopOff()),
-                         fbm(p * 0.6 + vec2(5.2, 1.3) - loopOff()));
-        f += fbm(p + warp * u_distort) * 0.15 * u_detail;
-        col = grad4(clamp(f, 0.0, 1.0));
-        col += u_c3 * pow(max(0.5 + 0.5 * spiral, 0.0), mix(3.0, 8.0, u_detail)) * mix(0.08, 0.20, u_distort);
-    }
 
-    /* ─── 6 · glass ─── */
-    else if (u_mode == 6){
+    /* ─── 5 · glass ─── */
+    else if (u_mode == 5){
         vec2 p = vec2(uv.x * ar, uv.y);
         float frost = 0.0, rim = 0.0;
         vec2  refr = vec2(0.0);
@@ -244,8 +227,8 @@ void main(){
         col += u_c3 * rim * (0.4 + 0.6 * u_detail);
     }
 
-    /* ─── 7 · grain ─── */
-    else if (u_mode == 7){
+    /* ─── 6 · grain ─── */
+    else if (u_mode == 6){
         vec2 p = vec2(uv.x * ar, uv.y);
         float s = u_seed;
         float rA = 0.10 + 0.22 * u_speed;
@@ -258,8 +241,8 @@ void main(){
         col += (hash21(gl_FragCoord.xy + vec2(u_phase * 43.7)) - 0.5) * (0.10 + 0.30 * u_distort);
     }
 
-    /* ─── 8 · halftone ─── */
-    else if (u_mode == 8){
+    /* ─── 7 · halftone ─── */
+    else if (u_mode == 7){
         vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.2, 4.0, u_scale) + sOff;
         vec2 q = vec2(fbm(p + loopOff()), fbm(p + vec2(5.2, 1.3) - loopOff()));
         float f = fbm(p + q * (1.0 + 2.5 * u_distort));
@@ -270,8 +253,8 @@ void main(){
         col = mix(u_c0 * 0.7, grad4(clamp(f * 1.5, 0.0, 1.0)), mask);
     }
 
-    /* ─── 9 · kaleidoscope ─── */
-    else if (u_mode == 9){
+    /* ─── 8 · kaleidoscope ─── */
+    else if (u_mode == 8){
         vec2 p = uv - 0.5;
         p.x *= ar;
         float angle = atan(p.y, p.x);
@@ -288,8 +271,8 @@ void main(){
         col += u_c3 * pow(rad * 1.8, 3.0) * 0.12;
     }
 
-    /* ─── 10 · lines ─── */
-    else if (u_mode == 10){
+    /* ─── 9 · lines ─── */
+    else if (u_mode == 9){
         vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.5, 5.0, u_scale) + sOff;
         float t = u_phase * mix(0.3, 1.0, u_speed);
         float ang = u_distort * 0.35 + t * 0.05;
@@ -303,8 +286,8 @@ void main(){
         col = grad4(clamp(f, 0.0, 1.0));
     }
 
-    /* ─── 11 · marble ─── */
-    else if (u_mode == 11){
+    /* ─── 10 · marble ─── */
+    else if (u_mode == 10){
         vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.5, 4.0, u_scale) + sOff;
         float t = u_phase * mix(0.2, 0.8, u_speed);
         vec2 q2 = p + vec2(cnoise(p * 0.8 + loopOff()),
@@ -315,16 +298,16 @@ void main(){
         col += u_c3 * vein * 0.15;
     }
 
-    /* ─── 12 · orbs ─── */
-    else if (u_mode == 12){
+    /* ─── 11 · orbs ─── */
+    else if (u_mode == 11){
         vec2 p = vec2(uv.x * ar, uv.y);
         float f = metaf(p, ar) * (0.30 + 0.30 * u_density)
                 + fbm(uv * (1.0 + 2.0 * u_scale) + loopOff() + sOff) * 0.20 * u_detail;
         col = grad4(f);
     }
 
-    /* ─── 13 · plasma ─── */
-    else if (u_mode == 13){
+    /* ─── 12 · plasma ─── */
+    else if (u_mode == 12){
         vec2 p = uv * mix(1.0, 3.5, u_scale);
         float t = u_phase * mix(0.3, 1.2, u_speed);
         float v = 0.0;
@@ -338,8 +321,8 @@ void main(){
         col = mix(col, grad4(clamp(v * 0.8 + 0.3, 0.0, 1.0)), 0.3 * u_distort);
     }
 
-    /* ─── 14 · reeded ─── */
-    else if (u_mode == 14){
+    /* ─── 13 · reeded ─── */
+    else if (u_mode == 13){
         float N  = mix(24.0, 110.0, u_density);
         float rx = uv.x * N;
         float ri = floor(rx);
@@ -360,8 +343,8 @@ void main(){
         col *= 0.87 + fbm(vec2(ri * 0.09, uv.y * 3.1) + loopOff() * 0.8 + sOff) * 0.15;
     }
 
-    /* ─── 15 · rings ─── */
-    else if (u_mode == 15){
+    /* ─── 14 · rings ─── */
+    else if (u_mode == 14){
         vec2 p = (uv - 0.5) * vec2(ar, 1.0);
         float rad = length(p);
         float n = fbm(p * mix(1.0, 4.0, u_scale) + loopOff() + sOff);
@@ -372,8 +355,8 @@ void main(){
         col += u_c3 * glow;
     }
 
-    /* ─── 16 · rorschach ─── */
-    else if (u_mode == 16){
+    /* ─── 15 · rorschach ─── */
+    else if (u_mode == 15){
         vec2 mp = uv;
         mp.x = abs(mp.x - 0.5) * 2.0;
         vec2 p = (vec2(mp.x * ar, mp.y) - vec2(0.5 * ar, 0.5)) * mix(2.0, 6.0, u_scale) + sOff;
@@ -395,8 +378,8 @@ void main(){
         col += inkCol * edge * 0.12;
     }
 
-    /* ─── 17 · ridged ─── */
-    else if (u_mode == 17){
+    /* ─── 16 · ridged ─── */
+    else if (u_mode == 16){
         vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(2.0, 6.0, u_scale) + sOff;
         float t = u_phase * mix(0.2, 0.8, u_speed);
         mat2 rot = mat2(0.8, 0.6, -0.6, 0.8);
@@ -420,8 +403,8 @@ void main(){
         col += u_c3 * ridge * mix(0.1, 0.4, u_detail);
     }
 
-    /* ─── 18 · sd rosette ─── */
-    else if (u_mode == 18){
+    /* ─── 17 · sd rosette ─── */
+    else if (u_mode == 17){
         vec2 p = uv - 0.5;
         p.x *= ar;
         float n = 5.0 + floor(mix(3.0, 9.0, u_density));
@@ -439,8 +422,8 @@ void main(){
         col += u_c3 * edge * 0.22;
     }
 
-    /* ─── 19 · truchet ─── */
-    else if (u_mode == 19){
+    /* ─── 18 · truchet ─── */
+    else if (u_mode == 18){
         float tileN = mix(2.0, 8.0, u_scale);
         vec2 p = (uv - 0.5) * vec2(ar, 1.0) * tileN + sOff;
         float t = u_phase * mix(0.5, 1.5, u_speed);
@@ -458,8 +441,8 @@ void main(){
         col += u_c3 * edge * mix(0.15, 0.40, u_distort);
     }
 
-    /* ─── 20 · triangle lattice ─── */
-    else if (u_mode == 20){
+    /* ─── 19 · triangle lattice ─── */
+    else if (u_mode == 19){
         vec2 p = uv - 0.5;
         p.x *= ar;
         float a = u_phase * (0.2 + 0.4 * u_speed);
@@ -475,8 +458,8 @@ void main(){
         col = mix(col, u_c3, edge * (0.4 + 0.6 * u_scale));
     }
 
-    /* ─── 21 · turbulence ─── */
-    else if (u_mode == 21){
+    /* ─── 20 · turbulence ─── */
+    else if (u_mode == 20){
         vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(2.0, 6.0, u_scale) + sOff;
         float t = u_phase * mix(0.3, 1.0, u_speed);
         mat2 rot = mat2(0.8, 0.6, -0.6, 0.8);
@@ -493,8 +476,8 @@ void main(){
         col += u_c3 * pow(clamp(v, 0.0, 1.0), 3.0) * 0.2;
     }
 
-    /* ─── 22 · waves ─── */
-    else if (u_mode == 22){
+    /* ─── 21 · waves ─── */
+    else if (u_mode == 21){
         float f = uv.y * mix(1.5, 5.0, u_scale);
         f += sin(uv.x * (3.0 + 9.0 * u_density) + u_phase + u_seed) * 0.45;
         f += sin(uv.x * (7.0 + 5.0 * u_density) - 2.0 * u_phase + u_seed * 1.7) * 0.20;
@@ -543,22 +526,22 @@ let U: UniformMap = {};
 export let texLoaded = false;
 export let texObj: WebGLTexture | null = null;
 
-function compileShaderSrc(type: number, src: string): WebGLShader {
-  const s = gl.createShader(type)!;
-  gl.shaderSource(s, src);
-  gl.compileShader(s);
-  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS))
-    throw new Error(gl.getShaderInfoLog(s) ?? 'shader compile error');
+function compileShaderSrc(ctx: WebGLRenderingContext, type: number, src: string): WebGLShader {
+  const s = ctx.createShader(type)!;
+  ctx.shaderSource(s, src);
+  ctx.compileShader(s);
+  if (!ctx.getShaderParameter(s, ctx.COMPILE_STATUS))
+    throw new Error(ctx.getShaderInfoLog(s) ?? 'shader compile error');
   return s;
 }
 
-function linkProgram(vs: WebGLShader, fs: WebGLShader): WebGLProgram {
-  const p = gl.createProgram()!;
-  gl.attachShader(p, vs);
-  gl.attachShader(p, fs);
-  gl.linkProgram(p);
-  if (!gl.getProgramParameter(p, gl.LINK_STATUS))
-    throw new Error(gl.getProgramInfoLog(p) ?? 'link error');
+function linkProgram(ctx: WebGLRenderingContext, vs: WebGLShader, fs: WebGLShader): WebGLProgram {
+  const p = ctx.createProgram()!;
+  ctx.attachShader(p, vs);
+  ctx.attachShader(p, fs);
+  ctx.linkProgram(p);
+  if (!ctx.getProgramParameter(p, ctx.LINK_STATUS))
+    throw new Error(ctx.getProgramInfoLog(p) ?? 'link error');
   return p;
 }
 
@@ -587,9 +570,9 @@ export function initWebGL(cv: HTMLCanvasElement): void {
   }
   gl = ctx as WebGLRenderingContext;
 
-  const vs = compileShaderSrc(gl.VERTEX_SHADER, VS);
-  const fs = compileShaderSrc(gl.FRAGMENT_SHADER, FS);
-  prog = linkProgram(vs, fs);
+  const vs = compileShaderSrc(gl, gl.VERTEX_SHADER, VS);
+  const fs = compileShaderSrc(gl, gl.FRAGMENT_SHADER, FS);
+  prog = linkProgram(gl, vs, fs);
   gl.useProgram(prog);
   setupGeometry(prog);
   U = cacheUniforms(prog);
@@ -655,9 +638,9 @@ export function draw(phase: number): void {
 
 export function compileNewFS(newSrc: string): string | null {
   try {
-    const fs = compileShaderSrc(gl.FRAGMENT_SHADER, newSrc);
-    const vs = compileShaderSrc(gl.VERTEX_SHADER, VS);
-    const newProg = linkProgram(vs, fs);
+    const fs = compileShaderSrc(gl, gl.FRAGMENT_SHADER, newSrc);
+    const vs = compileShaderSrc(gl, gl.VERTEX_SHADER, VS);
+    const newProg = linkProgram(gl, vs, fs);
     const aLoc = gl.getAttribLocation(newProg, 'a');
     if (aLoc === -1) return "Error: Attrib 'a' not found in shader.";
     gl.useProgram(newProg);
@@ -683,4 +666,93 @@ export function compileNewFS(newSrc: string): string | null {
   } catch (e) {
     return e instanceof Error ? e.message : String(e);
   }
+}
+
+// ── Preset thumbnails ────────────────────────────────────
+
+const THUMB_W = 88;
+const THUMB_H = 50;
+const thumbCache = new Map<string, string>();
+let thumbCanvas: HTMLCanvasElement | null = null;
+let thumbGl: WebGLRenderingContext | null = null;
+let thumbProg: WebGLProgram | null = null;
+let thumbU: UniformMap = {};
+
+function thumbCacheKey(mode: number): string {
+  return [
+    mode, P.seed,
+    ...P.colors,
+    P.speed, P.scale, P.density, P.distort, P.detail,
+  ].join('|');
+}
+
+function ensureThumbContext(): boolean {
+  if (thumbCanvas && thumbGl && thumbProg) return true;
+  thumbCanvas = document.createElement('canvas');
+  thumbCanvas.width = THUMB_W;
+  thumbCanvas.height = THUMB_H;
+  const ctx = thumbCanvas.getContext('webgl', { preserveDrawingBuffer: true })
+    ?? thumbCanvas.getContext('experimental-webgl', { preserveDrawingBuffer: true });
+  if (!ctx) return false;
+  thumbGl = ctx as WebGLRenderingContext;
+  const vs = compileShaderSrc(thumbGl, thumbGl.VERTEX_SHADER, VS);
+  const fs = compileShaderSrc(thumbGl, thumbGl.FRAGMENT_SHADER, FS);
+  thumbProg = linkProgram(thumbGl, vs, fs);
+  thumbGl.useProgram(thumbProg);
+  const buf = thumbGl.createBuffer()!;
+  thumbGl.bindBuffer(thumbGl.ARRAY_BUFFER, buf);
+  thumbGl.bufferData(thumbGl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), thumbGl.STATIC_DRAW);
+  const aLoc = thumbGl.getAttribLocation(thumbProg, 'a');
+  thumbGl.enableVertexAttribArray(aLoc);
+  thumbGl.vertexAttribPointer(aLoc, 2, thumbGl.FLOAT, false, 0, 0);
+  thumbU = {};
+  UNIFORM_NAMES.forEach(n => { thumbU[n] = thumbGl!.getUniformLocation(thumbProg!, n); });
+  return true;
+}
+
+function drawThumbMode(mode: number): void {
+  if (!thumbGl || !thumbProg) return;
+  thumbGl.viewport(0, 0, THUMB_W, THUMB_H);
+  thumbGl.useProgram(thumbProg);
+  thumbGl.uniform2f(thumbU.u_res, THUMB_W, THUMB_H);
+  thumbGl.uniform1f(thumbU.u_phase, 1.2);
+  thumbGl.uniform1f(thumbU.u_seed, (P.seed % 10000) * 0.6180339887 % 12.566);
+  thumbGl.uniform1i(thumbU.u_mode, mode);
+  thumbGl.uniform1f(thumbU.u_speed,   P.speed);
+  thumbGl.uniform1f(thumbU.u_scale,   P.scale);
+  thumbGl.uniform1f(thumbU.u_density, P.density);
+  thumbGl.uniform1f(thumbU.u_distort, P.distort);
+  thumbGl.uniform1f(thumbU.u_detail,  P.detail);
+  thumbGl.uniform1f(thumbU.u_grain,   P.grain);
+  thumbGl.uniform1f(thumbU.u_mix,     0);
+  thumbGl.uniform1f(thumbU.u_pixel,   0);
+  thumbGl.uniform1f(thumbU.u_invert,  P.invert);
+  thumbGl.uniform3fv(thumbU.u_c0, hex2rgb(P.colors[0]));
+  thumbGl.uniform3fv(thumbU.u_c1, hex2rgb(P.colors[1]));
+  thumbGl.uniform3fv(thumbU.u_c2, hex2rgb(P.colors[2]));
+  thumbGl.uniform3fv(thumbU.u_c3, hex2rgb(P.colors[3]));
+  thumbGl.activeTexture(thumbGl.TEXTURE0);
+  thumbGl.bindTexture(thumbGl.TEXTURE_2D, null);
+  thumbGl.uniform1i(thumbU.u_texture, 0);
+  thumbGl.drawArrays(thumbGl.TRIANGLE_STRIP, 0, 4);
+}
+
+export function getPresetThumbnail(mode: number): string | null {
+  if (!gl || !prog) return null;
+  const key = thumbCacheKey(mode);
+  const cached = thumbCache.get(key);
+  if (cached) return cached;
+  if (!ensureThumbContext() || !thumbCanvas) return null;
+  drawThumbMode(mode);
+  try {
+    const url = thumbCanvas.toDataURL('image/png');
+    thumbCache.set(key, url);
+    return url;
+  } catch {
+    return null;
+  }
+}
+
+export function invalidatePresetThumbnails(): void {
+  thumbCache.clear();
 }

@@ -29,6 +29,7 @@ export function initSizes(onChange?: () => void): void {
     b.textContent = s.label;
     if (i === P.sizeIdx) b.classList.add('active');
     b.onclick = () => {
+      window.dispatchEvent(new CustomEvent('lumen:historyBefore'));
       P.sizeIdx = i;
       sizesEl.querySelectorAll('button').forEach(x => x.classList.remove('active'));
       b.classList.add('active');

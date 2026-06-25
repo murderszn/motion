@@ -4,7 +4,12 @@
 // ─────────────────────────────────────────────────────────
 
 import { THEMES } from '../state';
-import { scheduleFitTerminal, updateTermTheme, logToTerminal } from './terminal';
+import {
+  scheduleFitTerminal, updateTermTheme, logToTerminal,
+  applyTermPanelHeight, focusTerminal,
+  saveHeightBeforeMaximize, restoreHeightAfterMaximize,
+} from './terminal';
+import type { LeftTab } from './settings';
 import { renderTextOverlay, toggleTextTool, textToolActive } from './text';
 
 const $ = (id: string) => document.getElementById(id)!;
@@ -15,7 +20,13 @@ function isCompact(): boolean {
 
 // ── Left sidebar tabs ────────────────────────────────────
 
-export function selectLeftTab(tab: 'generator' | 'text'): void {
+function emitLayout(): void {
+  window.dispatchEvent(new CustomEvent('lumen:layoutChanged'));
+}
+
+export function selectLeftTab(tab: LeftTab): void {
+  window.lumenLeftTab = tab;
+  window.dispatchEvent(new CustomEvent('lumen:leftTabChanged'));
   const sbTabGen   = $('sbTabGen'), sbTabTxt = $('sbTabTxt');
   const sbGen      = $('sb-generator'), sbTxt = $('sb-text');
   const btnGenTab  = $('btnGenTab'), btnTextTab = $('btnTextTab');
@@ -23,11 +34,7 @@ export function selectLeftTab(tab: 'generator' | 'text'): void {
   if (tab === 'generator') {
     if (isCompact()) document.body.classList.add('right-closed');
     sbTabGen.classList.add('active');
-    (sbTabGen as HTMLElement).style.borderBottomColor = 'var(--accent)';
-    (sbTabGen as HTMLElement).style.color = 'var(--white)';
     sbTabTxt.classList.remove('active');
-    (sbTabTxt as HTMLElement).style.borderBottomColor = 'transparent';
-    (sbTabTxt as HTMLElement).style.color = 'var(--dim)';
     (sbGen as HTMLElement).style.display = 'block';
     (sbTxt as HTMLElement).style.display = 'none';
     btnGenTab.classList.add('active');
@@ -36,11 +43,7 @@ export function selectLeftTab(tab: 'generator' | 'text'): void {
   } else {
     if (isCompact()) document.body.classList.add('right-closed');
     sbTabTxt.classList.add('active');
-    (sbTabTxt as HTMLElement).style.borderBottomColor = 'var(--accent)';
-    (sbTabTxt as HTMLElement).style.color = 'var(--white)';
     sbTabGen.classList.remove('active');
-    (sbTabGen as HTMLElement).style.borderBottomColor = 'transparent';
-    (sbTabGen as HTMLElement).style.color = 'var(--dim)';
     (sbGen as HTMLElement).style.display = 'none';
     (sbTxt as HTMLElement).style.display = 'block';
     btnTextTab.classList.add('active');
@@ -49,6 +52,7 @@ export function selectLeftTab(tab: 'generator' | 'text'): void {
   }
   setTimeout(renderTextOverlay, 10);
   scheduleFitTerminal();
+  emitLayout();
 }
 
 // ── Toggles ──────────────────────────────────────────────
@@ -64,6 +68,7 @@ export function togglePanel(): void {
   $('togPanel').classList.toggle('active', open);
   $('sRight').textContent = open ? '☰ panel' : '☰';
   scheduleFitTerminal();
+  emitLayout();
 }
 
 export function toggleLeft(): void {
@@ -71,6 +76,7 @@ export function toggleLeft(): void {
   const open = !document.body.classList.contains('left-closed');
   $('sLeft').textContent = open ? '◀' : '▶';
   scheduleFitTerminal();
+  emitLayout();
 }
 
 export function toggleTerm(): void {
@@ -79,12 +85,34 @@ export function toggleTerm(): void {
   $('togTerm').classList.toggle('active', open);
   $('sTerm').textContent = open ? '▤ term' : '▤';
   $('bottom').classList.toggle('hidden', !open);
-  if (open) scheduleFitTerminal();
+  applyTermPanelHeight();
+  if (open) {
+    scheduleFitTerminal();
+    requestAnimationFrame(() => focusTerminal());
+  }
+  emitLayout();
+}
+
+function updateMaximizeIcon(): void {
+  const btn = $('termMaximize');
+  const icon = btn.querySelector('.icon-max');
+  const maximized = document.body.classList.contains('term-maximized');
+  if (icon) icon.textContent = maximized ? '⤢' : '⛶';
+  btn.setAttribute('title', maximized ? 'restore panel size (⌘⇧`)' : 'maximize panel (⌘⇧`)');
 }
 
 export function toggleMaximize(): void {
+  const willMaximize = !document.body.classList.contains('term-maximized');
+  if (willMaximize) saveHeightBeforeMaximize();
   document.body.classList.toggle('term-maximized');
+  if (!willMaximize) restoreHeightAfterMaximize();
+  else applyTermPanelHeight();
+  updateMaximizeIcon();
   scheduleFitTerminal();
+  if (!document.body.classList.contains('term-closed')) {
+    requestAnimationFrame(() => focusTerminal());
+  }
+  emitLayout();
 }
 
 // ── Theme ────────────────────────────────────────────────
@@ -97,6 +125,7 @@ export function applyTheme(key: string): void {
   updateTermTheme(theme.variables);
   localStorage.setItem('lumen-theme', key);
   window.currentThemeKey = key;
+  window.dispatchEvent(new CustomEvent('lumen:themeChanged'));
 }
 
 // ── Responsive chrome ────────────────────────────────────
@@ -152,6 +181,7 @@ export function initSidebar(): void {
   $('sTerm').onclick    = toggleTerm;
   $('termClose').onclick = toggleTerm;
   $('termMaximize').onclick = toggleMaximize;
+  updateMaximizeIcon();
 
   // Theme
   const themeKeys = Object.keys(THEMES);
@@ -162,10 +192,14 @@ export function initSidebar(): void {
     logToTerminal('theme → ' + THEMES[themeKeys[next]].name, 'info');
   };
 
-  const savedTheme = localStorage.getItem('lumen-theme') ?? 'lumen-dark';
-  applyTheme(savedTheme);
-
   window.addEventListener('resize', applyResponsiveChrome);
   applyResponsiveChrome();
   selectLeftTab('generator');
+
+  window.addEventListener('lumen:applyLeftTab', e => {
+    selectLeftTab((e as CustomEvent<LeftTab>).detail);
+  });
+  window.addEventListener('lumen:applyTheme', e => {
+    applyTheme((e as CustomEvent<string>).detail);
+  });
 }

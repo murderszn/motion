@@ -7,6 +7,7 @@ export default defineConfig({
       input: {
         index:  resolve(__dirname, 'index.html'),
         studio: resolve(__dirname, 'studio.html'),
+        roadmap: resolve(__dirname, 'studio-roadmap.html'),
         splash: resolve(__dirname, 'splash.html'),
         chromaverse: resolve(__dirname, 'chromaverse/index.html'),
       },

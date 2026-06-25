@@ -10,7 +10,8 @@ import { toggleTextTool } from './text';
 import { applyPresetUI } from './presets';
 import { applySizeUI } from './sizes';
 import { togglePause } from '../render';
-import { logToTerminal } from './terminal';
+import { logToTerminal, reconnectTerminal } from './terminal';
+import { undo, redo } from './history';
 import { copyStateToClipboard, pasteStateFromClipboard, copyShareLink } from './url_api';
 import { exportHtmlEmbed } from './export_embed';
 
@@ -21,6 +22,8 @@ let selectedCmdIdx = 0;
 
 function buildCommands(randomize: () => void): Command[] {
   return [
+    { name: 'Undo', action: () => undo(), key: 'Cmd+Z' },
+    { name: 'Redo', action: () => redo(), key: 'Cmd+Shift+Z' },
     { name: 'Randomize All Parameters', action: randomize, key: 'R' },
     { name: 'Save PNG Image', action: exportPNG, key: 'S' },
     { name: 'Export WebM Video', action: () => ($('expVid') as HTMLButtonElement).click() },
@@ -29,6 +32,7 @@ function buildCommands(randomize: () => void): Command[] {
     { name: 'Toggle Text Tool', action: toggleTextTool, key: 'T' },
     { name: 'Toggle Right Panel', action: togglePanel, key: 'Cmd+B' },
     { name: 'Toggle Bottom Terminal', action: toggleTerm, key: 'Ctrl+`' },
+    { name: 'Terminal: Reconnect', action: reconnectTerminal },
     { name: 'Toggle Maximized Terminal', action: toggleMaximize, key: 'Ctrl+Shift+`' },
     { name: 'Pause / Play Animation', action: () => togglePause($('btnPause') as HTMLButtonElement), key: 'Space' },
     { name: 'Theme: Lumen Dark',     action: () => applyTheme('lumen-dark') },

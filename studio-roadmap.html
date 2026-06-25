@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>/motion studio — roadmap (phase 6+)</title>
+<link rel="icon" type="image/png" href="/assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #08080a;
+  --panel: #0e0e12;
+  --line: #1c1c22;
+  --text: #b8b8c0;
+  --dim: #55555e;
+  --accent: #e03a3a;
+  --white: #f4f4f6;
+  --ok: #a3be8c;
+  --sp-4: 16px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --r: 8px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+.page {
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: var(--sp-8) var(--sp-4) 80px;
+}
+header {
+  margin-bottom: var(--sp-8);
+  padding-bottom: var(--sp-6);
+  border-bottom: 1px solid var(--line);
+}
+h1 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--white);
+  letter-spacing: 0.12em;
+  text-transform: lowercase;
+  margin-bottom: 8px;
+}
+h1 span { color: var(--accent); }
+.lead { color: var(--dim); font-size: 14px; max-width: 40rem; }
+.meta {
+  margin-top: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--dim);
+}
+.meta a { color: var(--text); text-decoration: none; }
+.meta a:hover { color: var(--accent); }
+
+h2 {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin: var(--sp-8) 0 var(--sp-4);
+}
+h3 {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--white);
+  margin-bottom: 6px;
+}
+
+.done-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: var(--sp-6);
+}
+.chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  color: var(--ok);
+  background: rgba(163, 190, 140, 0.08);
+}
+
+.phase {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: var(--sp-4) var(--sp-6);
+  margin-bottom: var(--sp-4);
+  transition: opacity .2s ease, border-color .2s ease;
+}
+.phase.done {
+  border-color: rgba(163, 190, 140, 0.35);
+  opacity: 0.72;
+}
+.phase.done h3,
+.phase.done .phase-tag { color: var(--ok); }
+.phase.done p,
+.phase.done li { color: var(--dim); }
+
+.phase-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+.roadmap-check {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.phase-body { flex: 1; min-width: 0; }
+
+.phase-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.phase p { margin-bottom: 12px; font-size: 14px; }
+ul { margin: 0 0 8px 1.2rem; font-size: 14px; }
+li { margin-bottom: 6px; }
+li strong { color: var(--white); font-weight: 500; }
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-4);
+}
+@media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+
+.milestone {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-size: 13px;
+  color: var(--dim);
+}
+.milestone em { color: var(--text); font-style: normal; }
+
+.timeline {
+  border-left: 2px solid var(--line);
+  margin-left: 8px;
+  padding-left: var(--sp-6);
+}
+.timeline .phase { position: relative; }
+.timeline .phase::before {
+  content: '';
+  position: absolute;
+  left: calc(-1 * var(--sp-6) - 5px);
+  top: 22px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--bg);
+}
+.timeline .phase.done::before { background: var(--ok); }
+
+footer {
+  margin-top: var(--sp-8);
+  padding-top: var(--sp-6);
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--dim);
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1><span>/</span>motion studio roadmap</h1>
+    <p class="lead">Check items off as they ship. Progress is saved in your browser. Sprint 1 (items 1–5) is complete; sprint 2 (terminal) is done. Items 11–22 track parity with <a href="https://fluid.krackeddevs.com/" style="color:var(--text)">Fluid</a> — shaders, distortion, and distribution — without changing core studio behaviour until each ships.</p>
+    <p class="meta"><a href="/studio.html">← back to studio</a> · updated June 2026 · ref <a href="https://fluid.krackeddevs.com/dev" style="color:var(--text)">fluid dev docs</a> · see also <code>docs/PLAN.md</code></p>
+  </header>
+
+  <h2>Recently shipped</h2>
+  <div class="done-strip">
+    <span class="chip">settings persistence</span>
+    <span class="chip">undo / redo</span>
+    <span class="chip">preset thumbnails</span>
+    <span class="chip">export progress UI</span>
+    <span class="chip">Monaco GLSL editor</span>
+    <span class="chip">terminal tabs + reconnect</span>
+  </div>
+
+  <h2>Next up — studio polish (items 6–10)</h2>
+  <div class="grid-2">
+    <div class="phase" data-roadmap-id="item-6">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-6" data-roadmap-id="item-6" checked>
+        <div class="phase-body">
+          <div class="phase-tag">6 · terminal</div>
+          <h3><label for="check-item-6">Terminal tabs + reconnect</label></h3>
+          <p>Multiple shell tabs, spawn/kill, and a clear “PTY server offline” banner with reconnect. One command: <code>npm run studio</code> (Vite + PTY together).</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase" data-roadmap-id="item-7">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-7" data-roadmap-id="item-7">
+        <div class="phase-body">
+          <div class="phase-tag">7 · text layers</div>
+          <h3><label for="check-item-7">Text layer list</label></h3>
+          <p>Sidebar list of all text elements: duplicate, reorder, lock, hide. Snap to center and rule-of-thirds guides.</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase" data-roadmap-id="item-8">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-8" data-roadmap-id="item-8">
+        <div class="phase-body">
+          <div class="phase-tag">8 · animation</div>
+          <h3><label for="check-item-8">Phase-driven text motion</label></h3>
+          <p>Per-text entrance presets (fade, slide, scale, typewriter) keyed to <code>u_phase</code> — seamless by default.</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase" data-roadmap-id="item-9">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-9" data-roadmap-id="item-9">
+        <div class="phase-body">
+          <div class="phase-tag">9 · curation</div>
+          <h3><label for="check-item-9">Favorites + smart randomize</label></h3>
+          <p>Pin presets, recent list, fuzzy palette in command palette. Randomize palette-only / sliders-only / locked sliders.</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase" data-roadmap-id="item-10">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-10" data-roadmap-id="item-10">
+        <div class="phase-body">
+          <div class="phase-tag">10 · compositing</div>
+          <h3><label for="check-item-10">Image transform layer</label></h3>
+          <p>Position, scale, rotation for uploaded images. Optional luminance-driven shader modulation.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Fluid parity — distribution &amp; services (items 11–14)</h2>
+  <p style="font-size:14px;color:var(--dim);margin-bottom:var(--sp-4);max-width:44rem;">Fluid ships embeds, an MCP server, and a no-auth REST API on top of the same client-side renderer. We already have share URLs and self-contained HTML export — these close the gap for agents and third-party sites.</p>
+  <div class="grid-2">
+    <div class="phase" data-roadmap-id="item-11">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-11" data-roadmap-id="item-11">
+        <div class="phase-body">
+          <div class="phase-tag">11 · embed sdk</div>
+          <h3><label for="check-item-11">Live embed package</label></h3>
+          <p><code>npm i lumen-bg</code> + React <code>&lt;LumenBg/&gt;</code>. Copy-paste snippets: responsive iframe, full-bleed fixed background (<code>pointer-events:none</code>), and static CSS from exported PNG. Hash carries full state — canvas-only, no hosting.</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase" data-roadmap-id="item-12">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-12" data-roadmap-id="item-12">
+        <div class="phase-body">
+          <div class="phase-tag">12 · agent api</div>
+          <h3><label for="check-item-12">MCP + REST piece API</label></h3>
+          <p>HTTP MCP: <code>create_piece</code>, <code>list_looks</code>, <code>decode_link</code>. Plain JSON <code>/api/piece</code> — same params as share URLs, no key. “Code for Claude” panel copies a ready-made prompt + embed block.</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase" data-roadmap-id="item-13">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-13" data-roadmap-id="item-13">
+        <div class="phase-body">
+          <div class="phase-tag">13 · curation</div>
+          <h3><label for="check-item-13">Templates + live gallery</label></h3>
+          <p>Curated <strong>looks</strong> (named starting points via API). Gallery page: pieces rendered live in-browser, filter by engine preset and vibe. Tap to open in studio and remix.</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase" data-roadmap-id="item-14">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-14" data-roadmap-id="item-14">
+        <div class="phase-body">
+          <div class="phase-tag">14 · library</div>
+          <h3><label for="check-item-14">My designs</label></h3>
+          <p>Persist saved pieces locally (IndexedDB): thumbnail, name, timestamp. Quick reload without losing the current session. Complements auto-save in Phase 1.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Fluid parity — fields, melt &amp; surface (items 15–18)</h2>
+  <p style="font-size:14px;color:var(--dim);margin-bottom:var(--sp-4);max-width:44rem;">Fluid’s <strong>Field</strong> step has 12 engines; our <code>u_distort</code> slider modulates presets but we lack several engines and a dedicated surface post-pass. Source images “melt” via liquify + luminance-driven shape.</p>
+  <div class="grid-2">
+    <div class="phase" data-roadmap-id="item-15">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-15" data-roadmap-id="item-15">
+        <div class="phase-body">
+          <div class="phase-tag">15 · fields</div>
+          <h3><label for="check-item-15">Missing field presets</label></h3>
+          <p>Port Fluid engines we lack: <strong>cellular</strong>, <strong>gyroid</strong>, <strong>smoke</strong>, <strong>crystal</strong>, <strong>honeycomb</strong>, <strong>grid</strong>. Revisit <strong>interfere / golden</strong> as optional phyllotaxis mode. All loop-safe via <code>u_phase</code> + <code>loopOff()</code>.</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase" data-roadmap-id="item-16">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-16" data-roadmap-id="item-16">
+        <div class="phase-body">
+          <div class="phase-tag">16 · source melt</div>
+          <h3><label for="check-item-16">Liquify + photo blend</label></h3>
+          <p>GPU-only image ingest (file + camera). <strong>Liquify</strong> warps the field; <strong>photo blend</strong> mixes luminance into shape while palette owns colour. Built-in melt textures, flip, freeze, center. Extends item 10.</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase" data-roadmap-id="item-17">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-17" data-roadmap-id="item-17">
+        <div class="phase-body">
+          <div class="phase-tag">17 · surface</div>
+          <h3><label for="check-item-17">Surface post-pass</label></h3>
+          <p>Second-pass screen treatment after the field: <strong>pixelate</strong>, dot size, threshold. Screen modes: square, hex, ASCII, dither, halftone — toggles on top of any preset, not baked per-mode.</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase" data-roadmap-id="item-18">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-18" data-roadmap-id="item-18">
+        <div class="phase-body">
+          <div class="phase-tag">18 · warp</div>
+          <h3><label for="check-item-18">Warp + symmetry controls</label></h3>
+          <p>Split <strong>warp</strong> (domain displacement strength, Fluid 0–9) from <strong>distort</strong> (preset modulation). Add <strong>symmetry</strong> slider — bilateral / radial mirror of the field. Pair with zoom alias for scale.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Fluid parity — UX &amp; interaction (items 19–22)</h2>
+  <div class="grid-2">
+    <div class="phase" data-roadmap-id="item-19">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-19" data-roadmap-id="item-19">
+        <div class="phase-body">
+          <div class="phase-tag">19 · text</div>
+          <h3><label for="check-item-19">Living pattern text fill</label></h3>
+          <p>Glyphs filled with the animated shader (mask / clip), not flat colour. Dark or light letter background. Banner-friendly wide aspect presets.</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase" data-roadmap-id="item-20">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-20" data-roadmap-id="item-20">
+        <div class="phase-body">
+          <div class="phase-tag">20 · preview</div>
+          <h3><label for="check-item-20">Before / after + live still</label></h3>
+          <p>Canvas chrome: <strong>Live / Still</strong> toggle (pause loop without hiding UI). <strong>Before / after</strong> split or wipe comparing params snapshot vs current — useful for randomize and melt tweaks.</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase" data-roadmap-id="item-21">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-21" data-roadmap-id="item-21">
+        <div class="phase-body">
+          <div class="phase-tag">21 · input</div>
+          <h3><label for="check-item-21">Cursor ripple field</label></h3>
+          <p>Optional pointer-driven distortion: move cursor over canvas to ripple the field (Fluid’s “random pattern — move your cursor”). Phase-looped fallback when idle; disable for export.</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase" data-roadmap-id="item-22">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-22" data-roadmap-id="item-22">
+        <div class="phase-body">
+          <div class="phase-tag">22 · colours</div>
+          <h3><label for="check-item-22">Custom gradient editor</label></h3>
+          <p>Four-stop dark→light gradient UI (Fluid <strong>Custom</strong> palette). Named palette presets stay; custom stops sync to share URL and API. One-click <strong>Record clip</strong> beside PNG export.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Phase 1 — studio shell (3–6 months)</h2>
+  <div class="timeline">
+    <div class="phase" data-roadmap-id="p1-manifest">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-p1-manifest" data-roadmap-id="p1-manifest">
+        <div class="phase-body">
+          <div class="phase-tag">infrastructure</div>
+          <h3><label for="check-p1-manifest">Unified project format</label></h3>
+          <ul>
+            <li><strong>.lumen manifest</strong> — single source of truth: params, texts, custom shader, layout, export prefs</li>
+            <li><strong>Auto-save</strong> — IndexedDB snapshots + crash recovery prompt</li>
+            <li><strong>Export queue</strong> — batch PNG + WebM + GIF with shared progress panel</li>
+          </ul>
+          <p class="milestone"><em>Milestone:</em> self-contained creative sandbox that feels like a native app.</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase" data-roadmap-id="p1-plugins">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-p1-plugins" data-roadmap-id="p1-plugins">
+        <div class="phase-body">
+          <div class="phase-tag">extensibility</div>
+          <h3><label for="check-p1-plugins">Plugin API v0</label></h3>
+          <ul>
+            <li>Manifest: preset id, icon, slider defs, GLSL branch</li>
+            <li>Hot-load plugins without editing <code>webgl.ts</code> core</li>
+            <li>Example third-party preset in <code>examples/</code></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Phase 2 — timeline &amp; layers (6–12 months)</h2>
+  <div class="timeline">
+    <div class="phase" data-roadmap-id="p2-layers">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-p2-layers" data-roadmap-id="p2-layers">
+        <div class="phase-body">
+          <div class="phase-tag">composition</div>
+          <h3><label for="check-p2-layers">Layer system</label></h3>
+          <ul>
+            <li>Shader, text, image, solid, video layers with z-order</li>
+            <li>Per-layer transform: position, scale, rotation, opacity</li>
+            <li>Blending modes + adjustment layers</li>
+            <li>Pre-compositions (nest comps inside comps)</li>
+          </ul>
+          <p class="milestone"><em>Milestone:</em> compose generative shaders over video with animated text — a real motion tool.</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase" data-roadmap-id="p2-keyframes">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-p2-keyframes" data-roadmap-id="p2-keyframes">
+        <div class="phase-body">
+          <div class="phase-tag">animation</div>
+          <h3><label for="check-p2-keyframes">Keyframe engine</label></h3>
+          <ul>
+            <li>Visual keyframes per property on a timeline track</li>
+            <li>Linear + bezier interpolation, graph editor for curves</li>
+            <li>All motion respects seamless loop invariant</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Phase 3 — node graph (12–18 months)</h2>
+  <div class="timeline">
+    <div class="phase" data-roadmap-id="p3-nodes">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-p3-nodes" data-roadmap-id="p3-nodes">
+        <div class="phase-body">
+          <div class="phase-tag">hybrid paradigm</div>
+          <h3><label for="check-p3-nodes">Per-layer node editor</label></h3>
+          <ul>
+            <li>Every layer gets a Caddis-style node graph</li>
+            <li>50+ built-in nodes: color, blur, distort, matte, generate</li>
+            <li>Custom GLSL as a node with typed ports</li>
+            <li>JavaScript expressions on any parameter (AE-style)</li>
+            <li>Community preset browser for node setups</li>
+          </ul>
+          <p class="milestone"><em>Milestone:</em> compositing expressiveness rivaling Fusion/Cavalry with layer approachability.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Phase 4 — platform (18–24 months)</h2>
+  <div class="timeline">
+    <div class="phase" data-roadmap-id="p4-platform">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-p4-platform" data-roadmap-id="p4-platform">
+        <div class="phase-body">
+          <div class="phase-tag">distribution</div>
+          <h3><label for="check-p4-platform">Marketplace + collaboration</label></h3>
+          <ul>
+            <li>Plugin marketplace — presets, node packs, themes</li>
+            <li>Real-time multiplayer editing (Figma-style cursors + sync)</li>
+            <li>Data-driven animation from CSV/JSON/Sheets</li>
+            <li>Interactive export runtime (Rive-style state machines)</li>
+            <li>Audio-reactive parameters via spectrum analysis</li>
+            <li>AI utility nodes (depth, segmentation, upscale) via ONNX/WASM</li>
+          </ul>
+          <p class="milestone"><em>Milestone:</em> open-source motion design platform — create, collaborate, distribute.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Technical evolution</h2>
+  <div class="phase" data-roadmap-id="tech-evolution">
+    <div class="phase-head">
+      <input type="checkbox" class="roadmap-check" id="check-tech-evolution" data-roadmap-id="tech-evolution">
+      <div class="phase-body">
+        <h3><label for="check-tech-evolution">Stack &amp; resilience</label></h3>
+        <ul>
+          <li><strong>Rendering</strong> — WebGPU primary, WebGL2 fallback; WGSL/GLSL transpile path</li>
+          <li><strong>Desktop</strong> — Tauri wrapper for native FS, file associations, smaller binary than Electron</li>
+          <li><strong>State</strong> — MobX or Zustand for reactive param graph as complexity grows</li>
+          <li><strong>Testing</strong> — automated loop-seam pixel diff; shader compile regression suite</li>
+          <li><strong>Resilience</strong> — WebGL context loss recovery; pause-when-hidden for laptop battery</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Full architecture and governance details live in <code>docs/PLAN.md</code>. Shader loop invariant and preset docs in <code>brain/</code>.
+  </footer>
+</div>
+<script>
+(function () {
+  const KEY = 'lumen-roadmap-checks';
+
+  function load() {
+    try {
+      return JSON.parse(localStorage.getItem(KEY) || '{}');
+    } catch {
+      return {};
+    }
+  }
+
+  function save(state) {
+    localStorage.setItem(KEY, JSON.stringify(state));
+  }
+
+  function applyDone(el, on) {
+    el.classList.toggle('done', on);
+  }
+
+  const state = load();
+  document.querySelectorAll('.roadmap-check').forEach(cb => {
+    const id = cb.dataset.roadmapId;
+    if (id && state[id] !== undefined) cb.checked = !!state[id];
+    else if (id === 'item-6' && state[id] === undefined) {
+      cb.checked = true;
+      state[id] = true;
+    }
+    const phase = cb.closest('.phase');
+    if (phase) applyDone(phase, cb.checked);
+    cb.addEventListener('change', () => {
+      state[id] = cb.checked;
+      save(state);
+      if (phase) applyDone(phase, cb.checked);
+    });
+  });
+  save(state);
+})();
+</script>
+</body>
+</html>

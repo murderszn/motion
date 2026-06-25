@@ -7,6 +7,8 @@ import { exportPNG, startWebmExport, exportGIF } from './export';
 import { toggleTextTool, textToolActive } from './text';
 import { togglePanel, toggleTerm, toggleMaximize } from './sidebar';
 import { toggleCmdPalette } from './command_palette';
+import { undo, redo } from './history';
+import { isTerminalFocused } from './terminal';
 
 const $ = (id: string) => document.getElementById(id)!;
 
@@ -26,6 +28,12 @@ export function initKeyboard(randomize: () => void): void {
     // ── Cmd/Ctrl+` — Terminal ──
     if (e.key === '`' && (e.ctrlKey || e.metaKey)) {
       e.preventDefault(); if (e.shiftKey) toggleMaximize(); else toggleTerm(); return;
+    }
+    // ── Cmd/Ctrl+Z — Undo / Redo ──
+    if (e.key === 'z' && (e.ctrlKey || e.metaKey) && !isTerminalFocused()) {
+      e.preventDefault();
+      if (e.shiftKey) redo(); else undo();
+      return;
     }
     // ── Cmd/Ctrl+B — Panel ──
     if (e.key === 'b' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); togglePanel(); return; }

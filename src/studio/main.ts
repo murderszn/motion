@@ -2,7 +2,7 @@
 //  studio/main.ts — entry point, wires everything together
 // ─────────────────────────────────────────────────────────
 
-import { P, PALETTES, PRESETS } from './state';
+import { P, PALETTES, PRESETS, normalizeMode, presetAt } from './state';
 import type { SliderKey } from './types';
 import { FS, initWebGL, loadTexture, clearTexture } from './webgl';
 import { startRenderLoop, togglePause } from './render';
@@ -14,7 +14,13 @@ import { initSizes, applySizeUI } from './ui/sizes';
 import { initTextControls, renderTextOverlay, texts } from './ui/text';
 import { initExport, exportPNG } from './ui/export';
 import { initTerminal, initResizeDragHandle, logToTerminal } from './ui/terminal';
-import { initSidebar } from './ui/sidebar';
+import { initSidebar, applyTheme } from './ui/sidebar';
+import {
+  loadSettings, applySavedParams, applyChromeSettings,
+  hasUrlOverrides, initSettingsPersistence,
+} from './ui/settings';
+import { initHistory } from './ui/history';
+import { getShaderSource } from './ui/shader_editor';
 import { initStatusBar, setStatusMode, setStatusSeed } from './ui/statusbar';
 import { initShaderEditor } from './ui/shader_editor';
 import { initKeyboard } from './ui/keyboard';
@@ -40,6 +46,7 @@ function downloadBlob(blob: Blob, name: string): void {
 // ── Randomize ────────────────────────────────────────────
 
 function randomize(): void {
+  window.dispatchEvent(new CustomEvent('lumen:historyBefore'));
   setSeed(Math.floor(Math.random() * 10000), setStatusSeed);
   setPalette(PALETTES[Math.floor(Math.random() * PALETTES.length)]);
   setSlider('speed',   0.25 + Math.random() * 0.6);
@@ -57,7 +64,7 @@ function randomize(): void {
 
 function saveProject(): void {
   // FS is imported at the top and reflects the live-edited source if compileNewFS was called
-  const project = { version: '1.0.0', params: P, texts: [...texts], shader: FS };
+  const project = { version: '1.0.0', params: P, texts: [...texts], shader: getShaderSource() };
   const blob = new Blob([JSON.stringify(project, null, 4)], { type: 'application/json' });
   const name = 'lumen-project-' + String(P.seed).padStart(4, '0') + '.lumen';
   downloadBlob(blob, name);
@@ -79,8 +86,9 @@ function loadProject(file: File): void {
       (['speed', 'scale', 'density', 'distort', 'detail', 'grain'] as SliderKey[]).forEach(id => {
         if (P[id] !== undefined) setSlider(id, P[id]);
       });
+      P.mode = normalizeMode(P.mode);
       applyPresetUI();
-      setStatusMode(PRESETS[P.mode].full);
+      setStatusMode(presetAt(P.mode).full);
       applySizeUI();
       ($('loop') as HTMLInputElement).value = String(P.loop);
       $('loopVal').textContent = P.loop.toFixed(1) + 's';
@@ -110,8 +118,14 @@ function loadProject(file: File): void {
   // WebGL
   initWebGL($('c') as HTMLCanvasElement);
 
-  // Parse URL parameters to set up initial state
+  const savedSettings = loadSettings();
+  if (savedSettings && !hasUrlOverrides()) {
+    applySavedParams(savedSettings);
+  }
+
+  // Parse URL parameters to set up initial state (overrides saved params when present)
   parseUrlParams();
+  P.mode = normalizeMode(P.mode);
 
   // UI modules
   initPresets(name => setStatusMode(name));
@@ -123,12 +137,18 @@ function loadProject(file: File): void {
   initStatusBar();
 
   // Sync initial status labels
-  setStatusMode(PRESETS[P.mode].full);
+  setStatusMode(presetAt(P.mode).full);
   setStatusSeed(String(P.seed).padStart(4, '0'));
   initSidebar();
   initShaderEditor();
+  if (savedSettings && !hasUrlOverrides()) {
+    applyChromeSettings(savedSettings);
+  } else {
+    applyTheme(localStorage.getItem('lumen-theme') ?? 'lumen-dark');
+  }
   initResizeDragHandle();
-  initTerminal(localStorage.getItem('lumen-theme') ?? 'lumen-dark');
+  initTerminal(window.currentThemeKey ?? 'lumen-dark');
+  initSettingsPersistence();
 
   // Pause button
   ($('btnPause') as HTMLButtonElement).onclick = () =>
@@ -172,6 +192,11 @@ function loadProject(file: File): void {
     }
     logToTerminal('image removed', 'info');
   };
+  [$('mixRng'), $('pixelRng')].forEach(el => {
+    el.addEventListener('pointerdown', () => {
+      window.dispatchEvent(new CustomEvent('lumen:historyBefore'));
+    });
+  });
   ($('mixRng') as HTMLInputElement).addEventListener('input', function() {
     P.mix = parseFloat((this as HTMLInputElement).value) / 100;
     $('mixVal').textContent = Math.round(P.mix * 100) + '%';
@@ -202,7 +227,11 @@ function loadProject(file: File): void {
   });
 
   // Loop duration
-  ($('loop') as HTMLInputElement).addEventListener('input', e => {
+  const loopEl = $('loop') as HTMLInputElement;
+  loopEl.addEventListener('pointerdown', () => {
+    window.dispatchEvent(new CustomEvent('lumen:historyBefore'));
+  });
+  loopEl.addEventListener('input', e => {
     P.loop = parseFloat((e.target as HTMLInputElement).value);
     $('loopVal').textContent = P.loop.toFixed(1) + 's';
   });
@@ -302,4 +331,6 @@ function loadProject(file: File): void {
 
   // Start RAF
   startRenderLoop();
+
+  initHistory();
 })();

@@ -10,7 +10,6 @@ export const PRESETS: Preset[] = [
   { id: 'curl',      icon: 'CU', full: 'curl noise' },
   { id: 'electric',  icon: 'EL', full: 'electric' },
   { id: 'flow',      icon: 'FL', full: 'flow' },
-  { id: 'interfere', icon: 'PH', full: 'golden' },
   { id: 'glass',     icon: 'GL', full: 'glass' },
   { id: 'grain',     icon: 'GR', full: 'grain' },
   { id: 'halftone',  icon: 'HT', full: 'halftone' },
@@ -29,6 +28,29 @@ export const PRESETS: Preset[] = [
   { id: 'turb',      icon: 'TU', full: 'turbulence' },
   { id: 'waves',     icon: 'WV', full: 'waves' },
 ];
+
+/** Clamp to a valid preset index (0 … PRESETS.length - 1). */
+export function normalizeMode(mode: number): number {
+  const m = Math.floor(Number(mode));
+  if (!Number.isFinite(m) || m < 0) return 0;
+  if (m >= PRESETS.length) return PRESETS.length - 1;
+  return m;
+}
+
+/**
+ * Remap mode indices from the 23-preset layout (golden was index 5).
+ * Call once when loading v1 saved settings / projects.
+ */
+export function migrateLegacyMode(mode: number): number {
+  let m = Math.floor(Number(mode));
+  if (!Number.isFinite(m) || m < 0) return 0;
+  if (m >= 6) m -= 1;
+  return normalizeMode(m);
+}
+
+export function presetAt(mode: number): Preset {
+  return PRESETS[normalizeMode(mode)];
+}
 
 export const SIZES: SizeDef[] = [
   { label: '1:1',  w: 1080, h: 1080 },
@@ -76,16 +98,16 @@ export const THEMES: Record<string, ThemeDef> = {
   'lumen-dark': {
     name: 'lumen dark',
     variables: {
-      '--bg':        '#08080a',
-      '--panel':     '#0e0e12',
-      '--bar-bg':    '#0a0a0e',
-      '--line':      '#1c1c22',
-      '--text':      '#b8b8c0',
-      '--dim':       '#55555e',
+      '--bg':        '#0a0808',
+      '--panel':     '#130f0f',
+      '--bar-bg':    '#0e0b0b',
+      '--line':      '#231c1a',
+      '--text':      '#e8e4e2',
+      '--dim':       '#786b66',
       '--accent':    '#e03a3a',
-      '--white':     '#f4f4f6',
-      '--term-bg':   '#060608',
-      '--term-text': '#88c0d0',
+      '--white':     '#ffffff',
+      '--term-bg':   '#0a0808',
+      '--term-text': '#9ca3af',
     },
   },
   'lumen-dim': {
