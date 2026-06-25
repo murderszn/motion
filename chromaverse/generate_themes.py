@@ -3792,9 +3792,6 @@ for t in themes:
 
 grid_content = "\n\n".join(cards_html)
 
-font_imports = list(set([t["font_import"] for t in themes]))
-font_imports_html = "\n    ".join(font_imports)
-
 import json
 categories_json = json.dumps(categories_dict, indent=12)
 all_themes_json = json.dumps({t["slug"]: t for t in themes}, indent=12)
@@ -3809,7 +3806,6 @@ index_template = f"""<!DOCTYPE html>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-    {font_imports_html}
     <style>
         :root {{
             --r-md: 8px;
@@ -3971,12 +3967,17 @@ index_template = f"""<!DOCTYPE html>
             margin: var(--sp-2) 0;
             white-space: nowrap;
             filter:
-                drop-shadow(0 0 1px rgba(228, 234, 244, 0.98))
-                drop-shadow(0 0 2px rgba(200, 210, 230, 0.75))
-                drop-shadow(-1px -1px 0 rgba(255, 255, 255, 0.5))
-                drop-shadow(1px 1px 0 rgba(72, 82, 102, 0.55))
-                drop-shadow(0 0 18px rgba(190, 205, 235, 0.3))
-                drop-shadow(0 5px 18px rgba(0, 0, 0, 0.45));
+                drop-shadow(0 0 1px #000000)
+                drop-shadow(0 0 2px #000000)
+                drop-shadow(1px 0 0 #000000)
+                drop-shadow(-1px 0 0 #000000)
+                drop-shadow(0 1px 0 #000000)
+                drop-shadow(0 -1px 0 #000000)
+                drop-shadow(2px 0 0 #000000)
+                drop-shadow(-2px 0 0 #000000)
+                drop-shadow(0 2px 0 #000000)
+                drop-shadow(0 -2px 0 #000000)
+                drop-shadow(0 4px 16px rgba(0, 0, 0, 0.4));
         }}
         
         .banner-title span {{
@@ -4209,18 +4210,29 @@ index_template = f"""<!DOCTYPE html>
         }}
 
         .sidebar-brand {{
-            font-size: 1.4rem;
-            font-weight: 800;
-            color: var(--text);
-            letter-spacing: -0.03em;
             margin-bottom: var(--sp-4);
             display: flex;
             align-items: center;
             gap: var(--sp-2);
         }}
 
-        .sidebar-brand span {{
-            color: var(--accent);
+        .sidebar-wordmark {{
+            font-size: 1.1rem;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            text-transform: uppercase;
+            white-space: nowrap;
+            line-height: 1;
+            color: var(--text);
+        }}
+
+        .sidebar-wordmark > span {{
+            background: linear-gradient(135deg, #FF3366, #FF6633, #FFDD00, #00CC44, #0088FF, #6633FF, #CC00CC);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: inherit;
         }}
 
         .sidebar-mode-row {{
@@ -4423,6 +4435,8 @@ index_template = f"""<!DOCTYPE html>
             border-radius: var(--r-lg);
             text-decoration: none;
             color: inherit;
+            content-visibility: auto;
+            contain-intrinsic-size: 320px 380px;
             transition: border-color 0.15s var(--ease-out), transform 0.15s var(--ease-out), box-shadow 0.15s;
         }}
 
@@ -5572,7 +5586,7 @@ index_template = f"""<!DOCTYPE html>
                 <path d="M14 7a7 7 0 100 14 7 7 0 000-14zm0 2.8a4.2 4.2 0 110 8.4 4.2 4.2 0 010-8.4z" fill="url(#spectrum)" opacity="0.7"/>
                 <circle cx="14" cy="14" r="2" fill="url(#spectrum)"/>
             </svg>
-            Chromaverse
+            <span class="sidebar-wordmark">CHROMA<span>VERSE</span></span>
         </div>
         <div class="sidebar-mode-row">
             <span class="sidebar-mode-label">Appearance</span>
@@ -6356,7 +6370,23 @@ index_template = f"""<!DOCTYPE html>
 
         const bannerCanvas = document.getElementById("banner-shader-canvas");
         if (bannerCanvas) {{
-            initBannerShader(bannerCanvas);
+            let bannerShaderStarted = false;
+            const startBannerShader = () => {{
+                if (bannerShaderStarted) return;
+                bannerShaderStarted = true;
+                initBannerShader(bannerCanvas);
+            }};
+            if ("IntersectionObserver" in window) {{
+                const bannerObserver = new IntersectionObserver((entries) => {{
+                    if (entries.some((entry) => entry.isIntersecting)) {{
+                        startBannerShader();
+                        bannerObserver.disconnect();
+                    }}
+                }}, {{ rootMargin: "120px" }});
+                bannerObserver.observe(bannerCanvas);
+            }} else {{
+                startBannerShader();
+            }}
         }}
 
         const saved = safeStorage.getItem("chromaverse-theme-mode");
@@ -7463,7 +7493,3 @@ index_template = embed_builder_theme_shell(index_template)
 with open("index.html", "w", encoding="utf-8") as index_out:
     index_out.write(index_template)
 print("Generated: index.html dashboard successfully!")
-
-with open("chromaverse.html", "w", encoding="utf-8") as chroma_out:
-    chroma_out.write(index_template)
-print("Generated: chromaverse.html dashboard successfully!")
