@@ -164,18 +164,24 @@
             background: var(--bg-alt);
             flex-shrink: 0;
             transition: background-color 0.25s, border-color 0.25s;
-            padding: 0 clamp(24px, 5vw, 64px);
+            padding: 0;
         }
 
-        /* Aligns header and page content to the same 1240px rail */
+        /* Same 1240px rail + horizontal padding as .section-inner */
         .theme-header-inner {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            height: 64px;
+            gap: var(--sp-3);
+            min-height: 64px;
+            height: auto;
+            flex-wrap: wrap;
+            width: 100%;
             max-width: 1240px;
+            min-width: 0;
             margin: 0 auto;
-            padding: 0;
+            padding: var(--sp-3) clamp(24px, 5vw, 64px);
+            box-sizing: border-box;
         }
 
         .theme-header-brand {
@@ -184,6 +190,18 @@
             text-transform: uppercase;
             letter-spacing: -0.015em;
             color: var(--text);
+            min-width: 0;
+            flex: 1 1 auto;
+        }
+
+        .theme-header-actions {
+            display: flex;
+            align-items: center;
+            gap: var(--sp-4);
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            min-width: 0;
+            flex-shrink: 0;
         }
 
         .theme-header-brand span {
@@ -876,7 +894,11 @@
             align-items: center;
             justify-content: space-between;
             gap: var(--sp-4);
-            padding: var(--sp-4) var(--sp-6);
+            flex-wrap: wrap;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            padding: var(--sp-4) var(--sp-5);
             border: 1px solid var(--border);
             background: var(--nav-bg);
             backdrop-filter: blur(12px);
@@ -1153,6 +1175,15 @@
 
         @media (max-width: 840px) {
 
+            .theme-header-inner {
+                align-items: flex-start;
+            }
+
+            .theme-header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+
             .page-header {
                 grid-template-columns: 1fr;
             }
@@ -1384,7 +1415,7 @@
     <header class="theme-header">
         <div class="theme-header-inner">
             <span class="theme-header-brand">Sahara <span>Dust</span></span>
-            <div style="display: flex; align-items: center; gap: var(--sp-4);">
+            <div class="theme-header-actions">
                 <div class="mode-toggle" role="group" aria-label="Color mode" style="margin-top:0;">
                     <button type="button" class="active" data-mode="dark">Dark</button>
                     <button type="button" data-mode="light">Light</button>
