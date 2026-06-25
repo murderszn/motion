@@ -181,9 +181,9 @@
             text-transform: uppercase;
             margin: var(--sp-2) 0;
             white-space: nowrap;
-            text-shadow:
-                0 2px 4px rgba(0, 0, 0, 0.45),
-                0 8px 32px rgba(0, 0, 0, 0.35);
+            filter:
+                drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45))
+                drop-shadow(0 8px 28px rgba(0, 0, 0, 0.32));
         }
         
         .banner-title span {
@@ -193,7 +193,6 @@
             background-clip: text;
             color: transparent;
             letter-spacing: inherit;
-            filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.4));
         }
 
         .banner-subtitle {
