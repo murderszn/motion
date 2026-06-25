@@ -225,27 +225,27 @@
             font-size: clamp(3rem, 11vw, 7rem);
             font-weight: 800;
             color: #f8f9fc;
-            letter-spacing: -0.05em;
+            letter-spacing: -0.06em;
             line-height: 0.95;
             text-transform: uppercase;
             margin: var(--sp-2) 0;
-            -webkit-text-stroke: 0.035em rgba(228, 234, 244, 0.95);
-            paint-order: stroke fill;
-            text-shadow:
-                -0.02em -0.02em 0 rgba(255, 255, 255, 0.55),
-                0.02em 0.02em 0 rgba(72, 82, 102, 0.6),
-                0 0 0.35em rgba(200, 212, 235, 0.35),
-                0 0.06em 0.2em rgba(0, 0, 0, 0.45);
+            white-space: nowrap;
+            filter:
+                drop-shadow(0 0 1px rgba(228, 234, 244, 0.98))
+                drop-shadow(0 0 2px rgba(200, 210, 230, 0.75))
+                drop-shadow(-1px -1px 0 rgba(255, 255, 255, 0.5))
+                drop-shadow(1px 1px 0 rgba(72, 82, 102, 0.55))
+                drop-shadow(0 0 18px rgba(190, 205, 235, 0.3))
+                drop-shadow(0 5px 18px rgba(0, 0, 0, 0.45));
         }
         
         .banner-title span {
-            background: linear-gradient(135deg, #FF3366, #FF6633, #FFDD00, #00CC44, #0088FF, #6633FF);
+            background: linear-gradient(135deg, #FF3366, #FF6633, #FFDD00, #00CC44, #0088FF, #6633FF, #CC00CC);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            display: inline-block;
-            -webkit-text-stroke: 0.035em rgba(228, 234, 244, 0.95);
-            paint-order: stroke fill;
+            color: transparent;
+            letter-spacing: inherit;
         }
 
         .banner-subtitle {
