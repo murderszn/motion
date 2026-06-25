@@ -3966,18 +3966,6 @@ index_template = f"""<!DOCTYPE html>
             text-transform: uppercase;
             margin: var(--sp-2) 0;
             white-space: nowrap;
-            filter:
-                drop-shadow(0 0 1px #000000)
-                drop-shadow(0 0 2px #000000)
-                drop-shadow(1px 0 0 #000000)
-                drop-shadow(-1px 0 0 #000000)
-                drop-shadow(0 1px 0 #000000)
-                drop-shadow(0 -1px 0 #000000)
-                drop-shadow(2px 0 0 #000000)
-                drop-shadow(-2px 0 0 #000000)
-                drop-shadow(0 2px 0 #000000)
-                drop-shadow(0 -2px 0 #000000)
-                drop-shadow(0 4px 16px rgba(0, 0, 0, 0.4));
         }}
         
         .banner-title span {{
