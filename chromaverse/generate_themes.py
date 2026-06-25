@@ -3966,6 +3966,9 @@ index_template = f"""<!DOCTYPE html>
             text-transform: uppercase;
             margin: var(--sp-2) 0;
             white-space: nowrap;
+            text-shadow:
+                0 2px 4px rgba(0, 0, 0, 0.45),
+                0 8px 32px rgba(0, 0, 0, 0.35);
         }}
         
         .banner-title span {{
@@ -3975,6 +3978,7 @@ index_template = f"""<!DOCTYPE html>
             background-clip: text;
             color: transparent;
             letter-spacing: inherit;
+            filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.4));
         }}
 
         .banner-subtitle {{
@@ -3982,6 +3986,7 @@ index_template = f"""<!DOCTYPE html>
             font-weight: 700;
             color: #ffffff;
             letter-spacing: -0.02em;
+            text-shadow: 0 2px 16px rgba(0, 0, 0, 0.45);
         }}
         
         .banner-desc {{
@@ -4058,12 +4063,18 @@ index_template = f"""<!DOCTYPE html>
             gap: var(--sp-2);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
-            transition: border-color 0.2s var(--ease-out), background 0.2s var(--ease-out), color 0.2s var(--ease-out);
+            box-shadow:
+                0 4px 16px rgba(0, 0, 0, 0.28),
+                0 12px 36px rgba(0, 0, 0, 0.18);
+            transition: border-color 0.2s var(--ease-out), background 0.2s var(--ease-out), color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
         }}
         
         .banner-cta:hover {{
             border-color: #ffffff;
             background: rgba(255, 255, 255, 0.12);
+            box-shadow:
+                0 6px 22px rgba(0, 0, 0, 0.35),
+                0 16px 44px rgba(0, 0, 0, 0.22);
         }}
         
         .banner-cta svg {{
