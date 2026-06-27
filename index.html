@@ -133,7 +133,7 @@
         /* ============================================================
            VIDEO BACKGROUND — fixed, full-viewport, alpha-friendly
            ============================================================ */
-        #bg-video, #bg-canvas {
+        #bg-video {
             position: fixed;
             inset: 0;
             width: 100%;
@@ -142,9 +142,9 @@
             z-index: 0;
             will-change: transform;
             transition: transform 0.2s ease-out;
-            display: none;            /* hidden until JS activates the chosen background */
+            display: none;
         }
-        #bg-video.bg-active, #bg-canvas.bg-active { display: block; }
+        #bg-video.bg-active { display: block; }
 
         /* Dark vignette overlay on top of video */
         #vignette {
@@ -158,10 +158,8 @@
             transition: background 0.4s;
         }
 
-        /* Adaptive scrim — keeps the page text readable over any of the 3 bgs.
-           Tinted with the active theme's base colour; opacity adapts to which
-           background loaded (heavier over the light aurora, lighter over the
-           already-dark wave/video). */
+        /* Adaptive scrim — keeps text readable over the video.
+           Tinted with the active theme's base colour. */
         #scrim {
             position: fixed;
             inset: 0;
@@ -171,9 +169,6 @@
             opacity: 0.25;
             transition: opacity 0.6s ease, background 0.4s;
         }
-        body[data-bg="aurora"] #vignette { opacity: 0; }
-        body[data-bg="aurora"] #scrim    { opacity: 0; }
-        body[data-bg="wave"]   #scrim    { opacity: 0.15; }
         body[data-bg="video"]  #scrim    { opacity: 0.20; }
 
         /* ============================================================
@@ -184,22 +179,12 @@
             top: 1.5rem; left: 0; right: 0;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
             padding: 0 1.8rem;
             z-index: 20;
             pointer-events: none;
             mix-blend-mode: var(--mix-blend);
         }
-        .mark {
-            font-weight: 800;
-            font-size: 1.05rem;
-            letter-spacing: -0.02em;
-            text-transform: lowercase;
-            color: var(--text-color);
-            user-select: none;
-            transition: color 0.4s;
-        }
-        .mark span { color: var(--accent); transition: color 0.4s; }
         .nav-links {
             display: flex;
             align-items: center;
@@ -544,6 +529,7 @@
            ============================================================ */
         @media (max-width: 768px) {
             .offerings-grid { grid-template-columns: 1fr; }
+            .nav-links { display: none; }
         }
         @media (max-width: 640px) {
             .story p { font-size: 0.95rem; }
@@ -614,8 +600,8 @@
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 12px;
             transition: all 0.3s ease;
             cursor: pointer;
         }
@@ -627,6 +613,8 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            flex: 1;
+            min-width: 0;
             white-space: nowrap;
             overflow-x: auto;
             scrollbar-width: none;
@@ -646,9 +634,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
             color: #ffffff;
             transition: color 0.2s ease;
-            flex-shrink: 0;
         }
         .terminal-block:hover .copy-btn {
             color: var(--text-muted);
@@ -846,7 +836,7 @@
 
         @media (prefers-reduced-motion: reduce) {
             .reveal { opacity: 1; transform: none; filter: none; transition: none; }
-            #bg-video, #bg-canvas { transition: none; }
+            #bg-video { transition: none; }
             html { scroll-behavior: auto; }
         }
     </style>
@@ -855,13 +845,11 @@
 
     <!-- ============ BACKGROUND (video OR webgl shader, chosen at random) ============ -->
     <video id="bg-video" loop muted playsinline poster="media/poster.jpg" preload="none"></video>
-    <canvas id="bg-canvas"></canvas>
     <div id="vignette"></div>
     <div id="scrim"></div>
 
     <!-- ============ NAV ============ -->
     <nav class="nav">
-        <span class="mark"><span>/</span>motion local</span>
         <div class="nav-links">
             <a href="#offerings" class="nav-link">offerings</a>
             <a href="#playground" class="nav-link">playground</a>

@@ -2,17 +2,18 @@
 //  studio/main.ts — entry point, wires everything together
 // ─────────────────────────────────────────────────────────
 
-import { P, PALETTES, PRESETS, normalizeMode, presetAt } from './state';
+import { P, PALETTES, PRESETS, normalizeMode, migrateTrilatRemoval, presetAt } from './state';
 import type { SliderKey } from './types';
 import { FS, initWebGL, loadTexture, clearTexture } from './webgl';
 import { startRenderLoop, togglePause } from './render';
 import { initPresets, applyPresetUI } from './ui/presets';
 import { initSeed, setSeed } from './ui/seed';
-import { initPalette, setPalette } from './ui/palette';
+import { initPalette, setPalette, getRandomPalette } from './ui/palette';
 import { initSliders, setSlider } from './ui/sliders';
 import { initSizes, applySizeUI } from './ui/sizes';
 import { initTextControls, renderTextOverlay, texts } from './ui/text';
 import { initExport, exportPNG } from './ui/export';
+import { initExportTargets, syncExportUIFromParams } from './ui/export_targets_ui';
 import { initTerminal, initResizeDragHandle, logToTerminal } from './ui/terminal';
 import { initSidebar, applyTheme } from './ui/sidebar';
 import {
@@ -27,6 +28,9 @@ import { initKeyboard } from './ui/keyboard';
 import { initCommandPalette } from './ui/command_palette';
 import { parseUrlParams, copyStateToClipboard, pasteStateFromClipboard, copyShareLink } from './ui/url_api';
 import { exportHtmlEmbed } from './ui/export_embed';
+import { initKineticStudio } from './ui/kinetic_studio';
+import { initAudioVisualizer } from './ui/audio_visualizer';
+import { initMenuBar } from './ui/menu_bar';
 
 const $ = (id: string): HTMLElement => document.getElementById(id)!;
 
@@ -48,15 +52,16 @@ function downloadBlob(blob: Blob, name: string): void {
 function randomize(): void {
   window.dispatchEvent(new CustomEvent('lumen:historyBefore'));
   setSeed(Math.floor(Math.random() * 10000), setStatusSeed);
-  setPalette(PALETTES[Math.floor(Math.random() * PALETTES.length)]);
+  setPalette(getRandomPalette());
   setSlider('speed',   0.25 + Math.random() * 0.6);
   setSlider('scale',   0.20 + Math.random() * 0.7);
   setSlider('density', 0.25 + Math.random() * 0.65);
   setSlider('distort', 0.20 + Math.random() * 0.7);
+  setSlider('warp',    0.20 + Math.random() * 0.7);
   setSlider('detail',  0.25 + Math.random() * 0.6);
   setSlider('grain',   Math.random() * 0.5);
-  ($('mixRng') as HTMLInputElement).value = '0'; P.mix = 0; $('mixVal').textContent = '0%';
-  ($('pixelRng') as HTMLInputElement).value = '0'; P.pixel = 0; $('pixelVal').textContent = '0%';
+  P.mix = 0;
+  P.pixel = 0;
   logToTerminal('randomized all parameters', 'ok');
 }
 
@@ -83,23 +88,18 @@ function loadProject(file: File): void {
 
       setSeed(P.seed, setStatusSeed);
       setPalette(P.colors);
-      (['speed', 'scale', 'density', 'distort', 'detail', 'grain'] as SliderKey[]).forEach(id => {
+      (['speed', 'scale', 'density', 'distort', 'warp', 'detail', 'grain'] as SliderKey[]).forEach(id => {
         if (P[id] !== undefined) setSlider(id, P[id]);
       });
-      P.mode = normalizeMode(P.mode);
+      P.mode = migrateTrilatRemoval(P.mode);
       applyPresetUI();
       setStatusMode(presetAt(P.mode).full);
       applySizeUI();
       ($('loop') as HTMLInputElement).value = String(P.loop);
       $('loopVal').textContent = P.loop.toFixed(1) + 's';
-      if (P.mix !== undefined) {
-        ($('mixRng') as HTMLInputElement).value = String(Math.round(P.mix * 100));
-        $('mixVal').textContent = Math.round(P.mix * 100) + '%';
-      }
-      if (P.pixel !== undefined) {
-        ($('pixelRng') as HTMLInputElement).value = String(Math.round(P.pixel * 100));
-        $('pixelVal').textContent = Math.round(P.pixel * 100) + '%';
-      }
+      P.pixel = 0;
+      $('btnInvert').textContent = 'invert colors: ' + (P.invert ? 'on' : 'off');
+      syncExportUIFromParams();
       renderTextOverlay();
       logToTerminal('project loaded: ' + file.name, 'ok');
     } catch (err) {
@@ -113,7 +113,6 @@ function loadProject(file: File): void {
 
 (function init(): void {
   let lastImgUrl: string | null = null;
-  let lastViewerUrl: string | null = null;
 
   // WebGL
   initWebGL($('c') as HTMLCanvasElement);
@@ -154,12 +153,12 @@ function loadProject(file: File): void {
   ($('btnPause') as HTMLButtonElement).onclick = () =>
     togglePause($('btnPause') as HTMLButtonElement);
 
-  // Randomize buttons
-  ($('btnRandom') as HTMLButtonElement).onclick = randomize;
+  // Randomize buttons (header randomize removed; left-nav ↻ + 'r' key remain)
   ($('btnRandom2') as HTMLButtonElement).onclick = randomize;
   ($('btnSave') as HTMLButtonElement).onclick = exportPNG;
 
   // Export
+  initExportTargets();
   initExport($('btnPause') as HTMLButtonElement);
 
   // Image upload
@@ -170,6 +169,8 @@ function loadProject(file: File): void {
     const img = new Image();
     img.onload = () => {
       loadTexture(img);
+      P.mix = 1;
+      P.pixel = 0;
       ($('imgThumb') as HTMLImageElement).src = img.src;
       $('imgPreview').style.display = 'block';
       $('imgStatus').textContent = img.naturalWidth + '×' + img.naturalHeight;
@@ -181,30 +182,17 @@ function loadProject(file: File): void {
   };
   ($('imgRemove') as HTMLButtonElement).onclick = () => {
     clearTexture();
+    P.mix = 0;
+    P.pixel = 0;
     $('imgPreview').style.display = 'none';
     ($('imgFile') as HTMLInputElement).value = '';
     $('imgStatus').textContent = '';
-    ($('mixRng') as HTMLInputElement).value = '0'; P.mix = 0; $('mixVal').textContent = '0%';
-    ($('pixelRng') as HTMLInputElement).value = '0'; P.pixel = 0; $('pixelVal').textContent = '0%';
     if (lastImgUrl) {
       URL.revokeObjectURL(lastImgUrl);
       lastImgUrl = null;
     }
     logToTerminal('image removed', 'info');
   };
-  [$('mixRng'), $('pixelRng')].forEach(el => {
-    el.addEventListener('pointerdown', () => {
-      window.dispatchEvent(new CustomEvent('lumen:historyBefore'));
-    });
-  });
-  ($('mixRng') as HTMLInputElement).addEventListener('input', function() {
-    P.mix = parseFloat((this as HTMLInputElement).value) / 100;
-    $('mixVal').textContent = Math.round(P.mix * 100) + '%';
-  });
-  ($('pixelRng') as HTMLInputElement).addEventListener('input', function() {
-    P.pixel = parseFloat((this as HTMLInputElement).value) / 100;
-    $('pixelVal').textContent = Math.round(P.pixel * 100) + '%';
-  });
 
   // Drag-and-drop image onto stage
   const stageEl = $('stage') as HTMLElement;
@@ -216,6 +204,8 @@ function loadProject(file: File): void {
     const img = new Image();
     img.onload = () => {
       loadTexture(img);
+      P.mix = 1;
+      P.pixel = 0;
       ($('imgThumb') as HTMLImageElement).src = img.src;
       $('imgPreview').style.display = 'block';
       $('imgStatus').textContent = img.naturalWidth + '×' + img.naturalHeight;
@@ -257,80 +247,16 @@ function loadProject(file: File): void {
   initKeyboard(randomize);
   initCommandPalette(randomize);
 
-  // Viewer
-  try {
-    const viewerFile = $('viewerFile') as HTMLInputElement | null;
-    const viewerStage = $('viewerStage') as HTMLElement | null;
-    const viewerVid = $('viewerVid') as HTMLVideoElement | null;
-    const viewerImg = $('viewerImg') as HTMLImageElement | null;
-    const viewerSection = $('viewerSection') as HTMLElement | null;
-    const viewerOpen = $('viewerOpen') as HTMLButtonElement | null;
-    const viewerPlay = $('viewerPlay') as HTMLButtonElement | null;
-    const viewerPause = $('viewerPause') as HTMLButtonElement | null;
-    const viewerLoop = $('viewerLoop') as HTMLButtonElement | null;
-    const viewerInvert = $('viewerInvert') as HTMLButtonElement | null;
-    const viewerSpeed = $('viewerSpeed') as HTMLInputElement | null;
-    const viewerSpeedVal = $('viewerSpeedVal') as HTMLElement | null;
-
-    viewerOpen?.addEventListener('click', () => viewerFile?.click());
-    viewerFile?.addEventListener('change', () => {
-      const file = viewerFile.files?.[0];
-      if (!file || !viewerStage || !viewerSection) return;
-      viewerSection.style.display = '';
-      if (lastViewerUrl) {
-        URL.revokeObjectURL(lastViewerUrl);
-      }
-      lastViewerUrl = URL.createObjectURL(file);
-      if (file.type.startsWith('video/')) {
-        if (viewerImg) viewerImg.style.display = 'none';
-        if (viewerVid) {
-          viewerVid.src = lastViewerUrl;
-          viewerVid.style.display = 'block';
-          viewerVid.play().catch(() => {});
-        }
-      } else {
-        if (viewerVid) {
-          viewerVid.pause();
-          viewerVid.style.display = 'none';
-        }
-        if (viewerImg) {
-          viewerImg.src = lastViewerUrl;
-          viewerImg.style.display = 'block';
-        }
-      }
-    });
-    viewerPlay?.addEventListener('click', () => {
-      if (viewerVid && viewerVid.style.display !== 'none') {
-        viewerVid.play().catch(() => {});
-      }
-    });
-    viewerPause?.addEventListener('click', () => {
-      if (viewerVid && viewerVid.style.display !== 'none') {
-        viewerVid.pause();
-      }
-    });
-    viewerLoop?.addEventListener('click', () => {
-      if (!viewerVid) return;
-      viewerVid.loop = !viewerVid.loop;
-      viewerLoop.textContent = viewerVid.loop ? 'loop on' : 'loop off';
-    });
-    let viewerInverted = false;
-    viewerInvert?.addEventListener('click', () => {
-      viewerInverted = !viewerInverted;
-      if (viewerVid) viewerVid.style.filter = viewerInverted ? 'invert(1)' : '';
-      if (viewerImg) viewerImg.style.filter = viewerInverted ? 'invert(1)' : '';
-      viewerInvert.textContent = viewerInverted ? 'invert on' : 'invert off';
-    });
-    viewerSpeed?.addEventListener('input', () => {
-      const v = parseFloat(viewerSpeed?.value ?? '1');
-      if (viewerVid) viewerVid.playbackRate = v;
-      if (viewerSpeedVal) viewerSpeedVal.textContent = v.toFixed(2) + 'x';
-    });
-  } catch {}
-
-
   // Start RAF
   startRenderLoop();
 
   initHistory();
+  initKineticStudio();
+  initAudioVisualizer();
+  initMenuBar();
+
+  // Expose P for Playwright tests
+  if (typeof window !== 'undefined') {
+    (window as any).P = P;
+  }
 })();

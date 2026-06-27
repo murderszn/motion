@@ -1,22 +1,23 @@
 // ─────────────────────────────────────────────────────────
-//  Export — PNG, WebM, GIF
+//  Export — PNG/JPG/WebP, WebM, GIF
 // ─────────────────────────────────────────────────────────
 
-import { P, PRESETS } from '../state';
-import { draw, canvas, gl } from '../webgl';
-import { getPhase, setPhase, isPaused, setExporting } from '../render';
+import { P } from '../state';
+import { draw, canvas, gl, withRenderSize } from '../webgl';
+import { getPhase, setPhase, setExporting } from '../render';
 import { composeExportCanvas, renderTextOnCanvas } from './text';
 import { setStatusMsg } from './statusbar';
 import {
   showExportProgress, updateExportProgress, updateExportEncoding, hideExportProgress,
 } from './export_progress';
 import type { ExportFormat } from './settings';
+import {
+  STILL_FORMAT_META, buildExportFilename, resolveExportTarget,
+} from '../export_targets';
+import { refreshExportSpec } from './export_targets_ui';
 
 const $ = (id: string) => document.getElementById(id)!;
 
-function fname(ext: string): string {
-  return 'lumen-' + PRESETS[P.mode].id + '-' + String(P.seed).padStart(4, '0') + '.' + ext;
-}
 function anchorDownload(blob: Blob, name: string): void {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -30,14 +31,6 @@ function anchorDownload(blob: Blob, name: string): void {
 
 export type Saver = (blob: Blob) => Promise<void>;
 
-// Acquire a file saver while we still hold the user's click activation.
-//
-// Prefer the File System Access API: it writes straight to a user-chosen file
-// and never creates a chrome.downloads item, so download-manager extensions
-// can't intercept it and discard the `download` filename (that interception is
-// what produces the UUID-named, extension-less files in a normal browser).
-// Anywhere the API is unavailable (Firefox/Safari, insecure contexts) we fall
-// back to a plain anchor download, which preserves the name fine there.
 export async function pickSaver(name: string, mime: string): Promise<Saver> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const picker = (window as any).showSaveFilePicker;
@@ -54,25 +47,67 @@ export async function pickSaver(name: string, mime: string): Promise<Saver> {
         await writable.close();
       };
     } catch (err) {
-      // User dismissed the save dialog — propagate so the export aborts.
       if (err && (err as { name?: string }).name === 'AbortError') throw err;
-      // Any other failure (e.g. no activation, insecure context): fall back.
     }
   }
   return (blob: Blob) => { anchorDownload(blob, name); return Promise.resolve(); };
 }
+
 function msg(t: string): void { setStatusMsg(t); }
 
-// ── PNG ──────────────────────────────────────────────────
+function stillBlob(
+  cv: HTMLCanvasElement,
+  fmt: keyof typeof STILL_FORMAT_META,
+): Promise<Blob | null> {
+  const meta = STILL_FORMAT_META[fmt];
+  return new Promise(res => {
+    cv.toBlob(b => res(b), meta.mime, meta.qual);
+  });
+}
+
+function attemptStillExport(w: number, h: number, phase: number): HTMLCanvasElement {
+  return withRenderSize(w, h, () => {
+    draw(phase);
+    gl.finish();
+    return composeExportCanvas(canvas, w, h);
+  });
+}
+
+// ── Still image (PNG / JPG / WebP) ───────────────────────
 
 export async function exportPNG(): Promise<void> {
+  const fmt = P.imageFormat;
+  const meta = STILL_FORMAT_META[fmt];
+  const target = resolveExportTarget(P.exportTargetId, canvas.width, canvas.height);
+  const fname = buildExportFilename(P.exportCaption, P.seed, P.mode, meta.ext);
   let saver: Saver;
-  try { saver = await pickSaver(fname('png'), 'image/png'); }
-  catch { return; } // save dialog cancelled
-  draw(getPhase());
-  gl.finish();
-  const ec = composeExportCanvas(canvas, canvas.width, canvas.height);
-  ec.toBlob(async b => { if (b) { await saver(b); msg('image saved'); } }, 'image/png');
+  try { saver = await pickSaver(fname, meta.mime); }
+  catch { return; }
+
+  const phase = getPhase();
+  let W = target.w;
+  let H = target.h;
+  let ec = attemptStillExport(W, H, phase);
+  let blob = await stillBlob(ec, fmt);
+
+  if (!blob || (gl.isContextLost && gl.isContextLost())) {
+    W = Math.max(2, Math.round(W / 2));
+    H = Math.max(2, Math.round(H / 2));
+    ec = attemptStillExport(W, H, phase);
+    blob = await stillBlob(ec, fmt);
+    if (blob) {
+      await saver(blob);
+      msg(`saved ${W}×${H} (scaled down)`);
+      refreshExportSpec();
+      return;
+    }
+    msg('export failed — try a smaller size');
+    return;
+  }
+
+  await saver(blob);
+  msg(`saved ${W}×${H} ${fmt}`);
+  refreshExportSpec();
 }
 
 // ── WebM / MP4 Video ─────────────────────────────────────
@@ -87,12 +122,8 @@ let videoSaver: Saver | null = null;
 export async function startWebmExport(pauseBtn: HTMLButtonElement): Promise<void> {
   if (recorder) return;
 
-  // Determine supported container and codec.
-  // Prefer MP4/H.264 first: it opens natively in QuickTime, Preview, Photos,
-  // and every video editor. Plain .webm downloads look like an "unknown
-  // format" to macOS and won't open without VLC, so it's only a fallback.
   const candidates: Array<[string, string]> = [
-    ['video/mp4;codecs=avc1.42E01E', 'mp4'], // H.264 baseline — most compatible
+    ['video/mp4;codecs=avc1.42E01E', 'mp4'],
     ['video/mp4;codecs=avc1', 'mp4'],
     ['video/mp4', 'mp4'],
     ['video/webm;codecs=vp9', 'webm'],
@@ -105,29 +136,24 @@ export async function startWebmExport(pauseBtn: HTMLButtonElement): Promise<void
     if (MediaRecorder.isTypeSupported(m)) { mime = m; activeExportExt = ext; break; }
   }
 
-  // Grab the save target now, while the click activation is still live —
-  // recording finishes seconds later, long after the activation expires.
-  try { videoSaver = await pickSaver(fname(activeExportExt), mime.split(';')[0]); }
-  catch { return; } // save dialog cancelled
+  const vTarget = resolveExportTarget(P.exportTargetId, canvas.width, canvas.height);
+  const vw = vTarget.w;
+  const vh = vTarget.h;
+  const vname = buildExportFilename(P.exportCaption, P.seed, P.mode, activeExportExt);
+
+  try { videoSaver = await pickSaver(vname, mime.split(';')[0]); }
+  catch { return; }
 
   setExporting(true);
   showExportProgress('video', 'recording video…');
 
   exportCv = document.createElement('canvas');
-  exportCv.width = canvas.width; exportCv.height = canvas.height;
-  // Style invisibly and append to DOM so captureStream works in all browsers
-  exportCv.style.position = 'fixed';
-  exportCv.style.top = '0';
-  exportCv.style.left = '0';
-  exportCv.style.width = '1px';
-  exportCv.style.height = '1px';
-  exportCv.style.opacity = '0';
-  exportCv.style.pointerEvents = 'none';
-  exportCv.style.zIndex = '-9999';
+  exportCv.width = vw;
+  exportCv.height = vh;
+  exportCv.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;pointer-events:none;z-index:-9999';
   document.body.appendChild(exportCv);
-
   ectx = exportCv.getContext('2d')!;
-  
+
   const pixelCv = document.createElement('canvas');
   const pctx = pixelCv.getContext('2d')!;
 
@@ -137,9 +163,7 @@ export async function startWebmExport(pauseBtn: HTMLButtonElement): Promise<void
   recorder.ondataavailable = e => { if ((e as BlobEvent).data.size) chunks.push((e as BlobEvent).data); };
   recorder.onstop = () => {
     hideExportProgress();
-    if (exportCv && exportCv.parentNode) {
-      exportCv.parentNode.removeChild(exportCv);
-    }
+    if (exportCv?.parentNode) exportCv.parentNode.removeChild(exportCv);
     if (chunks.length && videoSaver) {
       const baseMime = mime.split(';')[0];
       videoSaver(new Blob(chunks, { type: baseMime })).then(() => msg('video saved'));
@@ -163,8 +187,11 @@ export async function startWebmExport(pauseBtn: HTMLButtonElement): Promise<void
     }
 
     const phase = (currentFrame / totalFrames) * Math.PI * 2;
-    draw(phase);
-    gl.finish();
+    const frame = withRenderSize(vw, vh, () => {
+      draw(phase);
+      gl.finish();
+      return composeExportCanvas(canvas, vw, vh);
+    });
 
     if (P.pixel && P.pixel > 0.001) {
       const scale = Math.max(0.02, 1 - P.pixel);
@@ -174,16 +201,14 @@ export async function startWebmExport(pauseBtn: HTMLButtonElement): Promise<void
         pixelCv.width = sw; pixelCv.height = sh;
       }
       pctx.imageSmoothingEnabled = true;
-      pctx.drawImage(canvas, 0, 0, sw, sh);
+      pctx.drawImage(frame, 0, 0, sw, sh);
       ectx.imageSmoothingEnabled = false;
       ectx.drawImage(pixelCv, 0, 0, exportCv.width, exportCv.height);
     } else {
-      ectx.drawImage(canvas, 0, 0);
+      ectx.drawImage(frame, 0, 0);
     }
 
-    renderTextOnCanvas(ectx, exportCv.width, exportCv.height);
     updateExportProgress(currentFrame + 1, totalFrames, `recording ${activeExportExt}…`);
-
     currentFrame++;
     videoAnimId = requestAnimationFrame(recordFrame);
   }
@@ -201,13 +226,8 @@ export function cancelExport(): void {
     recorder.ondataavailable = null;
     recorder.onstop = () => {
       hideExportProgress();
-      if (exportCv && exportCv.parentNode) {
-        exportCv.parentNode.removeChild(exportCv);
-      }
-      recorder = null;
-      exportCv = null;
-      ectx = null;
-      videoSaver = null;
+      if (exportCv?.parentNode) exportCv.parentNode.removeChild(exportCv);
+      recorder = null; exportCv = null; ectx = null; videoSaver = null;
       setExporting(false);
     };
     recorder.stop();
@@ -238,49 +258,38 @@ function loadGifLib(): Promise<string> {
 }
 
 export async function exportGIF(): Promise<void> {
-  if (recorder) return; // already exporting webm
+  if (recorder) return;
+  const gTarget = resolveExportTarget(P.exportTargetId, canvas.width, canvas.height);
+  const gname = buildExportFilename(P.exportCaption, P.seed, P.mode, 'gif');
   let saver: Saver;
-  try { saver = await pickSaver(fname('gif'), 'image/gif'); }
-  catch { return; } // save dialog cancelled
+  try { saver = await pickSaver(gname, 'image/gif'); }
+  catch { return; }
+
   setExporting(true); gifCancel = false;
   showExportProgress('gif-render', 'rendering gif frames…');
   try {
     const workerUrl = await loadGifLib();
     const maxDim = 640;
-    const k = Math.min(1, maxDim / Math.max(canvas.width, canvas.height));
-    const tw = Math.round(canvas.width * k), th = Math.round(canvas.height * k);
+    const tw = Math.min(gTarget.w, maxDim);
+    const th = Math.min(gTarget.h, Math.round(gTarget.h * (tw / gTarget.w)));
     const tmp = document.createElement('canvas');
     tmp.width = tw; tmp.height = th;
     const tctx = tmp.getContext('2d')!;
-
-    const pixelCv = document.createElement('canvas');
-    const pctx = pixelCv.getContext('2d')!;
 
     const fps = 30;
     const frames = Math.round(P.loop * fps);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const gif = new (window as any).GIF({ workers: 2, quality: 8, width: tw, height: th, workerScript: workerUrl });
+
     for (let i = 0; i < frames; i++) {
       if (gifCancel) throw new Error('cancelled');
-      draw(i / frames * Math.PI * 2);
-      gl.finish();
-
-      if (P.pixel && P.pixel > 0.001) {
-        const scale = Math.max(0.02, 1 - P.pixel);
-        const sw = Math.max(1, Math.floor(tw * scale));
-        const sh = Math.max(1, Math.floor(th * scale));
-        if (pixelCv.width !== sw || pixelCv.height !== sh) {
-          pixelCv.width = sw; pixelCv.height = sh;
-        }
-        pctx.imageSmoothingEnabled = true;
-        pctx.drawImage(canvas, 0, 0, sw, sh);
-        tctx.imageSmoothingEnabled = false;
-        tctx.drawImage(pixelCv, 0, 0, tw, th);
-      } else {
-        tctx.drawImage(canvas, 0, 0, tw, th);
-      }
-
-      renderTextOnCanvas(tctx, tw, th);
+      const phase = i / frames * Math.PI * 2;
+      const frame = withRenderSize(gTarget.w, gTarget.h, () => {
+        draw(phase);
+        gl.finish();
+        return composeExportCanvas(canvas, gTarget.w, gTarget.h);
+      });
+      tctx.drawImage(frame, 0, 0, tw, th);
       gif.addFrame(tmp, { copy: true, delay: 1000 / fps });
       updateExportProgress(i + 1, frames, 'rendering gif frames…');
       await new Promise(r => setTimeout(r, 0));
@@ -303,9 +312,6 @@ export async function exportGIF(): Promise<void> {
 
 function setExportFormat(fmt: ExportFormat): void {
   window.lumenExportFormat = fmt;
-  document.querySelectorAll('.export-fmt').forEach(btn => {
-    btn.classList.toggle('active', btn.getAttribute('data-fmt') === fmt);
-  });
   window.dispatchEvent(new CustomEvent('lumen:exportFormatChanged'));
 }
 
@@ -314,13 +320,6 @@ export function initExport(pauseBtn: HTMLButtonElement): void {
   ($('expVid') as HTMLButtonElement).onclick = () => { setExportFormat('webm'); startWebmExport(pauseBtn); };
   ($('expGif') as HTMLButtonElement).onclick = () => { setExportFormat('gif'); exportGIF(); };
   ($('exportCancel') as HTMLButtonElement).onclick = cancelExport;
-
-  document.querySelectorAll('.export-fmt').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const fmt = btn.getAttribute('data-fmt') as ExportFormat;
-      if (fmt) setExportFormat(fmt);
-    });
-  });
 
   window.addEventListener('lumen:applyExportFormat', e => {
     setExportFormat((e as CustomEvent<ExportFormat>).detail);

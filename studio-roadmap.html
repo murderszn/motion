@@ -185,7 +185,7 @@ footer {
 <div class="page">
   <header>
     <h1><span>/</span>motion studio roadmap</h1>
-    <p class="lead">Check items off as they ship. Progress is saved in your browser. Sprint 1 (items 1–5) is complete; sprint 2 (terminal) is done. Items 11–22 track parity with <a href="https://fluid.krackeddevs.com/" style="color:var(--text)">Fluid</a> — shaders, distortion, and distribution — without changing core studio behaviour until each ships.</p>
+    <p class="lead">Check items off as they ship. Progress is saved in your browser. Sprint 1–2 complete. 33 presets shipped (21 core + 12 Fluid field engines). Items 11–22 track Fluid parity. Items 35–42 are polish &amp; infrastructure improvements.</p>
     <p class="meta"><a href="/studio.html">← back to studio</a> · updated June 2026 · ref <a href="https://fluid.krackeddevs.com/dev" style="color:var(--text)">fluid dev docs</a> · see also <code>docs/PLAN.md</code></p>
   </header>
 
@@ -197,6 +197,22 @@ footer {
     <span class="chip">export progress UI</span>
     <span class="chip">Monaco GLSL editor</span>
     <span class="chip">terminal tabs + reconnect</span>
+    <span class="chip">33 shader presets (21 core + 12 Fluid)</span>
+    <span class="chip">pattern-fill text (shader mask)</span>
+    <span class="chip">text drag + effects (7 effects)</span>
+    <span class="chip">warp slider (Fluid parity)</span>
+    <span class="chip">12 Fluid field engines ported</span>
+    <span class="chip">audio visualizer (mic input)</span>
+    <span class="chip">kinetic typography studio</span>
+    <span class="chip">export targets (wallpaper/social/icon)</span>
+    <span class="chip">self-contained HTML embed export</span>
+    <span class="chip">webGL context-loss recovery</span>
+    <span class="chip">loop-seam pixel diff audit (Playwright)</span>
+    <span class="chip">studio.css extracted (2314 lines)</span>
+    <span class="chip">chromaverse: gallery font diet</span>
+    <span class="chip">chromaverse: firebase cache headers</span>
+    <span class="chip">chromaverse: card content-visibility</span>
+    <span class="chip">chromaverse: deferred banner shader</span>
   </div>
 
   <h2>Next up — studio polish (items 6–10)</h2>
@@ -211,9 +227,9 @@ footer {
         </div>
       </div>
     </div>
-    <div class="phase" data-roadmap-id="item-7">
+    <div class="phase done" data-roadmap-id="item-7">
       <div class="phase-head">
-        <input type="checkbox" class="roadmap-check" id="check-item-7" data-roadmap-id="item-7">
+        <input type="checkbox" class="roadmap-check" id="check-item-7" data-roadmap-id="item-7" checked>
         <div class="phase-body">
           <div class="phase-tag">7 · text layers</div>
           <h3><label for="check-item-7">Text layer list</label></h3>
@@ -221,9 +237,9 @@ footer {
         </div>
       </div>
     </div>
-    <div class="phase" data-roadmap-id="item-8">
+    <div class="phase done" data-roadmap-id="item-8">
       <div class="phase-head">
-        <input type="checkbox" class="roadmap-check" id="check-item-8" data-roadmap-id="item-8">
+        <input type="checkbox" class="roadmap-check" id="check-item-8" data-roadmap-id="item-8" checked>
         <div class="phase-body">
           <div class="phase-tag">8 · animation</div>
           <h3><label for="check-item-8">Phase-driven text motion</label></h3>
@@ -301,9 +317,9 @@ footer {
   <h2>Fluid parity — fields, melt &amp; surface (items 15–18)</h2>
   <p style="font-size:14px;color:var(--dim);margin-bottom:var(--sp-4);max-width:44rem;">Fluid’s <strong>Field</strong> step has 12 engines; our <code>u_distort</code> slider modulates presets but we lack several engines and a dedicated surface post-pass. Source images “melt” via liquify + luminance-driven shape.</p>
   <div class="grid-2">
-    <div class="phase" data-roadmap-id="item-15">
+    <div class="phase done" data-roadmap-id="item-15">
       <div class="phase-head">
-        <input type="checkbox" class="roadmap-check" id="check-item-15" data-roadmap-id="item-15">
+        <input type="checkbox" class="roadmap-check" id="check-item-15" data-roadmap-id="item-15" checked>
         <div class="phase-body">
           <div class="phase-tag">15 · fields</div>
           <h3><label for="check-item-15">Missing field presets</label></h3>
@@ -331,9 +347,9 @@ footer {
         </div>
       </div>
     </div>
-    <div class="phase" data-roadmap-id="item-18">
+    <div class="phase done" data-roadmap-id="item-18">
       <div class="phase-head">
-        <input type="checkbox" class="roadmap-check" id="check-item-18" data-roadmap-id="item-18">
+        <input type="checkbox" class="roadmap-check" id="check-item-18" data-roadmap-id="item-18" checked>
         <div class="phase-body">
           <div class="phase-tag">18 · warp</div>
           <h3><label for="check-item-18">Warp + symmetry controls</label></h3>
@@ -382,6 +398,216 @@ footer {
           <div class="phase-tag">22 · colours</div>
           <h3><label for="check-item-22">Custom gradient editor</label></h3>
           <p>Four-stop dark→light gradient UI (Fluid <strong>Custom</strong> palette). Named palette presets stay; custom stops sync to share URL and API. One-click <strong>Record clip</strong> beside PNG export.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Chromaverse — gallery performance (items 23–34)</h2>
+  <p style="font-size:14px;color:var(--dim);margin-bottom:var(--sp-4);max-width:44rem;">The gallery ships as a ~1&nbsp;MB monolith: 65 pre-rendered cards, 400&nbsp;KB inline JSON, and (formerly) 65 Google Font requests. Items 23–26 are quick wins; 27–34 are the structural fixes.</p>
+  <div class="grid-2">
+    <div class="phase" data-roadmap-id="item-23">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-23" data-roadmap-id="item-23" checked>
+        <div class="phase-body">
+          <div class="phase-tag">23 · fonts</div>
+          <h3><label for="check-item-23">Gallery font diet</label></h3>
+          <p>Load only <code>Inter</code> + <code>JetBrains Mono</code> on the gallery index. Theme fonts load on individual theme pages — not 65 <code>&lt;link&gt;</code> tags on first paint.</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase" data-roadmap-id="item-24">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-24" data-roadmap-id="item-24" checked>
+        <div class="phase-body">
+          <div class="phase-tag">24 · hosting</div>
+          <h3><label for="check-item-24">Firebase cache headers</label></h3>
+          <p><code>Cache-Control</code> on <code>/assets/**</code> (immutable), <code>/chromaverse/**</code> (1&nbsp;h + stale-while-revalidate), and theme HTML (5&nbsp;min).</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase" data-roadmap-id="item-25">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-25" data-roadmap-id="item-25" checked>
+        <div class="phase-body">
+          <div class="phase-tag">25 · render</div>
+          <h3><label for="check-item-25">Card <code>content-visibility</code></label></h3>
+          <p>Skip layout/paint for off-screen theme cards. <code>contain-intrinsic-size</code> preserves scroll height without mounting 65 dual-preview panels at once.</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase" data-roadmap-id="item-26">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-26" data-roadmap-id="item-26" checked>
+        <div class="phase-body">
+          <div class="phase-tag">26 · gpu</div>
+          <h3><label for="check-item-26">Deferred banner shader</label></h3>
+          <p>Start the banner WebGL loop only when the hero enters the viewport (<code>IntersectionObserver</code> + 120px root margin). Saves GPU on studio-first visits.</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase" data-roadmap-id="item-27">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-27" data-roadmap-id="item-27">
+        <div class="phase-body">
+          <div class="phase-tag">27 · data</div>
+          <h3><label for="check-item-27">External <code>themes.json</code></label></h3>
+          <p>Move <code>ALL_THEMES_DATA</code> (~400&nbsp;KB) out of inline HTML into a cacheable JSON file fetched on demand.</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase" data-roadmap-id="item-28">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-28" data-roadmap-id="item-28">
+        <div class="phase-body">
+          <div class="phase-tag">28 · dom</div>
+          <h3><label for="check-item-28">Client-render theme cards</label></h3>
+          <p>Generate the 65-card grid from JSON instead of shipping ~355&nbsp;KB of duplicated pre-rendered HTML in the page.</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase" data-roadmap-id="item-29">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-29" data-roadmap-id="item-29">
+        <div class="phase-body">
+          <div class="phase-tag">29 · fonts</div>
+          <h3><label for="check-item-29">Lazy font previews</label></h3>
+          <p>Inject per-theme Google Font <code>&lt;link&gt;</code> tags only for cards entering the viewport — live <code>Aa</code> previews without eager loading all families.</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase" data-roadmap-id="item-30">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-30" data-roadmap-id="item-30">
+        <div class="phase-body">
+          <div class="phase-tag">30 · builder</div>
+          <h3><label for="check-item-30">Defer theme builder shell</label></h3>
+          <p>Lazy-load the ~72&nbsp;KB builder <code>&lt;template&gt;</code> and its JS until the user opens Theme Builder Studio.</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase" data-roadmap-id="item-31">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-31" data-roadmap-id="item-31">
+        <div class="phase-body">
+          <div class="phase-tag">31 · scroll</div>
+          <h3><label for="check-item-31">Virtualize theme grid</label></h3>
+          <p>Mount/unmount card DOM nodes based on scroll position — pairs with item 28 for large theme counts.</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase" data-roadmap-id="item-32">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-32" data-roadmap-id="item-32">
+        <div class="phase-body">
+          <div class="phase-tag">32 · fonts</div>
+          <h3><label for="check-item-32">Consolidate font requests</label></h3>
+          <p>If eager loading returns, merge families into 1–2 combined <code>css2</code> URLs instead of dozens of separate <code>&lt;link&gt;</code> tags.</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase" data-roadmap-id="item-33">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-33" data-roadmap-id="item-33">
+        <div class="phase-body">
+          <div class="phase-tag">33 · fonts</div>
+          <h3><label for="check-item-33">Self-host UI fonts</label></h3>
+          <p>Bundle <code>Inter</code> + <code>JetBrains Mono</code> as local WOFF2 — drop Google DNS/TLS from the critical path.</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase" data-roadmap-id="item-34">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-34" data-roadmap-id="item-34">
+        <div class="phase-body">
+          <div class="phase-tag">34 · assets</div>
+          <h3><label for="check-item-34">Split gallery CSS</label></h3>
+          <p>Extract gallery styles to <code>chromaverse/gallery.css</code> — cache separately from HTML, smaller repeat-visit payload.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Polish &amp; infrastructure (items 35–42)</h2>
+  <p style="font-size:14px;color:var(--dim);margin-bottom:var(--sp-4);max-width:44rem;">Codebase quality, UX polish, and missing interactions — things that make the studio feel complete rather than functional.</p>
+  <div class="grid-2">
+    <div class="phase done" data-roadmap-id="item-35">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-35" data-roadmap-id="item-35" checked>
+        <div class="phase-body">
+          <div class="phase-tag">35 · code</div>
+          <h3><label for="check-item-35">Extract studio CSS to external file</label></h3>
+          <p><code>studio.html</code> is 2900+ lines with ~800 lines of inline CSS. Move to <code>studio.css</code> — cacheable, smaller HTML, faster initial parse. Split layout/chrome from theme tokens.</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase" data-roadmap-id="item-36">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-36" data-roadmap-id="item-36">
+        <div class="phase-body">
+          <div class="phase-tag">36 · code</div>
+          <h3><label for="check-item-36">Modularize monolithic shader</label></h3>
+          <p><code>webgl.ts</code> shader is 854 lines. Split into per-preset GLSL strings or a <code>shaders/</code> directory imported at build. Improves readability and enables tree-shaking unused presets.</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase" data-roadmap-id="item-37">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-37" data-roadmap-id="item-37">
+        <div class="phase-body">
+          <div class="phase-tag">37 · ux</div>
+          <h3><label for="check-item-37">Deduplicate image upload code</label></h3>
+          <p>Button click and drag-drop handlers in <code>main.ts</code> are near-identical 20-line blocks. Extract to shared <code>handleImageFile(file)</code> helper.</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase" data-roadmap-id="item-38">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-38" data-roadmap-id="item-38">
+        <div class="phase-body">
+          <div class="phase-tag">38 · mobile</div>
+          <h3><label for="check-item-38">Mobile responsive studio</label></h3>
+          <p>Studio is desktop-only (fixed 44px left bar, 272px right panel). Add responsive breakpoints: bottom sheet panels, collapsed activity bar, touch-friendly sliders. Minimum viable: phone preview + export.</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase done" data-roadmap-id="item-39">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-39" data-roadmap-id="item-39" checked>
+        <div class="phase-body">
+          <div class="phase-tag">39 · resilience</div>
+          <h3><label for="check-item-39">WebGL context-loss recovery</label></h3>
+          <p>Tab backgrounding or GPU pressure can kill the WebGL context. Handle <code>webglcontextlost</code> / <code>webglcontextrestored</code> events — show banner, pause animation, re-init on restore.</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase done" data-roadmap-id="item-40">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-40" data-roadmap-id="item-40" checked>
+        <div class="phase-body">
+          <div class="phase-tag">40 · testing</div>
+          <h3><label for="check-item-40">Automated loop-seam pixel diff</label></h3>
+          <p>Playwright + <code>canvas.toDataURL()</code>: render phase 0 and phase 2π−ε, diff pixel buffers. Fail CI if any channel delta &gt; 1. Catches loop-seam regressions before they ship.</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase" data-roadmap-id="item-41">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-41" data-roadmap-id="item-41">
+        <div class="phase-body">
+          <div class="phase-tag">41 · ux</div>
+          <h3><label for="check-item-41">Favorites + smart randomize</label></h3>
+          <p>Pin presets you like. Recent list in command palette. Randomize palette-only / sliders-only / locked sliders. Keyboard shortcut to cycle through favorites.</p>
+        </div>
+      </div>
+    </div>
+    <div class="phase" data-roadmap-id="item-42">
+      <div class="phase-head">
+        <input type="checkbox" class="roadmap-check" id="check-item-42" data-roadmap-id="item-42">
+        <div class="phase-body">
+          <div class="phase-tag">42 · ux</div>
+          <h3><label for="check-item-42">Before / after comparison</label></h3>
+          <p>Toggle live/still without hiding UI. Split or wipe overlay comparing a params snapshot vs current — useful after randomize, melt tweaks, or shader edits.</p>
         </div>
       </div>
     </div>

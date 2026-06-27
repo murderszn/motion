@@ -50,4 +50,8 @@ function frame(now: number): void {
 export function startRenderLoop(): void {
   last = performance.now();
   requestAnimationFrame(frame);
+  // Expose draw + P for Playwright loop-seam tests
+  if (typeof window !== 'undefined') {
+    (window as any).draw = draw;
+  }
 }

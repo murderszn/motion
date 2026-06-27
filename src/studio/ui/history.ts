@@ -46,7 +46,7 @@ function syncUIFromSnapshot(s: Snapshot): void {
 
   setSeed(P.seed, setStatusSeed);
   setPalette(P.colors);
-  (['speed', 'scale', 'density', 'distort', 'detail', 'grain'] as SliderKey[]).forEach(id => {
+  (['speed', 'scale', 'density', 'distort', 'warp', 'detail', 'grain'] as SliderKey[]).forEach(id => {
     if (P[id] !== undefined) setSlider(id, P[id]);
   });
   applyPresetUI();
@@ -57,20 +57,6 @@ function syncUIFromSnapshot(s: Snapshot): void {
     loopEl.value = String(P.loop);
     const loopVal = document.getElementById('loopVal');
     if (loopVal) loopVal.textContent = P.loop.toFixed(1) + 's';
-  }
-
-  const mixRng = document.getElementById('mixRng') as HTMLInputElement | null;
-  if (mixRng) {
-    mixRng.value = String(Math.round(P.mix * 100));
-    const mixVal = document.getElementById('mixVal');
-    if (mixVal) mixVal.textContent = Math.round(P.mix * 100) + '%';
-  }
-
-  const pixelRng = document.getElementById('pixelRng') as HTMLInputElement | null;
-  if (pixelRng) {
-    pixelRng.value = String(Math.round(P.pixel * 100));
-    const pixelVal = document.getElementById('pixelVal');
-    if (pixelVal) pixelVal.textContent = Math.round(P.pixel * 100) + '%';
   }
 
   const btnInvert = document.getElementById('btnInvert');

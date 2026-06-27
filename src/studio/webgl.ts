@@ -3,6 +3,11 @@
 // ─────────────────────────────────────────────────────────
 
 import { P } from './state';
+import { FLUID_SHADER_BLOCK, FLUID_PRESET_BRANCH } from './fluid-shader';
+import {
+  bindMaskUniforms, hasPatternText, maskAspectChanged, updateMaskTexture,
+} from './text_mask';
+import { isActive, smoothData, updateAudioData, bindAudioTexture } from './ui/audio_visualizer';
 
 // ── GLSL source strings ──────────────────────────────────
 
@@ -11,16 +16,26 @@ attribute vec2 a;
 void main(){ gl_Position = vec4(a, 0.0, 1.0); }`;
 
 export let FS = `
+#extension GL_OES_standard_derivatives : enable
 precision highp float;
 
 uniform vec2  u_res;
 uniform float u_phase;
 uniform float u_seed;
 uniform int   u_mode;
-uniform float u_speed, u_scale, u_density, u_distort, u_detail, u_grain;
+uniform float u_speed, u_scale, u_density, u_distort, u_detail, u_grain, u_warp;
 uniform vec3  u_c0, u_c1, u_c2, u_c3;
 uniform sampler2D u_texture;
 uniform float u_mix, u_pixel, u_invert;
+uniform sampler2D u_mask;
+uniform float u_hasMask;
+uniform vec3  u_maskBg;
+uniform float u_audio_vol;
+uniform float u_audio_bass;
+uniform float u_audio_mid;
+uniform float u_audio_treble;
+uniform sampler2D u_audio_freq;
+uniform float u_has_audio;
 
 #define TAU 6.28318530718
 
@@ -105,6 +120,8 @@ float metaf(vec2 p, float ar){
          + 0.16 / (length(p - b3) + 0.07);
 }
 
+${FLUID_SHADER_BLOCK}
+
 void main(){
     vec2 uv = gl_FragCoord.xy / u_res;
     uv.y = 1.0 - uv.y;
@@ -122,12 +139,12 @@ void main(){
             float fi = float(i) + 1.0;
             float xx = uv.x * ar * (1.0 + 0.35 * fi) + u_seed * fi * 1.7;
             float wave = fbm(vec2(xx * 0.6, fi * 4.0) + loopOff() * 1.2) - 0.5;
-            float cy   = 0.42 + 0.12 * fi + wave * 0.38;
+            float cy   = 0.42 + 0.12 * fi + wave * 0.38 + (u_has_audio > 0.5 ? u_audio_bass * 0.25 * (fi - 1.5) : 0.0);
             float streak = fbm(vec2(xx * (3.0 + 4.0 * u_detail),
                                     uv.y * (1.0 + 1.5 * u_scale)) + loopOff());
             float dist  = uv.y - cy;
             float band  = exp(-dist * dist * (8.0 + 34.0 * u_density));
-            float inten = max(band * (0.25 + 0.95 * streak), 0.0);
+            float inten = max(band * (0.25 + 0.95 * streak + (u_has_audio > 0.5 ? u_audio_vol * 0.5 : 0.0)), 0.0);
             light += inten / fi;
             tint  += grad4(clamp(0.15 + (1.0 - uv.y) * 0.95, 0.0, 1.0)) * inten / fi;
         }
@@ -135,38 +152,70 @@ void main(){
         col += u_c3 * pow(clamp(light, 0.0, 1.0), 3.0) * 0.30;
     }
 
-    /* ─── 1 · contour waves ─── */
     else if (u_mode == 1){
-        vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.5, 5.0, u_scale) + sOff;
-        float t = u_phase * mix(0.3, 1.0, u_speed);
-        float n = cnoise(p * 1.5 + loopOff() * 0.8);
-        float bands = mix(6.0, 20.0, u_density);
-        float waves = sin((n * bands + t * 2.0) * 3.14159);
-        waves = smoothstep(0.0, 0.1, waves) * smoothstep(0.2, 0.1, waves);
-        float glow = waves * mix(0.5, 2.0, u_detail);
-        col = mix(u_c0 * 0.4, u_c2, waves);
-        col += u_c3 * glow * 0.3;
-        float pulse = sin(n * bands * 0.5 + t) * 0.5 + 0.5;
-        col += u_c2 * pulse * 0.08 * u_distort;
+        vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.0, 3.5, u_scale) + sOff;
+        float t = u_phase;
+        
+        // Domain warping to create organic camouflage patterns
+        vec2 warp = vec2(fbm(p * 0.8 + loopOff()), fbm(p * 0.8 + vec2(7.3, 3.1) - loopOff())) * mix(0.5, 2.5, u_distort);
+        float n = fbm(p + warp + loopOff() * 0.5);
+        
+        // Camouflage levels (flat color sections)
+        float levels = mix(3.0, 8.0, u_density);
+        float val = n * levels + t * 0.15;
+        
+        // Quantize the value with antialiased step transitions to prevent aliasing
+        float f_val = floor(val);
+        float fract_val = fract(val);
+        float border_width = 0.04 * (1.0 + u_detail * 2.0);
+        float smooth_val = f_val + smoothstep(0.5 - border_width, 0.5 + border_width, fract_val);
+        
+        // Map to flat color bands
+        float camo = clamp(smooth_val / levels, 0.0, 1.0);
+        col = grad4(camo);
+        
+        // Subtle audio response to pulse the camo boundaries
+        if (u_has_audio > 0.5) {
+            col += u_c3 * (smoothstep(0.48, 0.52, fract_val) * 0.15 * u_audio_bass);
+        }
     }
 
     /* ─── 2 · curl noise ─── */
     else if (u_mode == 2){
-        vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.5, 4.0, u_scale) + sOff;
-        float t = u_phase * mix(0.3, 1.0, u_speed);
-        float eps = 0.01;
+        vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.2, 4.0, u_scale) + sOff;
+        float eps = 0.04;
         vec2 off = loopOff();
+        
+        // Compute finite difference gradient of potential noise
         float n1 = cnoise(p + vec2(eps, 0.0) + off);
         float n2 = cnoise(p - vec2(eps, 0.0) + off);
         float n3 = cnoise(p + vec2(0.0, eps) + off);
         float n4 = cnoise(p - vec2(0.0, eps) + off);
+        
+        // Curl vector = (d/dy, -d/dx) -> divergence-free flow
         vec2 curl = vec2(n3 - n4, n2 - n1) / (2.0 * eps);
+        
+        // Audio reactive volume pushes the curl warp intensity
+        float audioWarp = (u_has_audio > 0.5) ? u_audio_bass * 1.5 : 0.0;
+        float warpStrength = mix(0.2, 3.5, u_distort) + audioWarp;
+        
+        // Warped coordinates
+        vec2 sp = p + curl * warpStrength;
+        
+        // Sample multi-octave FBM for wispy strands
+        float freq = mix(1.0, 3.0, u_density);
+        float f = fbm(sp * freq + loopOff());
+        
+        // Detail adjusts contrast and sharpness of the curls
+        float center = 0.5;
+        float width = 0.45 - 0.20 * u_detail;
+        f = smoothstep(center - width, center + width, f);
+        
+        col = grad4(clamp(f, 0.0, 1.0));
+        
+        // Add highlighting based on curl speed/magnitude
         float mag = length(curl);
-        float angle = atan(curl.y, curl.x);
-        float swirl = sin(angle * mix(2.0, 8.0, u_density) + mag * 6.0 + t * 2.0) * 0.5 + 0.5;
-        swirl += fbm(p * 1.5 + curl * u_distort * 2.0 + loopOff()) * 0.3 * u_detail;
-        col = grad4(clamp(swirl, 0.0, 1.0));
-        col += u_c3 * pow(mag, 2.0) * 0.2;
+        col += u_c3 * smoothstep(0.4, 1.2, mag) * 0.15 * (1.0 + (u_has_audio > 0.5 ? u_audio_treble * 1.5 : 0.0));
     }
 
     /* ─── 3 · electricity ─── */
@@ -177,8 +226,9 @@ void main(){
         float n = fbm(p * 1.4 + q * (1.0 + 2.5 * u_distort) + loopOff());
         float ridge = 1.0 - abs(2.0 * n - 1.0);
         float veins = pow(ridge, mix(6.0, 24.0, u_detail));
-        veins *= 0.55 + 0.45 * cos(3.0 * u_phase + u_seed);
+        veins *= 0.55 + 0.45 * cos(3.0 * u_phase + u_seed) + (u_has_audio > 0.5 ? u_audio_bass * 0.8 : 0.0);
         col  = u_c0 * 0.55;
+        col += u_c2 * veins * (1.0 + (u_has_audio > 0.5 ? u_audio_vol * 2.0 : 0.0));
         col += grad4(clamp(veins * 1.3, 0.0, 1.0)) * veins;
         col += u_c3 * pow(veins, 2.0) * 0.9;
         col += grad4(n * 0.35) * (0.10 + 0.10 * u_density);
@@ -197,38 +247,8 @@ void main(){
         col = mix(col, u_c2, q.y * q.x * 0.25);
     }
 
-
-    /* ─── 5 · glass ─── */
+    /* ─── 5 · grain ─── */
     else if (u_mode == 5){
-        vec2 p = vec2(uv.x * ar, uv.y);
-        float frost = 0.0, rim = 0.0;
-        vec2  refr = vec2(0.0);
-        for (int i = 0; i < 4; i++){
-            float fi = float(i) + 1.0;
-            float ph = u_phase + u_seed * fi + fi * 1.9;
-            vec2  c  = vec2(0.5 * ar, 0.5) + vec2(cos(ph), sin(ph)) * (0.36 / fi);
-            float r  = 0.14 + 0.06 * fi * u_scale + 0.12 * u_density;
-            float dd = length(p - c);
-            float body = smoothstep(r, r * 0.6, dd);
-            float ring = smoothstep(r * 0.70, r * 0.88, dd) * (1.0 - smoothstep(r * 0.88, r, dd));
-            frost += body;
-            rim   += ring;
-            refr  += normalize(p - c + 0.0001) * body;
-        }
-        frost = clamp(frost, 0.0, 1.0);
-        float bg  = metaf(p, ar) + fbm(uv * (1.2 + 2.0 * u_scale) + loopOff() + sOff) * 0.30;
-        vec3 plain = grad4(bg * 0.45);
-        vec2 sUV = uv + refr * (0.03 + 0.10 * u_distort);
-        vec2 sp  = vec2(sUV.x * ar, sUV.y);
-        float bg2 = metaf(sp, ar) + fbm(sUV * (1.2 + 2.0 * u_scale) + loopOff() + sOff) * 0.30;
-        vec3 behind = grad4(bg2 * 0.45);
-        vec3 frosted = mix(behind, vec3(dot(behind, vec3(0.333))), 0.30) + u_c3 * 0.10;
-        col = mix(plain, frosted, frost * 0.92);
-        col += u_c3 * rim * (0.4 + 0.6 * u_detail);
-    }
-
-    /* ─── 6 · grain ─── */
-    else if (u_mode == 6){
         vec2 p = vec2(uv.x * ar, uv.y);
         float s = u_seed;
         float rA = 0.10 + 0.22 * u_speed;
@@ -238,11 +258,11 @@ void main(){
                 + 0.45 / (length(p - b2) + 0.30)
                 + fbm(uv * (1.0 + 1.5 * u_scale) + loopOff() + sOff) * 0.25 * u_detail;
         col = grad4(f * (0.45 + 0.25 * u_density));
-        col += (hash21(gl_FragCoord.xy + vec2(u_phase * 43.7)) - 0.5) * (0.10 + 0.30 * u_distort);
+        col += (hash21(gl_FragCoord.xy + loopOff() * 43.7) - 0.5) * (0.10 + 0.30 * u_distort);
     }
 
-    /* ─── 7 · halftone ─── */
-    else if (u_mode == 7){
+    /* ─── 6 · halftone ─── */
+    else if (u_mode == 6){
         vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.2, 4.0, u_scale) + sOff;
         vec2 q = vec2(fbm(p + loopOff()), fbm(p + vec2(5.2, 1.3) - loopOff()));
         float f = fbm(p + q * (1.0 + 2.5 * u_distort));
@@ -253,15 +273,17 @@ void main(){
         col = mix(u_c0 * 0.7, grad4(clamp(f * 1.5, 0.0, 1.0)), mask);
     }
 
-    /* ─── 8 · kaleidoscope ─── */
-    else if (u_mode == 8){
+    /* ─── 7 · kaleidoscope ─── */
+    else if (u_mode == 7){
         vec2 p = uv - 0.5;
         p.x *= ar;
-        float angle = atan(p.y, p.x);
-        float rad   = length(p);
         float slices = mix(4.0, 12.0, u_density);
-        angle = mod(angle, 3.14159 / slices * 2.0);
-        angle = abs(angle - 3.14159 / slices);
+        float angle = atan(p.y, p.x) + 0.18 * sin(u_phase);
+        angle = mod(angle + 6.28318530718, 6.28318530718);
+        float sector = 3.14159265359 / slices;
+        angle = mod(angle, sector * 2.0);
+        angle = abs(angle - sector);
+        float rad   = length(p);
         p = vec2(cos(angle), sin(angle)) * rad;
         vec2 np = p * mix(1.5, 4.0, u_scale) + sOff;
         vec2 q = vec2(fbm(np + loopOff()),
@@ -271,25 +293,24 @@ void main(){
         col += u_c3 * pow(rad * 1.8, 3.0) * 0.12;
     }
 
-    /* ─── 9 · lines ─── */
-    else if (u_mode == 9){
+    /* ─── 8 · lines ─── */
+    else if (u_mode == 8){
         vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.5, 5.0, u_scale) + sOff;
-        float t = u_phase * mix(0.3, 1.0, u_speed);
-        float ang = u_distort * 0.35 + t * 0.05;
+        float t = u_phase;
+        float ang = u_distort * 0.35 + 0.08 * sin(t);
         float ca = cos(ang), sa = sin(ang);
         vec2 q = vec2(ca * p.x - sa * p.y, sa * p.x + ca * p.y);
         float freq = mix(3.0, 8.0, u_density) + u_distort * 1.4;
-        float wave = 0.6 * sin(q.y * 0.7 + t * 0.3);
-        wave += 0.3 * sin(q.y * 1.4 - t * 0.5) * u_detail;
+        float wave = 0.6 * sin(q.y * 0.7 + t);
+        wave += 0.3 * sin(q.y * 1.4 - 2.0 * t) * u_detail;
         float f = 0.5 + 0.5 * sin(q.x * freq + wave);
         f += fbm(p * 0.3 + loopOff()) * 0.08 * u_detail;
         col = grad4(clamp(f, 0.0, 1.0));
     }
 
-    /* ─── 10 · marble ─── */
-    else if (u_mode == 10){
+    /* ─── 9 · marble ─── */
+    else if (u_mode == 9){
         vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.5, 4.0, u_scale) + sOff;
-        float t = u_phase * mix(0.2, 0.8, u_speed);
         vec2 q2 = p + vec2(cnoise(p * 0.8 + loopOff()),
                            cnoise(p * 0.8 + vec2(5.2, 1.3) - loopOff())) * u_distort;
         float v = sin(q2.x * mix(4.0, 12.0, u_density) + fbm(q2 * mix(1.5, 4.0, u_detail)) * 5.0) * 0.5 + 0.5;
@@ -298,69 +319,46 @@ void main(){
         col += u_c3 * vein * 0.15;
     }
 
-    /* ─── 11 · orbs ─── */
-    else if (u_mode == 11){
+    /* ─── 10 · orbs ─── */
+    else if (u_mode == 10){
         vec2 p = vec2(uv.x * ar, uv.y);
         float f = metaf(p, ar) * (0.30 + 0.30 * u_density)
                 + fbm(uv * (1.0 + 2.0 * u_scale) + loopOff() + sOff) * 0.20 * u_detail;
         col = grad4(f);
     }
 
-    /* ─── 12 · plasma ─── */
-    else if (u_mode == 12){
+    /* ─── 11 · plasma ─── */
+    else if (u_mode == 11){
         vec2 p = uv * mix(1.0, 3.5, u_scale);
-        float t = u_phase * mix(0.3, 1.2, u_speed);
+        float t = u_phase;
         float v = 0.0;
         v += sin(p.x * 4.0 + t) * 0.5 + 0.5;
-        v += sin(p.y * 5.0 - t * 1.3) * 0.4;
-        v += sin((p.x + p.y) * 6.0 + t * 0.7) * 0.3;
-        v += sin(length(p - 0.5) * 8.0 - t * 1.1) * 0.3;
+        v += sin(p.y * 5.0 - 2.0 * t) * 0.4;
+        v += sin((p.x + p.y) * 6.0 + 3.0 * t) * 0.3;
+        v += sin(length(p - 0.5) * 8.0 - t) * 0.3;
         v += fbm(p * 1.5 + loopOff() + sOff) * 0.35 * u_detail;
         v *= 0.5 + 0.5 * u_density;
         col = grad4(clamp(v * 1.2, 0.0, 1.0));
         col = mix(col, grad4(clamp(v * 0.8 + 0.3, 0.0, 1.0)), 0.3 * u_distort);
     }
 
-    /* ─── 13 · reeded ─── */
-    else if (u_mode == 13){
-        float N  = mix(24.0, 110.0, u_density);
-        float rx = uv.x * N;
-        float ri = floor(rx);
-        float rf = fract(rx);
-        float lens = (rf - 0.5) * ((0.3 + 2.2 * u_distort) / N);
-        vec2 sUV = vec2(clamp(uv.x + lens, 0.001, 0.999), uv.y);
-        vec2 p = vec2(sUV.x * ar, sUV.y);
-        float f = metaf(p, ar)
-                + fbm(sUV * (1.2 + 2.4 * u_scale) + loopOff() + sOff) * (0.12 + 0.28 * u_detail);
-        col = grad4(f * 0.42);
-        float shimmer = 0.028 * sin(ri * 2.399 + u_seed + 2.0 * u_phase);
-        float h1 = exp(-pow((rf - 0.27 - shimmer) * 13.5, 2.0)) * 0.62;
-        float h2 = exp(-pow((rf - 0.75) * 22.0, 2.0)) * 0.10;
-        float groove = smoothstep(0.0, 0.07, rf) * smoothstep(1.0, 0.93, rf);
-        col  = col * (0.70 + groove * 0.30);
-        col += u_c3 * h1;
-        col += u_c3 * 0.85 * h2;
-        col *= 0.87 + fbm(vec2(ri * 0.09, uv.y * 3.1) + loopOff() * 0.8 + sOff) * 0.15;
-    }
-
-    /* ─── 14 · rings ─── */
-    else if (u_mode == 14){
+    /* ─── 12 · rings ─── */
+    else if (u_mode == 12){
         vec2 p = (uv - 0.5) * vec2(ar, 1.0);
         float rad = length(p);
         float n = fbm(p * mix(1.0, 4.0, u_scale) + loopOff() + sOff);
-        float rings = sin((rad * mix(8.0, 30.0, u_density) + n * 2.0 * u_distort - u_phase * 1.5) * 3.14159);
+        float rings = sin((rad * mix(8.0, 30.0, u_density) + n * 2.0 * u_distort) * 3.14159 - 2.0 * u_phase);
         float f = 0.5 + 0.5 * rings;
         col = grad4(clamp(f * (0.7 + 0.5 * u_detail), 0.0, 1.0));
         float glow = exp(-rad * 3.0) * 0.3;
         col += u_c3 * glow;
     }
 
-    /* ─── 15 · rorschach ─── */
-    else if (u_mode == 15){
+    /* ─── 13 · rorschach ─── */
+    else if (u_mode == 13){
         vec2 mp = uv;
         mp.x = abs(mp.x - 0.5) * 2.0;
         vec2 p = (vec2(mp.x * ar, mp.y) - vec2(0.5 * ar, 0.5)) * mix(2.0, 6.0, u_scale) + sOff;
-        float t = u_phase * mix(0.3, 1.0, u_speed);
         vec2 off = loopOff();
         vec2 q2 = vec2(fbm(p * 0.8 + off), fbm(p * 0.8 + vec2(5.2, 1.3) - off));
         vec2 r2 = vec2(fbm(p + q2 * (1.0 + 2.0 * u_distort) + off),
@@ -378,10 +376,9 @@ void main(){
         col += inkCol * edge * 0.12;
     }
 
-    /* ─── 16 · ridged ─── */
-    else if (u_mode == 16){
+    /* ─── 14 · ridged ─── */
+    else if (u_mode == 14){
         vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(2.0, 6.0, u_scale) + sOff;
-        float t = u_phase * mix(0.2, 0.8, u_speed);
         mat2 rot = mat2(0.8, 0.6, -0.6, 0.8);
         float v = 0.0, a = 0.5, w = 1.0;
         vec2 q2 = p + loopOff();
@@ -403,30 +400,30 @@ void main(){
         col += u_c3 * ridge * mix(0.1, 0.4, u_detail);
     }
 
-    /* ─── 17 · sd rosette ─── */
-    else if (u_mode == 17){
+    /* ─── 15 · sd rosette ─── */
+    else if (u_mode == 15){
         vec2 p = uv - 0.5;
         p.x *= ar;
         float n = 5.0 + floor(mix(3.0, 9.0, u_density));
         float a = atan(p.y, p.x);
         float r = length(p);
         float sector = 3.14159 / max(n, 2.0);
-        a = mod(a + u_phase * 0.25, sector * 2.0);
+        a = mod(a + 0.25 * sin(u_phase), sector * 2.0);
         a = abs(a - sector);
         vec2 q = vec2(cos(a), sin(a)) * r;
         float f = abs(q.y) - 0.04 * (0.4 + 0.8 * u_scale);
-        float pulse = sin(r * mix(6.0, 24.0, u_detail) - u_phase * 1.6) * 0.5 + 0.5;
+        float pulse = sin(r * mix(6.0, 24.0, u_detail) - 2.0 * u_phase) * 0.5 + 0.5;
         float edge = exp(-abs(f) * (18.0 + 40.0 * u_distort));
         edge = smoothstep(0.0, 0.9, edge);
         col = mix(u_c0 * 0.5, grad4(pulse), edge);
         col += u_c3 * edge * 0.22;
     }
 
-    /* ─── 18 · truchet ─── */
-    else if (u_mode == 18){
+    /* ─── 16 · truchet ─── */
+    else if (u_mode == 16){
         float tileN = mix(2.0, 8.0, u_scale);
         vec2 p = (uv - 0.5) * vec2(ar, 1.0) * tileN + sOff;
-        float t = u_phase * mix(0.5, 1.5, u_speed);
+        float t = u_phase;
         vec2 ip = floor(p);
         vec2 fp = fract(p);
         float h = hash21(ip + sOff);
@@ -434,41 +431,23 @@ void main(){
         float d = min(length(fp), length(fp - 1.0));
         d = abs(d - 0.5);
         float bands = mix(3.0, 7.0, u_density) + u_distort * 2.5;
-        float f = 0.5 + 0.5 * cos(d * bands * TAU - t * 1.5);
+        float f = 0.5 + 0.5 * cos(d * bands * TAU - 2.0 * t);
         f += fbm(p * 0.4 + loopOff()) * 0.1 * u_detail;
         col = grad4(clamp(f, 0.0, 1.0));
         float edge = smoothstep(0.06, 0.0, abs(d - 0.5) - 0.02);
         col += u_c3 * edge * mix(0.15, 0.40, u_distort);
     }
 
-    /* ─── 19 · triangle lattice ─── */
-    else if (u_mode == 19){
-        vec2 p = uv - 0.5;
-        p.x *= ar;
-        float a = u_phase * (0.2 + 0.4 * u_speed);
-        float ca = cos(a), sa = sin(a);
-        p = mat2(ca, -sa, sa, ca) * p;
-        vec2 g = p * (8.0 + 18.0 * u_density);
-        vec2 f = fract(g) - 0.5;
-        float tri = abs(f.x) * 0.866 + f.y * 0.5;
-        float d = abs(tri);
-        float rings = sin(length(floor(g)) * 0.9 + u_phase) * 0.5 + 0.5;
-        float edge = smoothstep(0.08, 0.0, d);
-        col = grad4(clamp(rings * (0.6 + 0.6 * u_detail), 0.0, 1.0));
-        col = mix(col, u_c3, edge * (0.4 + 0.6 * u_scale));
-    }
-
-    /* ─── 20 · turbulence ─── */
-    else if (u_mode == 20){
+    /* ─── 17 · turbulence ─── */
+    else if (u_mode == 17){
         vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(2.0, 6.0, u_scale) + sOff;
-        float t = u_phase * mix(0.3, 1.0, u_speed);
         mat2 rot = mat2(0.8, 0.6, -0.6, 0.8);
         float v = 0.0, a = 0.5;
-        vec2 q2 = p + vec2(t * 0.4, t * 0.2);
+        vec2 q2 = p + loopOff();
         for (int i = 0; i < 8; i++){
             float fi = float(i);
             if (fi >= mix(3.0, 8.0, u_density)) break;
-            v += a * abs(cnoise(q2));
+            v += a * abs(cnoise(q2 + loopOff()));
             q2 = rot * q2 * 2.0 + vec2(100.0);
             a *= mix(0.35, 0.65, u_detail);
         }
@@ -476,8 +455,8 @@ void main(){
         col += u_c3 * pow(clamp(v, 0.0, 1.0), 3.0) * 0.2;
     }
 
-    /* ─── 21 · waves ─── */
-    else if (u_mode == 21){
+    /* ─── 18 · waves ─── */
+    else if (u_mode == 18){
         float f = uv.y * mix(1.5, 5.0, u_scale);
         f += sin(uv.x * (3.0 + 9.0 * u_density) + u_phase + u_seed) * 0.45;
         f += sin(uv.x * (7.0 + 5.0 * u_density) - 2.0 * u_phase + u_seed * 1.7) * 0.20;
@@ -486,6 +465,8 @@ void main(){
         float t = 0.5 + 0.5 * sin(f * TAU * (0.4 + 0.9 * u_detail));
         col = grad4(t);
     }
+
+${FLUID_PRESET_BRANCH}
 
     /* texture overlay */
     if (u_mix > 0.001){
@@ -498,12 +479,23 @@ void main(){
     }
 
     /* film grain + vignette */
-    col += (hash21(gl_FragCoord.xy + vec2(u_phase * 91.3)) - 0.5) * u_grain * 0.22;
+    col += (hash21(gl_FragCoord.xy + loopOff() * 91.3) - 0.5) * u_grain * 0.22;
     vec2 v = uv * 2.0 - 1.0;
     col *= 1.0 - dot(v, v) * 0.16;
 
     if (u_invert > 0.5) {
         col = 1.0 - col;
+    }
+
+    if (u_hasMask > 0.5) {
+        float mk = texture2D(u_mask, vec2(uv.x, uv.y)).r;
+        col = mix(u_maskBg, col, smoothstep(0.42, 0.58, mk));
+    }
+
+    if (u_has_audio > 0.5) {
+        // Global ambient audio pulse & accent color glow
+        col += u_c2 * u_audio_bass * 0.08;
+        col = mix(col, col * (1.0 + u_audio_vol * 0.15), 0.7);
     }
 
     gl_FragColor = vec4(col, 1.0);
@@ -515,8 +507,10 @@ type UniformMap = Record<string, WebGLUniformLocation | null>;
 
 const UNIFORM_NAMES = [
   'u_res', 'u_phase', 'u_seed', 'u_mode',
-  'u_speed', 'u_scale', 'u_density', 'u_distort', 'u_detail', 'u_grain',
+  'u_speed', 'u_scale', 'u_density', 'u_distort', 'u_detail', 'u_grain', 'u_warp',
   'u_c0', 'u_c1', 'u_c2', 'u_c3', 'u_texture', 'u_mix', 'u_pixel', 'u_invert',
+  'u_mask', 'u_hasMask', 'u_maskBg',
+  'u_audio_vol', 'u_audio_bass', 'u_audio_mid', 'u_audio_treble', 'u_audio_freq', 'u_has_audio',
 ] as const;
 
 export let canvas: HTMLCanvasElement;
@@ -569,7 +563,28 @@ export function initWebGL(cv: HTMLCanvasElement): void {
     throw new Error('WebGL not available');
   }
   gl = ctx as WebGLRenderingContext;
+  gl.getExtension('OES_standard_derivatives');
 
+  compileAndLink();
+
+  // Context-loss recovery
+  cv.addEventListener('webglcontextlost', (e) => {
+    e.preventDefault();
+    window.dispatchEvent(new CustomEvent('lumen:contextLost'));
+  });
+  cv.addEventListener('webglcontextrestored', () => {
+    gl.getExtension('OES_standard_derivatives');
+    compileAndLink();
+    if (texLoaded && texObj) {
+      // Re-upload requires the original image — mark as lost, UI should re-prompt
+      texLoaded = false;
+      texObj = null;
+    }
+    window.dispatchEvent(new CustomEvent('lumen:contextRestored'));
+  });
+}
+
+function compileAndLink(): void {
   const vs = compileShaderSrc(gl, gl.VERTEX_SHADER, VS);
   const fs = compileShaderSrc(gl, gl.FRAGMENT_SHADER, FS);
   prog = linkProgram(gl, vs, fs);
@@ -611,6 +626,9 @@ function hex2rgb(h: string): [number, number, number] {
 // ── Draw ─────────────────────────────────────────────────
 
 export function draw(phase: number): void {
+  if (hasPatternText() && maskAspectChanged(canvas.width, canvas.height)) {
+    updateMaskTexture(gl, canvas.width, canvas.height);
+  }
   gl.uniform2f(U.u_res, canvas.width, canvas.height);
   gl.uniform1f(U.u_phase, phase);
   gl.uniform1f(U.u_seed, (P.seed % 10000) * 0.6180339887 % 12.566);
@@ -621,6 +639,7 @@ export function draw(phase: number): void {
   gl.uniform1f(U.u_distort, P.distort);
   gl.uniform1f(U.u_detail,  P.detail);
   gl.uniform1f(U.u_grain,   P.grain);
+  gl.uniform1f(U.u_warp,    P.warp ?? 0.5);
   gl.uniform1f(U.u_mix,     P.mix);
   gl.uniform1f(U.u_pixel,   P.pixel);
   gl.uniform1f(U.u_invert,  P.invert);
@@ -631,7 +650,44 @@ export function draw(phase: number): void {
   gl.activeTexture(gl.TEXTURE0);
   gl.bindTexture(gl.TEXTURE_2D, texLoaded ? texObj : null);
   gl.uniform1i(U.u_texture, 0);
+
+  // Bind audio visualizer data
+  if (isActive) {
+    updateAudioData(gl);
+    gl.uniform1f(U.u_audio_vol, smoothData.volume);
+    gl.uniform1f(U.u_audio_bass, smoothData.bass);
+    gl.uniform1f(U.u_audio_mid, smoothData.mid);
+    gl.uniform1f(U.u_audio_treble, smoothData.treble);
+    gl.uniform1f(U.u_has_audio, 1.0);
+    bindAudioTexture(gl, U.u_audio_freq);
+  } else {
+    gl.uniform1f(U.u_audio_vol, 0.0);
+    gl.uniform1f(U.u_audio_bass, 0.0);
+    gl.uniform1f(U.u_audio_mid, 0.0);
+    gl.uniform1f(U.u_audio_treble, 0.0);
+    gl.uniform1f(U.u_has_audio, 0.0);
+    bindAudioTexture(gl, U.u_audio_freq);
+  }
+  bindMaskUniforms(gl, U);
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+}
+
+/** Temporarily resize the GL canvas, run fn, then restore preview dimensions. */
+export function withRenderSize<T>(w: number, h: number, fn: () => T): T {
+  const ow = canvas.width;
+  const oh = canvas.height;
+  canvas.width = w;
+  canvas.height = h;
+  gl.viewport(0, 0, w, h);
+  if (hasPatternText()) updateMaskTexture(gl, w, h);
+  try {
+    return fn();
+  } finally {
+    canvas.width = ow;
+    canvas.height = oh;
+    gl.viewport(0, 0, ow, oh);
+    if (hasPatternText()) updateMaskTexture(gl, ow, oh);
+  }
 }
 
 // ── Shader hot-swap (live editor) ────────────────────────
@@ -695,6 +751,7 @@ function ensureThumbContext(): boolean {
     ?? thumbCanvas.getContext('experimental-webgl', { preserveDrawingBuffer: true });
   if (!ctx) return false;
   thumbGl = ctx as WebGLRenderingContext;
+  thumbGl.getExtension('OES_standard_derivatives');
   const vs = compileShaderSrc(thumbGl, thumbGl.VERTEX_SHADER, VS);
   const fs = compileShaderSrc(thumbGl, thumbGl.FRAGMENT_SHADER, FS);
   thumbProg = linkProgram(thumbGl, vs, fs);
@@ -724,9 +781,12 @@ function drawThumbMode(mode: number): void {
   thumbGl.uniform1f(thumbU.u_distort, P.distort);
   thumbGl.uniform1f(thumbU.u_detail,  P.detail);
   thumbGl.uniform1f(thumbU.u_grain,   P.grain);
+  thumbGl.uniform1f(thumbU.u_warp,    P.warp ?? 0.5);
   thumbGl.uniform1f(thumbU.u_mix,     0);
   thumbGl.uniform1f(thumbU.u_pixel,   0);
   thumbGl.uniform1f(thumbU.u_invert,  P.invert);
+  thumbGl.uniform1f(thumbU.u_hasMask, 0.0);
+  thumbGl.uniform3f(thumbU.u_maskBg, 0.03, 0.03, 0.04);
   thumbGl.uniform3fv(thumbU.u_c0, hex2rgb(P.colors[0]));
   thumbGl.uniform3fv(thumbU.u_c1, hex2rgb(P.colors[1]));
   thumbGl.uniform3fv(thumbU.u_c2, hex2rgb(P.colors[2]));

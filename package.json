@@ -10,13 +10,16 @@
   },
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node server/studio.mjs",
+    "dev:vite": "vite",
     "avocado": "vite --open /examples/avocado-farm.html",
     "build": "tsc --noEmit && vite build && node build/copy-chromaverse-themes.mjs",
     "preview": "vite preview",
     "api": "node server/api.mjs",
     "server": "node server/server.mjs",
-    "studio": "node server/studio.mjs"
+    "studio": "node server/studio.mjs",
+    "test": "npx playwright test",
+    "test:loop-seam": "npx playwright test tests/loop-seam.spec.ts"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -27,6 +30,7 @@
     "ws": "^8.16.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@types/node": "^22.15.29",
     "playwright": "^1.49.1",
     "typescript": "^5.8.3",

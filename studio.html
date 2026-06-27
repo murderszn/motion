@@ -1,1192 +1,99 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>/motion local — generative shader studio</title>
-<meta name="description" content="/motion local studio — real-time WebGL shader editor with 22 presets, Monaco GLSL editing, text overlays, undo/redo, and PNG/WebM/GIF export.">
+<title>/motion — studio</title>
+<meta name="description" content="/motion studio — real-time WebGL shader editor with presets, Monaco GLSL editing, text overlays, undo/redo, and PNG/WebM/GIF export.">
 <meta name="keywords" content="webgl, shader editor, glsl, generative art, motion graphics, studio, creative coding">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" type="image/png" href="/assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Anton&family=Bebas+Neue&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Syne:wght@700;800&family=Pacifico&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/@xterm/xterm@5.5.0/css/xterm.css">
-<style>
-:root {
-    /* Chromaverse scale */
-    --sp-1: 4px;
-    --sp-2: 8px;
-    --sp-3: 12px;
-    --sp-4: 16px;
-    --sp-5: 24px;
-    --r-sm: 6px;
-    --r-md: 8px;
-    --r-lg: 12px;
-    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-    --ease: all 0.2s var(--ease-out);
-
-    /* Chromaverse dark surface */
-    --bg:        #0a0808;
-    --bg-alt:    #130f0f;
-    --panel:     #130f0f;
-    --bar-bg:    #0e0b0b;
-    --line:      #231c1a;
-    --text:      #e8e4e2;
-    --dim:       #786b66;
-    --white:     #ffffff;
-    --accent:    #e03a3a;
-    --accent-dim: rgba(224, 58, 58, 0.14);
-    --accent-border: rgba(224, 58, 58, 0.4);
-    --accent-glow: rgba(224, 58, 58, 0.22);
-    --term-bg:   #0a0808;
-    --term-text: #9ca3af;
-    --term-accent: var(--accent);
-
-    /* VS Code shell */
-    --left-w:    44px;
-    --right-w:   272px;
-    --text-w:    0px;
-    --bottom-h:  280px;
-}
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-
-html, body { width:100%; height:100%; overflow:hidden; }
-
-body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Inter', system-ui, sans-serif;
-    font-size: 12px;
-    font-weight: 400;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-    display: grid;
-    height: 100vh;
-    grid-template-rows: 36px 1fr var(--bottom-h) 22px;
-    grid-template-columns: var(--left-w) var(--text-w) minmax(0, 1fr) var(--right-w);
-    grid-template-areas:
-        "header header  header  header"
-        "left   text    stage   right"
-        "left   text    bottom  right"
-        "status status  status  status";
-    transition: grid-template-columns 0.2s var(--ease-out), grid-template-rows 0.2s var(--ease-out);
-}
-body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    pointer-events: none;
-    opacity: 0.04;
-    mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    background-size: 140px 140px;
-}
-body.term-closed { --bottom-h: 0px; }
-body.left-closed { --left-w: 0px; }
-body.right-closed { --right-w: 0px; }
-body:not(.text-open) { --text-w: 0px; }
-body.text-open { --text-w: 272px; }
-
-/* ============ HEADER ============ */
-header {
-    grid-area: header;
-    display: flex;
-    align-items: center;
-    gap: var(--sp-3);
-    padding: 0 var(--sp-4);
-    border-bottom: 1px solid var(--line);
-    background: var(--bg-alt);
-    z-index: 10;
-    min-width: 0;
-}
-.logo-wrap {
-    margin-right: auto;
-    min-width: 0;
-    user-select: none;
-    display: flex;
-    align-items: center;
-    gap: var(--sp-2);
-}
-.logo {
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--white);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-.logo span { color: var(--accent); }
-.logo-sub {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--dim);
-    padding: 2px 8px;
-    border-radius: 20px;
-    border: 1px solid var(--line);
-    background: var(--bg);
-    flex: none;
-}
-
-.mini-actions {
-    display: flex;
-    gap: 4px;
-    align-items: center;
-    flex: none;
-    min-width: 0;
-}
-
-button {
-    font-family: inherit;
-    font-size: 11px;
-    font-weight: 600;
-    background: var(--bg-alt);
-    color: var(--text);
-    border: 1px solid var(--line);
-    padding: 0 12px;
-    height: 28px;
-    cursor: pointer;
-    transition: var(--ease);
-    text-transform: lowercase;
-    white-space: nowrap;
-    border-radius: var(--r-sm);
-}
-button:hover {
-    border-color: var(--accent-border);
-    color: var(--white);
-}
-button:active { transform: scale(0.98); }
-button.primary {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #0a0808;
-}
-button.primary:hover { filter: brightness(1.06); }
-button:disabled { opacity: .35; cursor: default; pointer-events: none; }
-
-.icon-btn {
-    border: none;
-    padding: 0;
-    width: 32px;
-    height: 32px;
-    display: grid;
-    place-items: center;
-    font-size: 14px;
-    border-radius: var(--r-sm);
-    color: var(--dim);
-    background: transparent;
-    transition: var(--ease);
-    font-family: inherit;
-}
-.icon-btn:hover {
-    color: var(--white);
-    background: var(--bg);
-}
-.icon-btn:active { transform: scale(0.94); }
-.icon-btn.active {
-    color: var(--accent);
-    background: var(--bg);
-    box-shadow: inset 3px 0 0 var(--accent);
-    border-radius: 0;
-}
-.icon-btn.primary { color: var(--accent); }
-
-/* --- Tooltips --- */
-[data-tooltip] {
-    position: relative;
-}
-[data-tooltip]::after {
-    content: attr(data-tooltip);
-    position: absolute;
-    z-index: 9999;
-    background: rgba(8, 8, 12, 0.96);
-    color: var(--white, #fff);
-    border: 1px solid var(--line, rgba(255,255,255,0.1));
-    border-radius: 4px;
-    padding: 4px 8px;
-    font-size: 10px;
-    font-family: 'Inter', sans-serif;
-    font-weight: 400;
-    text-transform: none;
-    letter-spacing: 0.02em;
-    white-space: nowrap;
-    pointer-events: none;
-    opacity: 0;
-    bottom: calc(100% + 6px);
-    left: 50%;
-    transform: translateX(-50%) scale(0.9);
-    transform-origin: bottom center;
-    transition: opacity 0.15s ease, transform 0.15s ease;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7);
-}
-[data-tooltip]:hover::after {
-    opacity: 1;
-    transform: translateX(-50%) scale(1);
-}
-
-#left [data-tooltip]::after {
-    bottom: auto;
-    left: calc(100% + 8px);
-    top: 50%;
-    transform: translateY(-50%) scale(0.9);
-    transform-origin: left center;
-}
-#left [data-tooltip]:hover::after {
-    transform: translateY(-50%) scale(1);
-}
-
-.header-history {
-    display: flex;
-    gap: 2px;
-    align-items: center;
-}
-.header-history .icon-btn { width: 28px; height: 28px; font-size: 13px; }
-.header-history .icon-btn:disabled { opacity: 0.3; pointer-events: none; }
-
-#exportProgress {
-    display: none;
-    align-items: center;
-    gap: 10px;
-    flex: 1;
-    min-width: 0;
-    max-width: 520px;
-    font-size: 9px;
-    letter-spacing: 0.06em;
-}
-#exportProgress.on { display: flex; }
-#exportProgress .export-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 88px;
-    flex: none;
-}
-#exportProgress #exportLabel { color: var(--white); font-size: 9px; }
-#exportProgress #exportPhase { color: var(--dim); font-size: 8px; text-transform: lowercase; }
-#exportProgress #exportFrame { color: var(--text); font-variant-numeric: tabular-nums; }
-#exportProgress .export-bar-track {
-    flex: 1;
-    height: 4px;
-    background: var(--line);
-    border-radius: 2px;
-    overflow: hidden;
-    min-width: 80px;
-}
-#exportProgress .export-bar-fill {
-    height: 100%;
-    width: 0%;
-    background: var(--accent);
-    border-radius: 2px;
-    transition: width 0.12s ease-out;
-}
-#exportProgress #exportPct,
-#exportProgress #exportEta {
-    color: var(--dim);
-    font-variant-numeric: tabular-nums;
-    min-width: 28px;
-    text-align: right;
-    flex: none;
-}
-#exportCancel {
-    font-size: 9px;
-    padding: 4px 10px;
-    flex: none;
-}
-
-/* ============ LEFT ACTIVITY BAR ============ */
-#left {
-    grid-area: left;
-    background: var(--bg-alt);
-    border-right: 1px solid var(--line);
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 2px;
-    padding: var(--sp-2) 0;
-    z-index: 5;
-    overflow: hidden;
-}
-#left .icon-btn {
-    width: 100%;
-    height: 36px;
-    border-radius: 0;
-}
-body.left-closed #left { pointer-events: none; border-right: 0; }
-#left .spacer { flex: 1; }
-
-/* ============ STAGE ============ */
-#stage {
-    grid-area: stage;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--sp-4);
-    min-width: 0;
-    min-height: 0;
-    overflow: hidden;
-    background: var(--bg);
-}
-
-/* canvas wrapper — holds canvas + text overlay together */
-#canvas-wrap {
-    position: relative;
-    max-width: 100%;
-    max-height: 100%;
-    line-height: 1.2;
-    border: 1px solid var(--line);
-    border-radius: var(--r-lg);
-    background: #060505;
-    overflow: hidden;
-    flex-shrink: 0;
-}
-#canvas-wrap:fullscreen,
-#canvas-wrap:-webkit-full-screen {
-    width: 100vw;
-    height: 100vh;
-    max-width: none;
-    max-height: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--bg);
-    border-radius: 0;
-    box-shadow: none;
-    padding: 20px;
-    cursor: none;
-}
-#canvas-wrap:fullscreen canvas,
-#canvas-wrap:-webkit-full-screen canvas {
-    max-width: 100vw;
-    max-height: 100vh;
-}
-#canvas-wrap canvas {
-    display: block;
-    max-width: 100%;
-    max-height: 100%;
-}
-
-/* text overlay — positioned over canvas for editing */
-#text-overlay {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    overflow: hidden;
-}
-.text-elem {
-    position: absolute;
-    pointer-events: auto;
-    cursor: move;
-    user-select: none;
-    white-space: nowrap;
-    padding: 2px 6px;
-    transform: translate(-50%, -50%);
-    outline: 2px solid transparent;
-    border-radius: 2px;
-    transition: outline .12s;
-}
-.text-elem:hover {
-    outline-color: rgba(255,255,255,.12);
-}
-.text-elem.selected {
-    outline-color: var(--accent);
-    background: rgba(224,58,58,.06);
-}
-
-.text-content-input {
-    width: 100%;
-    font-family: inherit;
-    font-size: 11px;
-    background: transparent;
-    color: var(--white);
-    border: 1px solid var(--line);
-    padding: 5px 8px;
-    outline: none;
-    border-radius: 3px;
-    resize: vertical;
-    min-height: 38px;
-}
-.text-content-input:focus { border-color: var(--dim); }
-.text-font-select {
-    width: 100%;
-    font-family: inherit;
-    font-size: 11px;
-    background: transparent;
-    color: var(--white);
-    border: 1px solid var(--line);
-    padding: 4px 6px;
-    outline: none;
-    border-radius: 3px;
-    cursor: pointer;
-}
-.text-font-select option { background: var(--panel); color: var(--white); }
-.text-style-row { display: flex; gap: 5px; }
-.text-style-row button { flex: 1; padding: 4px; font-size: 10px; text-align: center; }
-.text-style-row button.active { border-color: var(--accent); color: var(--accent); background: rgba(224,58,58,.08); }
-.text-del-btn { border-color: rgba(224,58,58,.3); color: var(--accent); }
-
-/* ============ TEXT TOOLBAR (slide-out from left) ============ */
-#text-bar {
-    grid-area: text;
-    background: var(--bg-alt);
-    border-right: 1px solid var(--line);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    padding: 0;
-    min-width: 0;
-    min-height: 0;
-}
-.sidebar-tabs {
-    display: flex;
-    flex-shrink: 0;
-    margin: var(--sp-3);
-    background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: var(--r-md);
-    padding: 2px;
-}
-.sidebar-tab {
-    flex: 1;
-    padding: 6px 10px;
-    text-align: center;
-    font-size: 11px;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    background: transparent;
-    color: var(--dim);
-    user-select: none;
-    border-radius: calc(var(--r-md) - 2px);
-    transition: var(--ease);
-}
-.sidebar-tab:hover { color: var(--white); }
-.sidebar-tab.active {
-    color: var(--white);
-    background: var(--bg-alt);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-}
-.sb-scroll {
-    flex: 1;
-    overflow-y: auto;
-    padding: 0 var(--sp-3) var(--sp-3);
-    min-height: 0;
-    scrollbar-width: thin;
-    scrollbar-color: var(--line) transparent;
-}
-body:not(.text-open) #text-bar {
-    padding-left: 0;
-    padding-right: 0;
-    border-right: 0;
-    pointer-events: none;
-}
-
-#text-bar .sect { margin-bottom: 14px; }
-#text-bar .sect-label { font-size: 9px; letter-spacing: 0.2em; text-transform: lowercase; color: var(--dim); margin-bottom: 6px; user-select: none; }
-#text-bar .ctl { margin-bottom: 8px; }
-#text-bar .ctl-head { display: flex; justify-content: space-between; margin-bottom: 3px; }
-#text-bar .ctl-head span { font-size: 10px; }
-#text-bar .ctl-head .val { color: var(--dim); font-size: 9px; }
-#text-bar .text-content-input {
-    width: 100%; font-family: inherit; font-size: 11px;
-    background: transparent; color: var(--white);
-    border: 1px solid var(--line); padding: 5px 8px;
-    outline: none; border-radius: 3px; resize: vertical; min-height: 36px;
-}
-#text-bar .text-content-input:focus { border-color: var(--dim); }
-#text-bar .text-font-select {
-    width: 100%; font-family: inherit; font-size: 11px;
-    background: transparent; color: var(--white);
-    border: 1px solid var(--line); padding: 4px 6px;
-    outline: none; border-radius: 3px; cursor: pointer;
-}
-#text-bar .text-font-select option { background: var(--panel); color: var(--white); }
-#text-bar .text-style-row { display: flex; gap: 4px; }
-#text-bar .text-style-row button { flex: 1; padding: 3px 4px; font-size: 10px; text-align: center; }
-#text-bar .text-style-row button.active { border-color: var(--accent); color: var(--accent); background: rgba(224,58,58,.08); }
-#text-bar input[type=range] { width: 100%; height: 12px; -webkit-appearance: none; appearance: none; background: transparent; cursor: pointer; margin: 0; }
-#text-bar input[type=range]::-webkit-slider-runnable-track { height: 2px; background: var(--line); border-radius: 1px; }
-#text-bar input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 8px; height: 8px; margin-top: -3px; border-radius: 50%; background: var(--white); transition: background .15s; }
-#text-bar input[type=range]:hover::-webkit-slider-thumb { background: var(--accent); }
-#text-bar .text-color-row { display: flex; gap: 6px; align-items: center; }
-#text-bar .text-color-row input[type=color] { width: 28px; height: 22px; border: 1px solid var(--line); background: transparent; padding: 1px; cursor: pointer; border-radius: 3px; -webkit-appearance: none; }
-#text-bar .text-color-row input[type=color]::-webkit-color-swatch-wrapper { padding: 0; }
-#text-bar .text-color-row input[type=color]::-webkit-color-swatch { border: none; border-radius: 2px; }
-#text-bar .text-del-btn { border-color: rgba(224,58,58,.3); color: var(--accent); width: 100%; padding: 5px; }
-
-/* ============ RIGHT PANEL ============ */
-#panel {
-    grid-area: right;
-    border-left: 1px solid var(--line);
-    background: var(--bg-alt);
-    overflow-y: auto;
-    padding: var(--sp-3);
-    min-width: 0;
-    scrollbar-width: thin;
-    scrollbar-color: var(--line) transparent;
-}
-body.right-closed #panel {
-    padding-left: 0;
-    padding-right: 0;
-    border-left: 0;
-    pointer-events: none;
-}
-
-.sect { margin-bottom: var(--sp-4); }
-.sect-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--dim);
-    border-bottom: 1px solid var(--line);
-    padding-bottom: 6px;
-    margin-bottom: var(--sp-2);
-    user-select: none;
-}
-
-/* preset grid with thumbnails */
-.presets { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-2); }
-.presets .preset-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    padding: 4px;
-    gap: 4px;
-    text-align: center;
-    border-radius: var(--r-md);
-    overflow: hidden;
-    background: var(--bg);
-    transition: var(--ease);
-}
-.presets .preset-thumb {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
-    border-radius: 6px;
-    background: #0c0c10;
-    display: block;
-}
-.presets .preset-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 0.08em;
-    color: var(--dim);
-}
-.presets .preset-btn.active {
-    border-color: var(--accent-border);
-    background: var(--accent-dim);
-}
-.presets .preset-btn.active .preset-label { color: var(--white); }
-.presets .preset-btn:hover { border-color: var(--accent-border); }
-
-/* seed row */
-.seed-row { display: flex; gap: 5px; }
-.seed-row input {
-    flex: 1;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    letter-spacing: .12em;
-    background: rgba(0, 0, 0, 0.25);
-    color: var(--white);
-    border: 1px solid var(--line);
-    padding: 8px 10px;
-    outline: none;
-    border-radius: var(--r-sm);
-    transition: var(--ease);
-}
-.seed-row input:focus { border-color: rgba(255, 255, 255, 0.2); }
-.seed-row input:focus { border-color: var(--dim); }
-.seed-row button { padding: 6px 12px; font-size: 11px; }
-
-/* palette */
-.swatches { display: flex; gap: 5px; }
-.swatches input[type=color] {
-    flex: 1; height: 26px;
-    border: 1px solid var(--line);
-    background: transparent;
-    padding: 2px; cursor: pointer;
-    -webkit-appearance: none;
-    border-radius: 3px;
-}
-.swatches input[type=color]::-webkit-color-swatch-wrapper { padding: 0; }
-.swatches input[type=color]::-webkit-color-swatch { border: none; border-radius: 2px; }
-.swatches button { width: 34px; height: 26px; flex: none; padding: 0; font-size: 14px; }
-
-/* sliders */
-.ctl { margin-bottom: var(--sp-3); }
-.ctl-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 4px;
-}
-.ctl-head span {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text);
-}
-.ctl-head .val {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    color: var(--dim);
-}
-input[type=range] {
-    width: 100%;
-    height: 16px;
-    -webkit-appearance: none;
-    appearance: none;
-    background: transparent;
-    cursor: pointer;
-    margin: 0;
-}
-input[type=range]::-webkit-slider-runnable-track {
-    height: 4px;
-    background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: 3px;
-}
-input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 12px;
-    height: 12px;
-    margin-top: -5px;
-    border-radius: 50%;
-    background: var(--white);
-    border: 2px solid var(--bg-alt);
-    transition: var(--ease);
-}
-input[type=range]:hover::-webkit-slider-thumb {
-    background: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-dim);
-}
-input[type=range]::-moz-range-track {
-    height: 4px;
-    background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: 3px;
-}
-input[type=range]::-moz-range-thumb {
-    width: 12px;
-    height: 12px;
-    border: 2px solid var(--bg-alt);
-    border-radius: 50%;
-    background: var(--white);
-}
-
-/* toggle groups — chromaverse builder style */
-.export-fmts,
-.sizes {
-    display: flex;
-    background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: var(--r-md);
-    padding: 2px;
-    gap: 0;
-}
-.sizes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.export-fmts { margin-bottom: var(--sp-2); }
-.export-fmt,
-.sizes button {
-    flex: 1;
-    height: 28px !important;
-    padding: 0 4px !important;
-    font-size: 10px !important;
-    border: none !important;
-    border-radius: calc(var(--r-md) - 2px) !important;
-    background: transparent !important;
-    color: var(--dim) !important;
-    box-shadow: none !important;
-}
-.export-fmt.active,
-.sizes button.active {
-    background: var(--bg-alt) !important;
-    color: var(--white) !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
-}
-
-/* export */
-.exports { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--sp-2); }
-.exports button { height: 30px; font-size: 10px; }
-
-/* ============ BOTTOM TERMINAL (xterm.js) ============ */
-#bottom {
-    grid-area: bottom;
-    background: var(--bg-alt);
-    border-top: 1px solid var(--line);
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    min-height: 0;
-    overflow: hidden;
-}
-#bottom.hidden { display: none; }
-
-/* resize handle — VS Code-style drag strip along panel top edge */
-#term-resize-handle {
-    position: absolute;
-    top: -5px;
-    left: 0;
-    right: 0;
-    height: 10px;
-    cursor: ns-resize;
-    z-index: 20;
-    touch-action: none;
-}
-#term-resize-handle::before {
-    content: '';
-    position: absolute;
-    top: 4px;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: var(--line);
-    transition: background .12s ease, height .12s ease;
-}
-#term-resize-handle::after {
-    content: '';
-    position: absolute;
-    top: 3px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 36px;
-    height: 3px;
-    background: var(--dim);
-    border-radius: 2px;
-    opacity: 0;
-    transition: opacity .12s ease, background .12s ease;
-}
-#bottom:hover #term-resize-handle::before,
-#term-resize-handle:hover::before,
-#term-resize-handle:active::before {
-    background: var(--accent);
-    height: 2px;
-}
-#bottom:hover #term-resize-handle::after,
-#term-resize-handle:hover::after,
-#term-resize-handle:active::after {
-    opacity: 0.55;
-}
-#term-resize-handle:hover::after,
-#term-resize-handle:active::after {
-    background: var(--accent);
-    opacity: 0.85;
-}
-body.term-maximized #term-resize-handle {
-    cursor: default;
-    pointer-events: none;
-}
-
-.term-bar {
-    display: flex;
-    align-items: center;
-    padding: 0 10px;
-    height: 26px;
-    border-bottom: 1px solid var(--line);
-    background: var(--panel);
-    gap: 8px;
-    flex-shrink: 0;
-}
-.term-tabs {
-    display: flex;
-    gap: 0;
-    height: 100%;
-    align-items: stretch;
-}
-.term-tab {
-    font-size: 10px;
-    font-weight: 600;
-    padding: 0 12px;
-    display: flex;
-    align-items: center;
-    border-bottom: 2px solid transparent;
-    color: var(--dim);
-    cursor: default;
-    user-select: none;
-    transition: var(--ease);
-}
-.term-tab:hover { color: var(--white); cursor: pointer; }
-.term-tab.active {
-    color: var(--white);
-    border-bottom-color: var(--accent);
-    background: var(--bg);
-}
-.term-actions { margin-left: auto; display: flex; gap: 4px; }
-#termMaximize .icon-max { font-size: 11px; }
-
-.term-shell-bar {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 0 6px 0 8px;
-    height: 28px;
-    border-bottom: 1px solid var(--line);
-    background: var(--bar-bg);
-    flex-shrink: 0;
-}
-.shell-tabs {
-    display: flex;
-    align-items: stretch;
-    gap: 2px;
-    flex: 1;
-    min-width: 0;
-    overflow-x: auto;
-    scrollbar-width: none;
-}
-.shell-tabs::-webkit-scrollbar { display: none; }
-.shell-tab {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 0 8px 0 10px;
-    height: 22px;
-    margin: auto 0;
-    border: 1px solid transparent;
-    border-radius: 4px;
-    background: transparent;
-    color: var(--dim);
-    font-family: inherit;
-    font-size: 9px;
-    letter-spacing: 0.06em;
-    cursor: pointer;
-    flex: none;
-    max-width: 140px;
-    transition: color .12s, border-color .12s, background .12s;
-}
-.shell-tab:hover { color: var(--text); background: rgba(255,255,255,.04); }
-.shell-tab.active {
-    color: var(--white);
-    border-color: var(--line);
-    background: rgba(255,255,255,.06);
-}
-.shell-tab.disconnected .shell-tab-label { opacity: 0.55; }
-.shell-tab.disconnected.active .shell-tab-label::after {
-    content: ' ◌';
-    color: var(--accent);
-    font-size: 8px;
-}
-.shell-tab-label {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-.shell-tab-close {
-    font-size: 12px;
-    line-height: 1;
-    opacity: 0.45;
-    padding: 0 2px;
-    border-radius: 2px;
-}
-.shell-tab-close:hover { opacity: 1; color: var(--accent); }
-.shell-tab-new {
-    width: 22px !important;
-    height: 22px !important;
-    font-size: 14px !important;
-    flex: none;
-}
-
-#term-xterm {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    min-width: 0;
-    overflow: hidden;
-    position: relative;
-}
-#termPanes {
-    flex: 1;
-    min-height: 0;
-    position: relative;
-}
-.term-pane {
-    display: none;
-    position: absolute;
-    inset: 0;
-    padding: 0 0 0 8px;
-}
-.term-pane.active { display: flex; }
-.term-pane .xterm {
-    flex: 1;
-    width: 100%;
-    height: 100%;
-    padding: 4px 8px 4px 0;
-}
-.term-pane .xterm-viewport {
-    scrollbar-width: thin;
-    scrollbar-color: var(--line) transparent;
-}
-.term-pane .xterm-screen { width: 100% !important; }
-
-.term-offline {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 12px;
-    background: rgba(224, 58, 58, 0.12);
-    border-bottom: 1px solid rgba(224, 58, 58, 0.35);
-    font-size: 10px;
-    letter-spacing: 0.04em;
-    flex-shrink: 0;
-}
-.term-offline.hidden { display: none !important; }
-.term-offline strong { color: var(--accent); font-weight: 500; }
-.term-offline code {
-    font-family: inherit;
-    font-size: 9px;
-    color: var(--text);
-    background: rgba(0,0,0,.25);
-    padding: 2px 6px;
-    border-radius: 3px;
-}
-.term-offline button {
-    margin-left: auto;
-    padding: 4px 10px;
-    font-size: 9px;
-}
-
-/* maximized terminal — stage collapses, terminal fills remaining height */
-body.term-maximized {
-    grid-template-rows: 36px 0px 1fr 22px;
-}
-body.term-maximized #stage {
-    overflow: hidden;
-    padding: 0;
-}
-body.term-maximized #stage canvas {
-    display: none;
-}
-body.dragging-term {
-    user-select: none;
-    -webkit-user-select: none;
-    cursor: ns-resize;
-    transition: none !important;
-}
-body.dragging-term * {
-    cursor: ns-resize !important;
-}
-body.dragging-term #stage,
-body.dragging-term #bottom {
-    pointer-events: none;
-}
-body.dragging-term #term-resize-handle {
-    pointer-events: auto;
-}
-
-/* ============ STATUS BAR ============ */
-footer {
-    grid-area: status;
-    display: flex;
-    align-items: center;
-    gap: var(--sp-4);
-    padding: 0 var(--sp-3);
-    border-top: 1px solid var(--line);
-    background: var(--bar-bg);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.04em;
-    color: var(--dim);
-    user-select: none;
-    z-index: 10;
-    min-width: 0;
-    overflow: hidden;
-}
-footer b { color: var(--text); font-weight: 500; }
-footer .right { margin-left: auto; display: flex; gap: 10px; min-width: 0; flex: none; }
-.status-btn {
-    border: none;
-    background: transparent;
-    color: var(--dim);
-    font-size: 10px;
-    cursor: pointer;
-    padding: 0 4px;
-    font-family: inherit;
-    transition: color .15s;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-.status-btn:hover { color: var(--text); }
-.status-btn.active { color: var(--accent); }
-
-/* ============ TABS & BADGES ============ */
-.term-tab { position: relative; }
-.term-tab .badge {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 8px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--accent);
-    background: var(--accent-dim);
-    border: 1px solid var(--accent-border);
-    padding: 1px 6px;
-    border-radius: 4px;
-    margin-left: 6px;
-    display: inline-block;
-    vertical-align: middle;
-}
-.term-tab .badge.hidden { display: none !important; }
-
-/* ============ SHADER EDITOR ============ */
-#shader-monaco {
-    flex: 1;
-    min-height: 0;
-    width: 100%;
-}
-#term-editor {
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-}
-
-/* ============ COMMAND PALETTE ============ */
-.cmd-palette {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    z-index: 1000;
-    display: flex;
-    justify-content: center;
-    padding-top: 50px;
-    font-family: 'JetBrains Mono', monospace;
-}
-.cmd-palette.hidden { display: none !important; }
-.cmd-palette-box {
-    width: 500px;
-    max-height: 330px;
-    background: var(--bg-alt);
-    border: 1px solid var(--line);
-    border-radius: var(--r-lg);
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-#cmdInput {
-    background: var(--bg);
-    color: var(--white);
-    border: none;
-    border-bottom: 1px solid var(--line);
-    padding: 10px 14px;
-    font-family: inherit;
-    font-size: 11px;
-    outline: none;
-    width: 100%;
-}
-.cmd-palette-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 6px 0;
-}
-.cmd-item {
-    padding: 8px 14px;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    user-select: none;
-    color: var(--text);
-    font-size: 10px;
-}
-.cmd-item.selected {
-    background: var(--accent-dim);
-    color: var(--white);
-    border-left: 3px solid var(--accent);
-}
-.cmd-item .cmd-key {
-    font-size: 8px;
-    color: var(--dim);
-    background: rgba(255,255,255,0.05);
-    padding: 1px 4px;
-    border-radius: 2px;
-    border: 1px solid var(--line);
-}
-
-@media (max-width: 980px) {
-    body { --right-w: 0px; }
-    body:not(.right-closed) #panel {
-        position: fixed;
-        top: 36px;
-        right: 0;
-        left: var(--left-w);
-        bottom: 24px;
-        width: auto;
-        max-width: 320px;
-        margin-left: auto;
-        z-index: 30;
-        border-left: 1px solid var(--line);
-        padding: 0 0 20px;
-        pointer-events: auto;
-        box-shadow: -18px 0 40px rgba(0, 0, 0, 0.45);
-    }
-}
-
-@media (max-width: 700px) {
-    body {
-        --left-w: 40px;
-        --bottom-h: 240px;
-    }
-    body.text-open { --text-w: min(272px, calc(100vw - var(--left-w))); }
-    .logo-sub { display: none; }
-    #exportProgress #exportEta,
-    #exportProgress #exportFrame { display: none; }
-    .header-history { display: none; }
-    header {
-        gap: 8px;
-        padding: 0 8px;
-    }
-    .logo {
-        max-width: 42vw;
-    }
-    .mini-actions button {
-        padding: 4px 7px;
-        letter-spacing: 0.04em;
-    }
-    #stage { padding: 10px; }
-    footer {
-        gap: 8px;
-        padding: 0 8px;
-    }
-    footer > span:not(.right):nth-of-type(2),
-    footer > span:not(.right):nth-of-type(4) {
-        display: none;
-    }
-    footer .right { gap: 4px; }
-    .status-btn { font-size: 9px; padding: 0 2px; }
-    #sTheme { display: none; }
-    #sRight,
-    #sTerm { width: 16px; overflow: hidden; }
-    .term-tab { padding: 0 8px; }
-    .term-bar { padding: 0 6px; gap: 4px; }
-    .cmd-palette { padding: 36px 10px 0; }
-    .cmd-palette-box { width: 100%; }
-}
-
-@media (max-width: 420px) {
-    header { gap: 6px; }
-    .logo { max-width: 34vw; }
-    .mini-actions button { padding: 4px 6px; font-size: 9px; }
-    footer > span:not(.right):nth-of-type(1) { max-width: 105px; overflow: hidden; white-space: nowrap; }
-}
-</style>
+<link rel="stylesheet" href="/studio.css">
 </head>
 <body>
 
 <header>
-    <div class="logo-wrap">
-        <div class="logo"><span>/</span>motion local</div>
-        <div class="logo-sub">studio</div>
+    <a href="/" class="brand" aria-label="/motion home">
+        <span class="brand-lockup">
+            <span class="brand-mark"><span class="slash">/</span>motion</span>
+            <span class="brand-edition">studio</span>
+        </span>
+    </a>
+    <div class="app-menu-bar">
+        <div class="menu-item">
+            <button class="menu-trigger">File</button>
+            <div class="menu-dropdown">
+                <button onclick="triggerFileAction('save-png')"><span class="label">Save PNG Image</span><span class="shortcut">S</span></button>
+                <button onclick="triggerFileAction('save-preset')"><span class="label">Save Project File</span><span class="shortcut">⌘S</span></button>
+                <button onclick="triggerFileAction('load-preset')"><span class="label">Load Project File...</span><span class="shortcut">⌘O</span></button>
+                <hr>
+                <button onclick="triggerFileAction('import-image')"><span class="label">Import Image Overlay...</span><span class="shortcut">I</span></button>
+                <button id="menuClearImage" onclick="triggerFileAction('clear-image')"><span class="label">Clear Image Overlay</span></button>
+                <hr>
+                <button onclick="triggerFileAction('export-embed')"><span class="label">Export HTML Embed Code...</span></button>
+            </div>
+        </div>
+        <div class="menu-item">
+            <button class="menu-trigger">Edit</button>
+            <div class="menu-dropdown">
+                <button id="menuUndo" onclick="triggerEditAction('undo')"><span class="label">Undo</span><span class="shortcut">⌘Z</span></button>
+                <button id="menuRedo" onclick="triggerEditAction('redo')"><span class="label">Redo</span><span class="shortcut">⌘⇧Z</span></button>
+                <hr>
+                <button onclick="triggerEditAction('randomize')"><span class="label">Randomize Parameters</span><span class="shortcut">R</span></button>
+                <button onclick="triggerEditAction('random-seed')"><span class="label">New Random Seed</span><span class="shortcut">⚄</span></button>
+                <button onclick="triggerEditAction('random-palette')"><span class="label">Shuffle Colors</span><span class="shortcut">⟳</span></button>
+                <button onclick="triggerEditAction('invert-colors')"><span class="label">Invert Palette Colors</span></button>
+            </div>
+        </div>
+        <div class="menu-item">
+            <button class="menu-trigger">View</button>
+            <div class="menu-dropdown">
+                <button id="menuTogglePanel" onclick="triggerViewAction('toggle-panel')"><span class="label">Toggle Right Panel</span><span class="shortcut">⌘B</span></button>
+                <button id="menuToggleTerminal" onclick="triggerViewAction('toggle-terminal')"><span class="label">Toggle Terminal</span><span class="shortcut">⌃`</span></button>
+                <button id="menuToggleLeft" onclick="triggerViewAction('toggle-left')"><span class="label">Toggle Left Sidebar</span></button>
+                <hr>
+                <button onclick="triggerViewAction('toggle-fullscreen')"><span class="label">Toggle Fullscreen View</span><span class="shortcut">F11</span></button>
+            </div>
+        </div>
+        <div class="menu-item">
+            <button class="menu-trigger">Workspace</button>
+            <div class="menu-dropdown">
+                <button onclick="switchMode('shaders')"><span class="label">WebGL Shaders Studio</span><span class="shortcut">◈</span></button>
+                <button onclick="switchMode('kinetic')"><span class="label">Kinetic Typography</span><span class="shortcut">▸</span></button>
+                <button onclick="switchMode('chromaverse')"><span class="label">Chromaverse Themes Gallery</span><span class="shortcut">◆</span></button>
+            </div>
+        </div>
+        <div class="menu-item">
+            <button class="menu-trigger">Help</button>
+            <div class="menu-dropdown">
+                <button onclick="triggerHelpAction('shortcuts')"><span class="label">Keyboard Shortcuts...</span><span class="shortcut">?</span></button>
+                <button onclick="triggerHelpAction('guide')"><span class="label">Developer Training Tour</span></button>
+                <hr>
+                <button onclick="triggerHelpAction('about')"><span class="label">About /motion Studio...</span></button>
+            </div>
+        </div>
+    </div>
+    <div class="mode-selector" id="modeSelector" role="tablist" aria-label="studio mode">
+        <button class="mode-btn" data-mode="chromaverse" role="tab" aria-selected="false" onclick="switchMode('chromaverse')"><span class="mode-icon">◆</span><span class="mode-label">chromaverse</span></button>
+        <button class="mode-btn active" data-mode="shaders" role="tab" aria-selected="true" onclick="switchMode('shaders')"><span class="mode-icon">◈</span><span class="mode-label">shaders</span></button>
+        <button class="mode-btn" data-mode="kinetic" role="tab" aria-selected="false" onclick="switchMode('kinetic')"><span class="mode-icon">▸</span><span class="mode-label">kinetic type</span></button>
     </div>
     <div class="header-history">
-        <button class="icon-btn" id="histUndo" data-tooltip="undo (⌘Z)" title="undo">↶</button>
-        <button class="icon-btn" id="histRedo" data-tooltip="redo (⌘⇧Z)" title="redo">↷</button>
+        <button class="icon-btn" id="histUndo" data-tooltip="undo (⌘Z)" title="undo">
+            <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 7a6 6 0 1 1 6 6H7"/>
+                <polyline points="5 9 3 7 5 5"/>
+            </svg>
+        </button>
+        <button class="icon-btn" id="histRedo" data-tooltip="redo (⌘⇧Z)" title="redo">
+            <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M13 7a6 6 0 1 0-6 6h2"/>
+                <polyline points="11 9 13 7 11 5"/>
+            </svg>
+        </button>
     </div>
     <div id="exportProgress">
         <div class="export-meta">
@@ -1199,15 +106,18 @@ footer .right { margin-left: auto; display: flex; gap: 10px; min-width: 0; flex:
         <span id="exportEta">—</span>
         <button id="exportCancel">cancel</button>
     </div>
-    <div class="mini-actions">
-        <button id="btnPause">pause</button>
-        <button id="btnRandom" class="primary">randomize</button>
-    </div>
+    <!-- pause kept (hidden) for Space/command-palette/export wiring; randomize lives on the left nav (↻) + 'r' key -->
+    <button id="btnPause" hidden>pause</button>
 </header>
+
+<div id="contextBanner" style="display:none;position:fixed;top:48px;left:0;right:0;z-index:100;background:var(--accent);color:var(--on-accent);text-align:center;padding:6px 16px;font-size:11px;font-weight:600;letter-spacing:0.04em;">
+  WebGL context lost — animation paused. Restoring...
+</div>
 
 <nav id="left">
     <button class="icon-btn active" id="btnGenTab" data-tooltip="generator settings (g)">⚙</button>
     <button class="icon-btn" id="btnTextTab"  data-tooltip="text overlays">T</button>
+    <button class="icon-btn" id="btnAudioVisualizer" data-tooltip="sound visualizer (a)">♫</button>
     <button class="icon-btn" id="togPanel" data-tooltip="toggle right panel (⌘B)">☰</button>
     <button class="icon-btn" id="togTerm"  data-tooltip="toggle terminal (⌃`)">▤</button>
     <div class="spacer"></div>
@@ -1243,6 +153,32 @@ footer .right { margin-left: auto; display: flex; gap: 10px; min-width: 0; flex:
                 <input type="color" id="col2" value="#e03a3a">
                 <input type="color" id="col3" value="#fff5f5">
                 <button id="palDice" title="random palette">⟳</button>
+            </div>
+            <div class="ctl" style="margin-bottom:8px">
+                <div class="ctl-head"><span>chromaverse category</span></div>
+                <select id="colorGroupSelector" style="width:100%;background:var(--bg-alt);color:var(--text);border:1px solid var(--line);padding:6px;border-radius:4px;font-family:inherit;font-size:11px;cursor:pointer;outline:none;">
+                    <option value="all">All Color Palettes</option>
+                    <option value="red">🔴 Red / Crimson</option>
+                    <option value="orange">🟠 Orange / Copper</option>
+                    <option value="yellow">🟡 Yellow / Gold</option>
+                    <option value="green">🟢 Green / Moss</option>
+                    <option value="blue">🔵 Blue / Teal</option>
+                    <option value="purple">🟣 Purple / Violet</option>
+                    <option value="pink">🌸 Pink / Rose</option>
+                    <option value="monochrome">⚫ Monochrome / Slate</option>
+                </select>
+            </div>
+            <div class="ctl" style="margin-bottom:8px;position:relative;">
+                <div class="ctl-head"><span>theme select</span></div>
+                <div class="custom-dropdown" id="themeDropdown">
+                    <div class="dropdown-trigger" id="themeTrigger" style="display:flex;align-items:center;justify-content:space-between;background:var(--bg-alt);color:var(--text);border:1px solid var(--line);padding:6px 8px;border-radius:4px;font-family:inherit;font-size:11px;cursor:pointer;outline:none;user-select:none;">
+                        <span id="selectedThemeName" style="flex:1;text-align:left;">-- Custom / Select Theme --</span>
+                        <div class="selected-theme-colors" id="selectedThemeColors" style="display:flex;gap:3px;margin-right:8px"></div>
+                        <span class="combobox-arrow" style="font-size:8px;color:var(--dim);">▼</span>
+                    </div>
+                    <div class="combobox-options" id="themeOptions" style="display:none;">
+                    </div>
+                </div>
             </div>
             <button id="btnInvert" style="width:100%;padding:6px">invert colors: off</button>
         </div>
@@ -1303,12 +239,15 @@ footer .right { margin-left: auto; display: flex; gap: 10px; min-width: 0; flex:
                     <option value="outline">outline</option>
                     <option value="badge">solid box</option>
                     <option value="glass">frosted glass</option>
+                    <option value="pattern">pattern fill</option>
                 </select>
             </div>
             <div class="ctl" id="tbBgColorGroup" style="display:none">
-                <div class="ctl-head"><span>box color</span></div>
+                <div class="ctl-head"><span id="tbBgColorLabel">box color</span></div>
                 <div class="text-color-row">
                     <input type="color" id="tbBgColor" value="#e03a3a">
+                    <button type="button" id="tbMaskDark" title="Dark letter background" style="flex:1;font-size:9px;padding:4px">dark</button>
+                    <button type="button" id="tbMaskLight" title="Light letter background" style="flex:1;font-size:9px;padding:4px">light</button>
                 </div>
             </div>
             <div class="ctl" style="margin-bottom:4px">
@@ -1335,6 +274,281 @@ footer .right { margin-left: auto; display: flex; gap: 10px; min-width: 0; flex:
     </div>
 </div>
 
+<!-- Chromaverse Mode View — full gallery embedded -->
+<div id="mode-chromaverse" class="mode-embed">
+    <div class="embed-loader"><span class="embed-spinner"></span> loading chromaverse…</div>
+    <iframe id="cvFrame" title="Chromaverse theme gallery"
+            data-src="/chromaverse/index.html"
+            allow="clipboard-write"></iframe>
+</div>
+
+<!-- Kinetic Type Mode View — native, theme-matched showcase page -->
+<div id="mode-kinetic" class="kt-page">
+    <div class="kt-inner" style="padding-bottom: 180px;">
+
+        <section class="kt-hero">
+            <p class="kt-eyebrow">/motion · type in motion</p>
+            <h1 class="kt-hero-title" aria-label="KINETIC TYPE">
+                <span class="kt-line">
+                    <span style="--i:0">K</span><span style="--i:1">I</span><span style="--i:2">N</span><span style="--i:3">E</span><span style="--i:4">T</span><span style="--i:5">I</span><span style="--i:6">C</span>
+                </span>
+                <span class="kt-line kt-accent">TYPE</span>
+            </h1>
+            <p class="kt-lede">Letterforms with a pulse. A living catalog of motion treatments — every demo loops seamlessly and inherits the studio's active theme. Click any tile to open the kinetic studio & timeline.</p>
+            <div class="kt-hero-bar"><span></span></div>
+        </section>
+
+        <section class="kt-section">
+            <div class="kt-section-head">
+                <span class="kt-section-label">kinetic type</span>
+                <span class="kt-section-meta">11 treatments</span>
+            </div>
+            <div class="kt-grid">
+                <article class="kt-tile" style="--d:0s" data-preset="slide">
+                    <span class="kt-tile-tag">words that move</span>
+                    <div class="kt-stage">
+                        <span class="kt-demo kt-demo-slide" style="font-family:'Syne',sans-serif">
+                            <span style="--i:0">W</span><span style="--i:1">O</span><span style="--i:2">R</span><span style="--i:3">D</span><span style="--i:4">S</span>
+                        </span>
+                    </div>
+                </article>
+                <article class="kt-tile" style="--d:.06s" data-preset="punch">
+                    <span class="kt-tile-tag">fast punch</span>
+                    <div class="kt-stage">
+                        <span class="kt-demo kt-demo-punch" style="font-family:'Anton',sans-serif">FAST</span>
+                    </div>
+                </article>
+                <article class="kt-tile" style="--d:.12s" data-preset="stagger">
+                    <span class="kt-tile-tag">poetic stagger</span>
+                    <div class="kt-stage">
+                        <span class="kt-demo kt-demo-stagger" style="font-family:'Playfair Display',serif;font-style:italic;text-transform:none">
+                            <span style="--i:0">P</span><span style="--i:1">o</span><span style="--i:2">e</span><span style="--i:3">t</span><span style="--i:4">i</span><span style="--i:5">c</span>
+                        </span>
+                    </div>
+                </article>
+                <article class="kt-tile" style="--d:.18s" data-preset="reveal">
+                    <span class="kt-tile-tag">rise &amp; fall</span>
+                    <div class="kt-stage">
+                        <span class="kt-reveal-mask"><span class="kt-demo kt-demo-reveal" style="font-family:'Anton',sans-serif">RISE</span></span>
+                    </div>
+                </article>
+                <article class="kt-tile" style="--d:.24s" data-preset="weight">
+                    <span class="kt-tile-tag">weight shift</span>
+                    <div class="kt-stage">
+                        <span class="kt-demo kt-demo-weight" style="font-family:'Inter',sans-serif;font-weight:800">WEIGHT</span>
+                    </div>
+                </article>
+                <article class="kt-tile" style="--d:.3s" data-preset="path">
+                    <span class="kt-tile-tag">text on path</span>
+                    <div class="kt-stage">
+                        <span class="kt-demo kt-demo-path" style="font-family:'Bebas Neue',sans-serif">
+                            <span style="--y:9px;--r:-10deg">C</span><span style="--y:-1px;--r:-5deg">U</span><span style="--y:-6px;--r:0deg">R</span><span style="--y:-1px;--r:5deg">V</span><span style="--y:9px;--r:10deg">E</span>
+                        </span>
+                    </div>
+                </article>
+                <article class="kt-tile" style="--d:.36s" data-preset="figma">
+                    <span class="kt-tile-tag">figma motion slide</span>
+                    <div class="kt-stage">
+                        <span class="kt-demo kt-demo-figma" style="font-family:'Inter',sans-serif;font-weight:700">SLIDE</span>
+                    </div>
+                </article>
+                <article class="kt-tile" style="--d:.42s" data-preset="implode">
+                    <span class="kt-tile-tag">spiral implode</span>
+                    <div class="kt-stage">
+                        <span class="kt-demo kt-demo-pulse" style="font-family:'Anton',sans-serif">IMPLODE</span>
+                    </div>
+                </article>
+                <article class="kt-tile" style="--d:.48s" data-preset="skewReveal">
+                    <span class="kt-tile-tag">skew reveal</span>
+                    <div class="kt-stage">
+                        <span class="kt-demo kt-demo-flip" style="font-family:'Playfair Display',serif;font-style:italic">Skew</span>
+                    </div>
+                </article>
+                <article class="kt-tile" style="--d:.54s" data-preset="curtain">
+                    <span class="kt-tile-tag">curtain reveal</span>
+                    <div class="kt-stage">
+                        <span class="kt-demo kt-demo-finale" style="font-family:'Syne',sans-serif">SHOW</span>
+                    </div>
+                </article>
+                <article class="kt-tile" style="--d:.6s" data-preset="spinReveal">
+                    <span class="kt-tile-tag">3D spin reveal</span>
+                    <div class="kt-stage kt-persp">
+                        <span class="kt-demo kt-demo-flip" style="font-family:'Bebas Neue',sans-serif">SPIN</span>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="kt-section">
+            <div class="kt-section-head">
+                <span class="kt-section-label">physics fx</span>
+                <span class="kt-section-meta">8 treatments</span>
+            </div>
+            <div class="kt-grid">
+                <article class="kt-tile" style="--d:0s" data-preset="liquid">
+                    <span class="kt-tile-tag">liquid text wave</span>
+                    <div class="kt-stage">
+                        <span class="kt-demo kt-demo-liquid" style="font-family:'Syne',sans-serif">
+                            <span style="--i:0">L</span><span style="--i:1">I</span><span style="--i:2">Q</span><span style="--i:3">U</span><span style="--i:4">I</span><span style="--i:5">D</span>
+                        </span>
+                    </div>
+                </article>
+                <article class="kt-tile" style="--d:.06s" data-preset="glitch">
+                    <span class="kt-tile-tag">elastic glitch</span>
+                    <div class="kt-stage">
+                        <span class="kt-demo kt-demo-glitch" data-text="GLITCH" style="font-family:'JetBrains Mono',monospace;font-weight:700">GLITCH</span>
+                    </div>
+                </article>
+                <article class="kt-tile" style="--d:.12s" data-preset="morph">
+                    <span class="kt-tile-tag">text morph</span>
+                    <div class="kt-stage">
+                        <span class="kt-demo kt-demo-morph" style="font-family:'Inter',sans-serif;font-weight:800">MORPH</span>
+                    </div>
+                </article>
+                <article class="kt-tile" style="--d:.18s" data-preset="refract">
+                    <span class="kt-tile-tag">refractive lens</span>
+                    <div class="kt-stage">
+                        <span class="kt-demo kt-demo-refract" style="font-family:'Inter',sans-serif;font-weight:800">LENS</span>
+                    </div>
+                </article>
+                <article class="kt-tile" style="--d:.24s" data-preset="strobe">
+                    <span class="kt-tile-tag">strobe pulse</span>
+                    <div class="kt-stage">
+                        <span class="kt-demo kt-demo-strobe" style="font-family:'Anton',sans-serif">STROBE</span>
+                    </div>
+                </article>
+                <article class="kt-tile" style="--d:.3s" data-preset="shake">
+                    <span class="kt-tile-tag">screen shake</span>
+                    <div class="kt-stage">
+                        <span class="kt-demo kt-demo-pulse" style="font-family:'Anton',sans-serif">SHAKE</span>
+                    </div>
+                </article>
+                <article class="kt-tile" style="--d:.36s" data-preset="bands">
+                    <span class="kt-tile-tag">color sweep</span>
+                    <div class="kt-stage">
+                        <span class="kt-demo kt-demo-wipe" style="font-family:'Syne',sans-serif">SWEEP</span>
+                    </div>
+                </article>
+                <article class="kt-tile" style="--d:.42s" data-preset="backSlam">
+                    <span class="kt-tile-tag">back slam</span>
+                    <div class="kt-stage">
+                        <span class="kt-demo kt-demo-punch" style="font-family:'Anton',sans-serif">SLAM</span>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="kt-section">
+            <div class="kt-section-head">
+                <span class="kt-section-label">ambient motions</span>
+                <span class="kt-section-meta">4 treatments</span>
+            </div>
+            <div class="kt-grid">
+                <article class="kt-tile" style="--d:0s" data-preset="neon">
+                    <span class="kt-tile-tag">neon flicker</span>
+                    <div class="kt-stage">
+                        <span class="kt-demo kt-demo-neon" style="font-family:'Syne',sans-serif">NEON</span>
+                    </div>
+                </article>
+                <article class="kt-tile" style="--d:.06s" data-preset="typewriter">
+                    <span class="kt-tile-tag">typewriter reveal</span>
+                    <div class="kt-stage">
+                        <span class="kt-demo kt-demo-typewriter" style="font-family:'JetBrains Mono',monospace">WRITE</span>
+                    </div>
+                </article>
+                <article class="kt-tile" style="--d:.12s" data-preset="scanner">
+                    <span class="kt-tile-tag">glitch scanner</span>
+                    <div class="kt-stage">
+                        <span class="kt-demo kt-demo-scanner" style="font-family:'Anton',sans-serif">SCAN</span>
+                    </div>
+                </article>
+                <article class="kt-tile" style="--d:.18s" data-preset="spring">
+                    <span class="kt-tile-tag">spring bounce</span>
+                    <div class="kt-stage">
+                        <span class="kt-demo kt-demo-spring" style="font-family:'Bebas Neue',sans-serif">BOUNCE</span>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="kt-section">
+            <div class="kt-section-head">
+                <span class="kt-section-label">data animation</span>
+                <span class="kt-section-meta">4 treatments</span>
+            </div>
+            <div class="kt-grid">
+                <article class="kt-tile" style="--d:0s" data-preset="bars">
+                    <span class="kt-tile-tag">bar chart growth</span>
+                    <div class="kt-stage">
+                        <div class="kt-bars">
+                            <i style="height:40px;--i:0"></i><i style="height:72px;--i:1"></i><i style="height:52px;--i:2"></i><i style="height:90px;--i:3"></i><i style="height:62px;--i:4"></i>
+                        </div>
+                    </div>
+                </article>
+                <article class="kt-tile" style="--d:.06s" data-preset="counter">
+                    <span class="kt-tile-tag">counting counter</span>
+                    <div class="kt-stage">
+                        <span class="kt-counter"></span>
+                    </div>
+                </article>
+                <article class="kt-tile" style="--d:.12s" data-preset="line">
+                    <span class="kt-tile-tag">line trend graph</span>
+                    <div class="kt-stage">
+                        <svg class="kt-line-svg" viewBox="0 0 190 96" preserveAspectRatio="none" aria-hidden="true">
+                            <polyline points="0,80 38,58 76,66 114,32 152,42 190,8"></polyline>
+                            <circle cx="190" cy="8" r="4"></circle>
+                        </svg>
+                    </div>
+                </article>
+                <article class="kt-tile" style="--d:.18s" data-preset="donut">
+                    <span class="kt-tile-tag">donut completion</span>
+                    <div class="kt-stage">
+                        <svg class="kt-donut-svg" viewBox="0 0 104 104" aria-hidden="true">
+                            <circle class="track" cx="52" cy="52" r="40"></circle>
+                            <circle class="fill" cx="52" cy="52" r="40"></circle>
+                        </svg>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="kt-section">
+            <div class="kt-section-head">
+                <span class="kt-section-label">commercial ads</span>
+                <span class="kt-section-meta">3 treatments</span>
+            </div>
+            <div class="kt-grid">
+                <article class="kt-tile" style="--d:0s" data-preset="wipe">
+                    <span class="kt-tile-tag">grove &amp; gold</span>
+                    <div class="kt-stage">
+                        <span class="kt-demo kt-demo-wipe" style="font-family:'Playfair Display',serif">GROVE</span>
+                    </div>
+                </article>
+                <article class="kt-tile" style="--d:.06s" data-preset="finale">
+                    <span class="kt-tile-tag">brand finale</span>
+                    <div class="kt-stage">
+                        <span class="kt-demo kt-demo-finale" style="font-family:'Syne',sans-serif">FINALE</span>
+                    </div>
+                </article>
+                <article class="kt-tile" style="--d:.12s" data-preset="aura">
+                    <span class="kt-tile-tag">aura perfume</span>
+                    <div class="kt-stage">
+                        <span class="kt-demo kt-demo-aura" style="font-family:'Playfair Display',serif;text-transform:uppercase">AURA</span>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="kt-marquee-strip" aria-hidden="true">
+            <div class="kt-marquee-track">
+                <span>KINETIC · TYPE · IN · MOTION ·&nbsp;</span>
+                <span>KINETIC · TYPE · IN · MOTION ·&nbsp;</span>
+            </div>
+        </section>
+
+    </div>
+</div>
+
 <aside id="panel">
     <div class="sect">
         <div class="sect-label">canvas</div>
@@ -1351,63 +565,35 @@ footer .right { margin-left: auto; display: flex; gap: 10px; min-width: 0; flex:
 
     <div class="sect">
         <div class="sect-label">image</div>
-        <div class="ctl" id="imgSection">
+        <div class="ctl" id="imgSection" style="margin-bottom:0">
             <input type="file" id="imgFile" accept="image/*" hidden>
             <button id="imgBtn" style="width:100%;padding:6px">+ upload image</button>
             <div id="imgPreview" style="display:none;margin-top:6px">
                 <img id="imgThumb" style="width:100%;border-radius:3px;border:1px solid var(--line);display:block">
-                <button id="imgRemove" style="width:100%;margin-top:4px;border-color:rgba(224,58,58,.3);color:var(--accent)">remove</button>
+                <button id="imgRemove" class="text-del-btn" style="width:100%;margin-top:4px;padding:5px">remove</button>
             </div>
             <div id="imgStatus" style="font-size:9px;color:var(--dim);margin-top:4px"></div>
-        </div>
-        <div class="ctl">
-            <div class="ctl-head"><span>blend</span><span class="val" id="mixVal">0%</span></div>
-            <input type="range" id="mixRng" min="0" max="100" value="0">
-        </div>
-        <div class="ctl" style="margin-bottom:0">
-            <div class="ctl-head"><span>pixelate</span><span class="val" id="pixelVal">0%</span></div>
-            <input type="range" id="pixelRng" min="0" max="100" value="0">
-        </div>
-    </div>
-
-    <div class="sect">
-        <div class="sect-label">viewer</div>
-        <div class="ctl">
-            <input type="file" id="viewerFile" accept="image/*,video/*,.gif" hidden>
-            <button id="viewerOpen" style="width:100%;padding:6px">+ open video / gif / image</button>
-        </div>
-        <div id="viewerSection" style="display:none;margin-top:6px">
-            <div id="viewerStage" style="position:relative;width:100%;aspect-ratio:16/9;background:#000;border:1px solid #000;border-radius:3px;overflow:hidden">
-                <video id="viewerVid" style="width:100%;height:100%;display:none;object-fit:contain;" playsinline loop></video>
-                <img id="viewerImg" style="width:100%;height:100%;display:none;object-fit:contain;" />
-            </div>
-            <div class="ctl" style="margin-top:8px;display:flex;gap:4px">
-                <button class="primary" id="viewerPlay" style="flex:1">play</button>
-                <button id="viewerPause" style="flex:1">pause</button>
-            </div>
-            <div class="ctl" style="margin-top:6px;display:flex;gap:4px">
-                <button id="viewerLoop" style="flex:1">loop on</button>
-                <button id="viewerInvert" style="flex:1">invert off</button>
-            </div>
-            <div class="ctl" style="margin-top:6px">
-                <div class="ctl-head"><span>speed</span><span class="val" id="viewerSpeedVal">1.0x</span></div>
-                <input type="range" id="viewerSpeed" min="0.25" max="2.0" step="0.25" value="1">
-            </div>
         </div>
     </div>
 
     <div class="sect">
         <div class="sect-label">export</div>
-        <div class="export-fmts">
-            <button class="export-fmt" data-fmt="png" type="button">png</button>
-            <button class="export-fmt active" data-fmt="webm" type="button">video</button>
-            <button class="export-fmt" data-fmt="gif" type="button">gif</button>
+        <div class="tag" id="exportSpec" style="margin-bottom:8px;font-size:9px;color:var(--dim)">1080×1080 · PNG · matches canvas</div>
+        <div class="export-still-fmts">
+            <button class="img-fmt active" data-imgfmt="png" type="button">png</button>
+            <button class="img-fmt" data-imgfmt="jpg" type="button">jpg</button>
+            <button class="img-fmt" data-imgfmt="webp" type="button">webp</button>
         </div>
-        <div class="exports">
-            <button id="expPng">image</button>
+        <div class="ctl" style="margin:8px 0 0">
+            <input id="exportCaption" type="text" maxlength="64" placeholder="filename — optional" spellcheck="false"
+                style="width:100%;font-family:inherit;font-size:10px;padding:6px 8px;background:var(--bg);border:1px solid var(--line);border-radius:var(--r-sm);color:var(--text)">
+        </div>
+        <div id="exportTargets" class="export-targets"></div>
+        <div class="export-actions">
+            <button id="expPng" class="primary">export</button>
             <button id="expVid">video</button>
             <button id="expGif">gif</button>
-            <button id="expEmbed" style="grid-column: span 3; margin-top: 4px;">export html splash page</button>
+            <button id="expEmbed">html page</button>
         </div>
     </div>
 
@@ -1446,7 +632,7 @@ footer .right { margin-left: auto; display: flex; gap: 10px; min-width: 0; flex:
     <div id="term-xterm">
         <div id="termOffline" class="term-offline hidden">
             <strong>PTY server offline</strong>
-            <span>Start the dev stack with <code>npm run studio</code></span>
+            <span>Start the dev stack with <code>npm run dev</code> (Vite + PTY). Vite-only: <code>npm run dev:vite</code> + <code>npm run server</code> in another tab.</span>
             <button type="button" id="termReconnect">reconnect</button>
         </div>
         <div id="termPanes"></div>
@@ -1490,6 +676,87 @@ footer .right { margin-left: auto; display: flex; gap: 10px; min-width: 0; flex:
 <script src="https://unpkg.com/@xterm/addon-fit@0.10.0/lib/addon-fit.js"></script>
 <script src="https://unpkg.com/@xterm/addon-web-links@0.11.0/lib/addon-web-links.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.js"></script>
+
+<script>
+// ============ MODE SWITCHING ============
+// Three studios under one roof: the shader studio + the native kinetic-type
+// showcase (both first-party, theme-matched), and the Chromaverse theme gallery
+// (embedded via iframe, lazy-loaded on first visit).
+let currentMode = 'shaders';
+
+const EMBEDS = {
+    chromaverse: { frame: 'cvFrame', view: 'mode-chromaverse' },
+};
+
+function ensureEmbedLoaded(mode) {
+    const cfg = EMBEDS[mode];
+    if (!cfg) return;
+    const frame = document.getElementById(cfg.frame);
+    if (frame && !frame.src && frame.dataset.src) {
+        const view = document.getElementById(cfg.view);
+        frame.addEventListener('load', () => view && view.classList.add('loaded'), { once: true });
+        frame.src = frame.dataset.src;
+    }
+}
+
+function moveModeIndicator(animate = true) {
+    const sel = document.getElementById('modeSelector');
+    const active = sel && sel.querySelector('.mode-btn.active');
+    if (!sel || !active) return;
+    if (!animate) sel.classList.add('no-anim');
+    sel.style.setProperty('--ind-x', `${active.offsetLeft}px`);
+    sel.style.setProperty('--ind-w', `${active.offsetWidth}px`);
+    if (!animate) requestAnimationFrame(() => sel.classList.remove('no-anim'));
+}
+
+function switchMode(mode) {
+    if (!['shaders', 'chromaverse', 'kinetic'].includes(mode)) return;
+    currentMode = mode;
+    // swap only the mode-* class so panel/terminal state classes (managed by
+    // main.ts) survive a mode change
+    document.body.classList.remove('mode-shaders', 'mode-chromaverse', 'mode-kinetic');
+    document.body.classList.add(`mode-${mode}`);
+    document.querySelectorAll('.mode-btn').forEach(b => {
+        const on = b.dataset.mode === mode;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    moveModeIndicator(true);
+    if (EMBEDS[mode]) ensureEmbedLoaded(mode);
+}
+
+// Position the sliding indicator on load + keep it aligned on resize.
+window.addEventListener('load', () => moveModeIndicator(false));
+document.addEventListener('DOMContentLoaded', () => moveModeIndicator(false));
+window.addEventListener('resize', () => moveModeIndicator(false));
+
+// Init default mode
+document.body.classList.add('mode-shaders');
+moveModeIndicator(false);
+</script>
+
+<!-- About Modal overlay -->
+<div id="aboutModal" class="modal" style="display:none">
+    <div class="modal-content glass">
+        <button class="modal-close" id="aboutCloseBtn" aria-label="close modal">&times;</button>
+        <h2 style="font-size: 20px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px;">/motion <span style="color:var(--accent);">studio</span></h2>
+        <p style="color: var(--dim); font-size: 11px; margin-bottom: 16px;">version 1.2.0 · local workstation</p>
+        <p style="margin-bottom: 16px; font-size: 12px; line-height: 1.6;">
+            A high-fidelity generative graphics and typography workstation. Designed for creators, developers, and designers to compose fluid GPU-driven backgrounds, custom color palettes, and kinetic type arrangements.
+        </p>
+        <div style="border-top: 1px solid var(--line); padding-top: 12px; margin-top: 12px;">
+            <p style="font-size: 11px; color: var(--dim); display: flex; justify-content: space-between;">
+                <span>WebGL Context:</span> <span id="aboutWebglInfo" style="color: var(--text);">WebGL 1.0 (GLSL ES 1.0)</span>
+            </p>
+            <p style="font-size: 11px; color: var(--dim); display: flex; justify-content: space-between; margin-top: 4px;">
+                <span>Render Pipeline:</span> <span style="color: var(--text);">60fps GPU Frame Loop</span>
+            </p>
+            <p style="font-size: 11px; color: var(--dim); display: flex; justify-content: space-between; margin-top: 4px;">
+                <span>Audio Visualizer:</span> <span style="color: var(--text);">Web Audio FFT Analyser</span>
+            </p>
+        </div>
+    </div>
+</div>
 
 <script type="module" src="/src/studio/main.ts"></script>
 </body>

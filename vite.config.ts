@@ -9,18 +9,24 @@ export default defineConfig({
         studio: resolve(__dirname, 'studio.html'),
         roadmap: resolve(__dirname, 'studio-roadmap.html'),
         splash: resolve(__dirname, 'splash.html'),
+        kinetic: resolve(__dirname, 'kinetic-typography.html'),
         chromaverse: resolve(__dirname, 'chromaverse/index.html'),
+        gallery: resolve(__dirname, 'gallery.html'),
       },
     },
     outDir: 'dist',
   },
   server: {
     port: 5173,
+    watch: {
+      ignored: ['**/tests/**', '**/node_modules/**'],
+    },
     // Proxy /terminal WebSocket to the existing node-pty server (npm run server)
     proxy: {
       '/terminal': {
-        target: 'ws://localhost:3000',
+        target: 'http://localhost:3000',
         ws: true,
+        changeOrigin: true,
       },
       '/api': {
         target: 'http://localhost:3001',

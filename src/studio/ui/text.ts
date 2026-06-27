@@ -5,7 +5,8 @@
 import { P } from '../state';
 
 import type { TextElem, TextAlign, TextEffect } from '../types';
-import { canvas } from '../webgl';
+import { canvas, gl } from '../webgl';
+import { invalidateMask, updateMaskTexture } from '../text_mask';
 
 const $ = (id: string) => document.getElementById(id)!;
 
@@ -29,7 +30,13 @@ export function renderTextOverlay(): void {
     d.style.top     = (t.y * 100) + '%';
     d.style.fontSize    = (t.fontSize * h) + 'px';
     d.style.fontFamily  = t.fontFamily;
-    d.style.color       = t.color;
+    if (t.effect === 'pattern') {
+      d.style.color = 'transparent';
+      d.style.webkitTextStroke = '1px rgba(255,255,255,0.35)';
+      d.textContent = t.content || 'pattern';
+    } else {
+      d.style.color = t.color;
+    }
     d.style.fontWeight  = t.bold ? 'bold' : '400';
     d.style.fontStyle   = t.italic ? 'italic' : 'normal';
     d.style.opacity     = String(t.opacity);
@@ -63,7 +70,7 @@ export function renderTextOverlay(): void {
         d.style.padding = '4px 10px'; d.style.borderRadius = '4px';
         d.style.border = '1px solid rgba(255,255,255,0.1)'; break;
     }
-    d.textContent = t.content || 'Text';
+    if (t.effect !== 'pattern') d.textContent = t.content || 'Text';
     d.addEventListener('mousedown', e => { e.stopPropagation(); selectText(t.id); startTextDrag(e as MouseEvent, t); });
     d.addEventListener('dblclick', () => { ($('tbContent') as HTMLTextAreaElement).focus(); });
     el.appendChild(d);
@@ -72,9 +79,14 @@ export function renderTextOverlay(): void {
 
 // ── Canvas bake (for export) ─────────────────────────────
 
+function scheduleMaskRefresh(): void {
+  invalidateMask();
+  if (gl && canvas) updateMaskTexture(gl, canvas.width, canvas.height);
+}
+
 export function renderTextOnCanvas(ctx: CanvasRenderingContext2D, w: number, h: number): void {
   texts.forEach(t => {
-    if (!t.content) return;
+    if (!t.content || t.effect === 'pattern') return;
     ctx.save();
     ctx.globalAlpha = t.opacity;
     ctx.font = `${t.italic ? 'italic ' : ''}${t.bold ? 'bold ' : ''}${t.fontSize * h}px ${t.fontFamily}`;
@@ -168,13 +180,31 @@ export function selectText(id: number | null): void {
   $('tbOpacityVal').textContent = Math.round(t.opacity * 100) + '%';
   ($('tbEffect') as HTMLSelectElement).value = t.effect;
   ($('tbBgColor') as HTMLInputElement).value = t.bgColor;
-  $('tbBgColorGroup').style.display = t.effect === 'badge' ? 'block' : 'none';
+  const bgGroup = $('tbBgColorGroup');
+  const bgLabel = $('tbBgColorLabel');
+  if (t.effect === 'pattern') {
+    bgGroup.style.display = 'block';
+    if (bgLabel) bgLabel.textContent = 'letter background';
+  } else if (t.effect === 'badge') {
+    bgGroup.style.display = 'block';
+    if (bgLabel) bgLabel.textContent = 'box color';
+  } else {
+    bgGroup.style.display = 'none';
+  }
 }
 
 export function updateText(id: number, props: Partial<TextElem>): void {
   const t = texts.find(x => x.id === id);
   if (!t) return;
   Object.assign(t, props);
+  if (props.effect !== undefined || props.content !== undefined
+      || props.fontSize !== undefined || props.fontFamily !== undefined
+      || props.bold !== undefined || props.italic !== undefined
+      || props.align !== undefined || props.tracking !== undefined
+      || props.x !== undefined || props.y !== undefined
+      || props.bgColor !== undefined || props.opacity !== undefined) {
+    scheduleMaskRefresh();
+  }
   selectText(id);
   window.dispatchEvent(new CustomEvent('lumen:textChanged'));
 }
@@ -183,6 +213,7 @@ export function deleteText(id: number): void {
   window.dispatchEvent(new CustomEvent('lumen:historyBefore'));
   const idx = texts.findIndex(x => x.id === id);
   if (idx !== -1) texts.splice(idx, 1);
+  scheduleMaskRefresh();
   if (selectedText === id)
     selectedText = texts.length ? texts[texts.length - 1].id : null;
   selectText(selectedText);
@@ -325,12 +356,35 @@ export function initTextControls(): void {
     if (selectedText !== null) {
       const val = (this as HTMLSelectElement).value as TextEffect;
       updateText(selectedText, { effect: val });
-      $('tbBgColorGroup').style.display = val === 'badge' ? 'block' : 'none';
+      const bgLabel = $('tbBgColorLabel');
+      if (val === 'pattern') {
+        $('tbBgColorGroup').style.display = 'block';
+        if (bgLabel) bgLabel.textContent = 'letter background';
+        if (selectedText !== null) {
+          const t = texts.find(x => x.id === selectedText);
+          if (t && t.bgColor === '#e03a3a') updateText(selectedText, { bgColor: '#08080a' });
+        }
+      } else if (val === 'badge') {
+        $('tbBgColorGroup').style.display = 'block';
+        if (bgLabel) bgLabel.textContent = 'box color';
+      } else {
+        $('tbBgColorGroup').style.display = 'none';
+      }
+      scheduleMaskRefresh();
     }
   });
   ($('tbBgColor') as HTMLInputElement).addEventListener('input', function() {
     if (selectedText !== null) updateText(selectedText, { bgColor: (this as HTMLInputElement).value });
   });
+  const setMaskBg = (hex: string) => {
+    if (selectedText === null) return;
+    ($('tbBgColor') as HTMLInputElement).value = hex;
+    updateText(selectedText, { bgColor: hex });
+  };
+  const maskDark = $('tbMaskDark');
+  const maskLight = $('tbMaskLight');
+  if (maskDark) maskDark.onclick = () => setMaskBg('#08080a');
+  if (maskLight) maskLight.onclick = () => setMaskBg('#f4f4f6');
   $('tbDel').onclick = () => { if (selectedText !== null) deleteText(selectedText); };
 
   // Canvas click — place text or deselect

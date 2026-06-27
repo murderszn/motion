@@ -2,16 +2,17 @@
 //  URL API — Parse settings from query parameters or generate share link
 // ─────────────────────────────────────────────────────────
 
-import { P, PRESETS } from '../state';
+import { P, PRESETS, migrateTrilatRemoval, presetAt } from '../state';
 import type { SliderKey } from '../types';
 import { texts, renderTextOverlay } from './text';
-import { setStatusMsg } from './statusbar';
+import { setStatusMsg, setStatusMode } from './statusbar';
 import { logToTerminal } from './terminal';
 import { setSeed } from './seed';
 import { setPalette } from './palette';
 import { setSlider } from './sliders';
 import { applyPresetUI } from './presets';
 import { applySizeUI } from './sizes';
+import { syncExportUIFromParams } from './export_targets_ui';
 
 export function parseUrlParams(): void {
   const params = new URLSearchParams(window.location.search);
@@ -40,7 +41,7 @@ export function parseUrlParams(): void {
   }
 
   // 4. Sliders (speed, scale, density, distort, detail, grain)
-  (['speed', 'scale', 'density', 'distort', 'detail', 'grain'] as SliderKey[]).forEach(key => {
+  (['speed', 'scale', 'density', 'distort', 'warp', 'detail', 'grain'] as SliderKey[]).forEach(key => {
     const val = params.get(key);
     if (val) {
       const parsed = parseFloat(val);
@@ -65,6 +66,15 @@ export function parseUrlParams(): void {
     const parsed = parseInt(invert, 10);
     if (!isNaN(parsed)) P.invert = parsed === 1 ? 1 : 0;
   }
+
+  const exportTarget = params.get('export');
+  if (exportTarget) P.exportTargetId = exportTarget;
+
+  const imgfmt = params.get('imgfmt');
+  if (imgfmt === 'jpg' || imgfmt === 'webp' || imgfmt === 'png') P.imageFormat = imgfmt;
+
+  const caption = params.get('caption');
+  if (caption) P.exportCaption = caption.slice(0, 64);
 }
 
 export function generateShareUrl(): string {
@@ -72,12 +82,15 @@ export function generateShareUrl(): string {
   params.set('preset', PRESETS[P.mode].id);
   params.set('seed', String(P.seed));
   params.set('palette', P.colors.join(','));
-  (['speed', 'scale', 'density', 'distort', 'detail', 'grain'] as SliderKey[]).forEach(key => {
+  (['speed', 'scale', 'density', 'distort', 'warp', 'detail', 'grain'] as SliderKey[]).forEach(key => {
     params.set(key, P[key].toFixed(2));
   });
   if (P.mix > 0.001) params.set('mix', P.mix.toFixed(2));
   if (P.pixel > 0.001) params.set('pixel', P.pixel.toFixed(2));
   if (P.invert === 1) params.set('invert', '1');
+  if (P.exportTargetId && P.exportTargetId !== 'custom') params.set('export', P.exportTargetId);
+  if (P.imageFormat && P.imageFormat !== 'png') params.set('imgfmt', P.imageFormat);
+  if (P.exportCaption) params.set('caption', P.exportCaption);
 
   return window.location.origin + window.location.pathname + '?' + params.toString();
 }
@@ -110,48 +123,45 @@ export function copyStateToClipboard(): void {
     });
 }
 
+export function applyProjectState(state: any): void {
+  if (!state.params || !state.texts) {
+    throw new Error('Invalid project JSON format');
+  }
+  Object.assign(P, state.params);
+  P.mode = migrateTrilatRemoval(P.mode);
+  texts.splice(0, texts.length, ...state.texts);
+
+  // Sync UI elements
+  setSeed(P.seed);
+  setPalette(P.colors);
+  (['speed', 'scale', 'density', 'distort', 'warp', 'detail', 'grain'] as SliderKey[]).forEach(id => {
+    if (P[id] !== undefined) setSlider(id, P[id]);
+  });
+  applyPresetUI();
+  setStatusMode(presetAt(P.mode).full);
+  applySizeUI();
+
+  const loopEl = document.getElementById('loop') as HTMLInputElement | null;
+  if (loopEl) {
+    loopEl.value = String(P.loop);
+    const loopVal = document.getElementById('loopVal');
+    if (loopVal) loopVal.textContent = P.loop.toFixed(1) + 's';
+  }
+
+  P.pixel = 0;
+
+  const btnInvert = document.getElementById('btnInvert');
+  if (btnInvert) btnInvert.textContent = 'invert colors: ' + (P.invert ? 'on' : 'off');
+  syncExportUIFromParams();
+  renderTextOverlay();
+}
+
 export function pasteStateFromClipboard(): void {
   navigator.clipboard.readText()
     .then(text => {
       try {
         const state = JSON.parse(text);
-        if (!state.params || !state.texts) {
-          throw new Error('Invalid clipboard JSON format');
-        }
-        Object.assign(P, state.params);
-        texts.splice(0, texts.length, ...state.texts);
-
-        // Sync UI elements
-        setSeed(P.seed);
-        setPalette(P.colors);
-        (['speed', 'scale', 'density', 'distort', 'detail', 'grain'] as SliderKey[]).forEach(id => {
-          if (P[id] !== undefined) setSlider(id, P[id]);
-        });
-        applyPresetUI();
-        applySizeUI();
-
-        const loopEl = document.getElementById('loop') as HTMLInputElement | null;
-        if (loopEl) {
-          loopEl.value = String(P.loop);
-          const loopVal = document.getElementById('loopVal');
-          if (loopVal) loopVal.textContent = P.loop.toFixed(1) + 's';
-        }
-
-        const mixRng = document.getElementById('mixRng') as HTMLInputElement | null;
-        if (mixRng) {
-          mixRng.value = String(Math.round(P.mix * 100));
-          const mixVal = document.getElementById('mixVal');
-          if (mixVal) mixVal.textContent = Math.round(P.mix * 100) + '%';
-        }
-
-        const pixelRng = document.getElementById('pixelRng') as HTMLInputElement | null;
-        if (pixelRng) {
-          pixelRng.value = String(Math.round(P.pixel * 100));
-          const pixelVal = document.getElementById('pixelVal');
-          if (pixelVal) pixelVal.textContent = Math.round(P.pixel * 100) + '%';
-        }
-
-        renderTextOverlay();
+        applyProjectState(state);
         logToTerminal('state successfully pasted and applied', 'ok');
         setStatusMsg('pasted JSON');
       } catch (err) {

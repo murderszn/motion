@@ -77,9 +77,9 @@
     #content {
       position: relative; z-index: 10;
       display: flex; flex-direction: column;
-      align-items: center; justify-content: flex-start;
+      align-items: center;
       min-height: 100vh;
-      padding: 4.5rem 1.5rem;
+      padding: 0;
       pointer-events: none;
     }
 
@@ -96,20 +96,48 @@
     }
 
     /* ── footer container ── */
-    .footer-container {
+    .site-footer {
+      position: relative;
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6rem 2rem 3rem;
+      pointer-events: auto;
+      opacity: 0;
+      animation: fadeUp 1.4s 0.8s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    .site-footer::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 10%; right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    }
+
+    .footer-top {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.8rem;
+      text-align: center;
+      max-width: 1000px;
+      width: 100%;
+    }
+
+    .footer-bottom {
       width: 100%;
       max-width: 800px;
-      margin-top: 8rem;
-      margin-bottom: 2rem;
-      padding-top: 3rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 1.5rem;
-      pointer-events: auto;
-      opacity: 0;
-      animation: fadeUp 1.4s 2.3s cubic-bezier(0.16,1,0.3,1) both;
+      padding-top: 4rem;
     }
 
     /* ── title ── */
@@ -122,7 +150,7 @@
       text-align: center;
       color: #ffffff;
       text-shadow: 0 2px 20px rgba(0,0,0,0.35);
-      animation: titleIn 2.4s cubic-bezier(0.16,1,0.3,1) both;
+      animation: titleIn 1.4s cubic-bezier(0.16,1,0.3,1) both;
       pointer-events: auto;
       user-select: none;
       text-transform: lowercase;
@@ -147,7 +175,7 @@
       text-align: center;
       line-height: 1.5;
       opacity: 0;
-      animation: fadeUp 1.4s 0.7s cubic-bezier(0.16,1,0.3,1) both;
+      animation: fadeUp 1.4s 0.1s cubic-bezier(0.16,1,0.3,1) both;
     }
 
     /* ── section typography (matches index story sections) ── */
@@ -194,7 +222,7 @@
       color: var(--text-muted);
       text-align: left;
       opacity: 0;
-      animation: fadeUp 1.4s 1s cubic-bezier(0.16,1,0.3,1) both;
+      animation: fadeUp 1.4s 0.2s cubic-bezier(0.16,1,0.3,1) both;
       pointer-events: auto;
       width: 100%;
       max-width: 650px;
@@ -205,8 +233,8 @@
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      gap: 12px;
       transition: all 0.3s ease;
     }
     .terminal-block:hover {
@@ -217,6 +245,8 @@
       display: flex;
       align-items: center;
       gap: 10px;
+      flex: 1;
+      min-width: 0;
       white-space: nowrap;
       overflow-x: auto;
       scrollbar-width: none;
@@ -236,10 +266,12 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
       color: #ffffff;
       transition: color 0.2s ease;
       cursor: pointer;
-      flex-shrink: 0;
     }
     .terminal-block:hover .copy-btn {
       color: var(--text-muted);
@@ -260,7 +292,7 @@
       display: flex; gap: 0.8rem;
       pointer-events: auto;
       opacity: 0;
-      animation: fadeUp 1.4s 1.6s cubic-bezier(0.16,1,0.3,1) both;
+      animation: fadeUp 1.4s 0.35s cubic-bezier(0.16,1,0.3,1) both;
     }
     .btn {
       font-family: 'Inter', -apple-system, sans-serif;
@@ -331,67 +363,116 @@
     .steps-section {
       width: 100%;
       max-width: 1000px;
-      margin-top: 7rem;
       opacity: 0;
-      animation: fadeUp 1.4s 2.3s cubic-bezier(0.16,1,0.3,1) both;
+      animation: fadeUp 1.4s 0.7s cubic-bezier(0.16,1,0.3,1) both;
       pointer-events: auto;
       text-align: center;
     }
-    .steps-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 2rem;
-    }
-    .step-card {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.03) 100%);
-      border: 1px solid rgba(255, 255, 255, 0.16);
+
+    .session-terminal {
+      background: #0c0e1c;
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 10px;
-      padding: 1.75rem;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: #c8ced8;
       text-align: left;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.04);
+      overflow: hidden;
+    }
+    .session-terminal-header {
+      height: 32px;
+      background: rgba(255, 255, 255, 0.04);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      gap: 6px;
+    }
+    .session-terminal-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+    }
+    .session-terminal-body {
+      padding: 1.5rem 1.75rem;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      min-height: 320px;
+      gap: 1.25rem;
     }
-    .step-card .terminal-mock {
-      margin-top: auto;
+    .session-message {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
-    .step-card:hover {
-      transform: translateY(-3px);
-      border-color: rgba(255, 255, 255, 0.3);
+    .session-role {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.5;
+      margin-bottom: 2px;
     }
-    .step-num {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 1.8rem;
-      font-weight: 200;
-      color: rgba(224, 58, 58, 0.25);
+    .session-role.user {
+      color: #3b82f6;
     }
-    .step-heading {
-      font-weight: 600;
-      font-size: 1.05rem;
-      letter-spacing: -0.02em;
-      color: var(--text-color);
+    .session-role.assistant {
+      color: #a78bfa;
     }
-    .step-desc {
-      font-weight: 300;
-      font-size: 0.88rem;
-      line-height: 1.65;
-      color: var(--text-sub);
-      margin-bottom: 8px;
+    .session-line {
+      line-height: 1.6;
+    }
+    .session-line.cmd {
+      color: #e4e8f0;
+    }
+    .session-line.cmd::before {
+      content: '> ';
+      color: rgba(255, 255, 255, 0.25);
+    }
+    .session-line.check {
+      color: #27ae60;
+    }
+    .session-line.check::before {
+      content: '✓ ';
+    }
+    .session-line.bullet {
+      color: #8899b0;
+      padding-left: 1.2em;
+    }
+    .session-line.bullet::before {
+      content: '• ';
+      color: rgba(255, 255, 255, 0.2);
+    }
+    .session-line.info {
+      color: #3b82f6;
+    }
+    .session-line.muted {
+      color: rgba(255, 255, 255, 0.3);
+      padding-left: 1.2em;
+    }
+    .session-line .highlight {
+      color: #e8e8f0;
+    }
+    .session-line .accent {
+      color: #ef4444;
+    }
+    .session-spacer {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.06);
+      margin: 0.25rem 0;
     }
 
     @media (max-width: 768px) {
-      .steps-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
+      .session-terminal {
+        font-size: 0.65rem;
+      }
+      .session-terminal-body {
+        padding: 1rem 1.25rem;
       }
     }
 
     @media (max-width: 640px) {
-      .title { letter-spacing: -0.04em; }
       .actions { flex-direction: column; align-items: center; }
       .terminal-block { font-size: 0.72rem; }
       .section-lead { font-size: 1rem; }
@@ -404,402 +485,311 @@
       z-index: 100;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 0 2.5rem;
+      justify-content: center;
+      padding: 0 1.8rem;
       pointer-events: auto;
-    }
-
-    .navbar-logo {
-      font-family: 'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;
-      font-weight: 800;
-      font-size: 1.1rem;
-      letter-spacing: -0.02em;
-      text-transform: lowercase;
-      color: #ffffff;
-      display: flex;
-      align-items: center;
-      text-decoration: none;
-      user-select: none;
-    }
-
-    .navbar-logo .slash {
-      color: #e03a3a;
     }
 
     .navbar-links {
       display: flex;
-      gap: 2.2rem;
+      align-items: center;
+      gap: 1.8rem;
     }
 
     .navbar-links a {
-      font-family: 'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 0.82rem;
       font-weight: 500;
       color: #ffffff;
       text-decoration: none;
       transition: color 0.2s ease;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
     }
 
     .navbar-links a:hover {
-      color: #e03a3a;
+      color: var(--accent);
     }
 
     @media (max-width: 768px) {
       .navbar-links {
         display: none;
       }
-      .navbar {
-        padding: 0 1.5rem;
-      }
     }
 
-    /* ── agent console playground ── */
-    .playground-section {
+    /* ── dramatic section jump (like index) ── */
+    .splash-section {
+      min-height: 100vh;
+      padding: 7rem 1.5rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
       width: 100%;
-      max-width: 1000px;
-      margin-top: 7rem;
+    }
+    .splash-section + .splash-section::before {
+      content: '';
+      display: block;
+      width: 40px;
+      height: 1px;
+      background: var(--accent);
+      margin: 0 auto 4rem;
+      opacity: 0.5;
+      flex-shrink: 0;
+    }
+
+    /* ── shader gallery ── */
+    .gallery-section {
+      width: 100%;
+      max-width: 1500px;
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
       opacity: 0;
-      animation: fadeUp 1.4s 2.0s cubic-bezier(0.16,1,0.3,1) both;
+      animation: fadeUp 1.4s 0.5s cubic-bezier(0.16,1,0.3,1) both;
       pointer-events: auto;
       text-align: center;
     }
-
-    .playground-container {
-      display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.03) 100%);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      border-radius: 10px;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      box-shadow: 0 0 0 1px var(--border), 0 20px 60px rgba(0, 0, 0, 0.35);
-      overflow: hidden;
-      text-align: left;
-      margin-top: 1.5rem;
+    .gallery-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
     }
-
-    @media (max-width: 900px) {
-      .playground-container {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* ── live preview strip (decoupled from the page background) ── */
-    .preview-strip {
-      grid-column: 1 / -1;
-      aspect-ratio: 16 / 9;   /* screen-accurate viewport, like the app */
-      width: 100%;
-      position: relative;
-      overflow: hidden;
-      background: #1a1a2e;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    #preview-canvas { display: block; width: 100%; height: 100%; }
-    .preview-tag {
-      position: absolute; top: 12px; left: 16px; z-index: 2;
+    .gallery-btn {
+      padding: 10px 20px;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.55rem; letter-spacing: 0.18em;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: rgba(255, 255, 255, 0.6);
-      pointer-events: none;
-    }
-
-    .agent-pane {
-      border-left: 1px solid rgba(255, 255, 255, 0.08);
-      display: flex;
-      flex-direction: column;
-    }
-
-    @media (max-width: 900px) {
-      .agent-pane {
-        border-left: none;
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
-      }
-    }
-
-    .pane-header {
-      padding: 12px 18px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .pane-title {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.68rem;
-      font-weight: 500;
-      color: rgba(255, 255, 255, 0.8);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .pane-title .dot {
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: #27ae60;
-      box-shadow: 0 0 6px rgba(39, 174, 96, 0.6);
-      animation: pulseGreen 2s infinite;
-    }
-
-    @keyframes pulseGreen {
-      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.6); }
-      70% { transform: scale(1); box-shadow: 0 0 0 5px rgba(39, 174, 96, 0); }
-      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(39, 174, 96, 0); }
-    }
-
-    .pane-actions {
-      display: flex;
-      gap: 6px;
-    }
-
-    .window-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    /* Right Pane */
-    .controls-pane {
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .control-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .control-label {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.62rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      color: rgba(255, 255, 255, 0.65);
-      letter-spacing: 0.06em;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .control-label span.val {
-      color: #e03a3a;
-    }
-
-    .preset-pills {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 6px;
-    }
-
-    .preset-pill {
-      padding: 8px 10px;
-      border-radius: 4px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      background: rgba(255, 255, 255, 0.08);
-      font-size: 0.68rem;
-      font-weight: 500;
-      color: rgba(255, 255, 255, 0.8);
+      background: rgba(255,255,255,0.04);
+      color: rgba(255,255,255,0.7);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 0;
       cursor: pointer;
-      text-align: center;
       transition: all 0.2s ease;
     }
-
-    .preset-pill:hover {
-      background: rgba(255, 255, 255, 0.15);
-      border-color: rgba(255, 255, 255, 0.2);
+    .gallery-btn:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.25);
+      color: #fff;
     }
-
-    .preset-pill.active {
-      background: #e03a3a;
-      border-color: #e03a3a;
-      color: #ffffff;
-      box-shadow: 0 4px 10px rgba(224, 58, 58, 0.3);
+    .gallery-btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
     }
+    .gallery-btn.primary:hover { filter: brightness(1.1); }
 
-
-    .slider-container {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .slider-container input[type="range"] {
-      flex-grow: 1;
-      appearance: none;
-      -webkit-appearance: none;
-      height: 3px;
-      border-radius: 2px;
-      background: rgba(255, 255, 255, 0.15);
-      outline: none;
-    }
-
-    .slider-container input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: #e03a3a;
-      cursor: pointer;
-      transition: transform 0.1s ease;
-    }
-
-    .slider-container input[type="range"]::-webkit-slider-thumb:hover {
-      transform: scale(1.15);
-    }
-
-    /* ── offerings / taste profile ── */
-    .offerings-section {
-      width: 100%;
-      max-width: 64rem;
-      margin-top: 5rem;
+    /* ── palette paint drops ── */
+    #theme-info {
       text-align: center;
-      pointer-events: auto;
+      margin-bottom: 1.5rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
     }
-    .offerings-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1.5rem;
-      width: 100%;
-      max-width: 56rem;
-      margin: 2.5rem auto 0;
-      text-align: left;
+    @keyframes palettePop {
+      0% { opacity: 0; transform: scale(0.5); }
+      100% { opacity: 1; transform: scale(1); }
     }
-    .offering-card {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.03) 100%);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      border-radius: 10px;
-      padding: 1.75rem;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+    .palette-row {
       display: flex;
-      flex-direction: column;
-      gap: 0.85rem;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 12px;
     }
-    .offering-card:hover {
-      transform: translateY(-3px);
-      border-color: rgba(255, 255, 255, 0.3);
+    .palette-row.shuffling .palette-dot {
+      animation: palettePop 0.35s cubic-bezier(0.16,1,0.3,1) both;
     }
-    .offering-card.motion { border-top: 2px solid rgba(212, 54, 54, 0.7); }
-    .offering-card.chroma { border-top: 2px solid rgba(167, 139, 250, 0.7); }
-    .offering-name {
+    .palette-row.shuffling .palette-dot:nth-child(1) { animation-delay: 0s; }
+    .palette-row.shuffling .palette-dot:nth-child(2) { animation-delay: 0.06s; }
+    .palette-row.shuffling .palette-dot:nth-child(3) { animation-delay: 0.12s; }
+    .palette-row.shuffling .palette-dot:nth-child(4) { animation-delay: 0.18s; }
+    .palette-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.15);
+      flex-shrink: 0;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+      cursor: default;
+    }
+    .palette-dot:hover {
+      transform: scale(1.18);
+      border-color: rgba(255,255,255,0.4);
+    }
+    .palette-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
       font-weight: 700;
-      font-size: 1.35rem;
-      letter-spacing: -0.03em;
-      color: var(--text-color);
-      line-height: 1.1;
+      color: #fff;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
     }
-    .offering-name .slash { color: var(--accent); }
-    .offering-card.chroma .offering-name .slash { color: #a78bfa; }
-    .offering-desc {
-      font-weight: 300;
-      font-size: 0.88rem;
+    .palette-desc {
+      font-size: 12px;
+      color: rgba(255,255,255,0.5);
       line-height: 1.65;
-      color: var(--text-sub);
-      flex: 1;
-      margin: 0;
-      text-align: left;
+      max-width: 520px;
+      margin: 0 auto;
     }
-    .offering-desc code {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.85em;
-    }
-    .offering-card.motion .offering-desc code { color: #f87171; }
-    .offering-card.chroma .offering-desc code { color: #c4b5fd; }
-    .offering-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.45rem;
-    }
-    .offering-tag {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.58rem;
-      letter-spacing: 0.06em;
-      padding: 3px 9px;
-      border-radius: 4px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: var(--text-dim);
-    }
-    .offering-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      margin-top: 0.25rem;
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--text-color);
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-    .offering-link:hover { color: var(--accent); }
-    .offering-card.chroma .offering-link:hover { color: #c4b5fd; }
-    .taste-profile-band {
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+      gap: 24px;
       width: 100%;
-      max-width: 56rem;
-      margin: 1.75rem auto 0;
-      padding: 1.6rem 1.75rem;
-      background: linear-gradient(135deg, rgba(212, 54, 54, 0.1) 0%, rgba(139, 92, 246, 0.08) 100%);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      border-radius: 10px;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      text-align: left;
     }
-    .taste-profile-band h4 {
-      font-weight: 600;
-      font-size: 1.05rem;
-      color: var(--text-color);
-      margin-bottom: 0.55rem;
-      letter-spacing: -0.02em;
+    @media (max-width: 480px) {
+      .gallery-grid { grid-template-columns: 1fr; }
     }
-    .taste-profile-band p {
-      font-weight: 300;
-      font-size: 0.88rem;
-      line-height: 1.65;
-      color: var(--text-sub);
-      margin: 0;
-      text-align: left;
+    .gallery-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 0;
+      overflow: hidden;
+      transition: border-color 0.3s, box-shadow 0.3s;
     }
-    .taste-chips {
+    .gallery-card:hover {
+      border-color: rgba(255,255,255,0.2);
+      box-shadow: 0 15px 35px rgba(224,58,58,0.08);
+    }
+    .card-hover-actions {
+      position: absolute;
+      top: 8px;
+      right: 8px;
       display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-top: 1rem;
+      gap: 6px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      z-index: 5;
     }
-    .taste-chip {
+    .gallery-card:hover .card-hover-actions { opacity: 1; }
+    .card-action-btn {
+      padding: 5px 10px;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.62rem;
-      letter-spacing: 0.04em;
-      padding: 4px 10px;
-      border-radius: 4px;
-      background: rgba(0, 0, 0, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: var(--text-sub);
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      background: rgba(0,0,0,0.7);
+      color: rgba(255,255,255,0.8);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 0;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      backdrop-filter: blur(8px);
     }
-    @media (max-width: 768px) {
-      .offerings-grid { grid-template-columns: 1fr; }
+    .card-action-btn:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .card-action-btn.copied {
+      background: #22c55e;
+      border-color: #22c55e;
+      color: #fff;
+    }
+    .gallery-card canvas {
+      width: 100%;
+      aspect-ratio: 16/9;
+      display: block;
+      background: #000;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      position: relative;
+    }
+    .gallery-card-body {
+      padding: 16px;
+    }
+    .gallery-card-body h3 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+    .gallery-card-body h3 span {
+      color: var(--accent);
+      font-weight: 400;
+      margin-right: 6px;
+    }
+    .gallery-card-body p {
+      font-size: 11px;
+      color: rgba(255,255,255,0.45);
+      line-height: 1.5;
+      margin-bottom: 12px;
+      height: 32px;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+    .gallery-controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 12px;
+    }
+    .gallery-ctrl {
+      flex: 1;
+      min-width: 100px;
+    }
+    .gallery-ctrl label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      color: rgba(255,255,255,0.7);
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .gallery-ctrl label .v { color: var(--accent); }
+    .gallery-ctrl input[type=range] {
+      width: 100%;
+      height: 12px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      cursor: pointer;
+    }
+    .gallery-ctrl input[type=range]::-webkit-slider-runnable-track {
+      height: 2px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 1px;
+    }
+    .gallery-ctrl input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 8px;
+      height: 8px;
+      margin-top: -3px;
+      border-radius: 50%;
+      background: var(--accent);
+      transition: background .15s;
+    }
+    .gallery-ctrl input[type=range]::-moz-range-track {
+      height: 2px;
+      background: rgba(255,255,255,0.12);
+    }
+    .gallery-ctrl input[type=range]::-moz-range-thumb {
+      width: 8px;
+      height: 8px;
+      border: none;
+      border-radius: 50%;
+      background: var(--accent);
     }
 
     /* ── faq section ── */
     .faq-section {
       width: 100%;
       max-width: 800px;
-      margin-top: 7rem;
       text-align: center;
       opacity: 0;
-      animation: fadeUp 1.4s 2.2s cubic-bezier(0.16,1,0.3,1) both;
+      animation: fadeUp 1.4s 0.6s cubic-bezier(0.16,1,0.3,1) both;
       pointer-events: auto;
     }
 
@@ -869,44 +859,32 @@
     }
 
     /* ── bottom cta banner ── */
-    .cta-banner {
-      width: 100%;
-      max-width: 1000px;
-      margin-top: 7rem;
-      padding: 3.5rem 2rem;
-      color: #ffffff;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1.8rem;
-      opacity: 0;
-      animation: fadeUp 1.4s 2.4s cubic-bezier(0.16,1,0.3,1) both;
-      pointer-events: auto;
-    }
-
-    .cta-banner h2 {
+    .footer-tagline {
       font-family: 'Inter', sans-serif;
       font-weight: 600;
-      font-size: clamp(1.6rem, 3.5vw, 2.3rem);
+      font-size: clamp(2rem, 5vw, 3.2rem);
       letter-spacing: -0.03em;
-      max-width: 600px;
-      line-height: 1.25;
+      max-width: 700px;
+      line-height: 1.2;
+      color: #ffffff;
+      text-shadow: 0 2px 30px rgba(0,0,0,0.3);
+    }
+
+    .footer-sub {
+      font-weight: 300;
+      font-size: clamp(1rem, 1.6vw, 1.15rem);
+      line-height: 1.65;
+      color: var(--text-sub);
+      max-width: 480px;
+    }
+    .footer-sub code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9em;
       color: #ffffff;
     }
 
-    .cta-banner p {
-      font-weight: 300;
-      font-size: clamp(1.05rem, 1.8vw, 1.2rem);
-      line-height: 1.65;
-      color: var(--text-sub);
-      max-width: 500px;
-      margin-top: -0.5rem;
-    }
-
-    /* inner terminal inherits the default light styling so it matches the site */
-    .cta-banner .terminal-block {
-      margin-top: 0;
+    .footer-top .terminal-block {
+      margin-top: 0.5rem;
       max-width: 480px;
     }
 
@@ -953,69 +931,18 @@
       color: #ffffff;
     }
 
-    .terminal-mock {
-      background: rgba(12, 14, 28, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.62rem;
-      color: #a9b2c3;
-      text-align: left;
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05), 0 8px 24px rgba(0, 0, 0, 0.3);
-      margin-top: 15px;
-      min-height: 130px;
-      overflow: hidden;
-    }
-    .terminal-mock-header {
-      height: 26px;
-      background: rgba(255, 255, 255, 0.04);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      display: flex;
-      align-items: center;
-      padding: 0 10px;
-      gap: 5px;
-    }
-    .terminal-mock-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.2);
-    }
-    .terminal-mock-body {
-      padding: 14px 16px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 6px;
-      flex: 1;
-    }
-    .terminal-mock .term-line {
-      white-space: pre-wrap;
-    }
-    .terminal-mock .prompt {
-      color: rgba(255, 255, 255, 0.35);
-      user-select: none;
-    }
-    .terminal-mock .success {
-      color: #27ae60;
-    }
-    .terminal-mock .info {
-      color: #3b82f6;
-    }
+
 
     /* ── scroll reveal animation ── */
     .reveal {
       opacity: 0;
       transform: translateY(40px);
-      filter: blur(4px);
       transition: opacity 1s cubic-bezier(0.16,1,0.3,1),
-                  transform 1s cubic-bezier(0.16,1,0.3,1),
-                  filter 1s cubic-bezier(0.16,1,0.3,1);
+                  transform 1s cubic-bezier(0.16,1,0.3,1);
     }
     .reveal.visible {
       opacity: 1;
       transform: translateY(0);
-      filter: blur(0);
     }
     .reveal.d1 { transition-delay: 0.1s; }
     .reveal.d2 { transition-delay: 0.3s; }
@@ -1023,57 +950,369 @@
     .reveal.d4 { transition-delay: 0.7s; }
     .reveal.d5 { transition-delay: 0.9s; }
 
-    /* ── background tint — bare swatch, bottom-left ── */
-    #tint-fab {
+    /* ── shader toggle — bottom-left ── */
+    #mode-toggle {
       position: fixed;
       bottom: 1.5rem;
       left: 1.5rem;
       z-index: 100;
-      width: 1.5rem;
-      height: 1.5rem;
-      display: block;
+      width: 2rem;
+      height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
       pointer-events: auto;
-      border-radius: 4px;
-      overflow: hidden;
-      transition: transform 0.15s ease, opacity 0.15s ease;
-    }
-    #tint-fab:hover { transform: scale(1.08); opacity: 0.92; }
-    #tint-swatch {
-      display: block;
-      width: 100%;
-      height: 100%;
-      border-radius: 4px;
-      background: #e03a3a;
-      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14);
-      pointer-events: none;
-    }
-    #tint-picker {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      opacity: 0;
-      cursor: pointer;
-      border: none;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.25);
+      background: rgba(0, 0, 0, 0.15);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      transition: transform 0.15s ease, border-color 0.2s ease, background 0.2s ease;
+      color: rgba(255, 255, 255, 0.55);
+      font-size: 14px;
+      line-height: 1;
       padding: 0;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    #mode-toggle:hover {
+      transform: scale(1.1);
+      border-color: rgba(255, 255, 255, 0.5);
+      color: #ffffff;
+    }
+    #mode-toggle:active { transform: scale(0.95); }
+    body[data-shader="off"] #mode-toggle {
+      border-color: rgba(0, 0, 0, 0.15);
+      color: rgba(0, 0, 0, 0.4);
+      background: rgba(255, 255, 255, 0.6);
+    }
+    body[data-shader="off"] #mode-toggle:hover {
+      border-color: rgba(0, 0, 0, 0.3);
+      color: rgba(0, 0, 0, 0.7);
+    }
+    body[data-shader-mode="light"] {
+      background: #f0ece8;
+    }
+    body[data-shader-mode="light"] #mode-toggle {
+      border-color: rgba(0, 0, 0, 0.2);
+      color: rgba(0, 0, 0, 0.5);
+      background: rgba(255, 255, 255, 0.5);
+    }
+    body[data-shader-mode="light"] .title {
+      color: #1a1a1a;
+      text-shadow: none;
+    }
+    body[data-shader-mode="light"] .subtitle {
+      color: rgba(0, 0, 0, 0.7);
+      text-shadow: none;
+    }
+    body[data-shader-mode="light"] .navbar-links a {
+      color: #1a1a1a;
+      text-shadow: none;
+    }
+    body[data-shader-mode="light"] .terminal-block {
+      background: rgba(0, 0, 0, 0.04);
+      border-color: rgba(0, 0, 0, 0.12);
+    }
+    body[data-shader-mode="light"] .terminal-block .cmd {
+      color: #1a1a1a;
+    }
+    body[data-shader-mode="light"] .copy-btn {
+      color: rgba(0, 0, 0, 0.5);
+    }
+    body[data-shader-mode="light"] .btn {
+      border-color: rgba(0, 0, 0, 0.18);
+      color: #1a1a1a;
+      background: rgba(0, 0, 0, 0.02);
+    }
+    body[data-shader-mode="light"] .btn:hover {
+      background: rgba(0, 0, 0, 0.05);
+      border-color: rgba(0, 0, 0, 0.35);
+    }
+    body[data-shader-mode="light"] .btn.white {
+      background: #1a1a1a;
+      color: #ffffff;
+      border-color: #1a1a1a;
+    }
+    body[data-shader-mode="light"] .btn.white:hover {
+      background: #333333;
+      border-color: #333333;
+    }
+    body[data-shader-mode="light"] .section-heading {
+      color: #1a1a1a;
+      text-shadow: none;
+    }
+    body[data-shader-mode="light"] .section-lead {
+      color: rgba(0, 0, 0, 0.7);
+    }
+    body[data-shader-mode="light"] .session-terminal {
+      background: #f4f4f6;
+      border-color: rgba(0, 0, 0, 0.1);
+      color: #1a1a1a;
+    }
+    body[data-shader-mode="light"] .session-terminal-header {
+      background: rgba(0, 0, 0, 0.03);
+      border-color: rgba(0, 0, 0, 0.06);
+    }
+    body[data-shader-mode="light"] .session-terminal-dot {
+      background: rgba(0, 0, 0, 0.15);
+    }
+    body[data-shader-mode="light"] .session-line.cmd {
+      color: #1a1a1a;
+    }
+    body[data-shader-mode="light"] .session-line.bullet {
+      color: rgba(0, 0, 0, 0.5);
+    }
+    body[data-shader-mode="light"] .session-line.muted {
+      color: rgba(0, 0, 0, 0.35);
+    }
+    body[data-shader-mode="light"] .session-line .highlight {
+      color: #111;
+    }
+    body[data-shader-mode="light"] .session-line.info {
+      color: #2563eb;
+    }
+    body[data-shader-mode="light"] .session-spacer {
+      background: rgba(0, 0, 0, 0.08);
+    }
+    body[data-shader-mode="light"] .gallery-card {
+      background: rgba(0, 0, 0, 0.03);
+      border-color: rgba(0, 0, 0, 0.1);
+    }
+    body[data-shader-mode="light"] .gallery-card-body h3 {
+      color: #1a1a1a;
+    }
+    body[data-shader-mode="light"] .gallery-card-body p {
+      color: rgba(0, 0, 0, 0.5);
+    }
+    body[data-shader-mode="light"] .gallery-ctrl label {
+      color: rgba(0, 0, 0, 0.6);
+    }
+    body[data-shader-mode="light"] .gallery-btn {
+      color: rgba(0, 0, 0, 0.7);
+      border-color: rgba(0, 0, 0, 0.12);
+    }
+    body[data-shader-mode="light"] .gallery-btn:hover {
+      background: rgba(0, 0, 0, 0.06);
+      color: #1a1a1a;
+      border-color: rgba(0, 0, 0, 0.25);
+    }
+    body[data-shader-mode="light"] .faq-item {
+      background: rgba(0, 0, 0, 0.03);
+      border-color: rgba(0, 0, 0, 0.1);
+    }
+    body[data-shader-mode="light"] .faq-question {
+      color: #1a1a1a;
+    }
+    body[data-shader-mode="light"] .faq-answer {
+      color: rgba(0, 0, 0, 0.7);
+    }
+    body[data-shader-mode="light"] .footer-tagline {
+      color: #1a1a1a;
+      text-shadow: none;
+    }
+    body[data-shader-mode="light"] .footer-sub {
+      color: rgba(0, 0, 0, 0.7);
+    }
+    body[data-shader-mode="light"] .footer-sub code {
+      color: #1a1a1a;
+    }
+    body[data-shader-mode="light"] .footer-col h4 {
+      color: rgba(0, 0, 0, 0.85);
+    }
+    body[data-shader-mode="light"] .footer-col a {
+      color: rgba(0, 0, 0, 0.6);
+    }
+    body[data-shader-mode="light"] .footer-col a:hover {
+      color: #1a1a1a;
+    }
+    body[data-shader-mode="light"] .socials a {
+      color: rgba(0, 0, 0, 0.4);
+    }
+    body[data-shader-mode="light"] .socials a:hover {
+      color: rgba(0, 0, 0, 0.8);
+    }
+    body[data-shader-mode="light"] .site-footer::before {
+      background: linear-gradient(90deg, transparent, rgba(0,0,0,0.1), transparent);
+    }
+    /* ── white background / shader off ── */
+    body[data-shader="off"] {
+      background: #ffffff;
+    }
+    body[data-shader="off"] #vignette,
+    body[data-shader="off"] #grain {
+      opacity: 0;
+    }
+    body[data-shader="off"] .title {
+      color: #1a1a1a;
+      text-shadow: none;
+    }
+    body[data-shader="off"] .subtitle {
+      color: rgba(0, 0, 0, 0.7);
+      text-shadow: none;
+    }
+    body[data-shader="off"] .navbar-links a {
+      color: #1a1a1a;
+      text-shadow: none;
+    }
+    body[data-shader="off"] .terminal-block {
+      background: rgba(0, 0, 0, 0.04);
+      border-color: rgba(0, 0, 0, 0.12);
+    }
+    body[data-shader="off"] .terminal-block .cmd {
+      color: #1a1a1a;
+    }
+    body[data-shader="off"] .copy-btn {
+      color: rgba(0, 0, 0, 0.5);
+    }
+    body[data-shader="off"] .btn {
+      border-color: rgba(0, 0, 0, 0.18);
+      color: #1a1a1a;
+      background: rgba(0, 0, 0, 0.02);
+    }
+    body[data-shader="off"] .btn:hover {
+      background: rgba(0, 0, 0, 0.05);
+      border-color: rgba(0, 0, 0, 0.35);
+    }
+    body[data-shader="off"] .btn.white {
+      background: #1a1a1a;
+      color: #ffffff;
+      border-color: #1a1a1a;
+    }
+    body[data-shader="off"] .btn.white:hover {
+      background: #333333;
+      border-color: #333333;
+    }
+    body[data-shader="off"] .section-heading {
+      color: #1a1a1a;
+      text-shadow: none;
+    }
+    body[data-shader="off"] .section-lead {
+      color: rgba(0, 0, 0, 0.7);
+    }
+    body[data-shader="off"] .faq-item {
+      background: rgba(0, 0, 0, 0.03);
+      border-color: rgba(0, 0, 0, 0.1);
+    }
+    body[data-shader="off"] .faq-question {
+      color: #1a1a1a;
+    }
+    body[data-shader="off"] .faq-answer {
+      color: rgba(0, 0, 0, 0.7);
+    }
+    body[data-shader="off"] .footer-tagline {
+      color: #1a1a1a;
+      text-shadow: none;
+    }
+    body[data-shader="off"] .footer-sub {
+      color: rgba(0, 0, 0, 0.7);
+    }
+    body[data-shader="off"] .footer-sub code {
+      color: #1a1a1a;
+    }
+    body[data-shader="off"] .footer-col h4 {
+      color: rgba(0, 0, 0, 0.85);
+    }
+    body[data-shader="off"] .footer-col a {
+      color: rgba(0, 0, 0, 0.6);
+    }
+    body[data-shader="off"] .footer-col a:hover {
+      color: #1a1a1a;
+    }
+    body[data-shader="off"] .socials a {
+      color: rgba(0, 0, 0, 0.4);
+    }
+    body[data-shader="off"] .socials a:hover {
+      color: rgba(0, 0, 0, 0.8);
+    }
+    body[data-shader="off"] .site-footer::before {
+      background: linear-gradient(90deg, transparent, rgba(0,0,0,0.1), transparent);
+    }
+    body[data-shader="off"] .gallery-card {
+      background: rgba(0, 0, 0, 0.03);
+      border-color: rgba(0, 0, 0, 0.1);
+    }
+    body[data-shader="off"] .gallery-card-body h3 {
+      color: #1a1a1a;
+    }
+    body[data-shader="off"] .gallery-card-body p {
+      color: rgba(0, 0, 0, 0.5);
+    }
+    body[data-shader="off"] .gallery-ctrl label {
+      color: rgba(0, 0, 0, 0.6);
+    }
+    body[data-shader="off"] .gallery-controls {
+      border-top-color: rgba(0, 0, 0, 0.08);
+    }
+    body[data-shader="off"] .palette-name {
+      color: #1a1a1a;
+    }
+    body[data-shader="off"] .palette-desc {
+      color: rgba(0, 0, 0, 0.6);
+    }
+    body[data-shader="off"] .palette-dot {
+      border-color: rgba(0, 0, 0, 0.15);
+    }
+    body[data-shader="off"] .palette-dot:hover {
+      border-color: rgba(0, 0, 0, 0.35);
+    }
+    body[data-shader="off"] .splash-section + .splash-section::before {
+      background: #1a1a1a;
+      opacity: 0.2;
+    }
+    body[data-shader="off"] .gallery-btn {
+      color: rgba(0, 0, 0, 0.7);
+      border-color: rgba(0, 0, 0, 0.12);
+    }
+    body[data-shader="off"] .gallery-btn:hover {
+      background: rgba(0, 0, 0, 0.06);
+      color: #1a1a1a;
+      border-color: rgba(0, 0, 0, 0.25);
+    }
+    body[data-shader="off"] .session-terminal {
+      background: #f4f4f6;
+      border-color: rgba(0, 0, 0, 0.1);
+      color: #1a1a1a;
+    }
+    body[data-shader="off"] .session-terminal-header {
+      background: rgba(0, 0, 0, 0.03);
+      border-color: rgba(0, 0, 0, 0.06);
+    }
+    body[data-shader="off"] .session-terminal-dot {
+      background: rgba(0, 0, 0, 0.15);
+    }
+    body[data-shader="off"] .session-line.cmd {
+      color: #1a1a1a;
+    }
+    body[data-shader="off"] .session-line.bullet {
+      color: rgba(0, 0, 0, 0.5);
+    }
+    body[data-shader="off"] .session-line.muted {
+      color: rgba(0, 0, 0, 0.35);
+    }
+    body[data-shader="off"] .session-line .highlight {
+      color: #111;
+    }
+    body[data-shader="off"] .session-line.info {
+      color: #2563eb;
+    }
+    body[data-shader="off"] .session-spacer {
+      background: rgba(0, 0, 0, 0.08);
     }
   </style>
 </head>
-<body>
+<body data-shader="off">
   <canvas id="bg-canvas"></canvas>
   <div id="vignette"></div>
   <div id="grain"></div>
 
-  <label id="tint-fab" for="tint-picker" title="Background tint">
-    <span id="tint-swatch" aria-hidden="true"></span>
-    <input type="color" id="tint-picker" value="#e03a3a" aria-label="Background tint color">
-  </label>
+  <button id="mode-toggle" title="Toggle dark/light mode" aria-label="Toggle dark/light mode">
+    <span id="mode-icon">◐</span>
+  </button>
 
   <nav class="navbar">
-    <a href="/" class="navbar-logo">
-      <span class="slash">/</span>motion
-    </a>
     <div class="navbar-links">
       <a href="#how-it-works" class="nav-link">how it works</a>
       <a href="chromaverse/index.html" class="nav-link">chromaverse</a>
@@ -1081,10 +1320,10 @@
     </div>
   </nav>
 
-  <div id="content" style="margin-top: 4rem; padding: 4.5rem 1.5rem 2.5rem 1.5rem;">
-    <div class="hero-container" style="min-height: calc(100vh - 13rem);">
+  <div id="content">
+    <div class="hero-container" style="min-height: 100vh; padding: 5rem 1.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center;">
       <div class="title"><span class="slash">/</span>motion</div>
-      <div class="subtitle">One downloadable generative studio. Shape looping WebGL shaders, export reproducible configs, and sharpen your aesthetic with <strong>Chromaverse</strong> — a featured theme gallery for better tastemaking and agent-ready design tokens.</div>
+      <div class="subtitle">One downloadable generative studio with kinetic typography. Shape looping WebGL shaders, export reproducible configs, and sharpen your aesthetic with <strong>Chromaverse</strong> — a featured theme gallery for better tastemaking and agent-ready design tokens.</div>
 
       <div class="terminal-block" onclick="copyText('git clone https://github.com/murderszn/motion.git && cd motion && npm install && npm run dev', this.querySelector('.copy-btn'))" style="cursor: pointer;" title="Click to copy install command">
         <div class="terminal-content">
@@ -1109,184 +1348,95 @@
 
     </div>
 
-    <!-- ── Interactive Config Builder ── -->
-    <div class="playground-section reveal" id="playground">
-      <div class="section-kicker">interactive config builder</div>
-      <h3 class="section-heading">Tweak shader parameters dynamically</h3>
-      <p class="section-lead">Tweak the shader parameters on the right. `/motion` dynamically updates the schema config on the left. Feed this JSON structure to your favorite AI assistant to automate shader styling.</p>
-      
-      <div class="playground-container">
-        <!-- Live preview (decoupled from the page background) -->
-        <div class="preview-strip">
-          <span class="preview-tag">live preview</span>
-          <canvas id="preview-canvas"></canvas>
-        </div>
-        <!-- Left Pane: Controls and Presets -->
-        <div class="controls-pane">
-          <div class="control-group">
-            <div class="control-label">Shader Presets</div>
-            <div class="preset-pills">
-              <div class="preset-pill active" onclick="loadPreset('aurora')">Aurora Waves</div>
-              <div class="preset-pill" onclick="loadPreset('grid')">Cyber Grid</div>
-              <div class="preset-pill" onclick="loadPreset('lava')">Lava Flow</div>
-              <div class="preset-pill" onclick="loadPreset('nebula')">Cosmic Nebula</div>
-            </div>
-          </div>
-          
-          <div class="control-group">
-            <div class="control-label">Scale <span class="val" id="val-scale">0.18</span></div>
-            <div class="slider-container">
-              <input type="range" id="slide-scale" min="0.05" max="5.0" step="0.05" value="0.18" oninput="updateShaderParam('scale', parseFloat(this.value))">
-            </div>
-          </div>
-          
-          <div class="control-group">
-            <div class="control-label">Density <span class="val" id="val-density">0.08</span></div>
-            <div class="slider-container">
-              <input type="range" id="slide-density" min="0.01" max="1.0" step="0.01" value="0.08" oninput="updateShaderParam('density', parseFloat(this.value))">
-            </div>
-          </div>
-          
-          <div class="control-group">
-            <div class="control-label">Distortion <span class="val" id="val-distort">0.86</span></div>
-            <div class="slider-container">
-              <input type="range" id="slide-distort" min="0.0" max="3.0" step="0.05" value="0.86" oninput="updateShaderParam('distort', parseFloat(this.value))">
-            </div>
-          </div>
-          
-          <div class="control-group">
-            <div class="control-label">Detail <span class="val" id="val-detail">0.32</span></div>
-            <div class="slider-container">
-              <input type="range" id="slide-detail" min="0.0" max="1.0" step="0.02" value="0.32" oninput="updateShaderParam('detail', parseFloat(this.value))">
-            </div>
-          </div>
-        </div>
+    <!-- ── Shader Gallery ── -->
+    <div class="gallery-section splash-section reveal" id="gallery">
+      <div class="section-kicker">shader gallery</div>
+      <h3 class="section-heading">Generative shaders, live in your browser</h3>
+      <p class="section-lead">Every shader runs on a single shared WebGL context. Shuffle palettes to see how Chromaverse themes transform the same generative art.</p>
 
-        <!-- Right Pane: JSON Config View -->
-        <div class="agent-pane">
-          <div class="pane-header">
-            <div class="pane-title">
-              <span class="dot"></span>
-              motion.config.json
-            </div>
-            <div class="pane-actions">
-              <span class="window-dot"></span>
-              <span class="window-dot"></span>
-              <span class="window-dot"></span>
-            </div>
-          </div>
-          <div class="code-editor-body" style="padding: 20px; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; line-height: 1.5; color: #a9b2c3; background: transparent; height: 330px; overflow-y: auto; display: flex; flex-direction: column; justify-content: flex-start; border-bottom-right-radius: 0; box-shadow: inset 0 4px 15px rgba(0,0,0,0.2);">
-            <pre style="margin: 0;"><code id="json-code"></code></pre>
-          </div>
-        </div>
+      <div class="gallery-actions">
+        <button class="gallery-btn primary" id="btn-rand-all">⟳ Randomize</button>
+        <button class="gallery-btn" id="btn-shuffle-pal">🎨 Shuffle Palette</button>
       </div>
+
+      <div id="theme-info">
+        <div class="palette-row" id="theme-swatches"></div>
+        <div class="palette-name" id="theme-name">Vaporwave</div>
+        <div class="palette-desc" id="theme-desc">Purples, pinks, and cyan bloom against deep black — ideal for aurora and flow modes where neon gradients can stretch across the canvas.</div>
+      </div>
+
+      <div class="gallery-grid" id="shader-grid"></div>
     </div>
 
     <!-- ── How It Works Steps ── -->
-    <div class="steps-section reveal" id="how-it-works">
+    <div class="steps-section splash-section reveal" id="how-it-works">
       <div class="section-kicker">how it works</div>
-      <h3 class="section-heading">Three steps to generate your graphics</h3>
-      <p class="section-lead">Create config files, ask any AI assistant to modify parameters, and export self-contained responsive code blocks in seconds.</p>
-      
-      <div class="steps-grid">
-        <div class="step-card">
-          <div class="step-num">01</div>
-          <div class="step-heading">install & run locally</div>
-          <div class="step-desc">Clone the repo and start the Vite dev server on your machine. This mounts a WebGL preview canvas directly on your local network.</div>
-          <div class="terminal-mock">
-            <div class="terminal-mock-header">
-              <span class="terminal-mock-dot"></span>
-              <span class="terminal-mock-dot"></span>
-              <span class="terminal-mock-dot"></span>
-            </div>
-            <div class="terminal-mock-body">
-              <div class="term-line"><span class="prompt">$</span> git clone https://github.com/murderszn/motion.git</div>
-              <div class="term-line"><span class="prompt">$</span> cd motion &amp;&amp; npm install &amp;&amp; npm run dev</div>
-              <div class="term-line success">  [vite] ready → http://localhost:5173</div>
-            </div>
-          </div>
-        </div>
-        <div class="step-card">
-          <div class="step-num">02</div>
-          <div class="step-heading">instruct any ai assistant</div>
-          <div class="step-desc">Ask your favorite AI (like Cursor, Copilot, or ChatGPT) to configure a specific layout or palette using `/motion`'s JSON parameter format.</div>
-          <div class="terminal-mock">
-            <div class="terminal-mock-header">
-              <span class="terminal-mock-dot"></span>
-              <span class="terminal-mock-dot"></span>
-              <span class="terminal-mock-dot"></span>
-            </div>
-            <div class="terminal-mock-body">
-              <div class="term-line"><span class="prompt">&gt;</span> "Create a slow lavender wave preset config:"</div>
-              <div class="term-line info">  [agent] updating motion.config.json...</div>
-              <div class="term-line success">  [agent] configuration completed.</div>
-            </div>
-          </div>
-        </div>
-        <div class="step-card">
-          <div class="step-num">03</div>
-          <div class="step-heading">bake & export index.html</div>
-          <div class="step-desc">Compile your configured studio workspace into a single self-contained, offline-ready HTML splash page with embedded WebGL shaders.</div>
-          <div class="terminal-mock">
-            <div class="terminal-mock-header">
-              <span class="terminal-mock-dot"></span>
-              <span class="terminal-mock-dot"></span>
-              <span class="terminal-mock-dot"></span>
-            </div>
-            <div class="terminal-mock-body">
-              <div class="term-line"><span class="prompt">$</span> motion bake --config my-theme.json --output build/</div>
-              <div class="term-line info">  [baker] baking index.html with WebGL contexts...</div>
-              <div class="term-line success">  [baker] successfully baked page build/index.html (48kb)</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+      <h3 class="section-heading">Talk to any AI like it's your VFX artist</h3>
+      <p class="section-lead">Describe what you want. The agent edits configs, swaps themes, and bakes the final page — all from a conversation.</p>
 
-    <!-- ── Two Offerings / Taste Profile ── -->
-    <div class="offerings-section reveal" id="offerings">
-      <div class="section-kicker">two offerings</div>
-      <h3 class="section-heading">Motion for atmosphere. Chromaverse for structure.</h3>
-      <p class="section-lead" style="margin-bottom:0.5rem;">Each studio exports machine-readable JSON your agent can read, remix, and deploy. Together they become a taste profile — a complete visual language for generating cohesive sites without guessing your aesthetic.</p>
-
-      <div class="offerings-grid">
-        <div class="offering-card motion">
-          <div class="offering-name"><span class="slash">/</span>motion</div>
-          <p class="offering-desc">A local WebGL shader studio. Configure looping presets, tune parameters in real time, and export <code>motion.config.json</code> — seeded, reproducible motion graphics for backgrounds, hero sections, and splash pages.</p>
-          <div class="offering-tags">
-            <span class="offering-tag">15 shader presets</span>
-            <span class="offering-tag">JSON schema</span>
-            <span class="offering-tag">standalone HTML export</span>
-          </div>
-          <a href="#playground" class="offering-link">Try the shader playground →</a>
+      <div class="session-terminal">
+        <div class="session-terminal-header">
+          <span class="session-terminal-dot"></span>
+          <span class="session-terminal-dot"></span>
+          <span class="session-terminal-dot"></span>
         </div>
-        <div class="offering-card chroma">
-          <div class="offering-name"><span class="slash">/</span>chromaverse</div>
-          <p class="offering-desc">A theme gallery and builder with 65 curated palettes. Copy CSS variables, export light/dark surface tokens, and save <code>theme.json</code> — typography, accents, and component patterns your agent can apply across any layout.</p>
-          <div class="offering-tags">
-            <span class="offering-tag">65 themes</span>
-            <span class="offering-tag">CSS variables</span>
-            <span class="offering-tag">theme builder</span>
-          </div>
-          <a href="chromaverse/index.html" class="offering-link">Enter Chromaverse →</a>
-        </div>
-      </div>
+        <div class="session-terminal-body">
 
-      <div class="taste-profile-band">
-        <h4>Together = your taste profile</h4>
-        <p>Point Cursor, Claude, or any coding agent at both configs. Shaders set mood and motion. Theme tokens set color, type, spacing, and UI hierarchy. The agent assembles production-ready pages that look intentional — not generic.</p>
-        <div class="taste-chips">
-          <span class="taste-chip">motion.config.json</span>
-          <span class="taste-chip">+</span>
-          <span class="taste-chip">chromaverse theme.json</span>
-          <span class="taste-chip">→</span>
-          <span class="taste-chip">agent-generated site</span>
+          <div class="session-message">
+            <div class="session-role user">You</div>
+            <div class="session-line cmd">Build a landing page with <span class="accent">/motion</span> — dark aurora shader background, Vaporwave Chromaverse theme, kinetic typography on the headline, glass panels for content.</div>
+          </div>
+
+          <div class="session-message">
+            <div class="session-role assistant">Claude</div>
+            <div class="session-line">I'll scaffold this step by step.</div>
+            <div class="session-spacer"></div>
+            <div class="session-line check">Created <span class="highlight">index.html</span> with shader canvas</div>
+            <div class="session-line check">Applied Vaporwave theme tokens</div>
+            <div class="session-line bullet">`--accent: #b026ff; --bg: #0d0221;`</div>
+            <div class="session-line check">Configured aurora fragment shader (slow phase)</div>
+            <div class="session-line bullet">`u_phase` loop at 12s, tinted to palette</div>
+            <div class="session-line check">Added kinetic typography module</div>
+            <div class="session-line bullet">CSS `will-change: transform`, canvas overlay</div>
+            <div class="session-line check">Layered glass-morphism cards</div>
+            <div class="session-line bullet">`backdrop-filter: blur(20px)` on content panels</div>
+            <div class="session-spacer"></div>
+            <div class="session-line muted">Preview at http://localhost:5173</div>
+          </div>
+
+          <div class="session-message">
+            <div class="session-role user">You</div>
+            <div class="session-line cmd">Swap the accent to something warmer — switch to the <span class="highlight">Magma</span> theme instead.</div>
+          </div>
+
+          <div class="session-message">
+            <div class="session-role assistant">Claude</div>
+            <div class="session-line check">Swapped to Magma theme</div>
+            <div class="session-line bullet">`--accent: #ef4444; --bg: #1a0505;`</div>
+            <div class="session-line check">Re-tinted shader uniforms to crimson/orange</div>
+            <div class="session-line check">Updated kinetic text color to match</div>
+            <div class="session-spacer"></div>
+            <div class="session-line muted">Looks warmer. Want me to tweak anything else?</div>
+          </div>
+
+          <div class="session-message">
+            <div class="session-role user">You</div>
+            <div class="session-line cmd">Looks great. Bake it for production.</div>
+          </div>
+
+          <div class="session-message">
+            <div class="session-role assistant">Claude</div>
+            <div class="session-line info">$ motion bake --config magma-theme.json --output build/</div>
+            <div class="session-line info">[baker] baking index.html with WebGL contexts…</div>
+            <div class="session-line check">Baked <span class="highlight">build/index.html</span> (64kb) — ready to ship</div>
+          </div>
+
         </div>
       </div>
     </div>
 
     <!-- ── FAQ Section ── -->
-    <div class="faq-section reveal" id="faq">
+    <div class="faq-section splash-section reveal" id="faq">
       <div class="section-kicker">frequently asked questions</div>
       <h3 class="section-heading">Got questions? We've got answers.</h3>
       
@@ -1339,358 +1489,64 @@
       </div>
     </div>
 
-    <!-- ── Bottom CTA ── -->
-    <div class="cta-banner reveal" id="install">
-      <h2>Create what's exciting.<br>Maintain what's essential.</h2>
-      <p>Get started with `/motion` today for free. Clone the repository, spin up the server, and write configurations using your favorite AI agent.</p>
-      
-      <div class="terminal-block" onclick="copyText('git clone https://github.com/murderszn/motion.git && cd motion && npm install && npm run dev', this.querySelector('.copy-btn'))" style="cursor: pointer;" title="Click to copy install command">
-        <div class="terminal-content">
-          <span class="prompt">&gt;_</span>
-          <span class="cmd">git clone https://github.com/murderszn/motion.git && cd motion && npm install && npm run dev</span>
-        </div>
-        <div class="copy-btn">
-          <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-        </div>
-      </div>
-    </div>
-
     <!-- ── Footer ── -->
-    <div class="footer-container" style="border-top: none; margin-top: 6rem; padding-top: 0;">
-      <div class="footer-directory">
-        <div class="footer-col">
-          <h4>Products</h4>
-          <a href="#playground">Presets Studio</a>
-          <a href="#playground">Visualizer Screen</a>
-          <a href="studio.html">Open Studio</a>
-          <a href="https://github.com/murderszn/motion" target="_blank" rel="noopener">GitHub</a>
-        </div>
-        <div class="footer-col">
-          <h4>Solutions</h4>
-          <a href="#playground">WebGL Backgrounds</a>
-          <a href="#playground">Looping Visuals</a>
-          <a href="#playground">Shader Templates</a>
-          <a href="https://github.com/murderszn/motion" target="_blank">Creative Coding</a>
-        </div>
-        <div class="footer-col">
-          <h4>Resources</h4>
-          <a href="https://github.com/murderszn/motion#readme" target="_blank">Shader API Docs</a>
-          <a href="https://github.com/murderszn/motion" target="_blank">Shader Presets Spec</a>
-          <a href="https://github.com/murderszn/motion" target="_blank">GitHub Issues</a>
-          <a href="https://discord.gg/F9Vy9ByYbB" target="_blank">Discord Guild</a>
-        </div>
-        <div class="footer-col">
-          <h4>Collective</h4>
-          <a href="https://github.com/murderszn" target="_blank">/motion Collective</a>
-          <a href="https://github.com/murderszn/motion" target="_blank">GitHub Repository</a>
-          <a href="https://discord.gg/F9Vy9ByYbB" target="_blank">Join Chat</a>
-          <a href="https://x.com/jahflyx" target="_blank">Follow on X</a>
+    <footer class="site-footer splash-section reveal" id="install">
+      <div class="footer-top">
+        <h2 class="footer-tagline">Create what's exciting.<br>Maintain what's essential.</h2>
+        <p class="footer-sub">Get started with <code>/motion</code> today for free. Clone the repository, spin up the server, and write configurations using your favorite AI agent.</p>
+
+        <div class="terminal-block" onclick="copyText('git clone https://github.com/murderszn/motion.git && cd motion && npm install && npm run dev', this.querySelector('.copy-btn'))" style="cursor: pointer;" title="Click to copy install command">
+          <div class="terminal-content">
+            <span class="prompt">&gt;_</span>
+            <span class="cmd">git clone https://github.com/murderszn/motion.git && cd motion && npm install && npm run dev</span>
+          </div>
+          <div class="copy-btn">
+            <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          </div>
         </div>
       </div>
 
-      <div class="socials" style="margin-top: 1.75rem;">
-        <a href="https://github.com/murderszn/motion" target="_blank" rel="noopener" aria-label="GitHub">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222 0 1.606-.014 2.898-.014 3.293 0 .322.216.694.825.576C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
-        </a>
-        <a href="https://discord.gg/F9Vy9ByYbB" target="_blank" rel="noopener" aria-label="Discord">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg>
-        </a>
+      <div class="footer-bottom">
+        <div class="footer-directory">
+          <div class="footer-col">
+            <h4>Products</h4>
+            <a href="#gallery">Shader Gallery</a>
+            <a href="studio.html">Open Studio</a>
+            <a href="https://github.com/murderszn/motion" target="_blank" rel="noopener">GitHub</a>
+          </div>
+          <div class="footer-col">
+            <h4>Solutions</h4>
+            <a href="#gallery">WebGL Backgrounds</a>
+            <a href="#gallery">Looping Visuals</a>
+            <a href="#gallery">Shader Templates</a>
+            <a href="https://github.com/murderszn/motion" target="_blank">Creative Coding</a>
+          </div>
+          <div class="footer-col">
+            <h4>Resources</h4>
+            <a href="https://github.com/murderszn/motion#readme" target="_blank">Shader API Docs</a>
+            <a href="https://github.com/murderszn/motion" target="_blank">Shader Presets Spec</a>
+            <a href="https://github.com/murderszn/motion" target="_blank">GitHub Issues</a>
+            <a href="https://discord.gg/F9Vy9ByYbB" target="_blank">Discord Guild</a>
+          </div>
+          <div class="footer-col">
+            <h4>Collective</h4>
+            <a href="https://github.com/murderszn" target="_blank">/motion Collective</a>
+            <a href="https://github.com/murderszn/motion" target="_blank">GitHub Repository</a>
+            <a href="https://discord.gg/F9Vy9ByYbB" target="_blank">Join Chat</a>
+            <a href="https://x.com/jahflyx" target="_blank">Follow on X</a>
+          </div>
+        </div>
+
+        <div class="socials">
+          <a href="https://github.com/murderszn/motion" target="_blank" rel="noopener" aria-label="GitHub">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222 0 1.606-.014 2.898-.014 3.293 0 .322.216.694.825.576C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+          </a>
+          <a href="https://discord.gg/F9Vy9ByYbB" target="_blank" rel="noopener" aria-label="Discord">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg>
+          </a>
+        </div>
       </div>
-
-  <!-- ═══════════════════════════════════════════════════════
-       WEBGL — original aurora splash shader (untouched)
-       ═══════════════════════════════════════════════════════ -->
-  <script>
-    // Drive preview state globally
-    const P = {
-      "mode": 0,
-      "seed": 5790,
-      "sizeIdx": 1,
-      "loop": 4,
-      "colors": ["#020617", "#1e3a8a", "#60a5fa", "#eff6ff"],
-      "speed": 0.2,
-      "scale": 0.18,
-      "density": 0.08,
-      "distort": 0.86,
-      "detail": 0.32,
-      "grain": 0.16,
-      "mix": 0,
-      "pixel": 0
-    };
-
-    // Defer compile & draw loop initialization to window load
-    window.addEventListener('load', () => {
-      const canvas = document.getElementById('preview-canvas');
-      const gl = canvas && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl'));
-      if (!gl) { 
-        console.warn('Live preview unavailable: WebGL not supported.');
-        return;
-      }
-
-      const VS = `attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }`;
-      const FS = `
-precision highp float;
-
-uniform vec2  u_res;
-uniform float u_phase;
-uniform float u_seed;
-uniform int   u_mode;
-uniform float u_speed, u_scale, u_density, u_distort, u_detail, u_grain;
-uniform vec3  u_c0, u_c1, u_c2, u_c3;
-uniform sampler2D u_texture;
-uniform float u_mix, u_pixel;
-
-#define TAU 6.28318530718
-
-float hash21(vec2 p){
-    p = fract(p * vec2(234.34, 435.345));
-    p += dot(p, p + 34.23);
-    return fract(p.x * p.y);
-}
-
-float vnoise(vec2 p){
-    vec2 i = floor(p), f = fract(p);
-    f = f * f * (3.0 - 2.0 * f);
-    float a = hash21(i);
-    float b = hash21(i + vec2(1.0, 0.0));
-    float c = hash21(i + vec2(0.0, 1.0));
-    float d = hash21(i + vec2(1.0, 1.0));
-    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
-}
-
-float fbm(vec2 p){
-    float v = 0.0, a = 0.5;
-    mat2 r = mat2(0.80, 0.60, -0.60, 0.80);
-    for (int i = 0; i < 5; i++){
-        v += a * vnoise(p);
-        p  = r * p * 2.1 + vec2(1.7, 9.2);
-        a *= 0.5;
-    }
-    return v;
-}
-
-vec2 loopOff(){
-    return vec2(cos(u_phase), sin(u_phase)) * (0.10 + 0.55 * u_speed);
-}
-
-vec3 grad4(float t){
-    t = clamp(t, 0.0, 1.0);
-    vec3 c = mix(u_c0, u_c1, smoothstep(0.00, 0.35, t));
-    c = mix(c, u_c2, smoothstep(0.35, 0.70, t));
-    c = mix(c, u_c3, smoothstep(0.70, 1.00, t));
-    return c;
-}
-
-void main(){
-    vec2 uv = gl_FragCoord.xy / u_res;
-    uv.y = 1.0 - uv.y;
-    float ar = u_res.x / u_res.y;
-    vec2 sOff = vec2(fract(u_seed * 0.193), fract(u_seed * 0.317)) * 47.0;
-
-    vec3 col = vec3(0.0);
-
-    /* ─── 0 · aurora ─── */
-    if (u_mode == 0){
-        vec3 night  = u_c0 * 0.40;
-        float light = 0.0;
-        vec3  tint  = vec3(0.0);
-        for (int i = 0; i < 3; i++){
-            float fi = float(i) + 1.0;
-            float xx = uv.x * ar * (1.0 + 0.35 * fi) + u_seed * fi * 1.7;
-            float wave = fbm(vec2(xx * 0.6, fi * 4.0) + loopOff() * 1.2) - 0.5;
-            float cy   = 0.42 + 0.12 * fi + wave * 0.38;
-            float streak = fbm(vec2(xx * (3.0 + 4.0 * u_detail),
-                                    uv.y * (1.0 + 1.5 * u_scale)) + loopOff());
-            float dist  = uv.y - cy;
-            float band  = exp(-dist * dist * (8.0 + 34.0 * u_density));
-            float inten = max(band * (0.25 + 0.95 * streak), 0.0);
-            light += inten / fi;
-            tint  += grad4(clamp(0.15 + (1.0 - uv.y) * 0.95, 0.0, 1.0)) * inten / fi;
-        }
-        col  = night + tint * (1.3 + 1.0 * u_distort);
-        col += u_c3 * pow(clamp(light, 0.0, 1.0), 3.0) * 0.30;
-    }
-
-    /* ─── 2 · flow ─── */
-    else if (u_mode == 2){
-        vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.2, 5.0, u_scale) + sOff;
-        float w = 1.0 + 3.0 * u_distort;
-        vec2 q = vec2(fbm(p + loopOff()),
-                      fbm(p + vec2(5.2, 1.3) - loopOff()));
-        vec2 r = vec2(fbm(p + q * w + vec2(1.7, 9.2) + loopOff() * 0.7),
-                      fbm(p + q * w + vec2(8.3, 2.8) - loopOff() * 0.4));
-        float f = fbm(p + r * (1.0 + 2.5 * u_detail));
-        col = grad4(clamp(f * 1.45 + 0.10 * r.x - 0.05, 0.0, 1.0));
-        col = mix(col, u_c2, q.y * q.x * 0.25);
-    }
-
-    /* ─── 3 · fractal square ─── */
-    else if (u_mode == 3){
-        vec2 p = uv - 0.5;
-        p.x *= ar;
-        float s = 1.0;
-        float orbit = 0.0;
-        for (int i = 0; i < 6; i++){
-            p = abs(p) - 0.12 * (0.6 + 0.4 * u_scale);
-            float r2 = dot(p,p);
-            orbit += exp(-4.0 * r2);
-            p = p / r2 + sOff * 0.15;
-            p *= 1.15 + 0.15 * u_detail;
-        }
-        float f = clamp(orbit * 0.35, 0.0, 1.0);
-        col = grad4(f + 0.15 * u_distort);
-        col += u_c3 * pow(orbit, 3.0) * 0.08;
-    }
-
-    /* ─── 5 · grain ─── */
-    else if (u_mode == 5){
-        vec2 p = vec2(uv.x * ar, uv.y);
-        float s = u_seed;
-        float rA = 0.10 + 0.22 * u_speed;
-        vec2 b1 = vec2(0.32 * ar, 0.60) + rA * vec2(cos(u_phase + s), sin(u_phase + s));
-        vec2 b2 = vec2(0.70 * ar, 0.35) + rA * 0.8 * vec2(cos(-u_phase + s * 1.9), sin(-u_phase + s * 1.9));
-        float f = 0.55 / (length(p - b1) + 0.30)
-                + 0.45 / (length(p - b2) + 0.30)
-                + fbm(uv * (1.0 + 1.5 * u_scale) + loopOff() + sOff) * 0.25 * u_detail;
-        col = grad4(f * (0.45 + 0.25 * u_density));
-        col += (hash21(gl_FragCoord.xy + vec2(u_phase * 43.7)) - 0.5) * (0.10 + 0.30 * u_distort);
-    }
-
-    /* ─── 6 · halftone ─── */
-    else if (u_mode == 6){
-        vec2 p = (uv - 0.5) * vec2(ar, 1.0) * mix(1.2, 4.0, u_scale) + sOff;
-        vec2 q = vec2(fbm(p + loopOff()), fbm(p + vec2(5.2, 1.3) - loopOff()));
-        float f = fbm(p + q * (1.0 + 2.5 * u_distort));
-        float cells = mix(18.0, 80.0, u_density);
-        vec2 g = fract(vec2(uv.x * ar, uv.y) * cells) - 0.5;
-        float rdot = clamp(f * (0.5 + 0.6 * u_detail), 0.05, 0.62);
-        float mask = smoothstep(rdot, rdot - 0.12, length(g) * 1.45);
-        col = mix(u_c0 * 0.7, grad4(clamp(f * 1.5, 0.0, 1.0)), mask);
-    }
-
-    /* ─── 9 · plasma ─── */
-    else if (u_mode == 9){
-        vec2 p = uv * mix(1.0, 3.5, u_scale);
-        float t = u_phase * mix(0.3, 1.2, u_speed);
-        float v = 0.0;
-        v += sin(p.x * 4.0 + t) * 0.5 + 0.5;
-        v += sin(p.y * 5.0 - t * 1.3) * 0.4;
-        v += sin((p.x + p.y) * 6.0 + t * 0.7) * 0.3;
-        v += sin(length(p - 0.5) * 8.0 - t * 1.1) * 0.3;
-        v += fbm(p * 1.5 + loopOff() + sOff) * 0.35 * u_detail;
-        v *= 0.5 + 0.5 * u_density;
-        col = grad4(clamp(v * 1.2, 0.0, 1.0));
-        col = mix(col, grad4(clamp(v * 0.8 + 0.3, 0.0, 1.0)), 0.3 * u_distort);
-    }
-
-    if (u_mix > 0.001){
-        vec2 tuv = uv;
-        float pix = 1.0 - u_pixel;
-        float blocks = mix(8.0, 200.0, pix * pix);
-        tuv = floor(tuv * blocks) / blocks;
-        vec4 tex = texture2D(u_texture, tuv);
-        col = mix(col, tex.rgb, clamp(u_mix, 0.0, 1.0));
-    }
-
-    col += (hash21(gl_FragCoord.xy + vec2(u_phase * 91.3)) - 0.5) * u_grain * 0.04;
-    vec2 v = uv * 2.0 - 1.0;
-    col *= 1.0 - dot(v, v) * 0.08;
-
-    gl_FragColor = vec4(col, 1.0);
-}`;
-
-      function compileShader(type, src) {
-        const s = gl.createShader(type);
-        gl.shaderSource(s, src);
-        gl.compileShader(s);
-        if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
-          console.error(gl.getShaderInfoLog(s));
-          gl.deleteShader(s);
-          return null;
-        }
-        return s;
-      }
-
-      const vs = compileShader(gl.VERTEX_SHADER, VS);
-      const fs = compileShader(gl.FRAGMENT_SHADER, FS);
-      if (!vs || !fs) { console.error('Shader compilation failed.'); }
-
-      const prog = gl.createProgram();
-      gl.attachShader(prog, vs);
-      gl.attachShader(prog, fs);
-      gl.linkProgram(prog);
-      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
-        console.error('Program linking failed: ' + gl.getProgramInfoLog(prog));
-      }
-      gl.useProgram(prog);
-
-      const buf = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
-      const aLoc = gl.getAttribLocation(prog, 'a');
-      gl.enableVertexAttribArray(aLoc);
-      gl.vertexAttribPointer(aLoc, 2, gl.FLOAT, false, 0, 0);
-
-      const U = {};
-      const uniforms = [
-        'u_res', 'u_phase', 'u_seed', 'u_mode',
-        'u_speed', 'u_scale', 'u_density', 'u_distort', 'u_detail', 'u_grain',
-        'u_c0', 'u_c1', 'u_c2', 'u_c3', 'u_texture', 'u_mix', 'u_pixel'
-      ];
-      uniforms.forEach(n => { U[n] = gl.getUniformLocation(prog, n); });
-
-      function hex2rgb(h) {
-        return [
-          parseInt(h.slice(1, 3), 16) / 255,
-          parseInt(h.slice(3, 5), 16) / 255,
-          parseInt(h.slice(5, 7), 16) / 255,
-        ];
-      }
-
-      function resize() {
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        const w = canvas.clientWidth || canvas.width;
-        const h = canvas.clientHeight || canvas.height;
-        canvas.width = Math.round(w * dpr);
-        canvas.height = Math.round(h * dpr);
-        gl.viewport(0, 0, canvas.width, canvas.height);
-      }
-      window.addEventListener('resize', resize);
-      resize();
-
-      const t0 = performance.now();
-      function render(now) {
-        const time = (now - t0) / 1000;
-        const loop = P.loop || 4;
-        const phase = (time / loop * Math.PI * 2) % (Math.PI * 2);
-
-        gl.uniform2f(U.u_res, canvas.width, canvas.height);
-        gl.uniform1f(U.u_phase, phase);
-        gl.uniform1f(U.u_seed, (P.seed % 10000) * 0.6180339887 % 12.566);
-        gl.uniform1i(U.u_mode, P.mode);
-        gl.uniform1f(U.u_speed, P.speed);
-        gl.uniform1f(U.u_scale, P.scale);
-        gl.uniform1f(U.u_density, P.density);
-        gl.uniform1f(U.u_distort, P.distort);
-        gl.uniform1f(U.u_detail, P.detail);
-        gl.uniform1f(U.u_grain, P.grain);
-        gl.uniform1f(U.u_mix, P.mix);
-        gl.uniform1f(U.u_pixel, P.pixel);
-        gl.uniform3fv(U.u_c0, hex2rgb(P.colors[0]));
-        gl.uniform3fv(U.u_c1, hex2rgb(P.colors[1]));
-        gl.uniform3fv(U.u_c2, hex2rgb(P.colors[2]));
-        gl.uniform3fv(U.u_c3, hex2rgb(P.colors[3]));
-
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, null);
-        gl.uniform1i(U.u_texture, 0);
-
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-        requestAnimationFrame(render);
-      }
-      requestAnimationFrame(render);
-    });
-  </script>
+    </footer>
 
   <script>
     // Copy helper
@@ -1699,150 +1555,550 @@ void main(){
         if (btnEl) {
           const oldHtml = btnEl.innerHTML;
           btnEl.innerHTML = `<svg viewBox="0 0 24 24" style="stroke: #27ae60; width:16px; height:16px; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
-          setTimeout(() => {
-            btnEl.innerHTML = oldHtml;
-          }, 2000);
+          setTimeout(() => { btnEl.innerHTML = oldHtml; }, 2000);
         }
       });
     }
 
-    // FAQ Accordion toggling
+    // FAQ Accordion
     function toggleFaq(item) {
-      // Toggle active class on clicked item
       item.classList.toggle('active');
-      
-      // Close other accordion items
-      const items = document.querySelectorAll('.faq-item');
-      items.forEach(otherItem => {
-        if (otherItem !== item) {
-          otherItem.classList.remove('active');
-        }
+      document.querySelectorAll('.faq-item').forEach(other => {
+        if (other !== item) other.classList.remove('active');
       });
     }
 
-    // Presets config
-    const PRESETS = {
-      aurora: {
-        mode: 0,
-        scale: 0.18,
-        density: 0.08,
-        distort: 0.86,
-        detail: 0.32,
-        colors: ["#020617", "#1e3a8a", "#60a5fa", "#eff6ff"]
-      },
-      grid: {
-        mode: 6,
-        scale: 2.50,
-        density: 0.24,
-        distort: 0.45,
-        detail: 0.60,
-        colors: ["#0f172a", "#3b82f6", "#10b981", "#ffffff"]
-      },
-      lava: {
-        mode: 2,
-        scale: 1.80,
-        density: 0.12,
-        distort: 1.80,
-        detail: 0.40,
-        colors: ["#180000", "#e11d48", "#f59e0b", "#fffbeb"]
-      },
-      nebula: {
-        mode: 5,
-        scale: 1.20,
-        density: 0.30,
-        distort: 1.20,
-        detail: 0.80,
-        colors: ["#0b031a", "#7c3aed", "#ec4899", "#fdf2f8"]
-      }
-    };
+    // ── Shader Gallery ──────────────────────────────────────
 
-    function updateJsonConfigView() {
-      const codeEl = document.getElementById('json-code');
-      if (!codeEl) return;
-      
-      const jsonStr = `{
-  <span style="color:#f43f5e;">"project"</span>: <span style="color:#10b981;">"/motion"</span>,
-  <span style="color:#f43f5e;">"version"</span>: <span style="color:#10b981;">"1.0.0"</span>,
-  <span style="color:#f43f5e;">"shader"</span>: {
-    <span style="color:#f43f5e;">"mode"</span>: <span style="color:#3b82f6;">${P.mode}</span>,
-    <span style="color:#f43f5e;">"scale"</span>: <span style="color:#3b82f6;">${P.scale.toFixed(2)}</span>,
-    <span style="color:#f43f5e;">"density"</span>: <span style="color:#3b82f6;">${P.density.toFixed(2)}</span>,
-    <span style="color:#f43f5e;">"distort"</span>: <span style="color:#3b82f6;">${P.distort.toFixed(2)}</span>,
-    <span style="color:#f43f5e;">"detail"</span>: <span style="color:#3b82f6;">${P.detail.toFixed(2)}</span>
-  },
-  <span style="color:#f43f5e;">"colors"</span>: [
-    <span style="color:#10b981;">"${P.colors[0]}"</span>,
-    <span style="color:#10b981;">"${P.colors[1]}"</span>,
-    <span style="color:#10b981;">"${P.colors[2]}"</span>,
-    <span style="color:#10b981;">"${P.colors[3]}"</span>
-  ]
-}`;
-      codeEl.innerHTML = jsonStr;
+    const GALLERY_PRESETS = [
+      { id: 0,  name: "Aurora",        desc: "Emanating curtains of polar light flowing over a dark night landscape." },
+      { id: 1,  name: "Contour Waves", desc: "Domain-warped camouflage bands with step-quantized flat shading." },
+      { id: 2,  name: "Curl Noise",    desc: "Wispy fluid strands driven by divergence-free curl-noise vector fields." },
+      { id: 3,  name: "Electricity",   desc: "Crackling lightning bolts and plasma discharge paths using fractional Brownian motion." },
+      { id: 4,  name: "Flow",          desc: "Warped density layers creating a liquid smoke or fluid advection look." },
+      { id: 5,  name: "Grain",         desc: "Moving soft light metaballs overlaid with high-frequency monochromatic film grain." },
+      { id: 6,  name: "Halftone",      desc: "Retro offset printing grid dot pattern scaled by dynamic underlying noise value." },
+      { id: 7,  name: "Kaleidoscope",  desc: "Symmetrical polar coordinate reflection slices creating detailed radial mandalas." },
+      { id: 8,  name: "Lines",         desc: "Parallel scanning wave patterns distorted by low-frequency noise displacement." },
+      { id: 9,  name: "Marble",        desc: "Domain-warped veins representing mineral formations in marble stone slabs." },
+      { id: 10, name: "Orbs",          desc: "Orbiting soft light spheres blending together procedurally." },
+      { id: 11, name: "Plasma",        desc: "Retro trigonometric plasma waves shifting out of phase." },
+      { id: 12, name: "Rings",         desc: "Concentric circular ripples radiating outwards from a central point." },
+      { id: 13, name: "Rorschach",     desc: "Symmetrical inkblot bleeding card test simulating organic dye diffusion." },
+      { id: 14, name: "Ridged Noise",  desc: "Sharpened ridge valleys and veins mimicking mountain terrain heightmaps." },
+      { id: 15, name: "SD Rosette",    desc: "Symmetrical rosette shapes generated using signed distance functions." },
+      { id: 16, name: "Truchet",       desc: "Interconnected multi-band curves mapped inside modular square grid tiles." },
+      { id: 17, name: "Turbulence",    desc: "Sharp flame-like valleys and fire ridges created using absolute noise FBM." },
+      { id: 18, name: "Waves",         desc: "Superimposed sine-wave contours floating and shifting horizontally." },
+      { id: 26, name: "Fluid Lines",   desc: "Undulating flow strands twisted by fluid-line field distortion — organic and restless." },
+      { id: 31, name: "Honeycomb",     desc: "Hexagonal cellular grid with pulsing cell interiors and sharp geometric walls." }
+    ];
+
+    const THEMES = [
+      { name:"Vaporwave", colors:["#0F051D","#9B30FF","#FF007F","#00F0FF"], desc:"Purples, pinks, and cyan bloom against deep black — ideal for aurora and flow modes where neon gradients stretch across the canvas.", labels:["Void Black","Electric Violet","Hot Pink","Neon Cyan"], roles:["Background / deep space","Primary accent / energy","Highlight / passion","Contrast / electric spark"] },
+      { name:"Cyberpunk", colors:["#05050A","#00F0FF","#FF0055","#FFDD00"], desc:"Aggressive cyan and red cut through obsidian dark. Best for halftone, lines, and electricity modes.", labels:["Obsidian","Terminal Cyan","Danger Red","Alert Yellow"], roles:["Dark foundation","Data streams / tech","Urgency / warnings","Highlights / caution"] },
+      { name:"Kyoto Moss", colors:["#141A16","#2F5233","#3B7A57","#F4F9F4"], desc:"Subtle earth greens and pale fog create calm, organic gradients. Perfect for marble and flow modes.", labels:["Deep Moss","Forest Floor","Living Green","Morning Mist"], roles:["Shadow / earth","Mid-tone / growth","Vibrant life","Light / clarity"] },
+      { name:"Arcade Neon", colors:["#0A0015","#180030","#00FF66","#FF007F"], desc:"Retro-future energy with radioactive green on deep purple. Makes grain and plasma pop.", labels:["Arcade Dark","Cabinet Purple","Pixel Green","Score Pink"], roles:["Background / cabinet","Surface / depth","Success / power-ups","Lives / bonus"] },
+      { name:"Glacier", colors:["#080F14","#162C3A","#4B90B5","#D8EAF2"], desc:"Frozen blues from navy to ice produce cold, serene depth. Suits atmospheric aurora and waves.", labels:["Polar Night","Deep Ice","Glacial Blue","Fresh Snow"], roles:["Abyss / depth","Shadow / cold","Water / flow","Light / purity"] },
+      { name:"Volcanic", colors:["#0A0300","#3E0A00","#EA580C","#FDBA74"], desc:"Black rock and molten orange forge dramatic heat. Ignites turbulence and ridged noise.", labels:["Cooled Rock","Magma Core","Molten Orange","Ember Glow"], roles:["Solid ground / base","Heat source / intensity","Active flame / energy","Warmth / radiance"] },
+      { name:"Coral Reef", colors:["#0D080A","#261317","#FF6B6B","#FFE66D"], desc:"Warm pinks and gold light over dark ocean depths. Brings organic warmth to flow patterns.", labels:["Deep Sea","Reef Shadow","Coral Pink","Sunlight"], roles:["Ocean floor / void","Cave / shelter","Living coral / warmth","Surface light / hope"] },
+      { name:"Monochrome", colors:["#08080A","#1C1C22","#55555E","#F4F4F6"], desc:"Pure value, no color. Silver-gray gradients put texture and structure front and center.", labels:["True Black","Charcoal","Slate Gray","Paper White"], roles:["Absolute dark","Structure / form","Mid-tone / balance","Light / negative space"] },
+      { name:"Crimson Horizon", colors:["#0A0604","#D92D0D","#FC390D","#F8A070"], desc:"Blazing crimson on warm ember foundations. High-impact editorial with fiery energy.", labels:["Warm Void","Crimson","Bright Scarlet","Ember Pale"], roles:["Deep base","Primary accent","Vibrant highlight","Soft warmth"] },
+      { name:"Nordic Frost", colors:["#1E222A","#5E81AC","#88C0D0","#ECEFF4"], desc:"Cool slate and polar blue gradients. Technical, clean, and highly readable.", labels:["Slate Dark","Deep Cobalt","Frost Blue","Ice White"], roles:["Dark foundation","Mid accent","Primary highlight","Clean surface"] },
+      { name:"Solar Flare", colors:["#1A0A00","#FF6B00","#FFB000","#FFD266"], desc:"Amber and orange solar energy over dark void. Radiates warmth and power.", labels:["Coronal Dark","Nova Orange","Solar Amber","Sunlight Gold"], roles:["Dark base","Hot accent","Primary glow","Soft radiance"] },
+      { name:"Emerald Forest", colors:["#031A09","#0A5C36","#10B981","#A7F3D0"], desc:"Deep forest greens with mint highlights. Organic, alive, and calming.", labels:["Deep Canopy","Forest Emerald","Mint Glow","Pale Fern"], roles:["Shadow base","Primary green","Vibrant life","Soft mist"] },
+      { name:"Neon Magenta", colors:["#0A0014","#D946EF","#06B6D4","#F472B6"], desc:"Electric magenta and biolume cyan clash over deep purple. High-energy cosmic vibes.", labels:["Void Purple","Electric Magenta","Biolume Cyan","Laser Pink"], roles:["Deep base","Primary punch","Secondary glow","Soft highlight"] },
+      { name:"Desert Dune", colors:["#1A0F05","#C2410C","#D97706","#FDE68A"], desc:"Earthy terracotta and amber over warm sand. Organic, sun-baked, and grounded.", labels:["Dune Shadow","Terracotta Red","Amber Hue","Desert Sun"], roles:["Deep earth","Hot accent","Primary warmth","Light sand"] },
+      { name:"Ocean Trench", colors:["#020E1A","#0284C7","#0EA5E9","#7DD3FC"], desc:"Deep marine blues descending into bioluminescent light. Vast and immersive.", labels:["Abyssal Dark","Deep Marine","Ocean Blue","Sky Frost"], roles:["Ocean depth","Rich accent","Primary blue","Surface light"] },
+      { name:"Brutalist", colors:["#0A0A0A","#E2E8F0","#000000","#A1A1AA"], desc:"Stark yellow on concrete and ink. Raw, industrial, and unapologetic.", labels:["Stark Ink","Concrete Slate","Pure Black","Muted Rebar"], roles:["Void","Secondary block","Deep accent","Soft border"] },
+      { name:"Sakura Bloom", colors:["#1A0A12","#9D174D","#EC4899","#FBCFE8"], desc:"Cherry blossom pinks over deep rose. Romantic, delicate, and alive.", labels:["Night Rose","Deep Pink","Sakura","Blossom"], roles:["Dark base","Rich accent","Primary bloom","Soft petal"] },
+      { name:"Matcha Latte", colors:["#0A1408","#65A30D","#84CC16","#D9F99D"], desc:"Fresh matcha greens with lime energy. Organic, vibrant, and refreshing.", labels:["Tea Shadow","Matcha Green","Lime Leaf","Creamy Foam"], roles:["Deep base","Primary green","Active highlight","Soft foam"] },
+      { name:"Orchid Nebula", colors:["#0D051A","#A855F7","#EC4899","#C084FC"], desc:"Cosmic violet and nebula pink swirl through deep space. Mystical and expansive.", labels:["Space Dark","Orchid Violet","Nebula Pink","Cosmic Lilac"], roles:["Void base","Primary cosmic","Secondary glow","Soft stardust"] },
+      { name:"Sunset Dusk", colors:["#12060A","#E11D48","#F43F5E","#FECDD3"], desc:"Rose and crimson sunset hues fading into soft blush. Warm, emotional, cinematic.", labels:["Dusk Void","Sunset Red","Dusk Rose","Sky Blush"], roles:["Dark base","Hot accent","Primary rose","Soft blush"] }
+    ];
+
+    let currentThemeIdx = 0;
+    let globalColors = [...THEMES[0].colors];
+
+    function hexToRgb(hex) {
+      return [parseInt(hex.slice(1,3),16)/255, parseInt(hex.slice(3,5),16)/255, parseInt(hex.slice(5,7),16)/255];
     }
 
-    function loadPreset(key) {
-      const preset = PRESETS[key];
-      if (!preset) return;
-      
-      // Set active class on pill
-      const pills = document.querySelectorAll('.preset-pill');
-      pills.forEach(p => p.classList.remove('active'));
-      
-      // Find the clicked pill
-      const targetPill = Array.from(pills).find(p => p.textContent.toLowerCase().replace(/\s/g, '').includes(key));
-      if (targetPill) targetPill.classList.add('active');
+    function updateThemeInfo(t) {
+      document.getElementById('theme-name').textContent = t.name;
+      document.getElementById('theme-desc').textContent = t.desc;
+      const row = document.getElementById('theme-swatches');
+      row.innerHTML = t.colors.map((hex, i) =>
+        `<span class="palette-dot" style="background:${hex}" title="${t.labels[i]} — ${hex}"></span>`
+      ).join('');
+      row.classList.add('shuffling');
+      setTimeout(() => row.classList.remove('shuffling'), 500);
+    }
+    updateThemeInfo(THEMES[0]);
 
-      // Update slider inputs
-      document.getElementById('slide-scale').value = preset.scale;
-      document.getElementById('slide-density').value = preset.density;
-      document.getElementById('slide-distort').value = preset.distort;
-      document.getElementById('slide-detail').value = preset.detail;
+    // ── WebGL Gallery Renderer ──────────────────────────────
 
-      // Update slider labels
-      document.getElementById('val-scale').textContent = preset.scale.toFixed(2);
-      document.getElementById('val-density').textContent = preset.density.toFixed(2);
-      document.getElementById('val-distort').textContent = preset.distort.toFixed(2);
-      document.getElementById('val-detail').textContent = preset.detail.toFixed(2);
+    const VS = `attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }`;
 
-      // Update WebGL P params
-      P.mode = preset.mode;
-      P.scale = preset.scale;
-      P.density = preset.density;
-      P.distort = preset.distort;
-      P.detail = preset.detail;
-      P.colors = preset.colors;
+    const FS = `
+    #extension GL_OES_standard_derivatives : enable
+    precision highp float;
+    uniform vec2 u_res; uniform float u_phase; uniform float u_seed; uniform int u_mode;
+    uniform float u_speed, u_scale, u_density, u_distort, u_detail, u_grain;
+    uniform vec3 u_c0, u_c1, u_c2, u_c3; uniform float u_invert;
+    #define TAU 6.28318530718
+    #define flT u_phase
+    float hash21(vec2 p){ p=fract(p*vec2(234.34,435.345)); p+=dot(p,p+34.23); return fract(p.x*p.y); }
+    float vnoise(vec2 p){ vec2 i=floor(p),f=fract(p); f=f*f*(3.0-2.0*f);
+      float a=hash21(i),b=hash21(i+vec2(1,0)),c=hash21(i+vec2(0,1)),d=hash21(i+vec2(1,1));
+      return mix(mix(a,b,f.x),mix(c,d,f.x),f.y); }
+    vec2 fade(vec2 t){return t*t*t*(t*(t*6.0-15.0)+10.0);}
+    vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x,289.0);}
+    float cnoise(vec2 P){vec4 Pi=floor(P.xyxy)+vec4(0,0,1,1);vec4 Pf=fract(P.xyxy)-vec4(0,0,1,1);
+      Pi=mod(Pi,289.0);vec4 ix=Pi.xzxz,iy=Pi.yyww,fx=Pf.xzxz,fy=Pf.yyww;
+      vec4 i=permute(permute(ix)+iy);vec4 gx=fract(i*(1.0/41.0))*2.0-1.0;
+      vec4 gy=abs(gx)-0.5;vec4 tx=floor(gx+0.5);gx=gx-tx;
+      vec2 g00=vec2(gx.x,gy.x),g10=vec2(gx.y,gy.y),g01=vec2(gx.z,gy.z),g11=vec2(gx.w,gy.w);
+      vec4 norm=1.79284291400159-0.85373472095314*vec4(dot(g00,g00),dot(g01,g01),dot(g10,g10),dot(g11,g11));
+      g00*=norm.x;g01*=norm.y;g10*=norm.z;g11*=norm.w;
+      float n00=dot(g00,vec2(fx.x,fy.x)),n10=dot(g10,vec2(fx.y,fy.y));
+      float n01=dot(g01,vec2(fx.z,fy.z)),n11=dot(g11,vec2(fx.w,fy.w));
+      vec2 fade_xy=fade(Pf.xy);vec2 n_x=mix(vec2(n00,n01),vec2(n10,n11),fade_xy.x);
+      return 2.3*mix(n_x.x,n_x.y,fade_xy.y); }
+    float fbm(vec2 p){float v=0.0,a=0.5;mat2 r=mat2(0.80,0.60,-0.60,0.80);
+      for(int i=0;i<5;i++){v+=a*vnoise(p);p=r*p*2.1+vec2(1.7,9.2);a*=0.5;}return v;}
+    vec2 loopOff(){return vec2(cos(u_phase),sin(u_phase))*(0.10+0.55*u_speed);}
+    vec3 grad4(float t){t=clamp(t,0.0,1.0);vec3 c=mix(u_c0,u_c1,smoothstep(0.0,0.35,t));
+      c=mix(c,u_c2,smoothstep(0.35,0.70,t));c=mix(c,u_c3,smoothstep(0.70,1.0,t));return c;}
+    float flHash(vec2 p){p=fract(p*0.3183099+fract(u_seed*0.1031)+0.1);p*=17.0;return fract(p.x*p.y*(p.x+p.y));}
+    float flVnoise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);
+      float a=flHash(i),b=flHash(i+vec2(1,0)),c=flHash(i+vec2(0,1)),d=flHash(i+vec2(1,1));
+      return mix(mix(a,b,f.x),mix(c,d,f.x),f.y);}
+    float flFbm(vec2 p){float v=0.0,a=0.5;
+      for(int i=0;i<5;i++){v+=a*flVnoise(p);p=p*2.03+vec2(11.7,5.9);a*=0.5;}return v;}
+    vec2 flOff(){return vec2(cos(u_phase),sin(u_phase))*(0.10+0.55*u_speed);}
+    vec2 flHexCenter(vec2 p){vec2 r=vec2(1.0,1.7320508);vec2 h=r*0.5;
+      vec2 a=mod(p,r)-h;vec2 b=mod(p-h,r)-h;vec2 gv=dot(a,a)<dot(b,b)?a:b;return p-gv;}
+    float flSpreadF(float v,float g){return clamp((v-0.5)*g+0.5,0.0,1.0);}
+    vec2 flFgrad(vec2 p,vec2 off){float e=0.06;
+      float gx=flFbm(p+vec2(e,0.0)+off)-flFbm(p-vec2(e,0.0)+off);
+      float gy=flFbm(p+vec2(0.0,e)+off)-flFbm(p-vec2(0.0,e)+off);
+      return vec2(gx,gy)/(2.0*e);}
+    float flFieldLines(vec2 p,float warp){float ang=warp*0.35;float c=cos(ang),s=sin(ang);
+      vec2 q=vec2(c*p.x-s*p.y,s*p.x+c*p.y);q.x+=flFbm(p*1.8+flOff())*u_distort*0.8;
+      float freq=5.0+warp*1.4+u_density*12.0;
+      float l=0.5+0.5*sin(q.x*freq+flT+0.6*sin(q.y*0.7+flT));
+      if(u_detail>0.05)l=mix(l,smoothstep(0.35,0.65,l),u_detail);return l;}
+    float flFieldHoneycomb(vec2 p,float warp){float hcWarp=mix(1.5,6.0,u_density)+warp*0.10;
+      vec2 hp=p*(1.3+hcWarp*0.35);vec2 c=flHexCenter(hp);vec2 gv=hp-c;
+      float hd=max(abs(gv.x),max(abs(0.5*gv.x+0.8660254*gv.y),abs(-0.5*gv.x+0.8660254*gv.y)));
+      float pulse=0.5+0.5*sin(flHash(c)*6.2831853+flT);
+      float cell=mix(0.5,pulse,0.55+0.45*u_distort);
+      float wall=smoothstep(0.40-0.035*u_detail,0.48+0.025*u_detail,hd);
+      return mix(cell,0.04,wall);}
+    float flFieldOf(int eng,vec2 p,float warp){
+      if(eng==7){return flFieldLines(p,warp);}
+      else if(eng==12){return flFieldHoneycomb(p,warp);}
+      return 0.5;}
+    float metaf(vec2 p,float ar){float s=u_seed,rA=0.08+0.20*u_speed;
+      vec2 b1=vec2((0.28+0.06*sin(s))*ar,0.62+0.05*cos(s*1.3))+rA*vec2(cos(u_phase+s),sin(u_phase+s));
+      vec2 b2=vec2((0.72+0.05*cos(s*2.1))*ar,0.40+0.06*sin(s*0.7))+rA*0.85*vec2(cos(-2.0*u_phase+s*1.7),sin(-2.0*u_phase+s*1.7));
+      vec2 b3=vec2((0.50+0.07*sin(s*1.6))*ar,0.24+0.05*cos(s*2.4))+rA*0.70*vec2(cos(u_phase+s*2.3+2.0),sin(u_phase+s*2.3+2.0));
+      return 0.30/(length(p-b1)+0.07)+0.22/(length(p-b2)+0.07)+0.16/(length(p-b3)+0.07);}
+    void main(){vec2 uv=gl_FragCoord.xy/u_res;uv.y=1.0-uv.y;float ar=u_res.x/u_res.y;
+      vec2 sOff=vec2(fract(u_seed*0.193),fract(u_seed*0.317))*47.0;vec3 col=vec3(0.0);
+      if(u_mode==0){vec3 night=u_c0*0.40;float light=0.0;vec3 tint=vec3(0.0);
+        for(int i=0;i<3;i++){float fi=float(i)+1.0;float xx=uv.x*ar*(1.0+0.35*fi)+u_seed*fi*1.7;
+          float wave=fbm(vec2(xx*0.6,fi*4.0)+loopOff()*1.2)-0.5;
+          float cy=0.42+0.12*fi+wave*0.38;
+          float streak=fbm(vec2(xx*(3.0+4.0*u_detail),uv.y*(1.0+1.5*u_scale))+loopOff());
+          float dist=uv.y-cy;float band=exp(-dist*dist*(8.0+34.0*u_density));
+          float inten=max(band*(0.25+0.95*streak),0.0);light+=inten/fi;
+          tint+=grad4(clamp(0.15+(1.0-uv.y)*0.95,0.0,1.0))*inten/fi;}
+        col=night+tint*(1.3+1.0*u_distort);col+=u_c3*pow(clamp(light,0.0,1.0),3.0)*0.30;}
+      else if(u_mode==1){vec2 p=(uv-0.5)*vec2(ar,1.0)*mix(1.0,3.5,u_scale)+sOff;
+        vec2 warp=vec2(fbm(p*0.8+loopOff()),fbm(p*0.8+vec2(7.3,3.1)-loopOff()))*mix(0.5,2.5,u_distort);
+        float n=fbm(p+warp+loopOff()*0.5);float levels=mix(3.0,8.0,u_density);
+        float val=n*levels+u_phase*0.15;float f_val=floor(val);float fract_val=fract(val);
+        float bw=0.04*(1.0+u_detail*2.0);float sv=f_val+smoothstep(0.5-bw,0.5+bw,fract_val);
+        col=grad4(clamp(sv/levels,0.0,1.0));}
+      else if(u_mode==2){vec2 p=(uv-0.5)*vec2(ar,1.0)*mix(1.2,4.0,u_scale)+sOff;
+        float eps=0.04;vec2 off=loopOff();
+        float n1=cnoise(p+vec2(eps,0)+off),n2=cnoise(p-vec2(eps,0)+off);
+        float n3=cnoise(p+vec2(0,eps)+off),n4=cnoise(p-vec2(0,eps)+off);
+        vec2 curl=vec2(n3-n4,n2-n1)/(2.0*eps);float ws=mix(0.2,3.5,u_distort);
+        vec2 sp=p+curl*ws;float freq=mix(1.0,3.0,u_density);
+        float f=fbm(sp*freq+loopOff());float center=0.5;float width=0.45-0.20*u_detail;
+        f=smoothstep(center-width,center+width,f);col=grad4(clamp(f,0.0,1.0));
+        col+=u_c3*smoothstep(0.4,1.2,length(curl))*0.15;}
+      else if(u_mode==3){vec2 p=uv*vec2(ar,1.0)*mix(1.5,5.0,u_scale)+sOff;
+        vec2 q=vec2(fbm(p+loopOff()),fbm(p+vec2(5.2,1.3)-loopOff()));
+        float n=fbm(p*1.4+q*(1.0+2.5*u_distort)+loopOff());
+        float ridge=1.0-abs(2.0*n-1.0);float veins=pow(ridge,mix(6.0,24.0,u_detail));
+        veins*=0.55+0.45*cos(3.0*u_phase+u_seed);col=u_c0*0.55;col+=u_c2*veins;
+        col+=grad4(clamp(veins*1.3,0.0,1.0))*veins;col+=u_c3*pow(veins,2.0)*0.9;
+        col+=grad4(n*0.35)*(0.10+0.10*u_density);}
+      else if(u_mode==4){vec2 p=(uv-0.5)*vec2(ar,1.0)*mix(1.2,5.0,u_scale)+sOff;
+        float w=1.0+3.0*u_distort;
+        vec2 q=vec2(fbm(p+loopOff()),fbm(p+vec2(5.2,1.3)-loopOff()));
+        vec2 r=vec2(fbm(p+q*w+vec2(1.7,9.2)+loopOff()*0.7),fbm(p+q*w+vec2(8.3,2.8)-loopOff()*0.4));
+        float f=fbm(p+r*(1.0+2.5*u_detail));
+        col=grad4(clamp(f*1.45+0.10*r.x-0.05,0.0,1.0));col=mix(col,u_c2,q.y*q.x*0.25);}
+      else if(u_mode==5){vec2 p=vec2(uv.x*ar,uv.y);float s=u_seed;float rA=0.10+0.22*u_speed;
+        vec2 b1=vec2(0.32*ar,0.60)+rA*vec2(cos(u_phase+s),sin(u_phase+s));
+        vec2 b2=vec2(0.70*ar,0.35)+rA*0.8*vec2(cos(-u_phase+s*1.9),sin(-u_phase+s*1.9));
+        float f=0.55/(length(p-b1)+0.30)+0.45/(length(p-b2)+0.30)+fbm(uv*(1.0+1.5*u_scale)+loopOff()+sOff)*0.25*u_detail;
+        col=grad4(f*(0.45+0.25*u_density));col+=(hash21(gl_FragCoord.xy+loopOff()*43.7)-0.5)*(0.10+0.30*u_distort);}
+      else if(u_mode==6){vec2 p=(uv-0.5)*vec2(ar,1.0)*mix(1.2,4.0,u_scale)+sOff;
+        vec2 q=vec2(fbm(p+loopOff()),fbm(p+vec2(5.2,1.3)-loopOff()));
+        float f=fbm(p+q*(1.0+2.5*u_distort));float cells=mix(18.0,80.0,u_density);
+        vec2 g=fract(vec2(uv.x*ar,uv.y)*cells)-0.5;
+        float rdot=clamp(f*(0.5+0.6*u_detail),0.05,0.62);
+        float mask=smoothstep(rdot,rdot-0.12,length(g)*1.45);
+        col=mix(u_c0*0.7,grad4(clamp(f*1.5,0.0,1.0)),mask);}
+      else if(u_mode==7){vec2 p=uv-0.5;p.x*=ar;float slices=mix(4.0,12.0,u_density);
+        float angle=atan(p.y,p.x)+0.18*sin(u_phase);angle=mod(angle+6.283,6.283);
+        float sector=3.14159/slices;angle=mod(angle,sector*2.0);angle=abs(angle-sector);
+        float rad=length(p);p=vec2(cos(angle),sin(angle))*rad;
+        vec2 np=p*mix(1.5,4.0,u_scale)+sOff;
+        vec2 q=vec2(fbm(np+loopOff()),fbm(np+vec2(5.2,1.3)-loopOff()));
+        float f=fbm(np+q*(1.0+2.0*u_distort)+loopOff()*0.6);
+        col=grad4(clamp(f*1.3,0.0,1.0));col+=u_c3*pow(rad*1.8,3.0)*0.12;}
+      else if(u_mode==8){vec2 p=(uv-0.5)*vec2(ar,1.0)*mix(1.5,5.0,u_scale)+sOff;
+        float ang=u_distort*0.35+0.08*sin(u_phase);float ca=cos(ang),sa=sin(ang);
+        vec2 q=vec2(ca*p.x-sa*p.y,sa*p.x+ca*p.y);float freq=mix(3.0,8.0,u_density)+u_distort*1.4;
+        float wave=0.6*sin(q.y*0.7+u_phase);wave+=0.3*sin(q.y*1.4-2.0*u_phase)*u_detail;
+        float f=0.5+0.5*sin(q.x*freq+wave);f+=fbm(p*0.3+loopOff())*0.08*u_detail;
+        col=grad4(clamp(f,0.0,1.0));}
+      else if(u_mode==9){vec2 p=(uv-0.5)*vec2(ar,1.0)*mix(1.5,4.0,u_scale)+sOff;
+        vec2 q2=p+vec2(cnoise(p*0.8+loopOff()),cnoise(p*0.8+vec2(5.2,1.3)-loopOff()))*u_distort;
+        float v=sin(q2.x*mix(4.0,12.0,u_density)+fbm(q2*mix(1.5,4.0,u_detail))*5.0)*0.5+0.5;
+        col=grad4(clamp(v,0.0,1.0));float vein=pow(abs(sin(q2.x*8.0+fbm(q2*3.0+loopOff())*4.0)),8.0);
+        col+=u_c3*vein*0.15;}
+      else if(u_mode==10){vec2 p=vec2(uv.x*ar,uv.y);
+        float f=metaf(p,ar)*(0.30+0.30*u_density)+fbm(uv*(1.0+2.0*u_scale)+loopOff()+sOff)*0.20*u_detail;col=grad4(f);}
+      else if(u_mode==11){vec2 p=uv*mix(1.0,3.5,u_scale);float t=u_phase;float v=0.0;
+        v+=sin(p.x*4.0+t)*0.5+0.5;v+=sin(p.y*5.0-2.0*t)*0.4;v+=sin((p.x+p.y)*6.0+3.0*t)*0.3;
+        v+=sin(length(p-0.5)*8.0-t)*0.3;v+=fbm(p*1.5+loopOff()+sOff)*0.35*u_detail;
+        v*=0.5+0.5*u_density;col=grad4(clamp(v*1.2,0.0,1.0));
+        col=mix(col,grad4(clamp(v*0.8+0.3,0.0,1.0)),0.3*u_distort);}
+      else if(u_mode==12){vec2 p=(uv-0.5)*vec2(ar,1.0);float rad=length(p);
+        float n=fbm(p*mix(1.0,4.0,u_scale)+loopOff()+sOff);
+        float rings=sin((rad*mix(8.0,30.0,u_density)+n*2.0*u_distort)*3.14159-2.0*u_phase);
+        float f=0.5+0.5*rings;col=grad4(clamp(f*(0.7+0.5*u_detail),0.0,1.0));
+        col+=u_c3*exp(-rad*3.0)*0.3;}
+      else if(u_mode==13){vec2 mp=uv;mp.x=abs(mp.x-0.5)*2.0;
+        vec2 p=(vec2(mp.x*ar,mp.y)-vec2(0.5*ar,0.5))*mix(2.0,6.0,u_scale)+sOff;vec2 off=loopOff();
+        vec2 q2=vec2(fbm(p*0.8+off),fbm(p*0.8+vec2(5.2,1.3)-off));
+        vec2 r2=vec2(fbm(p+q2*(1.0+2.0*u_distort)+off),fbm(p+q2*(1.0+2.0*u_distort)+vec2(1.7,9.2)-off));
+        float f=fbm(p+r2*(1.0+1.5*u_detail));float ink=smoothstep(0.2,0.6,f);
+        float bleed=smoothstep(0.0,0.3,f)*(1.0-smoothstep(0.7,1.0,f));
+        vec3 paper=u_c3*0.35+vec3(0.65);vec3 inkCol=mix(u_c0,u_c1,0.6);
+        col=mix(paper,inkCol,ink*mix(0.5,1.0,u_distort));col-=u_c2*bleed*0.08;
+        float stain=pow(1.0-abs(f-0.45)*4.0,6.0);col+=u_c3*stain*0.06*u_detail;
+        float edge=smoothstep(0.18,0.22,f)*(1.0-smoothstep(0.58,0.62,f));col+=inkCol*edge*0.12;}
+      else if(u_mode==14){vec2 p=(uv-0.5)*vec2(ar,1.0)*mix(2.0,6.0,u_scale)+sOff;
+        mat2 rot=mat2(0.8,0.6,-0.6,0.8);        float v=0.0,a=0.5,w=1.0;vec2 q2=p+loopOff();
+        float offset=mix(0.5,1.2,u_distort);
+        for(int i=0;i<8;i++){float fi=float(i);if(fi>=mix(3.0,8.0,u_density))break;
+          float n=cnoise(q2)*w;n=abs(n);n=offset-n;n=n*n;v+=n*a;
+          q2=rot*q2*2.1+vec2(1.7,9.2);a*=mix(0.35,0.65,u_detail);w=clamp(0.0,1.0,n*2.0);}
+        col=grad4(clamp(v*1.2,0.0,1.0));col+=u_c3*pow(clamp(v,0.0,1.0),2.0)*mix(0.1,0.4,u_detail);}
+      else if(u_mode==15){vec2 p=uv-0.5;p.x*=ar;float n=5.0+floor(mix(3.0,9.0,u_density));
+        float a=atan(p.y,p.x);float r=length(p);float sector=3.14159/max(n,2.0);
+        a=mod(a+0.25*sin(u_phase),sector*2.0);a=abs(a-sector);
+        vec2 q=vec2(cos(a),sin(a))*r;float f=abs(q.y)-0.04*(0.4+0.8*u_scale);
+        float pulse=sin(r*mix(6.0,24.0,u_detail)-2.0*u_phase)*0.5+0.5;
+        float edge=exp(-abs(f)*(18.0+40.0*u_distort));edge=smoothstep(0.0,0.9,edge);
+        col=mix(u_c0*0.5,grad4(pulse),edge);col+=u_c3*edge*0.22;}
+      else if(u_mode==16){float tileN=mix(2.0,8.0,u_scale);vec2 p=(uv-0.5)*vec2(ar,1.0)*tileN+sOff;
+        vec2 ip=floor(p);vec2 fp=fract(p);float h=hash21(ip+sOff);if(h<0.5)fp.x=1.0-fp.x;
+        float d=min(length(fp),length(fp-1.0));d=abs(d-0.5);
+        float bands=mix(3.0,7.0,u_density)+u_distort*2.5;
+        float f=0.5+0.5*cos(d*bands*TAU-2.0*u_phase);f+=fbm(p*0.4+loopOff())*0.1*u_detail;
+        col=grad4(clamp(f,0.0,1.0));col+=u_c3*smoothstep(0.06,0.0,abs(d-0.5)-0.02)*mix(0.15,0.40,u_distort);}
+      else if(u_mode==17){vec2 p=(uv-0.5)*vec2(ar,1.0)*mix(2.0,6.0,u_scale)+sOff;
+        mat2 rot=mat2(0.8,0.6,-0.6,0.8);float v=0.0,a=0.5;vec2 q2=p+loopOff();
+        for(int i=0;i<8;i++){float fi=float(i);if(fi>=mix(3.0,8.0,u_density))break;
+          v+=a*abs(cnoise(q2+loopOff()));q2=rot*q2*2.0+vec2(100.0);a*=mix(0.35,0.65,u_detail);}
+        col=grad4(clamp(v,0.0,1.0));col+=u_c3*pow(clamp(v,0.0,1.0),3.0)*0.2;}
+      else if(u_mode==18){float f=uv.y*mix(1.5,5.0,u_scale);
+        f+=sin(uv.x*(3.0+9.0*u_density)+u_phase+u_seed)*0.45;
+        f+=sin(uv.x*(7.0+5.0*u_density)-2.0*u_phase+u_seed*1.7)*0.20;
+        f+=fbm(uv*vec2(ar,1.0)*(1.5+2.0*u_scale)+loopOff()+sOff)*(0.30+0.90*u_distort);
+        float t=0.5+0.5*sin(f*TAU*(0.4+0.9*u_detail));col=grad4(t);}
+      else if(u_mode>=19){float mn=sqrt(u_res.x*u_res.y);
+        vec2 flP=(gl_FragCoord.xy-0.5*u_res)/mn;flP*=mix(1.0,2.5,u_scale)*3.0;
+        flP+=vec2(fract(u_seed*0.193),fract(u_seed*0.317))*2.0;
+        float flWarp=u_distort*6.0;int eng=u_mode-19;
+        float f=flFieldOf(eng,flP,flWarp);
+        float center=0.5;float width=0.42-0.15*u_detail;
+        f=smoothstep(center-width,center+width,f);
+        col=grad4(f);col+=u_c3*smoothstep(0.72-0.12*u_density,1.0,f)*0.12;}
+      col+=(hash21(gl_FragCoord.xy+loopOff()*91.3)-0.5)*u_grain*0.22;
+      vec2 v=uv*2.0-1.0;col*=1.0-dot(v,v)*0.16;
+      if(u_invert>0.5)col=1.0-col;gl_FragColor=vec4(col,1.0);}`;
 
-      // Update JSON code block
-      updateJsonConfigView();
+    const glCanvas = document.createElement('canvas');
+    const gl = glCanvas.getContext('webgl',{preserveDrawingBuffer:true}) || glCanvas.getContext('experimental-webgl',{preserveDrawingBuffer:true});
+    let prog, u = {};
+
+    if (gl) {
+      gl.getExtension('OES_standard_derivatives');
+      const vs = gl.createShader(gl.VERTEX_SHADER); gl.shaderSource(vs,VS); gl.compileShader(vs);
+      const fs = gl.createShader(gl.FRAGMENT_SHADER); gl.shaderSource(fs,FS); gl.compileShader(fs);
+      if (!gl.getShaderParameter(fs,gl.COMPILE_STATUS)) console.error("Shader:",gl.getShaderInfoLog(fs));
+      prog = gl.createProgram(); gl.attachShader(prog,vs); gl.attachShader(prog,fs); gl.linkProgram(prog);
+      const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+      gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+      const aLoc = gl.getAttribLocation(prog,'a'); gl.enableVertexAttribArray(aLoc);
+      gl.vertexAttribPointer(aLoc,2,gl.FLOAT,false,0,0); gl.useProgram(prog);
+      ['u_res','u_phase','u_seed','u_mode','u_speed','u_scale','u_density','u_distort','u_detail','u_grain','u_c0','u_c1','u_c2','u_c3','u_invert']
+        .forEach(n => { u[n] = gl.getUniformLocation(prog,n); });
     }
 
-    function updateShaderParam(param, value) {
-      // Update value in global P
-      P[param] = value;
+    // Generate cards
+    const grid = document.getElementById('shader-grid');
+    GALLERY_PRESETS.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'gallery-card';
+      card.dataset.mode = p.id;
+      card.innerHTML = `
+        <div style="position:relative">
+          <canvas id="canvas-${p.id}" data-mode="${p.id}"></canvas>
+          <div class="card-hover-actions">
+            <button class="card-action-btn" onclick="copyPresetJSON(${p.id}, this)">Copy JSON</button>
+            <button class="card-action-btn" onclick="copyPresetHTML(${p.id}, this)">Copy HTML</button>
+          </div>
+        </div>
+        <div class="gallery-card-body">
+          <h3>${p.name}</h3>
+          <p>${p.desc}</p>
+          <div class="gallery-controls">
+            <div class="gallery-ctrl"><label>Speed <span class="v" id="gv-s-${p.id}">0.50</span></label><input type="range" id="gs-${p.id}" min="0" max="1" step="0.01" value="0.50"></div>
+            <div class="gallery-ctrl"><label>Scale <span class="v" id="gv-c-${p.id}">0.45</span></label><input type="range" id="gc-${p.id}" min="0" max="1" step="0.01" value="0.45"></div>
+            <div class="gallery-ctrl"><label>Density <span class="v" id="gv-d-${p.id}">0.55</span></label><input type="range" id="gd-${p.id}" min="0" max="1" step="0.01" value="0.55"></div>
+          </div>
+        </div>`;
+      grid.appendChild(card);
+    });
 
-      // Update label
-      const label = document.getElementById(`val-${param}`);
-      if (label) {
-        label.textContent = typeof value === 'number' && !Number.isInteger(value) ? value.toFixed(2) : value;
-      }
-
-      // Update slider input value too (in case called from presets)
-      const input = document.getElementById(`slide-${param}`);
-      if (input) {
-        input.value = value;
-      }
-
-      // Deselect active preset pill since it's customized
-      const pills = document.querySelectorAll('.preset-pill');
-      pills.forEach(p => p.classList.remove('active'));
-
-      // Update JSON code block
-      updateJsonConfigView();
+    // Copy JSON for a preset
+    function copyPresetJSON(modeId, btn) {
+      const inst = instances.find(i => i.id === modeId);
+      if (!inst) return;
+      const preset = GALLERY_PRESETS.find(p => p.id === modeId);
+      const json = JSON.stringify({
+        project: "/motion",
+        version: "1.0.0",
+        shader: {
+          preset: preset.name.toLowerCase().replace(/\s+/g, '-'),
+          mode: modeId,
+          speed: +inst.speed.toFixed(2),
+          scale: +inst.scale.toFixed(2),
+          density: +inst.density.toFixed(2),
+          distort: +inst.distort.toFixed(2),
+          detail: +inst.detail.toFixed(2),
+          grain: +inst.grain.toFixed(2),
+          seed: +inst.seed.toFixed(1)
+        },
+        colors: [...globalColors]
+      }, null, 2);
+      navigator.clipboard.writeText(json).then(() => {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy JSON'; btn.classList.remove('copied'); }, 1500);
+      });
     }
 
-    // Initialize json code view on load
-    window.addEventListener('DOMContentLoaded', () => {
-      updateJsonConfigView();
+    // Copy self-contained HTML for a preset
+    function copyPresetHTML(modeId, btn) {
+      const inst = instances.find(i => i.id === modeId);
+      if (!inst) return;
+      const preset = GALLERY_PRESETS.find(p => p.id === modeId);
+      const c = globalColors;
+      const html = `<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${preset.name} — /motion</title>
+<style>body{margin:0;overflow:hidden;background:#000}canvas{width:100vw;height:100vh;display:block}</style></head>
+<body><canvas id="c"></canvas>
+<script>
+const VS='attribute vec2 a;void main(){gl_Position=vec4(a,0.0,1.0);}';
+const FS=\`precision highp float;
+uniform vec2 u_res;uniform float u_phase,u_seed;uniform int u_mode;
+uniform float u_speed,u_scale,u_density,u_distort,u_detail,u_grain;
+uniform vec3 u_c0,u_c1,u_c2,u_c3;
+#define TAU 6.28318530718
+float hash21(vec2 p){p=fract(p*vec2(234.34,435.345));p+=dot(p,p+34.23);return fract(p.x*p.y);}
+float vnoise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);
+float a=hash21(i),b=hash21(i+vec2(1,0)),c=hash21(i+vec2(0,1)),d=hash21(i+vec2(1,1));
+return mix(mix(a,b,f.x),mix(c,d,f.x),f.y);}
+vec2 fade(vec2 t){return t*t*t*(t*(t*6.0-15.0)+10.0);}
+vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x,289.0);}
+float cnoise(vec2 P){vec4 Pi=floor(P.xyxy)+vec4(0,0,1,1);vec4 Pf=fract(P.xyxy)-vec4(0,0,1,1);
+Pi=mod(Pi,289.0);vec4 ix=Pi.xzxz,iy=Pi.yyww,fx=Pf.xzxz,fy=Pf.yyww;
+vec4 i=permute(permute(ix)+iy);vec4 gx=fract(i*(1.0/41.0))*2.0-1.0;
+vec4 gy=abs(gx)-0.5;vec4 tx=floor(gx+0.5);gx=gx-tx;
+vec2 g00=vec2(gx.x,gy.x),g10=vec2(gx.y,gy.y),g01=vec2(gx.z,gy.z),g11=vec2(gx.w,gy.w);
+vec4 norm=1.79284291400159-0.85373472095314*vec4(dot(g00,g00),dot(g01,g01),dot(g10,g10),dot(g11,g11));
+g00*=norm.x;g01*=norm.y;g10*=norm.z;g11*=norm.w;
+float n00=dot(g00,vec2(fx.x,fy.x)),n10=dot(g10,vec2(fx.y,fy.y));
+float n01=dot(g01,vec2(fx.z,fy.z)),n11=dot(g11,vec2(fx.w,fy.w));
+vec2 fade_xy=fade(Pf.xy);vec2 n_x=mix(vec2(n00,n01),vec2(n10,n11),fade_xy.x);
+return 2.3*mix(n_x.x,n_x.y,fade_xy.y);}
+float fbm(vec2 p){float v=0.0,a=0.5;mat2 r=mat2(0.80,0.60,-0.60,0.80);
+for(int i=0;i<5;i++){v+=a*vnoise(p);p=r*p*2.1+vec2(1.7,9.2);a*=0.5;}return v;}
+vec2 loopOff(){return vec2(cos(u_phase),sin(u_phase))*(0.10+0.55*u_speed);}
+vec3 grad4(float t){t=clamp(t,0.0,1.0);vec3 c=mix(u_c0,u_c1,smoothstep(0.0,0.35,t));
+c=mix(c,u_c2,smoothstep(0.35,0.70,t));c=mix(c,u_c3,smoothstep(0.70,1.0,t));return c;}
+float metaf(vec2 p,float ar){float s=u_seed,rA=0.08+0.20*u_speed;
+vec2 b1=vec2((0.28+0.06*sin(s))*ar,0.62+0.05*cos(s*1.3))+rA*vec2(cos(u_phase+s),sin(u_phase+s));
+vec2 b2=vec2((0.72+0.05*cos(s*2.1))*ar,0.40+0.06*sin(s*0.7))+rA*0.85*vec2(cos(-2.0*u_phase+s*1.7),sin(-2.0*u_phase+s*1.7));
+vec2 b3=vec2((0.50+0.07*sin(s*1.6))*ar,0.24+0.05*cos(s*2.4))+rA*0.70*vec2(cos(u_phase+s*2.3+2.0),sin(u_phase+s*2.3+2.0));
+return 0.30/(length(p-b1)+0.07)+0.22/(length(p-b2)+0.07)+0.16/(length(p-b3)+0.07);}
+void main(){vec2 uv=gl_FragCoord.xy/u_res;uv.y=1.0-uv.y;float ar=u_res.x/u_res.y;
+vec2 sOff=vec2(fract(u_seed*0.193),fract(u_seed*0.317))*47.0;vec3 col=vec3(0.0);
+if(u_mode==0){vec3 night=u_c0*0.40;float light=0.0;vec3 tint=vec3(0.0);
+for(int i=0;i<3;i++){float fi=float(i)+1.0;float xx=uv.x*ar*(1.0+0.35*fi)+u_seed*fi*1.7;
+float wave=fbm(vec2(xx*0.6,fi*4.0)+loopOff()*1.2)-0.5;float cy=0.42+0.12*fi+wave*0.38;
+float streak=fbm(vec2(xx*(3.0+4.0*u_detail),uv.y*(1.0+1.5*u_scale))+loopOff());
+float dist=uv.y-cy;float band=exp(-dist*dist*(8.0+34.0*u_density));
+float inten=max(band*(0.25+0.95*streak),0.0);light+=inten/fi;
+tint+=grad4(clamp(0.15+(1.0-uv.y)*0.95,0.0,1.0))*inten/fi;}
+col=night+tint*(1.3+1.0*u_distort);col+=u_c3*pow(clamp(light,0.0,1.0),3.0)*0.30;}
+else if(u_mode==1){vec2 p=(uv-0.5)*vec2(ar,1.0)*mix(1.0,3.5,u_scale)+sOff;
+vec2 warp=vec2(fbm(p*0.8+loopOff()),fbm(p*0.8+vec2(7.3,3.1)-loopOff()))*mix(0.5,2.5,u_distort);
+float n=fbm(p+warp+loopOff()*0.5);float levels=mix(3.0,8.0,u_density);
+float val=n*levels+u_phase*0.15;float f_val=floor(val);float fract_val=fract(val);
+float bw=0.04*(1.0+u_detail*2.0);float sv=f_val+smoothstep(0.5-bw,0.5+bw,fract_val);
+col=grad4(clamp(sv/levels,0.0,1.0));}
+else if(u_mode==4){vec2 p=(uv-0.5)*vec2(ar,1.0)*mix(1.2,5.0,u_scale)+sOff;
+float w=1.0+3.0*u_distort;vec2 q=vec2(fbm(p+loopOff()),fbm(p+vec2(5.2,1.3)-loopOff()));
+vec2 r=vec2(fbm(p+q*w+vec2(1.7,9.2)+loopOff()*0.7),fbm(p+q*w+vec2(8.3,2.8)-loopOff()*0.4));
+float f=fbm(p+r*(1.0+2.5*u_detail));
+col=grad4(clamp(f*1.45+0.10*r.x-0.05,0.0,1.0));col=mix(col,u_c2,q.y*q.x*0.25);}
+else{col=grad4(0.5);}
+col+=(hash21(gl_FragCoord.xy+loopOff()*91.3)-0.5)*u_grain*0.22;
+vec2 v=uv*2.0-1.0;col*=1.0-dot(v,v)*0.16;gl_FragColor=vec4(col,1.0);}\`;
+const cv=document.getElementById('c');
+const gl=cv.getContext('webgl')||cv.getContext('experimental-webgl');
+if(!gl){document.body.textContent='WebGL required';throw'no gl';}
+gl.getExtension('OES_standard_derivatives');
+const vs=gl.createShader(gl.VERTEX_SHADER);gl.shaderSource(vs,VS);gl.compileShader(vs);
+const fs=gl.createShader(gl.FRAGMENT_SHADER);gl.shaderSource(fs,FS);gl.compileShader(fs);
+const pg=gl.createProgram();gl.attachShader(pg,vs);gl.attachShader(pg,fs);gl.linkProgram(pg);
+gl.useProgram(pg);
+const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+const aL=gl.getAttribLocation(pg,'a');gl.enableVertexAttribArray(aL);gl.vertexAttribPointer(aL,2,gl.FLOAT,false,0,0);
+const U={};['u_res','u_phase','u_seed','u_mode','u_speed','u_scale','u_density','u_distort','u_detail','u_grain','u_c0','u_c1','u_c2','u_c3'].forEach(n=>{U[n]=gl.getUniformLocation(pg,n);});
+function hex2rgb(h){return[parseInt(h.slice(1,3),16)/255,parseInt(h.slice(3,5),16)/255,parseInt(h.slice(5,7),16)/255];}
+const dpr=Math.min(devicePixelRatio||1,2);
+function resize(){cv.width=Math.round(innerWidth*dpr);cv.height=Math.round(innerHeight*dpr);gl.viewport(0,0,cv.width,cv.height);}
+resize();addEventListener('resize',resize);
+const t0=performance.now();
+(function loop(now){
+const ph=((now-t0)/${inst.speed.toFixed(2)}/1000*Math.PI*2)%(Math.PI*2);
+gl.uniform2f(U.u_res,cv.width,cv.height);gl.uniform1f(U.u_phase,ph);
+gl.uniform1f(U.u_seed,(${inst.seed.toFixed(1)}%10000)*0.6180339887%12.566);
+gl.uniform1i(U.u_mode,${modeId});
+gl.uniform1f(U.u_speed,${inst.speed.toFixed(2)});gl.uniform1f(U.u_scale,${inst.scale.toFixed(2)});
+gl.uniform1f(U.u_density,${inst.density.toFixed(2)});gl.uniform1f(U.u_distort,${inst.distort.toFixed(2)});
+gl.uniform1f(U.u_detail,${inst.detail.toFixed(2)});gl.uniform1f(U.u_grain,${inst.grain.toFixed(2)});
+const c0=hex2rgb('${c[0]}'),c1=hex2rgb('${c[1]}'),c2=hex2rgb('${c[2]}'),c3=hex2rgb('${c[3]}');
+gl.uniform3f(U.u_c0,c0[0],c0[1],c0[2]);gl.uniform3f(U.u_c1,c1[0],c1[1],c1[2]);
+gl.uniform3f(U.u_c2,c2[0],c2[1],c2[2]);gl.uniform3f(U.u_c3,c3[0],c3[1],c3[2]);
+gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(loop);
+})(performance.now());
+<\/script></body></html>`;
+      navigator.clipboard.writeText(html).then(() => {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy HTML'; btn.classList.remove('copied'); }, 1500);
+      });
+    }
+
+    const instances = [];
+    GALLERY_PRESETS.forEach(p => {
+      const canvas = document.getElementById(`canvas-${p.id}`);
+      if (!canvas) return;
+      const ctx2d = canvas.getContext('2d');
+      if (!ctx2d) return;
+      const si = document.getElementById(`gs-${p.id}`);
+      const ci = document.getElementById(`gc-${p.id}`);
+      const di = document.getElementById(`gd-${p.id}`);
+      if (!si||!ci||!di) return;
+      const ul = (id,v) => { const e=document.getElementById(id); if(e) e.textContent=Number(v).toFixed(2); };
+      si.addEventListener('input', e => { inst.speed=parseFloat(e.target.value); ul(`gv-s-${p.id}`,e.target.value); });
+      ci.addEventListener('input', e => { inst.scale=parseFloat(e.target.value); ul(`gv-c-${p.id}`,e.target.value); });
+      di.addEventListener('input', e => { inst.density=parseFloat(e.target.value); ul(`gv-d-${p.id}`,e.target.value); });
+      const inst = { id:p.id, canvas, ctx2d, speed:0.5, scale:0.45, density:0.55,
+        distort:0.5+0.3*Math.random(), detail:0.4+0.4*Math.random(), grain:0.15+0.1*Math.random(),
+        seed:Math.random()*20, phase:Math.random()*6.28, visible:false };
+      instances.push(inst);
+    });
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => { const inst = instances.find(i => i.id === parseInt(e.target.dataset.mode));
+        if (inst) inst.visible = e.isIntersecting; });
+    }, { threshold: 0.05 });
+    document.querySelectorAll('.gallery-card').forEach(c => observer.observe(c));
+
+    let lastTime = 0;
+    function renderLoop(time) {
+      const dt = (time - lastTime) * 0.001; lastTime = time;
+      if (!gl) { requestAnimationFrame(renderLoop); return; }
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      instances.forEach(inst => {
+        if (!inst.visible) return;
+        inst.phase += dt * inst.speed * 2.0;
+        const cw = inst.canvas.clientWidth, ch = inst.canvas.clientHeight;
+        const w = Math.round(cw * dpr), h = Math.round(ch * dpr);
+        if (inst.canvas.width !== w || inst.canvas.height !== h) { inst.canvas.width = w; inst.canvas.height = h; }
+        if (glCanvas.width !== w || glCanvas.height !== h) { glCanvas.width = w; glCanvas.height = h; }
+        gl.viewport(0,0,w,h); gl.useProgram(prog);
+        gl.uniform2f(u.u_res,w,h); gl.uniform1f(u.u_phase,inst.phase);
+        gl.uniform1f(u.u_seed,inst.seed); gl.uniform1i(u.u_mode,inst.id);
+        gl.uniform1f(u.u_speed,inst.speed); gl.uniform1f(u.u_scale,inst.scale);
+        gl.uniform1f(u.u_density,inst.density); gl.uniform1f(u.u_distort,inst.distort);
+        gl.uniform1f(u.u_detail,inst.detail); gl.uniform1f(u.u_grain,inst.grain);
+        gl.uniform1f(u.u_invert,0);
+        const c0=hexToRgb(globalColors[0]),c1=hexToRgb(globalColors[1]),c2=hexToRgb(globalColors[2]),c3=hexToRgb(globalColors[3]);
+        gl.uniform3f(u.u_c0,c0[0],c0[1],c0[2]); gl.uniform3f(u.u_c1,c1[0],c1[1],c1[2]);
+        gl.uniform3f(u.u_c2,c2[0],c2[1],c2[2]); gl.uniform3f(u.u_c3,c3[0],c3[1],c3[2]);
+        gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+        inst.ctx2d.drawImage(glCanvas,0,0);
+      });
+      requestAnimationFrame(renderLoop);
+    }
+    requestAnimationFrame(renderLoop);
+
+    // Buttons
+    document.getElementById('btn-rand-all').addEventListener('click', () => {
+      instances.forEach(inst => {
+        inst.speed=0.1+Math.random()*0.6; inst.scale=0.2+Math.random()*0.6;
+        inst.density=0.2+Math.random()*0.6; inst.distort=0.2+Math.random()*0.8;
+        inst.detail=0.3+Math.random()*0.6; inst.seed=Math.random()*20;
+        const si=document.getElementById(`gs-${inst.id}`),ci=document.getElementById(`gc-${inst.id}`),di=document.getElementById(`gd-${inst.id}`);
+        if(si)si.value=inst.speed; if(ci)ci.value=inst.scale; if(di)di.value=inst.density;
+        const us=document.getElementById(`gv-s-${inst.id}`),uc=document.getElementById(`gv-c-${inst.id}`),ud=document.getElementById(`gv-d-${inst.id}`);
+        if(us)us.textContent=inst.speed.toFixed(2); if(uc)uc.textContent=inst.scale.toFixed(2); if(ud)ud.textContent=inst.density.toFixed(2);
+      });
+    });
+
+    document.getElementById('btn-shuffle-pal').addEventListener('click', () => {
+      let next; do { next = Math.floor(Math.random()*THEMES.length); } while (next === currentThemeIdx);
+      currentThemeIdx = next; globalColors = [...THEMES[next].colors]; updateThemeInfo(THEMES[next]);
+    });
+
+    // Dark/light mode toggle for splash background
+    let currentMode = 'dark';
+    document.getElementById('mode-toggle').addEventListener('click', () => {
+      if (typeof window.setShaderMode !== 'function') return;
+      currentMode = currentMode === 'dark' ? 'light' : 'dark';
+      window.setShaderMode(currentMode);
+      document.getElementById('mode-icon').textContent = currentMode === 'dark' ? '◐' : '◑';
+      document.body.setAttribute('data-shader', 'on');
     });
   </script>
 
@@ -1851,16 +2107,16 @@ void main(){
   <script>
     // Scroll-triggered reveal animations
     const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
-    const observer = new IntersectionObserver((entries) => {
+    const revealObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           entry.target.classList.add('visible');
-          observer.unobserve(entry.target);
+          revealObserver.unobserve(entry.target);
         }
       });
     }, observerOptions);
 
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
   </script>
 </body>
 </html>

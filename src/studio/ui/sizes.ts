@@ -4,6 +4,7 @@
 
 import { SIZES, P } from '../state';
 import { canvas, gl } from '../webgl';
+import { refreshExportSpec } from './export_targets_ui';
 
 const $ = (id: string) => document.getElementById(id)!;
 
@@ -18,6 +19,7 @@ export function applySize(): void {
   canvas.style.aspectRatio = `${s.w}/${s.h}`;
   gl.viewport(0, 0, s.w, s.h);
   $('stRes').textContent = `${s.w}×${s.h}`;
+  refreshExportSpec();
   setTimeout(() => onSizeChange?.(), 0);
 }
 

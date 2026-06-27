@@ -10,7 +10,6 @@ export const PRESETS: Preset[] = [
   { id: 'curl',      icon: 'CU', full: 'curl noise' },
   { id: 'electric',  icon: 'EL', full: 'electric' },
   { id: 'flow',      icon: 'FL', full: 'flow' },
-  { id: 'glass',     icon: 'GL', full: 'glass' },
   { id: 'grain',     icon: 'GR', full: 'grain' },
   { id: 'halftone',  icon: 'HT', full: 'halftone' },
   { id: 'kaleid',    icon: 'KL', full: 'kaleidoscope' },
@@ -18,15 +17,27 @@ export const PRESETS: Preset[] = [
   { id: 'marble',    icon: 'MB', full: 'marble' },
   { id: 'orbs',      icon: 'OR', full: 'orbs' },
   { id: 'plasma',    icon: 'PL', full: 'plasma' },
-  { id: 'reeded',    icon: 'RD', full: 'reeded' },
   { id: 'rings',     icon: 'RI', full: 'rings' },
   { id: 'rorschach', icon: 'RK', full: 'rorschach' },
   { id: 'ridge',     icon: 'RF', full: 'ridged' },
   { id: 'rosette',   icon: 'RS', full: 'sd rosette' },
   { id: 'truchet',   icon: 'TR', full: 'truchet' },
-  { id: 'trilat',    icon: 'TL', full: 'triangle lattice' },
   { id: 'turb',      icon: 'TU', full: 'turbulence' },
   { id: 'waves',     icon: 'WV', full: 'waves' },
+  /* Fluid field engines (ported from fluid.krackeddevs.com) */
+  { id: 'noise',     icon: 'NZ', full: 'noise' },
+  { id: 'fl-flow',   icon: 'FW', full: 'fluid flow' },
+  { id: 'cellular',  icon: 'CE', full: 'cellular' },
+  { id: 'gyroid',    icon: 'GY', full: 'gyroid' },
+  { id: 'fl-truchet',icon: 'FM', full: 'fluid truchet' },
+  { id: 'interfere', icon: 'IF', full: 'interfere' },
+  { id: 'fl-kaleido',icon: 'FK', full: 'fluid kaleido' },
+  { id: 'fl-lines',  icon: 'FB', full: 'fluid lines' },
+  { id: 'grid',      icon: 'GD', full: 'grid' },
+  { id: 'golden',    icon: 'GO', full: 'golden' },
+  { id: 'smoke',     icon: 'SM', full: 'smoke' },
+  { id: 'crystal',   icon: 'CR', full: 'crystal' },
+  { id: 'honeycomb', icon: 'HC', full: 'honeycomb' },
 ];
 
 /** Clamp to a valid preset index (0 … PRESETS.length - 1). */
@@ -45,6 +56,14 @@ export function migrateLegacyMode(mode: number): number {
   let m = Math.floor(Number(mode));
   if (!Number.isFinite(m) || m < 0) return 0;
   if (m >= 6) m -= 1;
+  return m;
+}
+
+/** Remap indices after triangle lattice (was index 19) was removed. */
+export function migrateTrilatRemoval(mode: number): number {
+  let m = Math.floor(Number(mode));
+  if (!Number.isFinite(m) || m < 0) return 0;
+  if (m >= 20) m -= 1;
   return normalizeMode(m);
 }
 
@@ -78,6 +97,7 @@ export const SLIDERS: SliderDef[] = [
   { id: 'scale',   label: 'scale',      def: 0.45 },
   { id: 'density', label: 'density',    def: 0.55 },
   { id: 'distort', label: 'distortion', def: 0.60 },
+  { id: 'warp',    label: 'warp',       def: 0.50 },
   { id: 'detail',  label: 'detail',     def: 0.50 },
   { id: 'grain',   label: 'grain',      def: 0.20 },
 ];
@@ -89,9 +109,12 @@ export const P: Params = {
   loop: 4.0,
   colors: [...PALETTES[0]],
   speed: 0.50, scale: 0.45, density: 0.55,
-  distort: 0.60, detail: 0.50, grain: 0.20,
+  distort: 0.60, warp: 0.50, detail: 0.50, grain: 0.20,
   mix: 0, pixel: 0,
   invert: 0,
+  exportTargetId: 'custom',
+  imageFormat: 'png',
+  exportCaption: '',
 };
 
 export const THEMES: Record<string, ThemeDef> = {

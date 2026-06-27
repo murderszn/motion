@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Black Lives Matter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@500;700;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0a0a;
+      --bg-deep: #000000;
+      --text: #f4f4f6;
+      --text-muted: #8a8a94;
+      --accent: #f7d046;
+      --accent-bright: #ffd100;
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: var(--bg-deep);
+      font-family: 'Inter', -apple-system, sans-serif;
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    canvas#bg {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    #vignette {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background: radial-gradient(ellipse at center, transparent 30%, rgba(0, 0, 0, 0.75) 100%);
+    }
+
+    #grain {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      opacity: 0.05;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    #stage {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .scene {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      padding: 2rem;
+    }
+
+    .kicker {
+      font-weight: 700;
+      font-size: clamp(0.65rem, 1.5vw, 0.9rem);
+      letter-spacing: 0.45em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+    }
+
+    .headline {
+      font-family: 'Archivo Black', sans-serif;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+      line-height: 0.9;
+      color: var(--text);
+    }
+
+    .headline-xl {
+      font-size: clamp(3.5rem, 14vw, 11rem);
+    }
+
+    .headline-lg {
+      font-size: clamp(2.5rem, 9vw, 7rem);
+    }
+
+    .headline-md {
+      font-size: clamp(1.8rem, 6vw, 4.5rem);
+    }
+
+    .accent { color: var(--accent-bright); }
+
+    .line-mask {
+      overflow: hidden;
+      padding: 0.08em 0;
+    }
+
+    .line-mask > span {
+      display: inline-block;
+      transform: translateY(110%);
+    }
+
+    .char {
+      display: inline-block;
+    }
+
+    .sub {
+      font-weight: 500;
+      font-size: clamp(0.9rem, 2vw, 1.25rem);
+      color: var(--text-muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-top: 1.5rem;
+    }
+
+    .bar {
+      width: 0;
+      height: 4px;
+      background: var(--accent-bright);
+      margin: 1.25rem auto 0;
+    }
+
+    .names-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .name-item {
+      font-family: 'Archivo Black', sans-serif;
+      font-size: clamp(1.2rem, 3.5vw, 2.2rem);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text);
+      opacity: 0;
+    }
+
+    .fist {
+      font-size: clamp(4rem, 12vw, 8rem);
+      line-height: 1;
+      margin-bottom: 1rem;
+      opacity: 0;
+    }
+
+    .final-lockup {
+      font-family: 'Archivo Black', sans-serif;
+      font-size: clamp(1.5rem, 4vw, 3rem);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      opacity: 0;
+    }
+
+    .final-lockup .accent { color: var(--accent-bright); }
+
+    .controls {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .controls button {
+      background: rgba(247, 208, 70, 0.12);
+      border: 1px solid rgba(247, 208, 70, 0.35);
+      color: var(--text);
+      padding: 0.45rem 1.1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      transition: background 0.2s var(--ease-out);
+    }
+
+    .controls button:hover {
+      background: rgba(247, 208, 70, 0.25);
+    }
+
+    #timer {
+      position: fixed;
+      top: 1.5rem;
+      right: 1.5rem;
+      z-index: 100;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: var(--accent);
+      opacity: 0.55;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .line-mask > span,
+      .char,
+      .kicker,
+      .sub,
+      .bar,
+      .name-item,
+      .fist,
+      .final-lockup {
+        transform: none !important;
+        opacity: 1 !important;
+        animation: none !important;
+        width: auto !important;
+      }
+
+      .scene { opacity: 1 !important; }
+      .scene:not(#s6) { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bg"></canvas>
+  <div id="vignette"></div>
+  <div id="grain"></div>
+
+  <div id="stage">
+    <!-- Scene 1: BLACK (0–2s) -->
+    <div class="scene" id="s1" aria-label="Black">
+      <div class="kicker" id="s1-kicker">A movement</div>
+      <div class="headline headline-xl" id="s1-word"></div>
+      <div class="bar" id="s1-bar"></div>
+    </div>
+
+    <!-- Scene 2: LIVES (2–4s) -->
+    <div class="scene" id="s2" aria-label="Lives">
+      <div class="headline headline-xl" id="s2-word"></div>
+    </div>
+
+    <!-- Scene 3: MATTER (4–6.5s) -->
+    <div class="scene" id="s3" aria-label="Matter">
+      <div class="headline headline-xl accent" id="s3-word"></div>
+      <div class="sub" id="s3-sub">Black Lives Matter</div>
+    </div>
+
+    <!-- Scene 4: Say Their Names (6.5–10s) -->
+    <div class="scene" id="s4" aria-label="Say their names">
+      <div class="kicker" id="s4-kicker">Never forget</div>
+      <div class="headline headline-md" id="s4-headline">
+        <div class="line-mask"><span>Say Their</span></div>
+        <div class="line-mask"><span class="accent">Names</span></div>
+      </div>
+      <div class="names-list">
+        <div class="name-item" id="n1">George Floyd</div>
+        <div class="name-item" id="n2">Breonna Taylor</div>
+        <div class="name-item" id="n3">Ahmaud Arbery</div>
+      </div>
+    </div>
+
+    <!-- Scene 5: No Justice (10–12.5s) -->
+    <div class="scene" id="s5" aria-label="No justice no peace">
+      <div class="headline headline-lg" id="s5-text">
+        <div class="line-mask"><span>No Justice</span></div>
+        <div class="line-mask"><span class="accent">No Peace</span></div>
+      </div>
+    </div>
+
+    <!-- Scene 6: Final lockup (12.5–15s) -->
+    <div class="scene" id="s6" aria-label="Black Lives Matter — until justice is real">
+      <div class="fist" id="s6-fist" aria-hidden="true">✊</div>
+      <div class="final-lockup" id="s6-lockup">Black <span class="accent">Lives</span> Matter</div>
+      <div class="sub" id="s6-sub">Until justice is real</div>
+    </div>
+  </div>
+
+  <div id="timer">0.0s / 15.0s</div>
+
+  <div class="controls">
+    <button type="button" onclick="restart()">Replay</button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script>
+    (function () {
+      var canvas = document.getElementById('bg');
+      var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (!gl) {
+        canvas.style.background = '#000';
+        return;
+      }
+
+      var VS = 'attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }';
+      var FS = [
+        'precision highp float;',
+        'uniform vec2 u_res;',
+        'uniform float u_phase;',
+        '#define TAU 6.28318530718',
+        'float hash21(vec2 p){ p=fract(p*vec2(234.34,435.345)); p+=dot(p,p+34.23); return fract(p.x*p.y); }',
+        'float vnoise(vec2 p){ vec2 i=floor(p),f=fract(p); f=f*f*(3.0-2.0*f); return mix(mix(hash21(i),hash21(i+vec2(1.0,0.0)),f.x),mix(hash21(i+vec2(0.0,1.0)),hash21(i+vec2(1.0,1.0)),f.x),f.y); }',
+        'float fbm(vec2 p){ float v=0.0,a=0.5; mat2 r=mat2(0.8,0.6,-0.6,0.8); for(int i=0;i<5;i++){v+=a*vnoise(p);p=r*p*2.1+vec2(1.7,9.2);a*=0.5;} return v; }',
+        'vec2 loopOff(){ float a=u_phase; return vec2(cos(a),sin(a))*0.35; }',
+        'void main(){',
+        '  vec2 uv=gl_FragCoord.xy/u_res;',
+        '  uv.y=1.0-uv.y;',
+        '  float ar=u_res.x/u_res.y;',
+        '  vec2 p=(uv-0.5)*vec2(ar,1.0)*2.8;',
+        '  float f=fbm(p+loopOff());',
+        '  vec3 c0=vec3(0.0,0.0,0.0);',
+        '  vec3 c1=vec3(0.04,0.04,0.04);',
+        '  vec3 c2=vec3(0.12,0.10,0.02);',
+        '  vec3 c3=vec3(0.55,0.45,0.05);',
+        '  vec3 col=mix(c0,c1,smoothstep(0.0,0.4,f));',
+        '  col=mix(col,c2,smoothstep(0.4,0.75,f));',
+        '  col=mix(col,c3,smoothstep(0.75,1.0,f)*0.35);',
+        '  vec2 vig=uv*2.0-1.0;',
+        '  col*=1.0-dot(vig,vig)*0.35;',
+        '  gl_FragColor=vec4(col,1.0);',
+        '}'
+      ].join('\n');
+
+      function compile(type, src) {
+        var s = gl.createShader(type);
+        gl.shaderSource(s, src);
+        gl.compileShader(s);
+        return s;
+      }
+
+      var prog = gl.createProgram();
+      gl.attachShader(prog, compile(gl.VERTEX_SHADER, VS));
+      gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FS));
+      gl.linkProgram(prog);
+      gl.useProgram(prog);
+
+      var buf = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+      var aLoc = gl.getAttribLocation(prog, 'a');
+      gl.enableVertexAttribArray(aLoc);
+      gl.vertexAttribPointer(aLoc, 2, gl.FLOAT, false, 0, 0);
+
+      var uRes = gl.getUniformLocation(prog, 'u_res');
+      var uPhase = gl.getUniformLocation(prog, 'u_phase');
+
+      function resize() {
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.round(window.innerWidth * dpr);
+        canvas.height = Math.round(window.innerHeight * dpr);
+        gl.viewport(0, 0, canvas.width, canvas.height);
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      var t0 = performance.now();
+      var DURATION = 15;
+      function render(now) {
+        var elapsed = (now - t0) / 1000;
+        var phase = ((elapsed % DURATION) / DURATION) * TAU;
+        gl.uniform2f(uRes, canvas.width, canvas.height);
+        gl.uniform1f(uPhase, phase);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        requestAnimationFrame(render);
+      }
+      var TAU = 6.28318530718;
+      requestAnimationFrame(render);
+    })();
+
+    const freezeT = new URLSearchParams(location.search).get('t');
+    let master;
+
+    function splitChars(el) {
+      const text = el.textContent;
+      el.textContent = '';
+      el.setAttribute('aria-hidden', 'true');
+      for (const ch of text) {
+        const span = document.createElement('span');
+        span.className = 'char';
+        span.textContent = ch === ' ' ? '\u00A0' : ch;
+        el.appendChild(span);
+      }
+      return el.querySelectorAll('.char');
+    }
+
+    document.fonts.ready.then(() => {
+      document.getElementById('s1-word').textContent = 'BLACK';
+      const blackChars = splitChars(document.getElementById('s1-word'));
+
+      document.getElementById('s2-word').textContent = 'LIVES';
+      const livesChars = splitChars(document.getElementById('s2-word'));
+
+      document.getElementById('s3-word').textContent = 'MATTER';
+      const matterChars = splitChars(document.getElementById('s3-word'));
+
+      function build() {
+        const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
+
+        tl.set('#s1', { opacity: 1 }, 0)
+          .from('#s1-kicker', { y: 16, opacity: 0, duration: 0.5 }, 0.1)
+          .from(blackChars, {
+            y: 90,
+            opacity: 0,
+            rotateX: -40,
+            stagger: { each: 0.05, from: 'center' },
+            duration: 0.65,
+            ease: 'back.out(1.4)'
+          }, 0.15)
+          .to('#s1-bar', { width: 160, duration: 0.5, ease: 'power2.out' }, 0.55)
+          .to('#s1', { opacity: 0, duration: 0.35 }, 1.65);
+
+        tl.set('#s2', { opacity: 1 }, 2)
+          .from(livesChars, {
+            x: -60,
+            opacity: 0,
+            stagger: { each: 0.06, from: 'start' },
+            duration: 0.55,
+            ease: 'power3.out'
+          }, 2)
+          .to('#s2', { opacity: 0, duration: 0.35 }, 3.65);
+
+        tl.set('#s3', { opacity: 1 }, 4)
+          .from(matterChars, {
+            scale: 2.2,
+            opacity: 0,
+            filter: 'blur(16px)',
+            stagger: { each: 0.07, from: 'center' },
+            duration: 0.7,
+            ease: 'power3.out'
+          }, 4)
+          .from('#s3-sub', { y: 20, opacity: 0, duration: 0.5 }, 4.5)
+          .to('#s3', { opacity: 0, duration: 0.4 }, 6.1);
+
+        tl.set('#s4', { opacity: 1 }, 6.5)
+          .from('#s4-kicker', { opacity: 0, y: 12, duration: 0.45 }, 6.5)
+          .from('#s4 .line-mask > span', {
+            y: '110%',
+            duration: 0.55,
+            stagger: 0.1,
+            ease: 'power3.out'
+          }, 6.6)
+          .from(['#n1', '#n2', '#n3'], {
+            x: -30,
+            opacity: 0,
+            stagger: 0.18,
+            duration: 0.5
+          }, 7.2)
+          .to('#s4', { opacity: 0, duration: 0.4 }, 9.6);
+
+        tl.set('#s5', { opacity: 1 }, 10)
+          .from('#s5 .line-mask > span', {
+            y: '110%',
+            duration: 0.6,
+            stagger: 0.12,
+            ease: 'power3.out'
+          }, 10)
+          .to('#s5', { opacity: 0, duration: 0.4 }, 12.1);
+
+        tl.set('#s6', { opacity: 1 }, 12.5)
+          .from('#s6-fist', { scale: 0.4, opacity: 0, duration: 0.55, ease: 'back.out(2)' }, 12.5)
+          .from('#s6-lockup', { y: 28, opacity: 0, duration: 0.55 }, 12.75)
+          .from('#s6-sub', { opacity: 0, duration: 0.45 }, 13.1);
+
+        return tl;
+      }
+
+      master = build();
+
+      const timerEl = document.getElementById('timer');
+      gsap.ticker.add(() => {
+        if (master) timerEl.textContent = master.time().toFixed(1) + 's / 15.0s';
+      });
+
+      if (freezeT !== null) {
+        gsap.set('.scene', { opacity: 0 });
+        gsap.set('.char', { opacity: 0 });
+        gsap.set('.line-mask > span', { y: '110%' });
+        gsap.set('.name-item', { opacity: 0, x: -30 });
+        gsap.set('#s1-bar', { width: 0 });
+        gsap.set('#s6-fist, #s6-lockup, #s6-sub', { opacity: 0 });
+        master.pause();
+        master.seek(parseFloat(freezeT));
+      }
+
+      window.__ready = true;
+    });
+
+    function restart() {
+      if (master) master.restart();
+    }
+  </script>
+</body>
+</html>

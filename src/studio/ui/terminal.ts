@@ -53,7 +53,7 @@ const $ = (id: string) => document.getElementById(id)!;
 const TERM_HEIGHT_KEY = 'lumen-term-height';
 const DEFAULT_TERM_HEIGHT = 320;
 const MIN_TERM_HEIGHT = 80;
-const HEADER_HEIGHT = 40;
+const HEADER_HEIGHT = 48;
 const STATUS_HEIGHT = 24;
 const MIN_STAGE_HEIGHT = 120;
 const MAX_WS_RETRIES = 8;
@@ -411,7 +411,8 @@ export function createSession(): TermSession {
   sessions.push(session);
   renderShellTabs();
   switchSession(id);
-  connectSession(session);
+  if (termVisible()) connectSession(session);
+  else session.tabEl.classList.add('disconnected');
   return session;
 }
 
@@ -507,8 +508,9 @@ function wireGlobalListeners(): void {
   new MutationObserver(() => {
     if (!$('bottom').classList.contains('hidden') && termVisible()) {
       scheduleFitTerminal();
-      const s = activeSession();
-      if (s && !s.connected && !s.ws) connectSession(s, true);
+      sessions.forEach(s => {
+        if (!s.connected && !s.ws && !s.reconnectTimer) connectSession(s, true);
+      });
     }
   }).observe($('bottom'), { attributes: true, attributeFilter: ['class'] });
 

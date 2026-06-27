@@ -64,7 +64,7 @@ export async function exportHtmlEmbed(): Promise<void> {
   }
 
   // Generate HTML for text overlays
-  const textsHtml = texts.map(t => {
+  const textsHtml = texts.filter(t => t.effect !== 'pattern').map(t => {
     let style = `left: ${t.x * 100}%; top: ${t.y * 100}%; font-family: ${t.fontFamily}; color: ${t.color}; font-weight: ${t.bold ? 'bold' : '400'}; font-style: ${t.italic ? 'italic' : 'normal'}; opacity: ${t.opacity}; letter-spacing: ${t.tracking}em;`;
     
     if (t.align === 'left')       style += ' transform: translate(0%, -50%);';
@@ -185,13 +185,55 @@ export async function exportHtmlEmbed(): Promise<void> {
     const U = {};
     const uniforms = [
       'u_res', 'u_phase', 'u_seed', 'u_mode',
-      'u_speed', 'u_scale', 'u_density', 'u_distort', 'u_detail', 'u_grain',
-      'u_c0', 'u_c1', 'u_c2', 'u_c3', 'u_texture', 'u_mix', 'u_pixel', 'u_invert'
+      'u_speed', 'u_scale', 'u_density', 'u_distort', 'u_detail', 'u_grain', 'u_warp',
+      'u_c0', 'u_c1', 'u_c2', 'u_c3', 'u_texture', 'u_mix', 'u_pixel', 'u_invert',
+      'u_mask', 'u_hasMask', 'u_maskBg'
     ];
     uniforms.forEach(n => { U[n] = gl.getUniformLocation(prog, n); });
 
     // Embedded Parameters
     const P = ${JSON.stringify(P, null, 2)};
+    const TEXTS = ${JSON.stringify(texts, null, 2)};
+    let maskTex = null, maskCv = null;
+    function hex2rgb01(h) {
+      return [parseInt(h.slice(1,3),16)/255, parseInt(h.slice(3,5),16)/255, parseInt(h.slice(5,7),16)/255];
+    }
+    function updateMask() {
+      const pts = TEXTS.filter(t => t.effect === 'pattern' && (t.content||'').trim());
+      if (!pts.length) { gl.uniform1f(U.u_hasMask, 0); return; }
+      const ar = canvas.width / canvas.height;
+      const LONG = 2048, MW = ar >= 1 ? LONG : Math.round(LONG * ar), MH = ar >= 1 ? Math.round(LONG / ar) : LONG;
+      if (!maskCv) maskCv = document.createElement('canvas');
+      maskCv.width = MW; maskCv.height = MH;
+      const mx = maskCv.getContext('2d');
+      mx.fillStyle = '#000'; mx.fillRect(0,0,MW,MH);
+      mx.fillStyle = '#fff';
+      pts.forEach(t => {
+        const sizePx = t.fontSize * MH;
+        mx.font = (t.italic?'italic ':'') + (t.bold?'bold ':'') + sizePx + 'px ' + t.fontFamily;
+        mx.textBaseline = 'middle'; mx.textAlign = t.align;
+        mx.fillText(t.content, t.x * MW, t.y * MH);
+      });
+      if (!maskTex) {
+        maskTex = gl.createTexture();
+        gl.activeTexture(gl.TEXTURE2);
+        gl.bindTexture(gl.TEXTURE_2D, maskTex);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.uniform1i(U.u_mask, 2);
+        gl.activeTexture(gl.TEXTURE0);
+      }
+      gl.activeTexture(gl.TEXTURE2);
+      gl.bindTexture(gl.TEXTURE_2D, maskTex);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, maskCv);
+      gl.activeTexture(gl.TEXTURE0);
+      const bg = hex2rgb01(pts[0].bgColor || '#08080a');
+      gl.uniform1f(U.u_hasMask, 1);
+      gl.uniform3f(U.u_maskBg, bg[0], bg[1], bg[2]);
+    }
 
     // Helper: Hex to RGB
     function hex2rgb(h) {
@@ -228,6 +270,7 @@ export async function exportHtmlEmbed(): Promise<void> {
       canvas.width = Math.round(window.innerWidth * dpr);
       canvas.height = Math.round(window.innerHeight * dpr);
       gl.viewport(0, 0, canvas.width, canvas.height);
+      updateMask();
       
       const overlay = document.getElementById('text-overlay');
       const h = overlay.offsetHeight || window.innerHeight;
@@ -255,6 +298,7 @@ export async function exportHtmlEmbed(): Promise<void> {
       gl.uniform1f(U.u_distort, P.distort);
       gl.uniform1f(U.u_detail, P.detail);
       gl.uniform1f(U.u_grain, P.grain);
+      gl.uniform1f(U.u_warp, P.warp ?? 0.5);
       gl.uniform1f(U.u_mix, P.mix);
       gl.uniform1f(U.u_pixel, P.pixel);
       gl.uniform1f(U.u_invert, P.invert || 0);
@@ -266,6 +310,9 @@ export async function exportHtmlEmbed(): Promise<void> {
       gl.activeTexture(gl.TEXTURE0);
       gl.bindTexture(gl.TEXTURE_2D, texLoaded ? texObj : null);
       gl.uniform1i(U.u_texture, 0);
+      if (!TEXTS.some(t => t.effect === 'pattern' && (t.content||'').trim())) {
+        gl.uniform1f(U.u_hasMask, 0);
+      }
 
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       requestAnimationFrame(render);

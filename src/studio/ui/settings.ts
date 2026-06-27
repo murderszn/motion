@@ -2,7 +2,7 @@
 //  Settings — persist studio chrome + creative state
 // ─────────────────────────────────────────────────────────
 
-import { P, migrateLegacyMode, normalizeMode } from '../state';
+import { P, migrateLegacyMode, migrateTrilatRemoval } from '../state';
 import type { Params, TextElem } from '../types';
 import { texts } from './text';
 import { setTermPanelHeight } from './terminal';
@@ -30,7 +30,7 @@ export interface StudioSettings {
   texts: TextElem[];
 }
 
-const SETTINGS_VERSION = 2;
+const SETTINGS_VERSION = 3;
 
 const DEFAULTS: StudioSettings = {
   version: SETTINGS_VERSION,
@@ -77,7 +77,7 @@ export function loadSettings(): StudioSettings | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as StudioSettings;
     if (!parsed || !parsed.params) return null;
-    if (parsed.version !== 1 && parsed.version !== SETTINGS_VERSION) return null;
+    if (parsed.version !== 1 && parsed.version !== 2 && parsed.version !== SETTINGS_VERSION) return null;
     return parsed;
   } catch {
     return null;
@@ -88,9 +88,13 @@ export function loadSettings(): StudioSettings | null {
 export function applySavedParams(saved: StudioSettings): void {
   Object.assign(P, saved.params);
   P.colors = [...saved.params.colors] as Params['colors'];
-  P.mode = saved.version < SETTINGS_VERSION
+  P.exportTargetId = saved.params.exportTargetId ?? 'custom';
+  P.imageFormat = saved.params.imageFormat ?? 'png';
+  P.exportCaption = saved.params.exportCaption ?? '';
+  const rawMode = saved.version < 2
     ? migrateLegacyMode(saved.params.mode)
-    : normalizeMode(saved.params.mode);
+    : saved.params.mode;
+  P.mode = migrateTrilatRemoval(rawMode);
   texts.splice(0, texts.length, ...saved.texts.map(t => ({ ...t })));
 }
 
@@ -172,7 +176,7 @@ export function initSettingsPersistence(): void {
   const events = [
     'input', 'change', 'lumen:presetChanged', 'lumen:textChanged',
     'lumen:bottomTabChanged', 'lumen:leftTabChanged', 'lumen:themeChanged',
-    'lumen:exportFormatChanged', 'lumen:layoutChanged',
+    'lumen:exportFormatChanged', 'lumen:exportSettingsChanged', 'lumen:layoutChanged',
   ];
   events.forEach(ev => window.addEventListener(ev, scheduleSaveSettings));
   window.addEventListener('beforeunload', saveSettingsNow);

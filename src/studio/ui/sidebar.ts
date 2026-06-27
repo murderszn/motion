@@ -4,6 +4,7 @@
 // ─────────────────────────────────────────────────────────
 
 import { THEMES } from '../state';
+import { expandThemeVariables } from '../theme_tokens';
 import {
   scheduleFitTerminal, updateTermTheme, logToTerminal,
   applyTermPanelHeight, focusTerminal,
@@ -119,10 +120,11 @@ export function toggleMaximize(): void {
 
 export function applyTheme(key: string): void {
   const theme = THEMES[key] ?? THEMES['lumen-dark'];
-  Object.entries(theme.variables).forEach(([name, val]) =>
+  const vars = expandThemeVariables(theme.variables);
+  Object.entries(vars).forEach(([name, val]) =>
     document.documentElement.style.setProperty(name, val));
   $('sTheme').textContent = '◆ ' + theme.name;
-  updateTermTheme(theme.variables);
+  updateTermTheme(vars);
   localStorage.setItem('lumen-theme', key);
   window.currentThemeKey = key;
   window.dispatchEvent(new CustomEvent('lumen:themeChanged'));
@@ -201,5 +203,16 @@ export function initSidebar(): void {
   });
   window.addEventListener('lumen:applyTheme', e => {
     applyTheme((e as CustomEvent<string>).detail);
+  });
+
+  // WebGL context-loss banner
+  const banner = document.getElementById('contextBanner');
+  window.addEventListener('lumen:contextLost', () => {
+    if (banner) banner.style.display = 'block';
+    logToTerminal('WebGL context lost — pausing animation', 'err');
+  });
+  window.addEventListener('lumen:contextRestored', () => {
+    if (banner) banner.style.display = 'none';
+    logToTerminal('WebGL context restored', 'ok');
   });
 }

@@ -7,6 +7,26 @@
       "**/node_modules/**",
       "index.html"
     ],
+    "headers": [
+      {
+        "source": "/assets/**",
+        "headers": [
+          { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        ]
+      },
+      {
+        "source": "/chromaverse/*.html",
+        "headers": [
+          { "key": "Cache-Control", "value": "public, max-age=300, stale-while-revalidate=3600" }
+        ]
+      },
+      {
+        "source": "/chromaverse/**",
+        "headers": [
+          { "key": "Cache-Control", "value": "public, max-age=3600, stale-while-revalidate=86400" }
+        ]
+      }
+    ],
     "rewrites": [
       { "source": "/", "destination": "/splash.html" },
       { "source": "**", "destination": "/splash.html" }

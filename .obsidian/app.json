@@ -1,0 +1,13 @@
+{
+  "alwaysUpdateLinks": true,
+  "newFileLocation": "folder",
+  "newFileFolderPath": "brain",
+  "attachmentFolderPath": "brain/assets",
+  "useMarkdownLinks": true,
+  "showUnsupportedFiles": true,
+  "trashOption": "local",
+  "showLineNumber": true,
+  "spellcheck": true,
+  "tabSize": 2,
+  "readableLineLength": true
+}

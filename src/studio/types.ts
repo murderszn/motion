@@ -21,9 +21,11 @@ export interface SliderDef {
 }
 
 /** Keys that correspond to numeric shader parameters in Params */
-export type SliderKey = 'speed' | 'scale' | 'density' | 'distort' | 'detail' | 'grain';
+export type SliderKey = 'speed' | 'scale' | 'density' | 'distort' | 'warp' | 'detail' | 'grain';
 
 export type Palette = [string, string, string, string];
+
+export type StillImageFormat = 'png' | 'jpg' | 'webp';
 
 export interface Params {
   mode: number;
@@ -35,15 +37,19 @@ export interface Params {
   scale: number;
   density: number;
   distort: number;
+  warp: number;
   detail: number;
   grain: number;
   mix: number;
   pixel: number;
   invert: number;
+  exportTargetId: string;
+  imageFormat: StillImageFormat;
+  exportCaption: string;
 }
 
 export type TextAlign = 'left' | 'center' | 'right';
-export type TextEffect = 'none' | 'shadow' | 'neon' | 'outline' | 'badge' | 'glass';
+export type TextEffect = 'none' | 'shadow' | 'neon' | 'outline' | 'badge' | 'glass' | 'pattern';
 
 export interface TextElem {
   id: number;
