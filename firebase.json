@@ -29,6 +29,7 @@
     ],
     "rewrites": [
       { "source": "/", "destination": "/splash.html" },
+      { "source": "/chromaverse/**", "destination": "/chromaverse/index.html" },
       { "source": "**", "destination": "/splash.html" }
     ]
   }
