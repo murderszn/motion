@@ -33,7 +33,6 @@ void main(){
   vec3 col = vec3(0.0);
   col += vec3(0.12) * wave * 0.3;
   col += vec3(1.0) * crest;
-  col += (hash21(gl_FragCoord.xy) - 0.5) * 0.015;
   vec2 vig = uv*2.0 - 1.0; col *= 1.0 - dot(vig,vig)*0.25;
   gl_FragColor = vec4(col, 1.0);
 }`;
@@ -59,7 +58,6 @@ void main(){
   vec3 col = vec3(1.0);
   col -= vec3(0.08) * wave * 0.4;
   col -= vec3(1.0) * crest;
-  col += (hash21(gl_FragCoord.xy) - 0.5) * 0.008;
   vec2 vig = uv*2.0 - 1.0; col *= 1.0 - dot(vig,vig)*0.10;
   col = clamp(col, 0.0, 1.0);
   gl_FragColor = vec4(col, 1.0);
