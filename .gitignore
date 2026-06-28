@@ -60,3 +60,7 @@ __pycache__/
 # ─── Agent context files (personal) ───
 CLAUDE.md
 AGENTS.md
+
+# ─── Skill files (personal) ───
+*-coding-skill.md
+kinetic-typography-skills/

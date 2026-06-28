@@ -163,15 +163,10 @@ void main(){
         // Camouflage levels (flat color sections)
         float levels = mix(3.0, 8.0, u_density);
         float val = n * levels + t * 0.15;
-        
-        // Quantize the value with antialiased step transitions to prevent aliasing
-        float f_val = floor(val);
+        float f_val = mod(floor(val), levels);
         float fract_val = fract(val);
         float border_width = 0.04 * (1.0 + u_detail * 2.0);
-        float smooth_val = f_val + smoothstep(0.5 - border_width, 0.5 + border_width, fract_val);
-        
-        // Map to flat color bands
-        float camo = clamp(smooth_val / levels, 0.0, 1.0);
+        float camo = (f_val + smoothstep(0.5 - border_width, 0.5 + border_width, fract_val)) / levels;
         col = grad4(camo);
         
         // Subtle audio response to pulse the camo boundaries
