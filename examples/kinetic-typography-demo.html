@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kinetic Typography Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #08080a;
+      --text: #f4f4f6;
+      --accent: #e03a3a;
+      --muted: #55555e;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: var(--bg);
+      font-family: 'Inter', -apple-system, sans-serif;
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    #stage {
+      position: fixed; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 2rem;
+    }
+
+    .scene {
+      text-align: center;
+      opacity: 0;
+    }
+
+    .headline {
+      font-weight: 800;
+      font-size: clamp(3rem, 10vw, 8rem);
+      letter-spacing: -0.04em;
+      line-height: 1.1;
+    }
+
+    .headline .line {
+      overflow: hidden;
+      padding: 0.1em 0;
+    }
+
+    .headline .line > span {
+      display: inline-block;
+      transform: translateY(110%);
+    }
+
+    .headline .accent { color: var(--accent); }
+
+    .subhead {
+      font-weight: 400;
+      font-size: clamp(1rem, 2.5vw, 1.5rem);
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .subhead .line {
+      overflow: hidden;
+      padding: 0.15em 0;
+    }
+
+    .subhead .line > span {
+      display: inline-block;
+      transform: translateY(110%);
+    }
+
+    .variable-weight {
+      font-weight: 100;
+      font-size: clamp(2rem, 6vw, 5rem);
+      letter-spacing: -0.02em;
+    }
+
+    .char {
+      display: inline-block;
+      opacity: 0;
+    }
+
+    svg text {
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 48px;
+      fill: var(--text);
+    }
+
+    .path-text {
+      opacity: 0;
+    }
+
+    .controls {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 1rem;
+      z-index: 100;
+    }
+
+    .controls button {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: var(--text);
+      padding: 0.5rem 1.2rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      transition: background 0.2s;
+    }
+
+    .controls button:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .headline .line > span,
+      .subhead .line > span,
+      .variable-weight,
+      .char,
+      .path-text {
+        transform: none !important;
+        opacity: 1 !important;
+        animation: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="stage">
+    <!-- Scene 1: Mask Reveal Headline -->
+    <div class="scene" id="s1" aria-label="Words in motion">
+      <div class="headline">
+        <div class="line"><span>WORDS IN</span></div>
+        <div class="line"><span class="accent">MOTION</span></div>
+      </div>
+    </div>
+
+    <!-- Scene 2: Character Stagger -->
+    <div class="scene" id="s2" aria-label="Kinetic">
+      <div class="headline" id="kinetic-text"></div>
+    </div>
+
+    <!-- Scene 3: Variable Font Weight -->
+    <div class="scene" id="s3" aria-label="Weight shift">
+      <div class="variable-weight" id="weight-text">WEIGHT SHIFT</div>
+    </div>
+
+    <!-- Scene 4: SVG Text on Path -->
+    <div class="scene" id="s4" class="path-text" aria-label="Text flowing along a curved path">
+      <svg viewBox="0 0 600 200" width="500" height="170">
+        <path id="curve" d="M30,150 Q300,30 570,150" fill="none" />
+        <text>
+          <textPath href="#curve" startOffset="0%" id="path-text">TEXT FLOWS ALONG THE CURVE</textPath>
+        </text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button onclick="restart()">Replay</button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script>
+    // Freeze harness for screenshots
+    const t = new URLSearchParams(location.search).get("t");
+    let master;
+
+    // Split text into characters
+    function splitChars(el) {
+      const text = el.textContent;
+      el.textContent = '';
+      el.setAttribute('aria-hidden', 'true');
+      for (const ch of text) {
+        const span = document.createElement('span');
+        span.className = 'char';
+        span.textContent = ch === ' ' ? '\u00A0' : ch;
+        el.appendChild(span);
+      }
+      return el.querySelectorAll('.char');
+    }
+
+    // Split headline into lines
+    function splitLines(el) {
+      const text = el.textContent;
+      el.textContent = '';
+      el.setAttribute('aria-hidden', 'true');
+      const words = text.split(' ');
+      const line1 = document.createElement('div');
+      line1.className = 'line';
+      const span1 = document.createElement('span');
+      span1.textContent = words.slice(0, -1).join(' ');
+      line1.appendChild(span1);
+      const line2 = document.createElement('div');
+      line2.className = 'line';
+      const span2 = document.createElement('span');
+      span2.textContent = words[words.length - 1];
+      span2.className = el.classList.contains('accent') ? 'accent' : '';
+      line2.appendChild(span2);
+      el.appendChild(line1);
+      el.appendChild(line2);
+    }
+
+    document.fonts.ready.then(() => {
+      // Prepare scenes
+      splitLines(document.querySelector('#s1 .headline'));
+      const kineticChars = splitChars(document.getElementById('kinetic-text'));
+      document.getElementById('kinetic-text').textContent = 'KINETIC';
+      const weightEl = document.getElementById('weight-text');
+
+      // Build timeline
+      function build() {
+        const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
+
+        // Scene 1: Mask Reveal
+        tl.set('#s1', { opacity: 1 })
+          .from('#s1 .line > span', {
+            y: '110%',
+            duration: 0.6,
+            stagger: 0.1,
+            ease: 'power3.out'
+          }, 0)
+          .to('#s1', { opacity: 0, duration: 0.3 }, 1.2);
+
+        // Scene 2: Character Stagger
+        tl.set('#s2', { opacity: 1 }, 1.5)
+          .from(kineticChars, {
+            y: 40,
+            opacity: 0,
+            duration: 0.5,
+            stagger: { each: 0.04, from: 'center' },
+            ease: 'back.out(1.7)'
+          }, 1.5)
+          .to('#s2', { opacity: 0, duration: 0.3 }, 2.5);
+
+        // Scene 3: Variable Weight
+        tl.set('#s3', { opacity: 1 }, 3)
+          .fromTo(weightEl,
+            { fontVariationSettings: '"wght" 100' },
+            { fontVariationSettings: '"wght" 900', duration: 0.8, ease: 'power2.inOut' },
+            3
+          )
+          .to('#s3', { opacity: 0, duration: 0.3 }, 4);
+
+        // Scene 4: Text on Path
+        tl.set('#s4', { opacity: 1 }, 4.5)
+          .fromTo('#path-text',
+            { attr: { startOffset: '-30%' } },
+            { attr: { startOffset: '100%' }, duration: 2, ease: 'power1.inOut' },
+            4.5
+          )
+          .to('#s4', { opacity: 0, duration: 0.3 }, 6.5);
+
+        return tl;
+      }
+
+      master = build();
+
+      // Freeze harness
+      if (t !== null) {
+        master.pause();
+        master.seek(parseFloat(t));
+      }
+
+      window.__ready = true;
+    });
+
+    function restart() {
+      if (master) {
+        master.restart();
+      }
+    }
+  </script>
+</body>
+</html>

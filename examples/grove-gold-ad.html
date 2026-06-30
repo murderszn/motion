@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grove & Gold — 15s Commercial</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,700;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0B1305;
+      --ink: #121E0B;
+      --ink-soft: #2D4421;
+      --accent: #84CC16;
+      --accent-light: #D9F99D;
+      --accent-bright: #A3E635;
+      --text: #ECFDF5;
+      --text-mid: #D9F99D;
+      --muted: #4A6C38;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: var(--bg);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    canvas#bg {
+      position: fixed; inset: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+    }
+
+    #vignette {
+      position: fixed; inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background: radial-gradient(ellipse at center, transparent 20%, rgba(11,19,5,0.8) 100%);
+    }
+
+    #grain {
+      position: fixed; inset: 0; z-index: 2;
+      pointer-events: none; opacity: 0.04;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    #stage {
+      position: fixed; inset: 0;
+      z-index: 10;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+
+    .scene {
+      position: absolute;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      opacity: 0;
+      width: 100%; height: 100%;
+      padding: 2rem;
+    }
+
+    .eyebrow {
+      font-family: 'Newsreader', serif;
+      font-size: clamp(0.9rem, 2vw, 1.3rem);
+      font-weight: 400;
+      font-style: italic;
+      letter-spacing: 0.15em;
+      color: var(--accent-light);
+      margin-bottom: 1rem;
+    }
+
+    .headline {
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      line-height: 0.95;
+      color: var(--text);
+    }
+
+    .headline-xl {
+      font-size: clamp(4rem, 12vw, 10rem);
+    }
+
+    .headline-lg {
+      font-size: clamp(2.5rem, 7vw, 6rem);
+    }
+
+    .headline-md {
+      font-size: clamp(1.8rem, 5vw, 4rem);
+    }
+
+    .headline .accent { color: var(--accent-bright); }
+
+    .line-mask {
+      overflow: hidden;
+      padding: 0.1em 0;
+    }
+
+    .line-mask > span {
+      display: inline-block;
+      transform: translateY(110%);
+    }
+
+    .sub {
+      font-family: 'Newsreader', serif;
+      font-size: clamp(1rem, 2.5vw, 1.5rem);
+      font-weight: 400;
+      color: var(--text-mid);
+      margin-top: 1rem;
+      letter-spacing: 0.05em;
+    }
+
+    .char {
+      display: inline-block;
+    }
+
+    .stats-row {
+      display: flex;
+      gap: clamp(2rem, 5vw, 5rem);
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .stat-item {
+      text-align: center;
+      opacity: 0;
+    }
+
+    .stat-num {
+      font-weight: 900;
+      font-size: clamp(3rem, 8vw, 7rem);
+      color: var(--accent-bright);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-family: 'Newsreader', serif;
+      font-size: clamp(0.7rem, 1.5vw, 1rem);
+      font-style: italic;
+      color: var(--text-mid);
+      margin-top: 0.5rem;
+      letter-spacing: 0.1em;
+    }
+
+    .cta-btn {
+      display: inline-block;
+      font-weight: 800;
+      font-size: clamp(1rem, 2.5vw, 1.5rem);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      padding: 1rem 3rem;
+      border: 2px solid var(--accent);
+      background: var(--accent);
+      color: var(--bg);
+      margin-top: 2rem;
+      opacity: 0;
+    }
+
+    .logo-mark {
+      font-family: 'Newsreader', serif;
+      font-weight: 700;
+      font-size: clamp(1.5rem, 4vw, 3rem);
+      color: var(--text);
+      opacity: 0;
+    }
+
+    .logo-mark span { color: var(--accent-bright); }
+
+    .tagline {
+      font-family: 'Newsreader', serif;
+      font-style: italic;
+      font-size: clamp(0.9rem, 2vw, 1.2rem);
+      color: var(--text-mid);
+      margin-top: 0.75rem;
+      opacity: 0;
+    }
+
+    .divider {
+      width: 0;
+      height: 2px;
+      background: var(--accent);
+      margin: 1.5rem 0;
+    }
+
+    .controls {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      display: flex;
+      gap: 1rem;
+    }
+
+    .controls button {
+      background: rgba(132,204,22,0.15);
+      border: 1px solid rgba(132,204,22,0.4);
+      color: var(--text);
+      padding: 0.4rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: background 0.2s;
+    }
+
+    .controls button:hover {
+      background: rgba(132,204,22,0.3);
+    }
+
+    #timer {
+      position: fixed;
+      top: 1.5rem;
+      right: 1.5rem;
+      z-index: 100;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      color: var(--accent-light);
+      opacity: 0.6;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .line-mask > span,
+      .char,
+      .stat-item,
+      .stat-num,
+      .cta-btn,
+      .logo-mark,
+      .tagline,
+      .eyebrow {
+        transform: none !important;
+        opacity: 1 !important;
+        animation: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bg"></canvas>
+  <div id="vignette"></div>
+  <div id="grain"></div>
+
+  <div id="stage">
+    <!-- Scene 1: Brand Reveal (0-2.5s) -->
+    <div class="scene" id="s1" aria-label="Grove and Gold">
+      <div class="eyebrow" id="s1-eye">Small-Batch California Avocados</div>
+      <div class="headline headline-xl" id="s1-brand"></div>
+      <div class="divider" id="s1-div"></div>
+    </div>
+
+    <!-- Scene 2: Tagline (2.5-4.5s) -->
+    <div class="scene" id="s2" aria-label="Avocados Grown with Gold">
+      <div class="headline headline-lg" id="s2-text">
+        <div class="line-mask"><span>Avocados</span></div>
+        <div class="line-mask"><span>Grown with <span class="accent">Gold</span></span></div>
+      </div>
+    </div>
+
+    <!-- Scene 3: Stats Counter (4.5-7.5s) -->
+    <div class="scene" id="s3">
+      <div class="stats-row">
+        <div class="stat-item" id="stat1">
+          <div class="stat-num" data-target="12">0</div>
+          <div class="stat-label">Acres of Groves</div>
+        </div>
+        <div class="stat-item" id="stat2">
+          <div class="stat-num" data-target="3">0</div>
+          <div class="stat-label">Avocado Varieties</div>
+        </div>
+        <div class="stat-item" id="stat3">
+          <div class="stat-num" data-target="48" data-suffix="h">0</div>
+          <div class="stat-label">Field to Door</div>
+        </div>
+        <div class="stat-item" id="stat4">
+          <div class="stat-num" data-target="0">0</div>
+          <div class="stat-label">Chemicals Used</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scene 4: Story (7.5-10.5s) -->
+    <div class="scene" id="s4" aria-label="Three generations of sun and soil">
+      <div class="eyebrow" id="s4-eye">Our Story</div>
+      <div class="headline headline-md" id="s4-text">
+        <div class="line-mask"><span>Three Generations</span></div>
+        <div class="line-mask"><span>of <span class="accent">Sun & Soil</span></span></div>
+      </div>
+      <div class="sub" id="s4-sub">Since 1962</div>
+    </div>
+
+    <!-- Scene 5: Summer 2026 (10.5-13s) -->
+    <div class="scene" id="s5" aria-label="Summer 2026 Coming Soon">
+      <div class="headline headline-xl" id="s5-year"></div>
+      <div class="sub" id="s5-sub">Our Biggest Harvest Yet</div>
+    </div>
+
+    <!-- Scene 6: CTA (13-15s) -->
+    <div class="scene" id="s6">
+      <div class="logo-mark" id="s6-logo">Grove <span>&</span> Gold</div>
+      <div class="tagline" id="s6-tag">Grown in California</div>
+      <div class="cta-btn" id="s6-cta">Pre-Order Now</div>
+    </div>
+  </div>
+
+  <div id="timer">0.0s / 15.0s</div>
+
+  <div class="controls">
+    <button onclick="restart()">Replay</button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script>
+    // === WEBGL BACKGROUND (aurora green) ===
+    (function(){
+      var canvas = document.getElementById('bg');
+      var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (!gl) { canvas.style.background = '#0B1305'; return; }
+
+      var VS = 'attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }';
+      var FS = [
+        'precision highp float;',
+        'uniform vec2 u_res;',
+        'uniform float u_time;',
+        '#define TAU 6.28318530718',
+        'float hash21(vec2 p){ p=fract(p*vec2(234.34,435.345)); p+=dot(p,p+34.23); return fract(p.x*p.y); }',
+        'float vnoise(vec2 p){ vec2 i=floor(p),f=fract(p); f=f*f*(3.0-2.0*f); return mix(mix(hash21(i),hash21(i+vec2(1,0)),f.x),mix(hash21(i+vec2(0,1)),hash21(i+vec2(1,1)),f.x),f.y); }',
+        'float fbm(vec2 p){ float v=0.0,a=0.5; mat2 r=mat2(0.8,0.6,-0.6,0.8); for(int i=0;i<5;i++){v+=a*vnoise(p);p=r*p*2.1+vec2(1.7,9.2);a*=0.5;} return v; }',
+        'void main(){',
+        '  vec2 uv=gl_FragCoord.xy/u_res;',
+        '  uv.y=1.0-uv.y;',
+        '  float ar=u_res.x/u_res.y;',
+        '  vec2 p=(uv-0.5)*vec2(ar,1.0)*3.0;',
+        '  float t=u_time*0.15;',
+        '  vec2 off=vec2(cos(t*0.7),sin(t*0.5))*0.3;',
+        '  float f=fbm(p+off);',
+        '  float ridge=1.0-smoothstep(0.0,0.6,f);',
+        '  vec3 c0=vec3(0.043,0.075,0.035);',
+        '  vec3 c1=vec3(0.176,0.267,0.129);',
+        '  vec3 c2=vec3(0.329,0.522,0.243);',
+        '  vec3 c3=vec3(0.522,0.800,0.086);',
+        '  vec3 col=mix(c0,c1,smoothstep(0.0,0.35,f));',
+        '  col=mix(col,c2,smoothstep(0.35,0.7,f));',
+        '  col=mix(col,c3,smoothstep(0.7,1.0,f));',
+        '  col+=c3*ridge*0.2;',
+        '  col*=1.0-uv.y*0.3;',
+        '  vec2 vig=uv*2.0-1.0;',
+        '  col*=1.0-dot(vig,vig)*0.2;',
+        '  gl_FragColor=vec4(col,1.0);',
+        '}'
+      ].join('\n');
+
+      function compile(type, src) {
+        var s = gl.createShader(type);
+        gl.shaderSource(s, src);
+        gl.compileShader(s);
+        return s;
+      }
+
+      var prog = gl.createProgram();
+      gl.attachShader(prog, compile(gl.VERTEX_SHADER, VS));
+      gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FS));
+      gl.linkProgram(prog);
+      gl.useProgram(prog);
+
+      var buf = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
+      var aLoc = gl.getAttribLocation(prog, 'a');
+      gl.enableVertexAttribArray(aLoc);
+      gl.vertexAttribPointer(aLoc, 2, gl.FLOAT, false, 0, 0);
+
+      var uRes = gl.getUniformLocation(prog, 'u_res');
+      var uTime = gl.getUniformLocation(prog, 'u_time');
+
+      function resize() {
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.round(window.innerWidth * dpr);
+        canvas.height = Math.round(window.innerHeight * dpr);
+        gl.viewport(0, 0, canvas.width, canvas.height);
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      var t0 = performance.now();
+      function render(now) {
+        gl.uniform2f(uRes, canvas.width, canvas.height);
+        gl.uniform1f(uTime, (now - t0) / 1000);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        requestAnimationFrame(render);
+      }
+      requestAnimationFrame(render);
+    })();
+
+    // === KINETIC TYPOGRAPHY + DATA ANIMATION ===
+    const t = new URLSearchParams(location.search).get("t");
+    let master;
+
+    function splitChars(el) {
+      const text = el.textContent;
+      el.textContent = '';
+      el.setAttribute('aria-hidden', 'true');
+      for (const ch of text) {
+        const span = document.createElement('span');
+        span.className = 'char';
+        span.textContent = ch === ' ' ? '\u00A0' : ch;
+        el.appendChild(span);
+      }
+      return el.querySelectorAll('.char');
+    }
+
+    function animateCounter(el, target, suffix, duration) {
+      const start = performance.now();
+      const isZero = target === 0;
+      function update(now) {
+        const elapsed = (now - start) / 1000;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = isZero ? 0 : Math.round(target * eased);
+        el.textContent = current + (suffix || '');
+        if (progress < 1) requestAnimationFrame(update);
+      }
+      requestAnimationFrame(update);
+    }
+
+    document.fonts.ready.then(() => {
+      // Prepare - set text FIRST, then split
+      document.getElementById('s1-brand').textContent = 'GROVE & GOLD';
+      const brandChars = splitChars(document.getElementById('s1-brand'));
+      document.getElementById('s5-year').textContent = '2026';
+      const yearChars = splitChars(document.getElementById('s5-year'));
+
+      function build() {
+        const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
+
+        // === SCENE 1: Brand (0-2.5s) ===
+        tl.set('#s1', { opacity: 1 }, 0)
+          .from('#s1-eye', { y: 20, opacity: 0, duration: 0.6 }, 0.1)
+          .from(brandChars, {
+            y: 80, opacity: 0, rotateX: -60,
+            stagger: { each: 0.04, from: 'center' },
+            duration: 0.7, ease: 'back.out(1.4)'
+          }, 0.2)
+          .to('#s1-div', { width: 120, duration: 0.5, ease: 'power2.out' }, 0.6)
+          .to('#s1', { opacity: 0, duration: 0.4 }, 2.1);
+
+        // === SCENE 2: Tagline (2.5-4.5s) ===
+        tl.set('#s2', { opacity: 1 }, 2.5)
+          .from('#s2 .line-mask > span', {
+            y: '110%', duration: 0.6, stagger: 0.12, ease: 'power3.out'
+          }, 2.5)
+          .to('#s2', { opacity: 0, duration: 0.4 }, 4.1);
+
+        // === SCENE 3: Stats (4.5-7.5s) ===
+        tl.set('#s3', { opacity: 1 }, 4.5)
+          .from('.stat-item', {
+            y: 40, opacity: 0, stagger: 0.15, duration: 0.5
+          }, 4.5)
+          .call(() => {
+            animateCounter(document.querySelector('#stat1 .stat-num'), 12, '', 1.5);
+            animateCounter(document.querySelector('#stat2 .stat-num'), 3, '', 1.5);
+            animateCounter(document.querySelector('#stat3 .stat-num'), 48, 'h', 1.5);
+            animateCounter(document.querySelector('#stat4 .stat-num'), 0, '', 1.5);
+          }, [], 4.8)
+          .to('#s3', { opacity: 0, duration: 0.4 }, 7.1);
+
+        // === SCENE 4: Story (7.5-10.5s) ===
+        tl.set('#s4', { opacity: 1 }, 7.5)
+          .from('#s4-eye', { y: 20, opacity: 0, duration: 0.5 }, 7.5)
+          .from('#s4 .line-mask > span', {
+            y: '110%', duration: 0.6, stagger: 0.12, ease: 'power3.out'
+          }, 7.7)
+          .from('#s4-sub', { opacity: 0, duration: 0.4 }, 8.2)
+          .to('#s4', { opacity: 0, duration: 0.4 }, 10.1);
+
+        // === SCENE 5: Year (10.5-13s) ===
+        tl.set('#s5', { opacity: 1 }, 10.5)
+          .from(yearChars, {
+            scale: 3, opacity: 0, filter: 'blur(20px)',
+            stagger: { each: 0.08, from: 'center' },
+            duration: 0.7, ease: 'power3.out'
+          }, 10.5)
+          .from('#s5-sub', { y: 20, opacity: 0, duration: 0.5 }, 11)
+          .to('#s5', { opacity: 0, duration: 0.4 }, 12.6);
+
+        // === SCENE 6: CTA (13-15s) ===
+        tl.set('#s6', { opacity: 1 }, 13)
+          .from('#s6-logo', { y: 30, opacity: 0, duration: 0.5 }, 13)
+          .from('#s6-tag', { opacity: 0, duration: 0.4 }, 13.3)
+          .from('#s6-cta', { y: 20, opacity: 0, scale: 0.9, duration: 0.5, ease: 'back.out(1.5)' }, 13.5)
+          .to('#s6-cta', {
+            scale: 1.05, duration: 0.4, yoyo: true, repeat: 1, ease: 'sine.inOut'
+          }, 14);
+
+        return tl;
+      }
+
+      master = build();
+
+      // Timer
+      const timerEl = document.getElementById('timer');
+      gsap.ticker.add(() => {
+        if (master) {
+          const time = master.time().toFixed(1);
+          timerEl.textContent = time + 's / 15.0s';
+        }
+      });
+
+      // Freeze harness
+      if (t !== null) {
+        // Set initial states before seeking
+        gsap.set('.scene', { opacity: 0 });
+        gsap.set('.char', { opacity: 0, y: 80 });
+        gsap.set('.line-mask > span', { y: '110%' });
+        gsap.set('.stat-item', { opacity: 0, y: 40 });
+        gsap.set('#s1-div', { width: 0 });
+        gsap.set('#s6-cta', { opacity: 0, scale: 0.9 });
+        master.pause();
+        master.seek(parseFloat(t));
+      }
+
+      window.__ready = true;
+    });
+
+    function restart() {
+      if (master) master.restart();
+    }
+  </script>
+</body>
+</html>
