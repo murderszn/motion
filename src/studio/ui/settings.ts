@@ -12,7 +12,7 @@ const SAVE_DEBOUNCE_MS = 400;
 
 export type BottomTab = 'term' | 'shader' | 'problems' | 'hotkeys';
 export type ExportFormat = 'png' | 'webm' | 'gif';
-export type LeftTab = 'generator' | 'text';
+export type LeftTab = 'generator' | 'text' | 'ai';
 
 export interface StudioSettings {
   version: number;

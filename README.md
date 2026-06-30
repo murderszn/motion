@@ -1,8 +1,8 @@
 ![motion header](media/motion-header.png)
 
-# /motion — generative shader studio + chromaverse design system
+# /motion — generative shader studio + chromaverse design system + pollinations.ai
 
-A browser-based **generative graphics studio** for creating seamless-loop motion graphics with WebGL shaders, plus **Chromaverse** — a 65+ theme design-system gallery. Built with TypeScript + Vite.
+A browser-based **generative graphics studio** for creating seamless-loop motion graphics with WebGL shaders, plus **Chromaverse** — a 65+ theme design-system gallery. Supercharged with **Pollinations.ai** integrations for neural texture warping, prompt-based preset styling, and a live AI shader co-pilot. Built with TypeScript + Vite.
 
 **[Live Demo →](https://motion-e93d3.web.app)**
 
@@ -10,6 +10,7 @@ A browser-based **generative graphics studio** for creating seamless-loop motion
 
 ## ✨ Features
 
+- **Pollinations.ai Integration** — Real-time AI image generation (Flux, Turbo) loaded directly as WebGL texture overlays to be procedurally warped/refracted by shaders; semantic style prompt-to-preset translation; and an interactive AI Shader Co-Pilot to write custom GLSL or tweak parameters live.
 - **32 shader presets** — 19 classic procedural generators and 13 multi-slider fluid field engines (ported from `krackeddevs`)
 - **Professional Desktop Frame** — Adobe/Microsoft style header dropdown menus (**File**, **Edit**, **View**, **Workspace**, **Help**) with offline local project Save/Load support (`.json` files)
 - **Web Audio FFT Analyser** — Real-time microphone and audio input integration, splitting amplitudes into **Bass**, **Mids**, and **Treble** ranges to drive GPU visualizer maps

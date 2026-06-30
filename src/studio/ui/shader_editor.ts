@@ -75,6 +75,13 @@ export function getShaderSource(): string {
   return monacoEditor?.getValue() ?? FS.trim();
 }
 
+export function updateShaderSource(code: string): void {
+  if (monacoEditor) {
+    monacoEditor.setValue(code);
+  }
+  compileCurrentShader();
+}
+
 function compileCurrentShader(): void {
   const src = getShaderSource();
   const err = compileNewFS(src);

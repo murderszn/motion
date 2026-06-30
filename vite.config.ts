@@ -31,6 +31,28 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:3001',
       },
+      '/pollinations-image': {
+        target: 'https://image.pollinations.ai',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/pollinations-image/, ''),
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq) => {
+            proxyReq.removeHeader('origin');
+            proxyReq.removeHeader('referer');
+          });
+        }
+      },
+      '/pollinations-text': {
+        target: 'https://text.pollinations.ai',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/pollinations-text/, ''),
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq) => {
+            proxyReq.removeHeader('origin');
+            proxyReq.removeHeader('referer');
+          });
+        }
+      },
     },
   },
 });

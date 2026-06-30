@@ -23,6 +23,7 @@ import {
 import { initHistory } from './ui/history';
 import { getShaderSource } from './ui/shader_editor';
 import { initStatusBar, setStatusMode, setStatusSeed } from './ui/statusbar';
+import { initAI } from './ui/ai';
 import { initShaderEditor } from './ui/shader_editor';
 import { initKeyboard } from './ui/keyboard';
 import { initCommandPalette } from './ui/command_palette';
@@ -134,6 +135,7 @@ function loadProject(file: File): void {
   initSizes(() => renderTextOverlay());
   initTextControls();
   initStatusBar();
+  initAI();
 
   // Sync initial status labels
   setStatusMode(presetAt(P.mode).full);

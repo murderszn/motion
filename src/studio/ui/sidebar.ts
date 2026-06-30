@@ -28,27 +28,45 @@ function emitLayout(): void {
 export function selectLeftTab(tab: LeftTab): void {
   window.lumenLeftTab = tab;
   window.dispatchEvent(new CustomEvent('lumen:leftTabChanged'));
-  const sbTabGen   = $('sbTabGen'), sbTabTxt = $('sbTabTxt');
-  const sbGen      = $('sb-generator'), sbTxt = $('sb-text');
-  const btnGenTab  = $('btnGenTab'), btnTextTab = $('btnTextTab');
+  const sbTabGen   = $('sbTabGen'), sbTabTxt = $('sbTabTxt'), sbTabAI = $('sbTabAI');
+  const sbGen      = $('sb-generator'), sbTxt = $('sb-text'), sbAI = $('sb-ai');
+  const btnGenTab  = $('btnGenTab'), btnTextTab = $('btnTextTab'), btnAITab = $('btnAITab');
 
   if (tab === 'generator') {
     if (isCompact()) document.body.classList.add('right-closed');
-    sbTabGen.classList.add('active');
-    sbTabTxt.classList.remove('active');
-    (sbGen as HTMLElement).style.display = 'block';
-    (sbTxt as HTMLElement).style.display = 'none';
-    btnGenTab.classList.add('active');
-    btnTextTab.classList.remove('active');
+    if (sbTabGen) sbTabGen.classList.add('active');
+    if (sbTabTxt) sbTabTxt.classList.remove('active');
+    if (sbTabAI) sbTabAI.classList.remove('active');
+    if (sbGen) (sbGen as HTMLElement).style.display = 'block';
+    if (sbTxt) (sbTxt as HTMLElement).style.display = 'none';
+    if (sbAI) (sbAI as HTMLElement).style.display = 'none';
+    if (btnGenTab) btnGenTab.classList.add('active');
+    if (btnTextTab) btnTextTab.classList.remove('active');
+    if (btnAITab) btnAITab.classList.remove('active');
+    document.body.classList.add('text-open');
+  } else if (tab === 'text') {
+    if (isCompact()) document.body.classList.add('right-closed');
+    if (sbTabGen) sbTabGen.classList.remove('active');
+    if (sbTabTxt) sbTabTxt.classList.add('active');
+    if (sbTabAI) sbTabAI.classList.remove('active');
+    if (sbGen) (sbGen as HTMLElement).style.display = 'none';
+    if (sbTxt) (sbTxt as HTMLElement).style.display = 'block';
+    if (sbAI) (sbAI as HTMLElement).style.display = 'none';
+    if (btnGenTab) btnGenTab.classList.remove('active');
+    if (btnTextTab) btnTextTab.classList.add('active');
+    if (btnAITab) btnAITab.classList.remove('active');
     document.body.classList.add('text-open');
   } else {
     if (isCompact()) document.body.classList.add('right-closed');
-    sbTabTxt.classList.add('active');
-    sbTabGen.classList.remove('active');
-    (sbGen as HTMLElement).style.display = 'none';
-    (sbTxt as HTMLElement).style.display = 'block';
-    btnTextTab.classList.add('active');
-    btnGenTab.classList.remove('active');
+    if (sbTabGen) sbTabGen.classList.remove('active');
+    if (sbTabTxt) sbTabTxt.classList.remove('active');
+    if (sbTabAI) sbTabAI.classList.add('active');
+    if (sbGen) (sbGen as HTMLElement).style.display = 'none';
+    if (sbTxt) (sbTxt as HTMLElement).style.display = 'none';
+    if (sbAI) (sbAI as HTMLElement).style.display = 'block';
+    if (btnGenTab) btnGenTab.classList.remove('active');
+    if (btnTextTab) btnTextTab.classList.remove('active');
+    if (btnAITab) btnAITab.classList.add('active');
     document.body.classList.add('text-open');
   }
   setTimeout(renderTextOverlay, 10);
@@ -63,8 +81,9 @@ export function togglePanel(): void {
   const open = !document.body.classList.contains('right-closed');
   if (open && isCompact()) {
     document.body.classList.remove('text-open');
-    $('btnGenTab').classList.remove('active');
-    $('btnTextTab').classList.remove('active');
+    if ($('btnGenTab')) $('btnGenTab').classList.remove('active');
+    if ($('btnTextTab')) $('btnTextTab').classList.remove('active');
+    if ($('btnAITab')) $('btnAITab').classList.remove('active');
   }
   $('togPanel').classList.toggle('active', open);
   $('sRight').textContent = open ? '☰ panel' : '☰';
@@ -146,6 +165,7 @@ function applyResponsiveChrome(): void {
   $('togTerm').classList.remove('active');
   $('btnGenTab').classList.remove('active');
   $('btnTextTab').classList.remove('active');
+  if ($('btnAITab')) $('btnAITab').classList.remove('active');
   $('sRight').textContent = '☰';
   $('sTerm').textContent = '▤';
 }
@@ -156,6 +176,7 @@ export function initSidebar(): void {
   // Left tab clicks
   $('sbTabGen').onclick = () => selectLeftTab('generator');
   $('sbTabTxt').onclick = () => selectLeftTab('text');
+  if ($('sbTabAI')) $('sbTabAI').onclick = () => selectLeftTab('ai');
 
   $('btnGenTab').onclick = () => {
     const open = document.body.classList.contains('text-open');
@@ -168,11 +189,20 @@ export function initSidebar(): void {
     toggleTextTool();
     if (textToolActive) selectLeftTab('text');
   };
+  if ($('btnAITab')) {
+    $('btnAITab').onclick = () => {
+      const open = document.body.classList.contains('text-open');
+      if (open && $('btnAITab').classList.contains('active')) {
+        document.body.classList.remove('text-open');
+        $('btnAITab').classList.remove('active');
+      } else selectLeftTab('ai');
+    };
+  }
 
   // Listen for cross-module selectTab events (from text.ts)
   window.addEventListener('lumen:selectTab', e => {
     const tab = (e as CustomEvent<string>).detail;
-    if (tab === 'text' || tab === 'generator') selectLeftTab(tab);
+    if (tab === 'text' || tab === 'generator' || tab === 'ai') selectLeftTab(tab as LeftTab);
   });
 
   // Toggles
