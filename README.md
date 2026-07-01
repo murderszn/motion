@@ -174,10 +174,6 @@ docs/                              # Design language, changelog, research
 | `truchet` | Tile arc maze with hash-based orientation |
 | `turbulence` | Flame-like fBM patterns |
 | `waves` | Flowing contour bands |
-
-### Fluid Field Presets (Ported from KrackedDevs)
-| Preset | Description |
-|--------|-------------|
 | `noise` | Standard domain-warping FBM noise field |
 | `fluid flow` | Curl-noise flow potential reconstruction |
 | `cellular` | Worley/Voronoi cellular grid warping |
