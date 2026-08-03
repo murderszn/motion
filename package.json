@@ -33,7 +33,7 @@
     "@playwright/test": "^1.61.1",
     "@types/node": "^22.15.29",
     "playwright": "^1.49.1",
-    "typescript": "^5.8.3",
+    "typescript": "^7.0.2",
     "vite": "^6.3.5"
   }
 }
