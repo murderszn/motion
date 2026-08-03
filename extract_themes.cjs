@@ -47,7 +47,7 @@ function parseBlockFrom(openBracketIdx) {
   }
 
   const rawText = content.substring(openBracketIdx, endIdx);
-  return eval(rawText);
+  return JSON.parse(rawText.replace(/'/g, '\"'));
 }
 
 try {

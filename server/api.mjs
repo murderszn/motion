@@ -15,7 +15,7 @@ const client = new MongoClient(MONGO_URI, {
 });
 
 const app = express();
-app.use(cors());
+app.use(cors({ origin: process.env.ALLOWED_ORIGIN || 'http://localhost:8888' }));
 app.use(express.json());
 
 async function connectDB() {

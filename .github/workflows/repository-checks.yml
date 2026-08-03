@@ -1,0 +1,28 @@
+name: Repository checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  hygiene:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for tracked secret files
+        shell: bash
+        run: |
+          set -euo pipefail
+          forbidden='(^|/)(\.env|\.env\.|.*\.pem$|.*\.key$|credentials\.json$|secrets\.json$)'
+          if git ls-files | grep -E "$forbidden"; then
+            echo "A likely secret file is tracked. Remove it from the repository." >&2
+            exit 1
+          fi
+      - name: Validate repository metadata
+        shell: bash
+        run: |
+          test -f SECURITY.md
+          test -f LICENSE

@@ -64,3 +64,11 @@ AGENTS.md
 # ─── Skill files (personal) ───
 *-coding-skill.md
 kinetic-typography-skills/
+# Secrets and local credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+secrets.json
