@@ -567,3 +567,8 @@ Import via: `#include "lygia/generative/fbm"`
 | pmndrs/postprocessing | github.com/pmndrs/postprocessing | High-perf post-processing |
 | Codrops | tympanus.net/codrops | WebGL tutorials and demos |
 | web.dev | web.dev/rendering-performance | Frame budget, compositor optimization |
+
+
+## 16. Shader Effects / shaders.com
+
+[Shader Effects reference](shader-effects-reference.md) collects upstream documentation and pinned source links for noise, warps, materials, custom components, and rendering performance. It also records how WebGPU/WGSL ideas can be adapted to /motion’s phase-driven WebGL 1.0 shaders.

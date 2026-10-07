@@ -237,3 +237,8 @@ WebGL 1.0 context with `preserveDrawingBuffer: true` (required for export) and t
 Inspired by [Inigo Quilez](https://iquilezles.org/), [The Book of Shaders](https://thebookofshaders.com/), Casey Reas / Processing Foundation, Tyler Hobbs, Matt DesLauriers, Dave Whyte (bees & bombs), Ryoji Ikeda / teamLab, FIELD.IO, and Universal Everything.
 
 **Community:** [Join the Discord](https://discord.gg/F9Vy9ByYbB)
+
+## Shader References
+
+- [Shader, WebGL & Web Design Research](docs/shader-web-research.md)
+- [Shader Effects / shaders.com source map](docs/shader-effects-reference.md) — shader logic, primitives, and WebGPU-to-WebGL adaptation notes
